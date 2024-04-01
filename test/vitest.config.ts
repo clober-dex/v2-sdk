@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
@@ -6,6 +5,9 @@ export default defineConfig({
   test: {
     disableConsoleIntercept: false,
     environment: 'node',
-    include: ['src/tests/*.test.ts'],
+    include: ['*.test.ts'],
+    alias: {
+      '@clober-dex/v2-sdk': '../src/index.ts',
+    },
   },
 })

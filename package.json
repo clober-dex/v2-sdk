@@ -11,7 +11,7 @@
     "url": "git+https://github.com/clober-dex/v2-sdk.git"
   },
   "scripts": {
-    "test": "vitest --config vitest.config.ts",
+    "test": "vitest --config test/vitest.config.ts",
     "clean": "rm -rf dist",
     "build": "npm run clean && npm run build:cjs && npm run build:esm+types",
     "build:cjs": "tsc --project tsconfig.build.json --module commonjs --verbatimModuleSyntax false --outDir ./dist/cjs && echo > ./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
