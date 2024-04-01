@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.base.json",
+  "include": ["*.ts"],
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["DOM"],
+    "baseUrl": ".",
+    "paths": {
+      "@clober-dex/v2-sdk": ["../src/index.ts"]
+    },
+  }
+}
