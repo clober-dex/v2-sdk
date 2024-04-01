@@ -3,6 +3,8 @@ import { createPublicClient, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 import { FeePolicy, toBookId } from '@clober-dex/v2-sdk'
 
+import { BOOK_ID_WRAPPER_ABI } from './abis/mock/book-id-wrapper-abi'
+
 const BOOK_ID_WRAPPER_ADDRESS = '0x5C91A02B8B5D10597fc6cA23faF56F9718D1feD0'
 const publicClient = createPublicClient({
   chain: arbitrumSepolia,
@@ -22,59 +24,7 @@ test('check toId function', async () => {
   }
   const actual = await publicClient.readContract({
     address: BOOK_ID_WRAPPER_ADDRESS,
-    abi: [
-      {
-        inputs: [
-          {
-            components: [
-              {
-                internalType: 'Currency',
-                name: 'base',
-                type: 'address',
-              },
-              {
-                internalType: 'uint64',
-                name: 'unit',
-                type: 'uint64',
-              },
-              {
-                internalType: 'Currency',
-                name: 'quote',
-                type: 'address',
-              },
-              {
-                internalType: 'FeePolicy',
-                name: 'makerPolicy',
-                type: 'uint24',
-              },
-              {
-                internalType: 'contract IHooks',
-                name: 'hooks',
-                type: 'address',
-              },
-              {
-                internalType: 'FeePolicy',
-                name: 'takerPolicy',
-                type: 'uint24',
-              },
-            ],
-            internalType: 'struct IBookManager.BookKey',
-            name: 'bookKey',
-            type: 'tuple',
-          },
-        ],
-        name: 'toId',
-        outputs: [
-          {
-            internalType: 'BookId',
-            name: 'id',
-            type: 'uint192',
-          },
-        ],
-        stateMutability: 'pure',
-        type: 'function',
-      },
-    ] as const,
+    abi: BOOK_ID_WRAPPER_ABI,
     functionName: 'toId',
     args: [bookKey],
   })
@@ -83,5 +33,5 @@ test('check toId function', async () => {
     makerPolicy,
     takerPolicy,
   })
-  await expect(actual).toBe(expected)
+  expect(actual).toBe(expected)
 })
