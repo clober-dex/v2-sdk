@@ -1,14 +1,20 @@
 {
   "name": "@clober-dex/v2-sdk",
   "version": "0.0.1",
-  "description": "\uD83D\uDEE0 An SDK for building applications on top of Clober V2",
-  "main": "./dist/src/index.js",
+  "description": "🛠 An SDK for building applications on top of Clober V2",
+  "main": "./dist/esm/index.js",
   "files": [
     "/dist"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/clober-dex/v2-sdk.git"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm+types",
+    "build:cjs": "tsc --project tsconfig.build.json --module commonjs --verbatimModuleSyntax false --outDir ./dist/cjs && echo > ./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
+    "build:esm+types": "tsc --project tsconfig.build.json --module es2020 --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types && echo > ./dist/esm/package.json '{\"type\":\"module\"}'"
   },
   "keywords": [],
   "author": "Clober<official@clober.io>",
@@ -21,12 +27,7 @@
     "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-prettier": "^5.0.0",
     "prettier": "^3.0.3",
-    "typechain": "^8.3.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "viem": "^2.0.0"
+    "typescript": "^5.4.3",
+    "viem": "^2.9.6"
   }
 }
