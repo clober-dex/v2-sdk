@@ -11,9 +11,10 @@
     "url": "git+https://github.com/clober-dex/v2-sdk.git"
   },
   "scripts": {
-    "test": "vitest --config test/vitest.config.ts",
-    "clean": "rm -rf dist",
-    "build": "npm run clean && npm run build:cjs && npm run build:esm+types",
+    "test": "vitest --root test --config vitest.config.ts",
+    "clean": "rm -rf dist && rm -rf src/.graphclient",
+    "build": "npm run clean && npm run build-graph && npm run build:cjs && npm run build:esm+types",
+    "build-graph": "graphclient build --dir src",
     "build:cjs": "tsc --project tsconfig.build.json --module commonjs --verbatimModuleSyntax false --outDir ./dist/cjs && echo > ./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm+types": "tsc --project tsconfig.build.json --module es2020 --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types && echo > ./dist/esm/package.json '{\"type\":\"module\"}'"
   },
@@ -21,6 +22,8 @@
   "author": "Clober<official@clober.io>",
   "license": "MIT",
   "devDependencies": {
+    "@graphprotocol/client-cli": "^3.0.0",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
     "dotenv": "^16.4.5",

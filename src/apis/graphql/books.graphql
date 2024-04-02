@@ -1,0 +1,25 @@
+query getBooks($baseTokenAddress: String!, $quoteTokenAddress: String!) {
+    books(
+        where: {base: $baseTokenAddress, quote: $quoteTokenAddress, makerPolicy: "8888308", takerPolicy: "8889608", hooks: "0x0000000000000000000000000000000000000000"}
+    ) {
+        id
+        base {
+            id
+            name
+            symbol
+            decimals
+        }
+        quote {
+            id
+            name
+            symbol
+            decimals
+        }
+        unit
+        depths {
+            tick
+            price
+            rawAmount
+        }
+    }
+}

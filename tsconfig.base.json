@@ -26,7 +26,6 @@
 
     // Interop constraints
     "forceConsistentCasingInFileNames": true,
-    "verbatimModuleSyntax": true,
 
     // Language and environment
     "lib": ["ESNext"],
