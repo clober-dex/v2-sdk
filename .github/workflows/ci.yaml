@@ -45,6 +45,8 @@ jobs:
         run: npm run build-graph
       - name: Run test
         run: npm run test
+        env:
+          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
 
   check-lint:
     name: Check TS
@@ -65,7 +67,6 @@ jobs:
         uses: actions/cache@v3
         env:
           cache-name: cache-node-modules
-          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
         with:
           # npm cache files are stored in `~/.npm` on Linux/macOS
           path: ~/.npm
