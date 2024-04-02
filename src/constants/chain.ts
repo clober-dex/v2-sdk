@@ -1,6 +1,7 @@
-import { arbitrumSepolia, type Chain } from 'viem/chains'
+import { arbitrumSepolia, type Chain, mainnet } from 'viem/chains'
 
 export enum CHAIN_IDS {
+  MAINNET = mainnet.id,
   ARBITRUM_SEPOLIA = arbitrumSepolia.id,
 }
 

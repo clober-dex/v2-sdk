@@ -11,6 +11,7 @@
     "url": "git+https://github.com/clober-dex/v2-sdk.git"
   },
   "scripts": {
+    "docs": "typedoc --out docs src/index.ts --sort source-order",
     "test": "vitest --root test --config vitest.config.ts",
     "clean": "rm -rf dist && rm -rf src/.graphclient",
     "build": "npm run clean && npm run build-graph && npm run build:cjs && npm run build:esm+types",
@@ -32,6 +33,7 @@
     "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-prettier": "^5.0.0",
     "prettier": "^3.0.3",
+    "typedoc": "^0.25.12",
     "typescript": "^5.4.3",
     "viem": "^2.9.6",
     "vitest": "^1.4.0"
