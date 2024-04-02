@@ -11,6 +11,7 @@
     "url": "git+https://github.com/clober-dex/v2-sdk.git"
   },
   "scripts": {
+    "lint": "eslint --ext .ts src --fix",
     "docs": "typedoc --out docs src/index.ts --sort source-order",
     "test": "vitest --root test --config vitest.config.ts",
     "clean": "rm -rf dist && rm -rf src/.graphclient",
