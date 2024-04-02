@@ -44,7 +44,7 @@ jobs:
       - name: Build subgraph
         run: npm run build-graph
       - name: Run test
-        run: npm run test
+        run: ARBITRUM_SEPOLIA_RPC_URL=$ARBITRUM_SEPOLIA_RPC_URL npm run test
         env:
           ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
 
