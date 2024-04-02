@@ -93,7 +93,9 @@ const isSpendResultEqual = async (
     functionName: 'getExpectedOutput',
     args: [
       {
-        id: 2753017174304248252793812478093441832431186343406437115611n,
+        id: isBid
+          ? 2753017174304248252793812478093441832431186343406437115611n
+          : 2505799676027433010421416925405481572661563164234992034276n,
         limitPrice: isBid
           ? invertPrice(
               parsePrice(
@@ -169,5 +171,37 @@ test('get expected output ask', async () => {
     '0x0000000000000000000000000000000000000000',
     '1000000',
     (Math.pow(2, 256) - 1).toFixed(0),
+  )
+})
+
+test('get expected output bid', async () => {
+  const { takenAmount, spendAmount } = await isSpendResultEqual(
+    '0x0000000000000000000000000000000000000000',
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '0.01',
+    '4010',
+  )
+  expect(takenAmount).toBe('0')
+  expect(spendAmount).toBe('0')
+
+  await isSpendResultEqual(
+    '0x0000000000000000000000000000000000000000',
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '0.1',
+    '4005',
+  )
+
+  await isSpendResultEqual(
+    '0x0000000000000000000000000000000000000000',
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '1.1234',
+    '200',
+  )
+
+  await isSpendResultEqual(
+    '0x0000000000000000000000000000000000000000',
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '3.14',
+    '0',
   )
 })
