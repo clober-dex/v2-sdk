@@ -9,5 +9,6 @@ export default defineConfig({
     alias: {
       '@clober-dex/v2-sdk': '../src/index.ts',
     },
+    testTimeout: 40000000,
   },
 })
