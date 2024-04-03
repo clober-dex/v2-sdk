@@ -17,3 +17,11 @@ export type Market = {
   asks: Depth[]
   askBookOpen: boolean
 }
+
+export type Transaction = {
+  data: `0x${string}`
+  gas: bigint
+  gasPrice: bigint
+  value: bigint
+  to: `0x${string}`
+}
