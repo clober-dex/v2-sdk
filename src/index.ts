@@ -52,9 +52,8 @@ export const getMarket = async (
  * @param chainId The chain ID of the blockchain.
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
- * @param amountIn The amount of input token. (ex 1.2ETH -> 1.2)
- * @param limitPrice The limit price for the trade. (ex $5001.341 for ETH/USD -> 5000.341)
- * if skipped, ignore the limit price.
+ * @param amountIn The amount of input token. (ex 1.2 ETH -> 1.2)
+ * @param limitPrice The maximum limit price to spend.
  * @returns A Promise resolving to an object containing the taken amount and spend amount.
  * @example
  * import { getExpectedOutput } from '@clober-dex/v2-sdk'
@@ -64,8 +63,7 @@ export const getMarket = async (
  *   arbitrumSepolia.id,
  *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0', // USDC
  *  '0x0000000000000000000000000000000000000000', // ETH
- *  '1000.123', // 1000.123 USDC
- *  '5000.341' // $5000.341 for 1 ETH
+ *  '1000.123', // spend 1000.123 USDC
  * )
  */
 export const getExpectedOutput = async (
