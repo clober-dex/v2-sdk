@@ -200,3 +200,14 @@ test('get expected output bid', async () => {
     '0',
   )
 })
+
+test('get expected output in not open book', async () => {
+  const { takenAmount, spendAmount } = await getExpectedOutput(
+    arbitrumSepolia.id,
+    '0xf18201e84ab80beef65c1eb68eea1eb1006d0e69',
+    '0x0000000000000000000000000000000000000000',
+    '10000',
+  )
+  expect(takenAmount).toBe('0')
+  expect(spendAmount).toBe('0')
+})
