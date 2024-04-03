@@ -9,20 +9,16 @@ import {
   parseUnits,
   zeroHash,
 } from 'viem'
-import * as dotenv from 'dotenv'
 
 import { fetchMarket } from '../src/apis/market'
 import { parsePrice } from '../src/utils/prices'
 import { invertPrice } from '../src/utils/tick'
 
-dotenv.config()
-
-const BLOCK_NUMBER = 29456961n
 const BOOK_VIEWER_CONTRACT_ADDRESS =
   '0x8676558Af8D8a4A7fd7fC6A7b435D231393a2A76'
 const publicClient = createPublicClient({
   chain: arbitrumSepolia,
-  transport: http(process.env.ARBITRUM_SEPOLIA_RPC_URL),
+  transport: http(),
 })
 
 const _ABI = [
@@ -113,7 +109,6 @@ const isSpendResultEqual = async (
         hookData: zeroHash,
       },
     ],
-    blockNumber: BLOCK_NUMBER,
   })
 
   const { takenAmount, spendAmount } = await getExpectedOutput(
