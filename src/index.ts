@@ -52,7 +52,7 @@ export const getMarket = async (
  * @param chainId The chain ID of the blockchain.
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
- * @param amountIn The amount of input token. (ex 1.2 ETH -> 1.2)
+ * @param amountIn The amount of expected input amount. (ex 1.2 ETH -> 1.2)
  * @param limitPrice The maximum limit price to spend.
  * @returns A Promise resolving to an object containing the taken amount and spend amount.
  * @example
@@ -86,6 +86,66 @@ export const getExpectedOutput = async (
         market.base.decimals,
       ),
       amountIn: parseUnits(amountIn, inputCurrency.decimals),
+    }),
+  ).reduce(
+    (acc, { takenAmount, spendAmount }) => ({
+      takenAmount: acc.takenAmount + takenAmount,
+      spendAmount: acc.spendAmount + spendAmount,
+    }),
+    { takenAmount: 0n, spendAmount: 0n },
+  )
+  return {
+    takenAmount: formatUnits(
+      takenAmount,
+      isBid ? market.base.decimals : market.quote.decimals,
+    ),
+    spendAmount: formatUnits(
+      spendAmount,
+      isBid ? market.quote.decimals : market.base.decimals,
+    ),
+  }
+}
+
+/**
+ * Calculates the expected input for a given output amount, based on the provided market data.
+ *
+ * @param chainId The chain ID of the blockchain.
+ * @param inputToken The address of the input token.
+ * @param outputToken The address of the output token.
+ * @param amountOut The amount of expected output amount. (ex 1.2 ETH -> 1.2)
+ * @param limitPrice The maximum limit price to take.
+ * @returns A Promise resolving to an object containing the taken amount and spend amount.
+ * @example
+ * import { getExpectedInput } from '@clober-dex/v2-sdk'
+ * import { arbitrumSepolia } from 'viem/chains'
+ *
+ * const { takenAmount, spendAmount } = await getExpectedInput(
+ *   arbitrumSepolia.id,
+ *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0', // USDC
+ *  '0x0000000000000000000000000000000000000000', // ETH
+ *  '0.1', // take 0.1 ETH
+ * )
+ */
+export const getExpectedInput = async (
+  chainId: CHAIN_IDS,
+  inputToken: `0x${string}`,
+  outputToken: `0x${string}`,
+  amountOut: string,
+  limitPrice?: string,
+): Promise<{ takenAmount: string; spendAmount: string }> => {
+  const market = await fetchMarket(chainId, [inputToken, outputToken])
+  const isBid = isAddressEqual(market.quote.address, inputToken)
+  limitPrice = limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
+  const outputCurrency = isBid ? market.base : market.quote
+  const { takenAmount, spendAmount } = Object.values(
+    market.take({
+      takeQuote: !isBid,
+      limitPrice: parsePrice(
+        Number(limitPrice),
+        market.quote.decimals,
+        market.base.decimals,
+      ),
+      amountOut: parseUnits(amountOut, outputCurrency.decimals),
     }),
   ).reduce(
     (acc, { takenAmount, spendAmount }) => ({
