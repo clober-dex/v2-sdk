@@ -9,6 +9,7 @@ import { CONTROLLER_ABI } from './abis/core/controller-abi'
 import { getDeadlineTimestampInSeconds } from './utils/time'
 import { buildTransaction } from './utils/build-transaction'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
+import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
 
 /**
  * Build a transaction to open a market.
@@ -46,9 +47,9 @@ export const openMarket = async (
               base: inputToken,
               unit,
               quote: outputToken,
-              makerPolicy: 8888308,
+              makerPolicy: MAKER_DEFAULT_POLICY.rate,
               hooks: zeroAddress,
-              takerPolicy: 8889608,
+              takerPolicy: TAKER_DEFAULT_POLICY.rate,
             },
             hookData: zeroHash,
           },
