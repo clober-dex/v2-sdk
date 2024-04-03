@@ -14,10 +14,9 @@ import { parsePrice } from './utils/prices'
  *
  * @example
  * import { getMarket } from '@clober-dex/v2-sdk'
- * import { arbitrumSepolia } from 'viem/chains'
  *
  * const market = await getMarket(
- *   arbitrumSepolia.id,
+ *   421614,
  *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *  '0x0000000000000000000000000000000000000000',
  * )
@@ -55,10 +54,9 @@ export const getMarket = async (
  * @returns A Promise resolving to an object containing the taken amount and spend amount.
  * @example
  * import { getExpectedOutput } from '@clober-dex/v2-sdk'
- * import { arbitrumSepolia } from 'viem/chains'
  *
  * const { takenAmount, spendAmount } = await getExpectedOutput(
- *   arbitrumSepolia.id,
+ *   421614,
  *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0', // USDC
  *  '0x0000000000000000000000000000000000000000', // ETH
  *  '1000.123', // spend 1000.123 USDC
@@ -115,10 +113,9 @@ export const getExpectedOutput = async (
  * @returns A Promise resolving to an object containing the taken amount and spend amount.
  * @example
  * import { getExpectedInput } from '@clober-dex/v2-sdk'
- * import { arbitrumSepolia } from 'viem/chains'
  *
  * const { takenAmount, spendAmount } = await getExpectedInput(
- *   arbitrumSepolia.id,
+ *   421614,
  *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0', // USDC
  *  '0x0000000000000000000000000000000000000000', // ETH
  *  '0.1', // take 0.1 ETH
