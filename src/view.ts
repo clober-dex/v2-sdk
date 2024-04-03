@@ -51,7 +51,7 @@ export const getMarket = async (
  * @param outputToken The address of the output token.
  * @param amountIn The amount of expected input amount. (ex 1.2 ETH -> 1.2)
  * @param limitPrice The maximum limit price to spend.
- * @returns A Promise resolving to an object containing the taken amount and spend amount.
+ * @returns A Promise resolving to an object containing the taken amount, spend amount and book ids to spend.
  * @example
  * import { getExpectedOutput } from '@clober-dex/v2-sdk'
  *
@@ -68,22 +68,21 @@ export const getExpectedOutput = async (
   outputToken: `0x${string}`,
   amountIn: string,
   limitPrice?: string,
-): Promise<{ takenAmount: string; spendAmount: string }> => {
+): Promise<{ takenAmount: string; spendAmount: string; bookIds: bigint[] }> => {
   const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
   limitPrice = limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
   const inputCurrency = isBid ? market.quote : market.base
-  const { takenAmount, spendAmount } = Object.values(
-    market.spend({
-      spendBase: !isBid,
-      limitPrice: parsePrice(
-        Number(limitPrice),
-        market.quote.decimals,
-        market.base.decimals,
-      ),
-      amountIn: parseUnits(amountIn, inputCurrency.decimals),
-    }),
-  ).reduce(
+  const result = market.spend({
+    spendBase: !isBid,
+    limitPrice: parsePrice(
+      Number(limitPrice),
+      market.quote.decimals,
+      market.base.decimals,
+    ),
+    amountIn: parseUnits(amountIn, inputCurrency.decimals),
+  })
+  const { takenAmount, spendAmount } = Object.values(result).reduce(
     (acc, { takenAmount, spendAmount }) => ({
       takenAmount: acc.takenAmount + takenAmount,
       spendAmount: acc.spendAmount + spendAmount,
@@ -99,6 +98,7 @@ export const getExpectedOutput = async (
       spendAmount,
       isBid ? market.quote.decimals : market.base.decimals,
     ),
+    bookIds: Object.keys(result).map((bookId) => BigInt(bookId)),
   }
 }
 
@@ -110,7 +110,7 @@ export const getExpectedOutput = async (
  * @param outputToken The address of the output token.
  * @param amountOut The amount of expected output amount. (ex 1.2 ETH -> 1.2)
  * @param limitPrice The maximum limit price to take.
- * @returns A Promise resolving to an object containing the taken amount and spend amount.
+ * @returns A Promise resolving to an object containing the taken amount, spend amount and book ids to take.
  * @example
  * import { getExpectedInput } from '@clober-dex/v2-sdk'
  *
@@ -127,22 +127,21 @@ export const getExpectedInput = async (
   outputToken: `0x${string}`,
   amountOut: string,
   limitPrice?: string,
-): Promise<{ takenAmount: string; spendAmount: string }> => {
+): Promise<{ takenAmount: string; spendAmount: string; bookIds: bigint[] }> => {
   const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
   limitPrice = limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
   const outputCurrency = isBid ? market.base : market.quote
-  const { takenAmount, spendAmount } = Object.values(
-    market.take({
-      takeQuote: !isBid,
-      limitPrice: parsePrice(
-        Number(limitPrice),
-        market.quote.decimals,
-        market.base.decimals,
-      ),
-      amountOut: parseUnits(amountOut, outputCurrency.decimals),
-    }),
-  ).reduce(
+  const result = market.take({
+    takeQuote: !isBid,
+    limitPrice: parsePrice(
+      Number(limitPrice),
+      market.quote.decimals,
+      market.base.decimals,
+    ),
+    amountOut: parseUnits(amountOut, outputCurrency.decimals),
+  })
+  const { takenAmount, spendAmount } = Object.values(result).reduce(
     (acc, { takenAmount, spendAmount }) => ({
       takenAmount: acc.takenAmount + takenAmount,
       spendAmount: acc.spendAmount + spendAmount,
@@ -158,5 +157,6 @@ export const getExpectedInput = async (
       spendAmount,
       isBid ? market.quote.decimals : market.base.decimals,
     ),
+    bookIds: Object.keys(result).map((bookId) => BigInt(bookId)),
   }
 }
