@@ -51,7 +51,7 @@ export const getMarket = async (
  * @param outputToken The address of the output token.
  * @param amountIn The amount of expected input amount. (ex 1.2 ETH -> 1.2)
  * @param limitPrice The maximum limit price to spend.
- * @returns A Promise resolving to an object containing the taken amount, spend amount and book ids to spend.
+ * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
  * import { getExpectedOutput } from '@clober-dex/v2-sdk'
  *
@@ -68,7 +68,11 @@ export const getExpectedOutput = async (
   outputToken: `0x${string}`,
   amountIn: string,
   limitPrice?: string,
-): Promise<{ takenAmount: string; spendAmount: string; bookIds: bigint[] }> => {
+): Promise<{
+  takenAmount: string
+  spendAmount: string
+  result: { [p: string]: { takenAmount: bigint; spendAmount: bigint } }
+}> => {
   const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
   limitPrice = limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
@@ -98,7 +102,7 @@ export const getExpectedOutput = async (
       spendAmount,
       isBid ? market.quote.decimals : market.base.decimals,
     ),
-    bookIds: Object.keys(result).map((bookId) => BigInt(bookId)),
+    result,
   }
 }
 
@@ -110,7 +114,7 @@ export const getExpectedOutput = async (
  * @param outputToken The address of the output token.
  * @param amountOut The amount of expected output amount. (ex 1.2 ETH -> 1.2)
  * @param limitPrice The maximum limit price to take.
- * @returns A Promise resolving to an object containing the taken amount, spend amount and book ids to take.
+ * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
  * import { getExpectedInput } from '@clober-dex/v2-sdk'
  *
@@ -127,7 +131,11 @@ export const getExpectedInput = async (
   outputToken: `0x${string}`,
   amountOut: string,
   limitPrice?: string,
-): Promise<{ takenAmount: string; spendAmount: string; bookIds: bigint[] }> => {
+): Promise<{
+  takenAmount: string
+  spendAmount: string
+  result: { [p: string]: { takenAmount: bigint; spendAmount: bigint } }
+}> => {
   const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
   limitPrice = limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
@@ -157,6 +165,6 @@ export const getExpectedInput = async (
       spendAmount,
       isBid ? market.quote.decimals : market.base.decimals,
     ),
-    bookIds: Object.keys(result).map((bookId) => BigInt(bookId)),
+    result,
   }
 }
