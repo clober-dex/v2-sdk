@@ -43,6 +43,8 @@ jobs:
         run: npm ci
       - name: Build subgraph
         run: npm run build-graph
+      - name: Install Foundry
+        run: curl -L https://foundry.paradigm.xyz | bash && foundryup
       - name: Run test
         run: ARBITRUM_SEPOLIA_RPC_URL=$ARBITRUM_SEPOLIA_RPC_URL npm run test
         env:
