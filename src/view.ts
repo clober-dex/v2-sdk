@@ -50,15 +50,16 @@ export const getMarket = async (
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
  * @param amountIn The amount of expected input amount. (ex 1.2 ETH -> 1.2)
- * @param limitPrice The maximum limit price to spend.
+ * @param options
+ * @param options.limitPrice The maximum limit price to spend.
  * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
  * import { getExpectedOutput } from '@clober-dex/v2-sdk'
  *
  * const { takenAmount, spendAmount } = await getExpectedOutput(
  *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0', // USDC
- *  '0x0000000000000000000000000000000000000000', // ETH
+ *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *  '0x0000000000000000000000000000000000000000',
  *  '1000.123', // spend 1000.123 USDC
  * )
  */
@@ -67,7 +68,7 @@ export const getExpectedOutput = async (
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
   amountIn: string,
-  limitPrice?: string,
+  options?: { limitPrice?: string },
 ): Promise<{
   takenAmount: string
   spendAmount: string
@@ -75,7 +76,8 @@ export const getExpectedOutput = async (
 }> => {
   const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
-  limitPrice = limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
+  const limitPrice =
+    options?.limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
   const inputCurrency = isBid ? market.quote : market.base
   const result = market.spend({
     spendBase: !isBid,
@@ -119,15 +121,16 @@ export const getExpectedOutput = async (
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
  * @param amountOut The amount of expected output amount. (ex 1.2 ETH -> 1.2)
- * @param limitPrice The maximum limit price to take.
+ * @param options
+ * @param options.limitPrice The maximum limit price to take.
  * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
  * import { getExpectedInput } from '@clober-dex/v2-sdk'
  *
  * const { takenAmount, spendAmount } = await getExpectedInput(
  *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0', // USDC
- *  '0x0000000000000000000000000000000000000000', // ETH
+ *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *  '0x0000000000000000000000000000000000000000',
  *  '0.1', // take 0.1 ETH
  * )
  */
@@ -136,7 +139,7 @@ export const getExpectedInput = async (
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
   amountOut: string,
-  limitPrice?: string,
+  options?: { limitPrice?: string },
 ): Promise<{
   takenAmount: string
   spendAmount: string
@@ -144,7 +147,8 @@ export const getExpectedInput = async (
 }> => {
   const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
-  limitPrice = limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
+  const limitPrice =
+    options?.limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
   const outputCurrency = isBid ? market.base : market.quote
   const result = market.take({
     takeQuote: !isBid,

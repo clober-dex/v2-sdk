@@ -116,7 +116,7 @@ const isSpendResultEqual = async (
     inputToken,
     outputToken,
     amountOut,
-    limitPrice,
+    { limitPrice },
   )
 
   expect(takenAmount).toBe(
