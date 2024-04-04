@@ -248,7 +248,7 @@ test('make ask order with post only', async () => {
     account.address,
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '1',
+    '0.01',
     '1000',
     { postOnly: true },
   )
@@ -286,6 +286,6 @@ test('make ask order with post only', async () => {
     )
   ).find(({ price }) => 1000 <= price && price <= 1001)!.amount
 
-  expect(Number(beforeBalance - afterBalance)).greaterThan(Number(10n ** 18n))
+  expect(Number(beforeBalance - afterBalance)).greaterThan(Number(10n ** 16n))
   expect(Number(afterSize)).greaterThan(Number(beforeSize))
 })
