@@ -63,6 +63,37 @@ const _abi = [
   },
 ] as const
 
+/**
+ * Signs an ERC20 permit using EIP-712 encoding.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {HDAccount | PrivateKeyAccount} account The Ethereum account used for signing using
+ * [viem - Local Accounts (Private Key, Mnemonic, etc)](https://viem.sh/docs/accounts/local#local-accounts-private-key-mnemonic-etc).
+ * @param {`0x${string}`} token The ERC20 token address.
+ * @param {string} amount The amount of tokens to permit.
+ * @returns {Promise<PermitSignature>} Promise resolving to the permit signature.
+ * @example
+ * import { signERC20Permit } from '@clober-dex/v2-sdk'
+ * import { privateKeyToAccount } from 'viem/accounts'
+ *
+ * const { deadline, r, s, v } = await getExpectedOutput(
+ *   421614,
+ *   privateKeyToAccount('0x...')
+ *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *  '1000.123', // spend 1000.123 USDC
+ * )
+ *
+ * @example
+ * import { signERC20Permit } from '@clober-dex/v2-sdk'
+ * import { mnemonicToAccount } from 'viem/accounts'
+ *
+ * const { deadline, r, s, v } = await getExpectedOutput(
+ *   421614,
+ *   mnemonicToAccount('legal ...')
+ *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *  '1000.123', // spend 1000.123 USDC
+ * )
+ */
 export const signERC20Permit = async (
   chainId: CHAIN_IDS,
   account: HDAccount | PrivateKeyAccount,
