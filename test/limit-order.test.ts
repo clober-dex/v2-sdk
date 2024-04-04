@@ -231,3 +231,61 @@ test('make ask order', async () => {
   expect(Number(beforeBalance - afterBalance)).greaterThan(Number(10n ** 18n))
   expect(Number(afterSize)).greaterThan(Number(beforeSize))
 })
+
+test('make ask order with post only', async () => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[cloberTestChain.id],
+    transport: http(),
+  })
+  const walletClient = createWalletClient({
+    account,
+    chain: cloberTestChain,
+    transport: http(),
+  })
+
+  const transaction = await limitOrder(
+    cloberTestChain.id,
+    account.address,
+    '0x0000000000000000000000000000000000000000',
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '1',
+    '1000',
+    { postOnly: true },
+  )
+
+  const beforeBalance = await publicClient.getBalance({
+    address: account.address,
+  })
+  const bookId = toBookId(
+    '0x0000000000000000000000000000000000000000',
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    10n ** 12n,
+  )
+  const beforeSize = (
+    (
+      await fetchDepth(
+        cloberTestChain.id,
+        '0x0000000000000000000000000000000000000000',
+        '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+        bookId,
+      )
+    ).find(({ price }) => 1000 <= price && price <= 1001) ?? { amount: 0n }
+  ).amount
+
+  await walletClient.sendTransaction(transaction!)
+
+  const afterBalance = await publicClient.getBalance({
+    address: account.address,
+  })
+  const afterSize = (
+    await fetchDepth(
+      cloberTestChain.id,
+      '0x0000000000000000000000000000000000000000',
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      bookId,
+    )
+  ).find(({ price }) => 1000 <= price && price <= 1001)!.amount
+
+  expect(Number(beforeBalance - afterBalance)).greaterThan(Number(10n ** 18n))
+  expect(Number(afterSize)).greaterThan(Number(beforeSize))
+})
