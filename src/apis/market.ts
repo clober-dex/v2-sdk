@@ -15,6 +15,7 @@ const { getBooks } = getBuiltGraphSDK()
 export async function fetchMarket(
   chainId: CHAIN_IDS,
   tokenAddresses: `0x${string}`[],
+  rpcUrl?: string,
 ): Promise<Market> {
   if (tokenAddresses.length !== 2) {
     throw new Error('Invalid token pair')
@@ -31,8 +32,8 @@ export async function fetchMarket(
     { books: bidBooks },
     { books: askBooks },
   ] = await Promise.all([
-    fetchCurrency(chainId, quoteTokenAddress),
-    fetchCurrency(chainId, baseTokenAddress),
+    fetchCurrency(chainId, quoteTokenAddress, rpcUrl),
+    fetchCurrency(chainId, baseTokenAddress, rpcUrl),
     getBooks(
       {
         quoteTokenAddress: quoteTokenAddress.toLowerCase(),

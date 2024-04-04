@@ -1,6 +1,5 @@
 import { afterAll, expect, test } from 'vitest'
 import { mnemonicToAccount } from 'viem/accounts'
-import { createWalletClient, http } from 'viem'
 import { openMarket } from '@clober-dex/v2-sdk'
 
 import { cloberTestChain } from '../src/constants/test-chain'
@@ -8,7 +7,7 @@ import { cloberTestChain } from '../src/constants/test-chain'
 import { createProxyClients } from './utils/utils'
 import { FORK_BLOCK_NUMBER, FORK_URL, TEST_MNEMONIC } from './utils/constants'
 
-const clients = createProxyClients([1])
+const clients = createProxyClients([1, 2])
 const account = mnemonicToAccount(TEST_MNEMONIC)
 
 afterAll(async () => {
@@ -23,19 +22,17 @@ afterAll(async () => {
 })
 
 test('try open market', async () => {
-  const [{ publicClient }] = clients
-  const walletClient = createWalletClient({
-    account,
-    chain: cloberTestChain,
-    transport: http(),
-  })
-
+  const { publicClient, walletClient } = clients[0]
   const transaction = await openMarket(
     cloberTestChain.id,
     '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
     '0x0000000000000000000000000000000000000000',
+    { rpcUrl: publicClient.transport.url! },
   )
-  const hash = await walletClient.sendTransaction(transaction!)
+  const hash = await walletClient.sendTransaction({
+    ...transaction!,
+    account,
+  })
   const receipt = await publicClient.waitForTransactionReceipt({
     hash,
   })
@@ -43,10 +40,12 @@ test('try open market', async () => {
 })
 
 test('try already open market', async () => {
+  const { publicClient } = clients[1]
   const transaction = await openMarket(
     cloberTestChain.id,
     '0x0000000000000000000000000000000000000000',
     '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
+    { rpcUrl: publicClient.transport.url! },
   )
   expect(transaction).toBeUndefined()
 })

@@ -58,6 +58,7 @@ export const fetchDepth = async (
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
   bookId: bigint,
+  rpcUrl: string,
 ): Promise<
   {
     price: number
@@ -70,12 +71,12 @@ export const fetchDepth = async (
   ])
   const isBid = isAddressEqual(inputToken, quoteTokenAddress)
   const [quoteCurrency, baseCurrency] = await Promise.all([
-    fetchCurrency(chainId, quoteTokenAddress),
-    fetchCurrency(chainId, baseTokenAddress),
+    fetchCurrency(chainId, quoteTokenAddress, rpcUrl),
+    fetchCurrency(chainId, baseTokenAddress, rpcUrl),
   ])
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
-    transport: http(),
+    transport: http(rpcUrl),
   })
   const depths = await publicClient.readContract({
     address: BOOK_VIEWER_CONTRACT_ADDRESS,

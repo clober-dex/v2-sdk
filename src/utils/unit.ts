@@ -19,13 +19,17 @@ const _abi = [
   },
 ] as const
 
-export const calculateUnit = async (chainId: CHAIN_IDS, quote: Currency) => {
+export const calculateUnit = async (
+  chainId: CHAIN_IDS,
+  quote: Currency,
+  rpcUrl?: string,
+) => {
   if (isAddressEqual(quote.address, zeroAddress)) {
     return 10n ** 12n
   }
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
-    transport: http(),
+    transport: rpcUrl ? http(rpcUrl) : http(),
   })
   const totalSupply = await publicClient.readContract({
     address: quote.address,

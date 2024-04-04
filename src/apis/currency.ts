@@ -48,6 +48,7 @@ const _abi = [
 export const fetchCurrency = async (
   chainId: CHAIN_IDS,
   address: `0x${string}`,
+  rpcUrl?: string,
 ): Promise<Currency> => {
   if (isAddressEqual(address, zeroAddress)) {
     return {
@@ -60,7 +61,7 @@ export const fetchCurrency = async (
 
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
-    transport: http(),
+    transport: rpcUrl ? http(rpcUrl) : http(),
   })
   const [{ result: name }, { result: symbol }, { result: decimals }] =
     await publicClient.multicall({

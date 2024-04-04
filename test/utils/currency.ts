@@ -29,10 +29,11 @@ export const fetchTokenBalance = async (
   chainId: CHAIN_IDS,
   token: `0x${string}`,
   userAddress: `0x${string}`,
+  rpcUrl: string,
 ): Promise<bigint> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
-    transport: http(),
+    transport: http(rpcUrl),
   })
   return publicClient.readContract({
     address: token,

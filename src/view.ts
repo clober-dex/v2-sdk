@@ -10,6 +10,8 @@ import { parsePrice } from './utils/prices'
  * @param chainId - chain id from {@link CHAIN_IDS}
  * @param token0 - token0 address
  * @param token1 - token1 address
+ * @param options
+ * @param options.rpcUrl - RPC URL of the blockchain
  * @returns A market {@link Market}
  *
  * @example
@@ -25,11 +27,12 @@ export const getMarket = async (
   chainId: CHAIN_IDS,
   token0: `0x${string}`,
   token1: `0x${string}`,
+  options?: { rpcUrl: string | undefined },
 ): Promise<Market> => {
   if (isAddressEqual(token0, token1)) {
     throw new Error('Token0 and token1 must be different')
   }
-  const market = await fetchMarket(chainId, [token0, token1])
+  const market = await fetchMarket(chainId, [token0, token1], options?.rpcUrl)
   return {
     chainId,
     quote: market.quote,
@@ -52,6 +55,7 @@ export const getMarket = async (
  * @param amountIn The amount of expected input amount. (ex 1.2 ETH -> 1.2)
  * @param options
  * @param options.limitPrice The maximum limit price to spend.
+ * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
  * import { getExpectedOutput } from '@clober-dex/v2-sdk'
@@ -68,13 +72,17 @@ export const getExpectedOutput = async (
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
   amountIn: string,
-  options?: { limitPrice?: string },
+  options?: { limitPrice: string | undefined; rpcUrl: string | undefined },
 ): Promise<{
   takenAmount: string
   spendAmount: string
   result: { bookId: bigint; takenAmount: bigint; spendAmount: bigint }[]
 }> => {
-  const market = await fetchMarket(chainId, [inputToken, outputToken])
+  const market = await fetchMarket(
+    chainId,
+    [inputToken, outputToken],
+    options?.rpcUrl,
+  )
   const isBid = isAddressEqual(market.quote.address, inputToken)
   const limitPrice =
     options?.limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
@@ -123,6 +131,7 @@ export const getExpectedOutput = async (
  * @param amountOut The amount of expected output amount. (ex 1.2 ETH -> 1.2)
  * @param options
  * @param options.limitPrice The maximum limit price to take.
+ * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
  * import { getExpectedInput } from '@clober-dex/v2-sdk'
@@ -139,13 +148,17 @@ export const getExpectedInput = async (
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
   amountOut: string,
-  options?: { limitPrice?: string },
+  options?: { limitPrice: string | undefined; rpcUrl: string | undefined },
 ): Promise<{
   takenAmount: string
   spendAmount: string
   result: { bookId: bigint; takenAmount: bigint; spendAmount: bigint }[]
 }> => {
-  const market = await fetchMarket(chainId, [inputToken, outputToken])
+  const market = await fetchMarket(
+    chainId,
+    [inputToken, outputToken],
+    options?.rpcUrl,
+  )
   const isBid = isAddressEqual(market.quote.address, inputToken)
   const limitPrice =
     options?.limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')

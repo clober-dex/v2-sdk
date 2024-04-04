@@ -20,6 +20,8 @@ import { toBookId } from './utils/book-id'
  * @param chainId The chain ID of the blockchain.
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
+ * @param options
+ * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns A Promise resolving to a transaction object. If the market is already open, returns undefined.
  * @example
  * import { openMarket } from '@clober-dex/v2-sdk'
@@ -34,35 +36,47 @@ export const openMarket = async (
   chainId: CHAIN_IDS,
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
+  options?: {
+    rpcUrl: string | undefined
+  },
 ): Promise<Transaction | undefined> => {
-  const market = await fetchMarket(chainId, [inputToken, outputToken])
+  const market = await fetchMarket(
+    chainId,
+    [inputToken, outputToken],
+    options?.rpcUrl,
+  )
   const isBid = isAddressEqual(market.quote.address, inputToken)
   if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
     const unit = await calculateUnit(
       chainId,
       isBid ? market.quote : market.base,
+      options?.rpcUrl,
     )
-    return buildTransaction(chainId, {
-      address: CONTRACT_ADDRESSES[chainId]!.Controller,
-      abi: CONTROLLER_ABI,
-      functionName: 'open',
-      args: [
-        [
-          {
-            key: {
-              base: inputToken,
-              unit,
-              quote: outputToken,
-              makerPolicy: MAKER_DEFAULT_POLICY.value,
-              hooks: zeroAddress,
-              takerPolicy: TAKER_DEFAULT_POLICY.value,
+    return buildTransaction(
+      chainId,
+      {
+        address: CONTRACT_ADDRESSES[chainId]!.Controller,
+        abi: CONTROLLER_ABI,
+        functionName: 'open',
+        args: [
+          [
+            {
+              key: {
+                base: inputToken,
+                unit,
+                quote: outputToken,
+                makerPolicy: MAKER_DEFAULT_POLICY.value,
+                hooks: zeroAddress,
+                takerPolicy: TAKER_DEFAULT_POLICY.value,
+              },
+              hookData: zeroHash,
             },
-            hookData: zeroHash,
-          },
+          ],
+          getDeadlineTimestampInSeconds(),
         ],
-        getDeadlineTimestampInSeconds(),
-      ],
-    })
+      },
+      options?.rpcUrl,
+    )
   }
   return undefined
 }
@@ -79,6 +93,7 @@ export const openMarket = async (
  * @param {Object} [options] Optional parameters for the limit order.
  * @param {PermitSignature} [options.signature] The permit signature for token approval.
  * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
+ * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
  * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the limit order.
  * @example
  * import { signERC20Permit, limitOrder } from '@clober-dex/v2-sdk'
@@ -121,15 +136,17 @@ export const limitOrder = async (
   amount: string,
   price: string,
   options?: {
-    signature?: PermitSignature
-    postOnly?: boolean
+    signature: PermitSignature | undefined
+    postOnly: boolean | undefined
+    rpcUrl: string | undefined
   },
 ) => {
-  const { signature, postOnly } = options || {
+  const { signature, postOnly, rpcUrl } = options || {
     signature: undefined,
     postOnly: false,
+    rpcUrl: undefined,
   }
-  const market = await fetchMarket(chainId, [inputToken, outputToken])
+  const market = await fetchMarket(chainId, [inputToken, outputToken], rpcUrl)
   const isBid = isAddressEqual(market.quote.address, inputToken)
   if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
     throw new Error(`
@@ -157,9 +174,10 @@ export const limitOrder = async (
     isBid ? market.quote.decimals : market.base.decimals,
   )
   const [unit, { result }] = await Promise.all([
-    calculateUnit(chainId, isBid ? market.quote : market.base),
+    calculateUnit(chainId, isBid ? market.quote : market.base, rpcUrl),
     getExpectedOutput(chainId, inputToken, outputToken, amount, {
       limitPrice: price,
+      rpcUrl,
     }),
   ])
   const isETH = isAddressEqual(inputToken, zeroAddress)
@@ -181,46 +199,54 @@ export const limitOrder = async (
     hookData: zeroHash,
   }
   if (postOnly === true || result.length === 0) {
-    return buildTransaction(chainId, {
-      chain: CHAIN_MAP[chainId],
-      account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Controller,
-      abi: CONTROLLER_ABI,
-      functionName: 'make',
-      args: [
-        [makeParam],
-        tokensToSettle,
-        permitParamsList,
-        getDeadlineTimestampInSeconds(),
-      ],
-      value: isETH ? quoteAmount : 0n,
-    })
+    return buildTransaction(
+      chainId,
+      {
+        chain: CHAIN_MAP[chainId],
+        account: userAddress,
+        address: CONTRACT_ADDRESSES[chainId]!.Controller,
+        abi: CONTROLLER_ABI,
+        functionName: 'make',
+        args: [
+          [makeParam],
+          tokensToSettle,
+          permitParamsList,
+          getDeadlineTimestampInSeconds(),
+        ],
+        value: isETH ? quoteAmount : 0n,
+      },
+      options?.rpcUrl,
+    )
   } else if (result.length === 1) {
     // take and make
-    return buildTransaction(chainId, {
-      chain: CHAIN_MAP[chainId],
-      account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Controller,
-      abi: CONTROLLER_ABI,
-      functionName: 'limit',
-      args: [
-        [
-          {
-            takeBookId: result[0]!.bookId,
-            makeBookId: makeParam.id,
-            limitPrice: price,
-            tick: makeParam.tick,
-            quoteAmount: amount,
-            takeHookData: zeroHash,
-            makeHookData: makeParam.hookData,
-          },
+    return buildTransaction(
+      chainId,
+      {
+        chain: CHAIN_MAP[chainId],
+        account: userAddress,
+        address: CONTRACT_ADDRESSES[chainId]!.Controller,
+        abi: CONTROLLER_ABI,
+        functionName: 'limit',
+        args: [
+          [
+            {
+              takeBookId: result[0]!.bookId,
+              makeBookId: makeParam.id,
+              limitPrice: price,
+              tick: makeParam.tick,
+              quoteAmount: amount,
+              takeHookData: zeroHash,
+              makeHookData: makeParam.hookData,
+            },
+          ],
+          tokensToSettle,
+          permitParamsList,
+          getDeadlineTimestampInSeconds(),
         ],
-        tokensToSettle,
-        permitParamsList,
-        getDeadlineTimestampInSeconds(),
-      ],
-      value: isETH ? quoteAmount : 0n,
-    })
+        value: isETH ? quoteAmount : 0n,
+      },
+      options?.rpcUrl,
+    )
   } else {
     // take x n and make
   }

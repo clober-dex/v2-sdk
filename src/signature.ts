@@ -71,6 +71,8 @@ const _abi = [
  * [viem - Local Accounts (Private Key, Mnemonic, etc)](https://viem.sh/docs/accounts/local#local-accounts-private-key-mnemonic-etc).
  * @param {`0x${string}`} token The ERC20 token address.
  * @param {string} amount The amount of tokens to permit.
+ * @param options
+ * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns {Promise<PermitSignature>} Promise resolving to the permit signature.
  * @example
  * import { signERC20Permit } from '@clober-dex/v2-sdk'
@@ -99,12 +101,15 @@ export const signERC20Permit = async (
   account: HDAccount | PrivateKeyAccount,
   token: `0x${string}`,
   amount: string,
+  options?: {
+    rpcUrl: string | undefined
+  },
 ): Promise<PermitSignature> => {
-  const currency = await fetchCurrency(chainId, token)
+  const currency = await fetchCurrency(chainId, token, options?.rpcUrl)
   const spender = CONTRACT_ADDRESSES[chainId]!.Controller
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
-    transport: http(),
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
   const value = parseUnits(amount, currency.decimals)
   const [{ result: nonce }, { result: version }, { result: name }] =
