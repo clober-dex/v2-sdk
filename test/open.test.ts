@@ -2,8 +2,7 @@ import { afterAll, expect, test } from 'vitest'
 import { mnemonicToAccount } from 'viem/accounts'
 import { openMarket } from '@clober-dex/v2-sdk'
 
-import { cloberTestChain } from '../src/constants/test-chain'
-
+import { cloberTestChain } from './utils/test-chain'
 import { createProxyClients } from './utils/utils'
 import { FORK_BLOCK_NUMBER, FORK_URL, TEST_MNEMONIC } from './utils/constants'
 

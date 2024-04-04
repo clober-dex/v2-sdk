@@ -1,12 +1,11 @@
 import {
-  type Chain,
   createPublicClient,
   createTestClient,
   createWalletClient,
   http,
 } from 'viem'
-import { localhost } from 'viem/chains'
-import type { Anvil } from '@viem/anvil'
+
+import { cloberTestChain } from './test-chain'
 
 type TupleOf<T, N extends number, R extends unknown[]> = R['length'] extends N
   ? R
@@ -24,18 +23,18 @@ export function createProxyClients<const TIds extends readonly number[]>(
 ) {
   const output = ids.map((i) => {
     const publicClient = createPublicClient({
-      chain: anvil,
+      chain: cloberTestChain,
       transport: http(`http://127.0.0.1:${port}/${i}`),
     })
 
     const testClient = createTestClient({
-      chain: anvil,
+      chain: cloberTestChain,
       mode: 'anvil',
       transport: http(`http://127.0.0.1:${port}/${i}`),
     })
 
     const walletClient = createWalletClient({
-      chain: anvil,
+      chain: cloberTestChain,
       transport: http(`http://127.0.0.1:${port}/${i}`),
     })
 
@@ -44,49 +43,3 @@ export function createProxyClients<const TIds extends readonly number[]>(
 
   return output as Tuple<(typeof output)[number], TIds['length']>
 }
-
-export function createAnvilClients(instance: Anvil) {
-  const publicClient = createPublicClient({
-    chain: anvil,
-    transport: http(`http://${instance.host}:${instance.port}`),
-  })
-
-  const testClient = createTestClient({
-    chain: anvil,
-    mode: 'anvil',
-    transport: http(`http://${instance.host}:${instance.port}`),
-  })
-
-  const walletClient = createWalletClient({
-    chain: anvil,
-    transport: http(`http://${instance.host}:${instance.port}`),
-  })
-
-  return { publicClient, testClient, walletClient } as const
-}
-
-const id = process.env.VITEST_POOL_ID ?? 1
-export const anvil = {
-  ...localhost,
-  rpcUrls: {
-    default: {
-      http: [`http://127.0.0.1:8545/${id}`],
-      webSocket: [`ws://127.0.0.1:8545/${id}`],
-    },
-    public: {
-      http: [`http://127.0.0.1:8545/${id}`],
-      webSocket: [`ws://127.0.0.1:8545/${id}`],
-    },
-  },
-} as const satisfies Chain
-
-export const testClient = createTestClient({
-  chain: anvil,
-  mode: 'anvil',
-  transport: http(),
-})
-
-export const publicClient = createPublicClient({
-  chain: anvil,
-  transport: http(),
-})

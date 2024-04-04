@@ -1,15 +1,12 @@
-import { arbitrumSepolia, type Chain } from 'viem/chains'
-
-import { cloberTestChain } from './test-chain'
+import { arbitrumSepolia, type Chain, mainnet } from 'viem/chains'
 
 export enum CHAIN_IDS {
-  CLOBER_TESTNET = cloberTestChain.id,
+  MAINNET = mainnet.id,
   ARBITRUM_SEPOLIA = arbitrumSepolia.id,
 }
 
 export const CHAIN_MAP: {
   [chain in CHAIN_IDS]: Chain
 } = {
-  [CHAIN_IDS.CLOBER_TESTNET]: cloberTestChain,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: arbitrumSepolia,
 }
