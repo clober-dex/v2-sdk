@@ -12,7 +12,7 @@
   },
   "scripts": {
     "lint": "eslint --ext .ts src --fix",
-    "docs": "npm run build-graph && typedoc --out docs src/index.ts --sort source-order",
+    "docs": "npm run build-graph && typedoc --out docs src/index.ts --sort kind",
     "test": "vitest --root test --config vitest.config.ts",
     "clean": "rm -rf dist && rm -rf src/.graphclient",
     "build": "npm run clean && npm run build-graph && npm run build:cjs && npm run build:esm+types",
