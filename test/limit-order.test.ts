@@ -12,7 +12,7 @@ import { FORK_BLOCK_NUMBER, FORK_URL, TEST_MNEMONIC } from './utils/constants'
 import { fetchTokenBalance } from './utils/currency'
 import { fetchDepth } from './utils/depth'
 
-const clients = createProxyClients([2, 3, 4, 5])
+const clients = createProxyClients([2])
 const account = mnemonicToAccount(TEST_MNEMONIC)
 
 afterAll(async () => {

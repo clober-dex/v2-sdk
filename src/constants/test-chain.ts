@@ -1,7 +1,7 @@
 import { Chain } from 'viem'
 
 const http = Array.from(
-  { length: 5 },
+  { length: 2 },
   (_, i) => `http://localhost:8545/${i + 1}`,
 )
 
