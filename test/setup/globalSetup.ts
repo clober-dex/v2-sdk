@@ -11,7 +11,7 @@ export default async function () {
       forkBlockNumber: FORK_BLOCK_NUMBER,
       mnemonic: TEST_MNEMONIC,
       accounts: 1,
-      balance: 10000000000000000000, // 10 ETH
+      balance: 1000, // 1000 ETH
       gasPrice: 0n,
     },
   })
