@@ -163,6 +163,16 @@ export const limitOrder = async (
     }),
   ])
   const isETH = isAddressEqual(inputToken, zeroAddress)
+  const permitParamsList =
+    signature && !isETH
+      ? [
+          {
+            token: inputToken,
+            permitAmount: quoteAmount,
+            signature,
+          },
+        ]
+      : []
 
   const makeParam = {
     id: toBookId(inputToken, outputToken, unit),
@@ -180,21 +190,37 @@ export const limitOrder = async (
       args: [
         [makeParam],
         tokensToSettle,
-        signature
-          ? [
-              {
-                token: inputToken,
-                permitAmount: !isETH ? quoteAmount : 0n,
-                signature,
-              },
-            ]
-          : [],
+        permitParamsList,
         getDeadlineTimestampInSeconds(),
       ],
       value: isETH ? quoteAmount : 0n,
     })
   } else if (result.length === 1) {
     // take and make
+    return buildTransaction(chainId, {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Controller,
+      abi: CONTROLLER_ABI,
+      functionName: 'limit',
+      args: [
+        [
+          {
+            takeBookId: result[0]!.bookId,
+            makeBookId: makeParam.id,
+            limitPrice: price,
+            tick: makeParam.tick,
+            quoteAmount: amount,
+            takeHookData: zeroHash,
+            makeHookData: makeParam.hookData,
+          },
+        ],
+        tokensToSettle,
+        permitParamsList,
+        getDeadlineTimestampInSeconds(),
+      ],
+      value: isETH ? quoteAmount : 0n,
+    })
   } else {
     // take x n and make
   }
