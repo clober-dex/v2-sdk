@@ -12,6 +12,7 @@ export default async function () {
       mnemonic: TEST_MNEMONIC,
       accounts: 1,
       balance: 10000000000000000000, // 10 ETH
+      gasPrice: 0n,
     },
   })
 }
