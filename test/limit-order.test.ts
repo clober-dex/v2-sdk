@@ -4,10 +4,12 @@ import { createWalletClient, http } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 
 import { cloberTestChain } from '../src/constants/test-chain'
+import { toBookId } from '../src/utils/book-id'
 
 import { createProxyClients } from './utils/utils'
 import { FORK_BLOCK_NUMBER, FORK_URL, TEST_MNEMONIC } from './utils/constants'
 import { fetchTokenBalance } from './utils/currency'
+import { fetchDepth } from './utils/depth'
 
 const clients = createProxyClients([2])
 const account = mnemonicToAccount(TEST_MNEMONIC)
@@ -44,7 +46,7 @@ test('limit order in not open market', async () => {
     `)
 })
 
-test('make order - 1', async () => {
+test('make bid order', async () => {
   const walletClient = createWalletClient({
     account,
     chain: cloberTestChain,
@@ -72,13 +74,36 @@ test('make order - 1', async () => {
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     account.address,
   )
+  const bookId = toBookId(
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '0x0000000000000000000000000000000000000000',
+    1n,
+  )
+  const beforeSize = (
+    await fetchDepth(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      '0x0000000000000000000000000000000000000000',
+      bookId,
+    )
+  ).find(({ price }) => 999 <= price && price <= 1000)!.amount
+
   await walletClient.sendTransaction(transaction!)
+
   const afterBalance = await fetchTokenBalance(
     cloberTestChain.id,
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     account.address,
   )
-  expect(beforeBalance - afterBalance).toEqual(100000000n)
+  const afterSize = (
+    await fetchDepth(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      '0x0000000000000000000000000000000000000000',
+      bookId,
+    )
+  ).find(({ price }) => 999 <= price && price <= 1000)!.amount
 
-  // check open order nft
+  expect(beforeBalance - afterBalance).toEqual(100000000n)
+  expect(Number(afterSize)).greaterThan(Number(beforeSize))
 })
