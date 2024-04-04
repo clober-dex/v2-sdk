@@ -26,8 +26,8 @@ import { toBookId } from './utils/book-id'
  *
  * const transaction = await openMarket(
  *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0', // USDC
- *  '0x0000000000000000000000000000000000000000', // ETH
+ *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *  '0x0000000000000000000000000000000000000000'
  * )
  */
 export const openMarket = async (
@@ -67,6 +67,52 @@ export const openMarket = async (
   return undefined
 }
 
+/**
+ * Places a limit order on the specified chain for trading tokens.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {`0x${string}`} userAddress The Ethereum address of the user placing the order.
+ * @param {`0x${string}`} inputToken The address of the token to be used as input.
+ * @param {`0x${string}`} outputToken The address of the token to be received as output.
+ * @param {string} amount The amount of input tokens for the order.
+ * @param {string} price The price at which the order should be executed.
+ * @param {Object} [options] Optional parameters for the limit order.
+ * @param {PermitSignature} [options.signature] The permit signature for token approval.
+ * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
+ * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the limit order.
+ * @example
+ * import { signERC20Permit, limitOrder } from '@clober-dex/v2-sdk'
+ * import { privateKeyToAccount } from 'viem/accounts'
+ *
+ * const signature = await signERC20Permit(
+ *   421614,
+ *   privateKeyToAccount('0x...'),
+ *   '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   '100.123'
+ * )
+ *
+ * const transaction = await limitOrder(
+ *   421614,
+ *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *  '0x0000000000000000000000000000000000000000',
+ *  '100.123', // 100.123 USDC
+ *  '4000.01', // price at 4000.01 (ETH/USDC)
+ *  { signature: { r: '0x00', s: '0x00', v: 0, deadline: 0n } }
+ * )
+ *
+ * @example
+ * import { limitOrder } from '@clober-dex/v2-sdk'
+ *
+ * const transaction = await limitOrder(
+ *   421614,
+ *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *  '0x0000000000000000000000000000000000000000',
+ *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *  '0.13', // 0.13 ETH
+ *  '4000.01', // price at 4000.01 (ETH/USDC)
+ * )
+ */
 export const limitOrder = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
