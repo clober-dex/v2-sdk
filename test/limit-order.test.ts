@@ -81,13 +81,15 @@ test('make bid order', async () => {
     1n,
   )
   const beforeSize = (
-    await fetchDepth(
-      cloberTestChain.id,
-      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      '0x0000000000000000000000000000000000000000',
-      bookId,
-    )
-  ).find(({ price }) => 999 <= price && price <= 1000)!.amount
+    (
+      await fetchDepth(
+        cloberTestChain.id,
+        '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+        '0x0000000000000000000000000000000000000000',
+        bookId,
+      )
+    ).find(({ price }) => 999 <= price && price <= 1000) ?? { amount: 0n }
+  ).amount
 
   await walletClient.sendTransaction(transaction!)
 
@@ -138,13 +140,15 @@ test('make ask order', async () => {
     10n ** 12n,
   )
   const beforeSize = (
-    await fetchDepth(
-      cloberTestChain.id,
-      '0x0000000000000000000000000000000000000000',
-      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      bookId,
-    )
-  ).find(({ price }) => 8000 <= price && price <= 8001)!.amount
+    (
+      await fetchDepth(
+        cloberTestChain.id,
+        '0x0000000000000000000000000000000000000000',
+        '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+        bookId,
+      )
+    ).find(({ price }) => 8000 <= price && price <= 8001) ?? { amount: 0n }
+  ).amount
 
   await walletClient.sendTransaction(transaction!)
 
@@ -159,6 +163,7 @@ test('make ask order', async () => {
       bookId,
     )
   ).find(({ price }) => 8000 <= price && price <= 8001)!.amount
+
   expect(Number(beforeBalance - afterBalance)).greaterThan(Number(10n ** 18n))
   expect(Number(afterSize)).greaterThan(Number(beforeSize))
 })
