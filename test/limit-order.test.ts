@@ -107,3 +107,57 @@ test('make bid order', async () => {
   expect(beforeBalance - afterBalance).toEqual(100000000n)
   expect(Number(afterSize)).greaterThan(Number(beforeSize))
 })
+
+test('make ask order', async () => {
+  const [{ publicClient }] = clients
+  const walletClient = createWalletClient({
+    account,
+    chain: cloberTestChain,
+    transport: http(),
+  })
+
+  const transaction = await limitOrder(
+    cloberTestChain.id,
+    account.address,
+    '0x0000000000000000000000000000000000000000',
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '0.01',
+    '8000',
+  )
+
+  const beforeBalance = await publicClient.getBalance({
+    address: account.address,
+  })
+  const bookId = toBookId(
+    '0x0000000000000000000000000000000000000000',
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    10n ** 12n,
+  )
+  const beforeSize = (
+    await fetchDepth(
+      cloberTestChain.id,
+      '0x0000000000000000000000000000000000000000',
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      bookId,
+    )
+  ).find(({ price }) => 8000 <= price && price <= 8001)!.amount
+
+  await walletClient.sendTransaction(transaction!)
+
+  const afterBalance = await fetchTokenBalance(
+    cloberTestChain.id,
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    account.address,
+  )
+  const afterSize = (
+    await fetchDepth(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      '0x0000000000000000000000000000000000000000',
+      bookId,
+    )
+  ).find(({ price }) => 999 <= price && price <= 1000)!.amount
+
+  expect(beforeBalance - afterBalance).toEqual(10000000000000000n)
+  expect(Number(afterSize)).greaterThan(Number(beforeSize))
+})

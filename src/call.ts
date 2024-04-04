@@ -126,13 +126,15 @@ export const limitOrder = async (
       args: [
         [makeParam],
         tokensToSettle,
-        [
-          {
-            token: inputToken,
-            permitAmount: !isETH ? quoteAmount : 0n,
-            signature: signature!,
-          },
-        ],
+        signature
+          ? [
+              {
+                token: inputToken,
+                permitAmount: !isETH ? quoteAmount : 0n,
+                signature,
+              },
+            ]
+          : [],
         getDeadlineTimestampInSeconds(),
       ],
       value: isETH ? quoteAmount : 0n,
