@@ -191,7 +191,7 @@ test('make ask order', async () => {
     account.address,
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '1',
+    '0.01',
     '8000',
   )
 
@@ -228,7 +228,7 @@ test('make ask order', async () => {
     )
   ).find(({ price }) => 8000 <= price && price <= 8001)!.amount
 
-  expect(Number(beforeBalance - afterBalance)).greaterThan(Number(10n ** 18n))
+  expect(Number(beforeBalance - afterBalance)).greaterThan(Number(10n ** 16n))
   expect(Number(afterSize)).greaterThan(Number(beforeSize))
 })
 
