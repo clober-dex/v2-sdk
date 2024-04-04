@@ -1,10 +1,11 @@
 import { afterAll, expect, test } from 'vitest'
 import { limitOrder, signERC20Permit } from '@clober-dex/v2-sdk'
-import { createWalletClient, http } from 'viem'
+import { createPublicClient, createWalletClient, http } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 
 import { cloberTestChain } from '../src/constants/test-chain'
 import { toBookId } from '../src/utils/book-id'
+import { CHAIN_MAP } from '../src/constants/chain'
 
 import { createProxyClients } from './utils/utils'
 import { FORK_BLOCK_NUMBER, FORK_URL, TEST_MNEMONIC } from './utils/constants'
@@ -109,7 +110,10 @@ test('make bid order', async () => {
 })
 
 test('make ask order', async () => {
-  const [{ publicClient }] = clients
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[cloberTestChain.id],
+    transport: http(),
+  })
   const walletClient = createWalletClient({
     account,
     chain: cloberTestChain,
@@ -121,7 +125,7 @@ test('make ask order', async () => {
     account.address,
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '0.01',
+    '1',
     '8000',
   )
 
@@ -143,21 +147,17 @@ test('make ask order', async () => {
   ).find(({ price }) => 8000 <= price && price <= 8001)!.amount
 
   await walletClient.sendTransaction(transaction!)
-
-  const afterBalance = await fetchTokenBalance(
-    cloberTestChain.id,
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    account.address,
-  )
+  const afterBalance = await publicClient.getBalance({
+    address: account.address,
+  })
   const afterSize = (
     await fetchDepth(
       cloberTestChain.id,
-      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       '0x0000000000000000000000000000000000000000',
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       bookId,
     )
   ).find(({ price }) => 8000 <= price && price <= 8001)!.amount
-
   expect(beforeBalance - afterBalance).toEqual(10000000000000000n)
   expect(Number(afterSize)).greaterThan(Number(beforeSize))
 })
