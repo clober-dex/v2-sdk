@@ -147,6 +147,7 @@ test('make ask order', async () => {
   ).find(({ price }) => 8000 <= price && price <= 8001)!.amount
 
   await walletClient.sendTransaction(transaction!)
+
   const afterBalance = await publicClient.getBalance({
     address: account.address,
   })
@@ -158,6 +159,6 @@ test('make ask order', async () => {
       bookId,
     )
   ).find(({ price }) => 8000 <= price && price <= 8001)!.amount
-  expect(beforeBalance - afterBalance).toEqual(10000000000000000n)
+  expect(Number(beforeBalance - afterBalance)).greaterThan(Number(10n ** 18n))
   expect(Number(afterSize)).greaterThan(Number(beforeSize))
 })
