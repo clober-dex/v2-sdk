@@ -27,7 +27,7 @@ export const getMarket = async (
   chainId: CHAIN_IDS,
   token0: `0x${string}`,
   token1: `0x${string}`,
-  options?: { rpcUrl: string | undefined },
+  options?: { rpcUrl?: string },
 ): Promise<Market> => {
   if (isAddressEqual(token0, token1)) {
     throw new Error('Token0 and token1 must be different')
@@ -72,7 +72,7 @@ export const getExpectedOutput = async (
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
   amountIn: string,
-  options?: { limitPrice: string | undefined; rpcUrl: string | undefined },
+  options?: { limitPrice?: string; rpcUrl?: string },
 ): Promise<{
   takenAmount: string
   spendAmount: string
@@ -148,7 +148,7 @@ export const getExpectedInput = async (
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
   amountOut: string,
-  options?: { limitPrice: string | undefined; rpcUrl: string | undefined },
+  options?: { limitPrice?: string; rpcUrl?: string },
 ): Promise<{
   takenAmount: string
   spendAmount: string

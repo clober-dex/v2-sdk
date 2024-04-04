@@ -37,7 +37,7 @@ export const openMarket = async (
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
   options?: {
-    rpcUrl: string | undefined
+    rpcUrl?: string
   },
 ): Promise<Transaction | undefined> => {
   const market = await fetchMarket(
@@ -136,9 +136,9 @@ export const limitOrder = async (
   amount: string,
   price: string,
   options?: {
-    signature: PermitSignature | undefined
-    postOnly: boolean | undefined
-    rpcUrl: string | undefined
+    signature?: PermitSignature
+    postOnly?: boolean
+    rpcUrl?: string
   },
 ) => {
   const { signature, postOnly, rpcUrl } = options || {
@@ -175,10 +175,20 @@ export const limitOrder = async (
   )
   const [unit, { result }] = await Promise.all([
     calculateUnit(chainId, isBid ? market.quote : market.base, rpcUrl),
-    getExpectedOutput(chainId, inputToken, outputToken, amount, {
-      limitPrice: price,
-      rpcUrl,
-    }),
+    getExpectedOutput(
+      chainId,
+      inputToken,
+      outputToken,
+      amount,
+      rpcUrl
+        ? {
+            limitPrice: price,
+            rpcUrl,
+          }
+        : {
+            limitPrice: price,
+          },
+    ),
   ])
   const isETH = isAddressEqual(inputToken, zeroAddress)
   const permitParamsList =

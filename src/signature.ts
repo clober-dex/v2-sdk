@@ -102,7 +102,7 @@ export const signERC20Permit = async (
   token: `0x${string}`,
   amount: string,
   options?: {
-    rpcUrl: string | undefined
+    rpcUrl: string
   },
 ): Promise<PermitSignature> => {
   const currency = await fetchCurrency(chainId, token, options?.rpcUrl)
