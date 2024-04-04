@@ -88,6 +88,7 @@ test('make bid order', async () => {
       )
     ).find(({ price }) => 999 <= price && price <= 1000) ?? { amount: 0n }
   ).amount
+  expect(Number(beforeSize)).toEqual(0)
 
   await walletClient.sendTransaction({ ...transaction!, account })
 
@@ -108,7 +109,7 @@ test('make bid order', async () => {
   ).find(({ price }) => 999 <= price && price <= 1000)!.amount
 
   expect(beforeBalance - afterBalance).toEqual(100000000n)
-  expect(Number(afterSize)).greaterThan(Number(beforeSize))
+  expect(Number(afterSize)).greaterThan(0)
 })
 
 test('make bid order with post only', async () => {
@@ -152,6 +153,7 @@ test('make bid order with post only', async () => {
       )
     ).find(({ price }) => 7999 <= price && price <= 8000) ?? { amount: 0n }
   ).amount
+  expect(Number(beforeSize)).toEqual(0)
 
   await walletClient.sendTransaction({
     ...transaction!,
@@ -175,7 +177,7 @@ test('make bid order with post only', async () => {
   ).find(({ price }) => 7999 <= price && price <= 8000)!.amount
 
   expect(beforeBalance - afterBalance).toEqual(100000000n)
-  expect(Number(afterSize)).greaterThan(Number(beforeSize))
+  expect(Number(afterSize)).greaterThan(0)
 })
 
 test('make ask order', async () => {
@@ -209,6 +211,7 @@ test('make ask order', async () => {
       )
     ).find(({ price }) => 8000 <= price && price <= 8001) ?? { amount: 0n }
   ).amount
+  expect(Number(beforeSize)).toEqual(0)
 
   await walletClient.sendTransaction({
     ...transaction!,
@@ -229,7 +232,7 @@ test('make ask order', async () => {
   ).find(({ price }) => 8000 <= price && price <= 8001)!.amount
 
   expect(Number(beforeBalance - afterBalance)).greaterThan(Number(10n ** 16n))
-  expect(Number(afterSize)).greaterThan(Number(beforeSize))
+  expect(Number(afterSize)).greaterThan(0)
 })
 
 test('make ask order with post only', async () => {
@@ -263,6 +266,7 @@ test('make ask order with post only', async () => {
       )
     ).find(({ price }) => 1000 <= price && price <= 1001) ?? { amount: 0n }
   ).amount
+  expect(Number(beforeSize)).toEqual(0)
 
   await walletClient.sendTransaction({
     ...transaction!,
@@ -283,5 +287,5 @@ test('make ask order with post only', async () => {
   ).find(({ price }) => 1000 <= price && price <= 1001)!.amount
 
   expect(Number(beforeBalance - afterBalance)).greaterThan(Number(10n ** 16n))
-  expect(Number(afterSize)).greaterThan(Number(beforeSize))
+  expect(Number(afterSize)).greaterThan(0)
 })
