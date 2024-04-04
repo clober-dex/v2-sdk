@@ -11,5 +11,6 @@ export default defineConfig({
       '@clober-dex/v2-sdk': '../src/index.ts',
     },
     testTimeout: 40000000,
+    hookTimeout: 40000000,
   },
 })
