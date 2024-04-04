@@ -244,7 +244,7 @@ export const limitOrder = async (
               makeBookId: makeParam.id,
               limitPrice: price,
               tick: makeParam.tick,
-              quoteAmount: amount,
+              quoteAmount,
               takeHookData: zeroHash,
               makeHookData: makeParam.hookData,
             },
