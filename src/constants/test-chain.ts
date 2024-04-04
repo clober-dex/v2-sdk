@@ -1,5 +1,10 @@
 import { Chain } from 'viem'
 
+const http = Array.from(
+  { length: 5 },
+  (_, i) => `http://localhost:8545/${i + 1}`,
+)
+
 export const cloberTestChain: Chain = {
   id: 7777,
   name: 'Clober Test Chain',
@@ -10,10 +15,10 @@ export const cloberTestChain: Chain = {
   },
   rpcUrls: {
     default: {
-      http: ['http://localhost:8545/1', 'http://localhost:8545/2'],
+      http,
     },
     public: {
-      http: ['http://localhost:8545/1', 'http://localhost:8545/2'],
+      http,
     },
   },
   contracts: {
