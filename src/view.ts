@@ -71,7 +71,7 @@ export const getExpectedOutput = async (
 ): Promise<{
   takenAmount: string
   spendAmount: string
-  result: { [p: string]: { takenAmount: bigint; spendAmount: bigint } }
+  result: { bookId: bigint; takenAmount: bigint; spendAmount: bigint }[]
 }> => {
   const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -102,7 +102,13 @@ export const getExpectedOutput = async (
       spendAmount,
       isBid ? market.quote.decimals : market.base.decimals,
     ),
-    result,
+    result: Object.entries(result).map(
+      ([bookId, { takenAmount, spendAmount }]) => ({
+        bookId: BigInt(bookId),
+        takenAmount,
+        spendAmount,
+      }),
+    ),
   }
 }
 
@@ -134,7 +140,7 @@ export const getExpectedInput = async (
 ): Promise<{
   takenAmount: string
   spendAmount: string
-  result: { [p: string]: { takenAmount: bigint; spendAmount: bigint } }
+  result: { bookId: bigint; takenAmount: bigint; spendAmount: bigint }[]
 }> => {
   const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -165,6 +171,12 @@ export const getExpectedInput = async (
       spendAmount,
       isBid ? market.quote.decimals : market.base.decimals,
     ),
-    result,
+    result: Object.entries(result).map(
+      ([bookId, { takenAmount, spendAmount }]) => ({
+        bookId: BigInt(bookId),
+        takenAmount,
+        spendAmount,
+      }),
+    ),
   }
 }

@@ -1,3 +1,5 @@
+import { Account } from 'viem'
+
 import { CHAIN_IDS } from './constants/chain'
 import { Currency } from './model/currency'
 import { Depth } from './model/depth'
@@ -24,4 +26,12 @@ export type Transaction = {
   gasPrice: bigint
   value: bigint
   to: `0x${string}`
+  from: `0x${string}` | Account | undefined
+}
+
+export type PermitSignature = {
+  deadline: bigint
+  v: number
+  r: `0x${string}`
+  s: `0x${string}`
 }

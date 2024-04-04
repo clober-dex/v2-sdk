@@ -66,3 +66,81 @@ export const openMarket = async (
   }
   return undefined
 }
+
+export const limitOrder = async (
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+  inputToken: `0x${string}`,
+  outputToken: `0x${string}`,
+  amount: string,
+  price: string,
+  signature?: PermitSignature,
+  postOnly?: boolean,
+) => {
+  const market = await fetchMarket(chainId, [inputToken, outputToken])
+  const isBid = isAddressEqual(market.quote.address, inputToken)
+  if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
+    throw new Error(`
+       import { openMarket } from '@clober-dex/v2-sdk'
+
+       const transaction = await openMarket(
+            ${chainId},
+           '${inputToken}',
+           '${outputToken}',
+       )
+    `)
+  }
+
+  const rawPrice = parsePrice(
+    Number(price),
+    market.quote.decimals,
+    market.base.decimals,
+  )
+  const tick = isBid ? fromPrice(rawPrice) : fromPrice(invertPrice(rawPrice))
+  const tokensToSettle = [inputToken, outputToken].filter(
+    (address) => !isAddressEqual(address, zeroAddress),
+  )
+  const quoteAmount = parseUnits(
+    amount,
+    isBid ? market.quote.decimals : market.base.decimals,
+  )
+  const [unit, { result }] = await Promise.all([
+    calculateUnit(chainId, isBid ? market.quote : market.base),
+    getExpectedOutput(chainId, inputToken, outputToken, amount, price),
+  ])
+  const isETH = isAddressEqual(inputToken, zeroAddress)
+
+  const makeParam = {
+    id: toBookId(inputToken, outputToken, unit),
+    tick,
+    quoteAmount,
+    hookData: zeroHash,
+  }
+  if (postOnly === true || result.length === 0) {
+    return buildTransaction(chainId, {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Controller,
+      abi: CONTROLLER_ABI,
+      functionName: 'make',
+      args: [
+        [makeParam],
+        tokensToSettle,
+        [
+          {
+            token: inputToken,
+            permitAmount: !isETH ? quoteAmount : 0n,
+            signature: signature!,
+          },
+        ],
+        getDeadlineTimestampInSeconds(),
+      ],
+      value: isETH ? quoteAmount : 0n,
+    })
+  } else if (result.length === 1) {
+    // take and make
+  } else {
+    // take x n and make
+  }
+  return undefined
+}
