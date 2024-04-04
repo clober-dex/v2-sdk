@@ -156,7 +156,7 @@ test('make ask order', async () => {
       '0x0000000000000000000000000000000000000000',
       bookId,
     )
-  ).find(({ price }) => 999 <= price && price <= 1000)!.amount
+  ).find(({ price }) => 8000 <= price && price <= 8001)!.amount
 
   expect(beforeBalance - afterBalance).toEqual(10000000000000000n)
   expect(Number(afterSize)).greaterThan(Number(beforeSize))
