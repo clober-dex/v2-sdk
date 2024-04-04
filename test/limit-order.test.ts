@@ -67,7 +67,7 @@ test('make bid order', async () => {
     '0x0000000000000000000000000000000000000000',
     '100',
     '1000',
-    signature,
+    { signature },
   )
 
   const beforeBalance = await fetchTokenBalance(
@@ -106,6 +106,70 @@ test('make bid order', async () => {
       bookId,
     )
   ).find(({ price }) => 999 <= price && price <= 1000)!.amount
+
+  expect(beforeBalance - afterBalance).toEqual(100000000n)
+  expect(Number(afterSize)).greaterThan(Number(beforeSize))
+})
+
+test('make bid order with post only', async () => {
+  const walletClient = createWalletClient({
+    account,
+    chain: cloberTestChain,
+    transport: http(),
+  })
+
+  const signature = await signERC20Permit(
+    cloberTestChain.id,
+    account,
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '100',
+  )
+  const transaction = await limitOrder(
+    cloberTestChain.id,
+    account.address,
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '0x0000000000000000000000000000000000000000',
+    '100',
+    '8000',
+    { signature, postOnly: true },
+  )
+
+  const beforeBalance = await fetchTokenBalance(
+    cloberTestChain.id,
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    account.address,
+  )
+  const bookId = toBookId(
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '0x0000000000000000000000000000000000000000',
+    1n,
+  )
+  const beforeSize = (
+    (
+      await fetchDepth(
+        cloberTestChain.id,
+        '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+        '0x0000000000000000000000000000000000000000',
+        bookId,
+      )
+    ).find(({ price }) => 7999 <= price && price <= 8000) ?? { amount: 0n }
+  ).amount
+
+  await walletClient.sendTransaction(transaction!)
+
+  const afterBalance = await fetchTokenBalance(
+    cloberTestChain.id,
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    account.address,
+  )
+  const afterSize = (
+    await fetchDepth(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      '0x0000000000000000000000000000000000000000',
+      bookId,
+    )
+  ).find(({ price }) => 7999 <= price && price <= 8000)!.amount
 
   expect(beforeBalance - afterBalance).toEqual(100000000n)
   expect(Number(afterSize)).greaterThan(Number(beforeSize))

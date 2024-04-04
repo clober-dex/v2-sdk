@@ -74,9 +74,15 @@ export const limitOrder = async (
   outputToken: `0x${string}`,
   amount: string,
   price: string,
-  signature?: PermitSignature,
-  postOnly?: boolean,
+  options?: {
+    signature?: PermitSignature
+    postOnly?: boolean
+  },
 ) => {
+  const { signature, postOnly } = options || {
+    signature: undefined,
+    postOnly: false,
+  }
   const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
   if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
@@ -106,7 +112,9 @@ export const limitOrder = async (
   )
   const [unit, { result }] = await Promise.all([
     calculateUnit(chainId, isBid ? market.quote : market.base),
-    getExpectedOutput(chainId, inputToken, outputToken, amount, price),
+    getExpectedOutput(chainId, inputToken, outputToken, amount, {
+      limitPrice: price,
+    }),
   ])
   const isETH = isAddressEqual(inputToken, zeroAddress)
 
