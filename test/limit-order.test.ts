@@ -89,7 +89,7 @@ test('make bid order', async () => {
         bookId,
         publicClient.transport.url!,
       )
-    ).find(({ price }) => 1000 <= price && price <= 1001) ?? { amount: 0n }
+    ).find(({ price }) => 0.0001 <= price && price <= 0.0002) ?? { amount: 0n }
   ).amount
   expect(Number(beforeSize)).toEqual(0)
 
@@ -109,7 +109,7 @@ test('make bid order', async () => {
       bookId,
       publicClient.transport.url!,
     )
-  ).find(({ price }) => 1000 <= price && price <= 1001)!.amount
+  ).find(({ price }) => 0.0001 <= price && price <= 0.0002)!.amount
 
   expect(beforeBalance - afterBalance).toEqual(100000000n)
   expect(Number(afterSize)).greaterThan(0)
