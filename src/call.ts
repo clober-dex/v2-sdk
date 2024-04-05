@@ -530,7 +530,14 @@ export const claimOrders = async (
     options?.rpcUrl,
   )
   if (!isApprovedForAll) {
-    throw new Error(`Not approved for all`)
+    throw new Error(`
+       import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
+
+       const hash = await setApprovalOfOpenOrdersForAll(
+            ${chainId},
+            privateKeyToAccount('0x...')
+       )
+    `)
   }
 
   const openOrders = (await getOpenOrders(chainId, userAddress)).filter(

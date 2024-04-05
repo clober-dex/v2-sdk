@@ -105,7 +105,14 @@ test('claim all orders', async () => {
       openOrders.map((order) => order.id),
       { rpcUrl: publicClient.transport.url! },
     ).catch((e) => e.message),
-  ).toEqual('Not approved for all')
+  ).toEqual(`
+       import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
+
+       const hash = await setApprovalOfOpenOrdersForAll(
+            421614,
+            privateKeyToAccount('0x...')
+       )
+    `)
 
   // be sure to approve before claim
   await setApprovalOfOpenOrdersForAll(cloberTestChain.id, account, {
