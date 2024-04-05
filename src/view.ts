@@ -214,7 +214,7 @@ export const getExpectedInput = async (
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {string} id The ID of the open order.
- * @returns {Promise<OpenOrder | undefined>} Promise resolving to the open order object, or undefined if not found.
+ * @returns {Promise<OpenOrder>} Promise resolving to the open order object, or undefined if not found.
  * @example
  * import { getOpenOrder } from '@clober-dex/v2-sdk'
  *
@@ -226,7 +226,7 @@ export const getExpectedInput = async (
 export const getOpenOrder = async (
   chainId: CHAIN_IDS,
   id: string,
-): Promise<OpenOrder | undefined> => {
+): Promise<OpenOrder> => {
   return fetchOpenOrder(chainId, id)
 }
 
