@@ -544,7 +544,7 @@ export const claimOrders = async (
     (order) => ids.includes(order.id),
   )
   if (openOrders.length === 0) {
-    throw new Error(`No open orders found for ${userAddress}`)
+    throw new Error(`No claimable open orders found for ${userAddress}`)
   }
   const tokensToSettle = openOrders
     .map((order) => [order.outputCurrency.address, order.inputCurrency.address])
@@ -566,6 +566,127 @@ export const claimOrders = async (
       args: [
         openOrders.map((order) => ({
           id: BigInt(order.id),
+          hookData: zeroHash,
+        })),
+        tokensToSettle,
+        [],
+        getDeadlineTimestampInSeconds(),
+      ],
+    },
+    options?.rpcUrl,
+  )
+}
+
+/**
+ * Cancels specified open order if the order is not fully filled.
+ * [IMPORTANT] Set ApprovalForAll before calling this function.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {`0x${string}`} userAddress The Ethereum address of the user.
+ * @param {string} id An ID representing the open order to be canceled
+ * @param {Object} [options] Optional parameters for canceling orders.
+ * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
+ * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the cancel action.
+ * @throws {Error} Throws an error if no open orders are found for the specified user.
+ * @example
+ * import { getOpenOrders, cancelOrders } from '@clober-dex/v2-sdk'
+ *
+ * const openOrders = await getOpenOrders(
+ *     421614,
+ *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * )
+ * const transaction = await cancelOrders(
+ *    421614,
+ *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    openOrders.map((order) => order.id)
+ * )
+ */
+export const cancelOrder = async (
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+  id: string,
+  options?: {
+    rpcUrl?: string
+  },
+): Promise<Transaction> => {
+  return cancelOrders(chainId, userAddress, [id], options)
+}
+
+/**
+ * Cancels specified open orders if orders are not fully filled.
+ * [IMPORTANT] Set ApprovalForAll before calling this function.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {`0x${string}`} userAddress The Ethereum address of the user.
+ * @param {string[]} ids An array of IDs representing the open orders to be canceled.
+ * @param {Object} [options] Optional parameters for canceling orders.
+ * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
+ * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the cancel action.
+ * @throws {Error} Throws an error if no open orders are found for the specified user.
+ * @example
+ * import { getOpenOrders, cancelOrders } from '@clober-dex/v2-sdk'
+ *
+ * const openOrders = await getOpenOrders(
+ *     421614,
+ *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * )
+ * const transaction = await cancelOrders(
+ *    421614,
+ *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    openOrders.map((order) => order.id)
+ * )
+ */
+export const cancelOrders = async (
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+  ids: string[],
+  options?: {
+    rpcUrl?: string
+  },
+): Promise<Transaction> => {
+  const isApprovedForAll = await fetchIsApprovedForAll(
+    chainId,
+    userAddress,
+    options?.rpcUrl,
+  )
+  if (!isApprovedForAll) {
+    throw new Error(`
+       import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
+
+       const hash = await setApprovalOfOpenOrdersForAll(
+            ${chainId},
+            privateKeyToAccount('0x...')
+       )
+    `)
+  }
+
+  const openOrders = (await getOpenOrders(chainId, userAddress)).filter(
+    (order) => ids.includes(order.id) && order.cancelable,
+  )
+  if (openOrders.length === 0) {
+    throw new Error(`No cancelable open orders found for ${userAddress}`)
+  }
+  const tokensToSettle = openOrders
+    .map((order) => [order.outputCurrency.address, order.inputCurrency.address])
+    .flat()
+    .filter(
+      (address, index, self) =>
+        self.findIndex((c) => isAddressEqual(c, address)) === index,
+    )
+    .filter((address) => !isAddressEqual(address, zeroAddress))
+
+  return buildTransaction(
+    chainId,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Controller,
+      abi: CONTROLLER_ABI,
+      functionName: 'cancel',
+      args: [
+        openOrders.map((order) => ({
+          id: BigInt(order.id),
+          leftQuoteAmount: 0n,
           hookData: zeroHash,
         })),
         tokensToSettle,
