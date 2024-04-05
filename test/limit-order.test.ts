@@ -62,7 +62,7 @@ test('make bid order', async () => {
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '100',
-    '1000',
+    '1000.01',
     { signature, rpcUrl: publicClient.transport.url! },
   )
 
@@ -86,7 +86,7 @@ test('make bid order', async () => {
         bookId,
         publicClient.transport.url!,
       )
-    ).find(({ price }) => 999 <= price && price <= 1000) ?? { amount: 0n }
+    ).find(({ price }) => 1000 <= price && price <= 1001) ?? { amount: 0n }
   ).amount
   expect(Number(beforeSize)).toEqual(0)
 
@@ -106,7 +106,7 @@ test('make bid order', async () => {
       bookId,
       publicClient.transport.url!,
     )
-  ).find(({ price }) => 999 <= price && price <= 1000)!.amount
+  ).find(({ price }) => 1000 <= price && price <= 1001)!.amount
 
   expect(beforeBalance - afterBalance).toEqual(100000000n)
   expect(Number(afterSize)).greaterThan(0)
@@ -127,7 +127,7 @@ test('make bid order with post only', async () => {
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '100',
-    '8000',
+    '8000.01',
     { signature, postOnly: true, rpcUrl: publicClient.transport.url! },
   )
 
@@ -188,7 +188,7 @@ test('make ask order', async () => {
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0.01',
-    '8000',
+    '8000.01',
     { rpcUrl: publicClient.transport.url! },
   )
 
@@ -243,7 +243,7 @@ test('make ask order with post only', async () => {
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0.01',
-    '1000',
+    '1000.01',
     { postOnly: true, rpcUrl: publicClient.transport.url! },
   )
 

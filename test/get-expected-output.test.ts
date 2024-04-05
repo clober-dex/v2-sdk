@@ -142,7 +142,7 @@ test('get expected output ask', async () => {
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '1000.123',
-    '100',
+    '100.01',
   )
   expect(takenAmount).toBe('0')
   expect(spendAmount).toBe('0')
@@ -151,14 +151,14 @@ test('get expected output ask', async () => {
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '1000000',
-    '4005',
+    '4005.01',
   )
 
   await isSpendResultEqual(
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '1000.123',
-    '10000',
+    '10000.01',
   )
 
   await isSpendResultEqual(
@@ -174,7 +174,7 @@ test('get expected output bid', async () => {
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0.01',
-    '4010',
+    '4010.01',
   )
   expect(takenAmount).toBe('0')
   expect(spendAmount).toBe('0')
@@ -183,14 +183,14 @@ test('get expected output bid', async () => {
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0.1',
-    '4005',
+    '4005.01',
   )
 
   await isSpendResultEqual(
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '1.1234',
-    '200',
+    '200.01',
   )
 
   await isSpendResultEqual(
