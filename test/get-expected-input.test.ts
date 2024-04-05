@@ -70,7 +70,7 @@ const _ABI = [
   },
 ] as const
 
-const isSpendResultEqual = async (
+const isTakeResultEqual = async (
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
   amountOut: string,
@@ -138,7 +138,7 @@ const isSpendResultEqual = async (
 }
 
 test('get expected input ask', async () => {
-  const { takenAmount, spendAmount } = await isSpendResultEqual(
+  const { takenAmount, spendAmount } = await isTakeResultEqual(
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '0.1',
@@ -147,21 +147,21 @@ test('get expected input ask', async () => {
   expect(takenAmount).toBe('0')
   expect(spendAmount).toBe('0')
 
-  await isSpendResultEqual(
+  await isTakeResultEqual(
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '0.2',
     '4005.01',
   )
 
-  await isSpendResultEqual(
+  await isTakeResultEqual(
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '0.23',
     '10000.01',
   )
 
-  await isSpendResultEqual(
+  await isTakeResultEqual(
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '10',
@@ -170,7 +170,7 @@ test('get expected input ask', async () => {
 })
 
 test('get expected input bid', async () => {
-  const { takenAmount, spendAmount } = await isSpendResultEqual(
+  const { takenAmount, spendAmount } = await isTakeResultEqual(
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '100000',
@@ -179,21 +179,21 @@ test('get expected input bid', async () => {
   expect(takenAmount).toBe('0')
   expect(spendAmount).toBe('0')
 
-  await isSpendResultEqual(
+  await isTakeResultEqual(
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '100000',
     '4005.16',
   )
 
-  await isSpendResultEqual(
+  await isTakeResultEqual(
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '100000',
     '200.12',
   )
 
-  await isSpendResultEqual(
+  await isTakeResultEqual(
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '200000',
