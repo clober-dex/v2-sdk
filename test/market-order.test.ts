@@ -9,7 +9,7 @@ import { fetchTokenBalance } from './utils/currency'
 import { fetchBlockNumer } from './utils/chain'
 import { fetchAskDepth, fetchBidDepth } from './utils/depth'
 
-const clients = createProxyClients([11, 12])
+const clients = createProxyClients([11, 12, 13, 14, 15])
 const account = mnemonicToAccount(TEST_MNEMONIC)
 
 afterEach(async () => {
@@ -47,7 +47,7 @@ test('market order in not open market', async () => {
 })
 
 test('market bid with unlimited slippage', async () => {
-  const { walletClient, publicClient } = clients[0]
+  const { walletClient, publicClient } = clients[1]
   const signature = await signERC20Permit(
     cloberTestChain.id,
     account,
@@ -101,7 +101,7 @@ test('market bid with unlimited slippage', async () => {
 })
 
 test('market ask with unlimited slippage', async () => {
-  const { walletClient, publicClient } = clients[1]
+  const { walletClient, publicClient } = clients[2]
   const transaction = await marketOrder(
     cloberTestChain.id,
     account.address,
@@ -148,7 +148,7 @@ test('market ask with unlimited slippage', async () => {
 })
 
 test('market bid with slippage tolerate', async () => {
-  const { walletClient, publicClient } = clients[0]
+  const { walletClient, publicClient } = clients[3]
   const market = await getMarket(
     cloberTestChain.id,
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -211,7 +211,7 @@ test('market bid with slippage tolerate', async () => {
 })
 
 test('market ask with slippage tolerate', async () => {
-  const { walletClient, publicClient } = clients[1]
+  const { walletClient, publicClient } = clients[4]
   const market = await getMarket(
     cloberTestChain.id,
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
