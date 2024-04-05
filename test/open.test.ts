@@ -1,20 +1,22 @@
-import { afterAll, expect, test } from 'vitest'
+import { afterEach, expect, test } from 'vitest'
 import { mnemonicToAccount } from 'viem/accounts'
 import { openMarket } from '@clober-dex/v2-sdk'
 
 import { cloberTestChain } from './utils/test-chain'
 import { createProxyClients } from './utils/utils'
-import { FORK_BLOCK_NUMBER, FORK_URL, TEST_MNEMONIC } from './utils/constants'
+import { FORK_URL, TEST_MNEMONIC } from './utils/constants'
+import { fetchBlockNumer } from './utils/chain'
 
 const clients = createProxyClients([1, 2])
 const account = mnemonicToAccount(TEST_MNEMONIC)
 
-afterAll(async () => {
+afterEach(async () => {
+  const blockNumber = await fetchBlockNumer()
   await Promise.all(
     clients.map(({ testClient }) => {
       return testClient.reset({
         jsonRpcUrl: FORK_URL,
-        blockNumber: FORK_BLOCK_NUMBER,
+        blockNumber,
       })
     }),
   )

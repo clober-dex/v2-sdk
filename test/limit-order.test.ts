@@ -1,4 +1,4 @@
-import { afterAll, expect, test } from 'vitest'
+import { afterEach, expect, test } from 'vitest'
 import { limitOrder, signERC20Permit } from '@clober-dex/v2-sdk'
 import { mnemonicToAccount } from 'viem/accounts'
 import { formatUnits } from 'viem'
@@ -7,19 +7,21 @@ import { toBookId } from '../src/utils/book-id'
 
 import { cloberTestChain } from './utils/test-chain'
 import { createProxyClients } from './utils/utils'
-import { FORK_BLOCK_NUMBER, FORK_URL, TEST_MNEMONIC } from './utils/constants'
+import { FORK_URL, TEST_MNEMONIC } from './utils/constants'
 import { fetchTokenBalance } from './utils/currency'
 import { fetchDepth } from './utils/depth'
+import { fetchBlockNumer } from './utils/chain'
 
 const clients = createProxyClients([3, 4, 5, 6, 7, 8, 9, 10])
 const account = mnemonicToAccount(TEST_MNEMONIC)
 
-afterAll(async () => {
+afterEach(async () => {
+  const blockNumber = await fetchBlockNumer()
   await Promise.all(
     clients.map(({ testClient }) => {
       return testClient.reset({
         jsonRpcUrl: FORK_URL,
-        blockNumber: FORK_BLOCK_NUMBER,
+        blockNumber,
       })
     }),
   )
@@ -63,7 +65,7 @@ test('make bid order', async () => {
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '100',
-    '1000.01',
+    '0.0001',
     { signature, rpcUrl: publicClient.transport.url! },
   )
 
