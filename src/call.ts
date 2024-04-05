@@ -488,12 +488,13 @@ export const claimOrder = async (
   options?: {
     rpcUrl?: string
   },
-) => {
+): Promise<Transaction> => {
   return claimOrders(chainId, userAddress, [id], options)
 }
 
 /**
  * Claims specified open orders for settlement.
+ * [IMPORTANT] Set ApprovalForAll before calling this function.
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
@@ -522,7 +523,7 @@ export const claimOrders = async (
   options?: {
     rpcUrl?: string
   },
-) => {
+): Promise<Transaction> => {
   const isApprovedForAll = await fetchIsApprovedForAll(
     chainId,
     userAddress,
