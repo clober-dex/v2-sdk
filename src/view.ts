@@ -5,7 +5,7 @@ import { CHAIN_IDS } from './constants/chain'
 import { Market } from './type'
 import { parsePrice } from './utils/prices'
 import { MAX_PRICE } from './constants/price'
-import { fetchOpenOrders } from './apis/open-order'
+import { fetchOpenOrder, fetchOpenOrders } from './apis/open-order'
 import { OpenOrder } from './model/open-order'
 
 /**
@@ -207,6 +207,27 @@ export const getExpectedInput = async (
       }),
     ),
   }
+}
+
+/**
+ * Retrieves the open order with the specified ID on the given chain.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {string} id The ID of the open order.
+ * @returns {Promise<OpenOrder | undefined>} Promise resolving to the open order object, or undefined if not found.
+ * @example
+ * import { getOpenOrder } from '@clober-dex/v2-sdk'
+ *
+ * const openOrder = await getOpenOrder(
+ *   421614,
+ *  '46223845323662364279893361453861711542636620039907198451770258805035840307200'
+ * )
+ */
+export const getOpenOrder = async (
+  chainId: CHAIN_IDS,
+  id: string,
+): Promise<OpenOrder | undefined> => {
+  return fetchOpenOrder(chainId, id)
 }
 
 /**
