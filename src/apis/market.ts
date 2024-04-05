@@ -67,16 +67,18 @@ export async function fetchMarket(
         base: isBid ? baseCurrency : quoteCurrency,
         quote: isBid ? quoteCurrency : baseCurrency,
         unit: BigInt(book.unit),
-        depths: book.depths.map((depth) => {
-          const rawAmount = BigInt(depth.rawAmount)
-          const tick = BigInt(depth.tick)
-          return {
-            bookId: String(book.id),
-            unit: BigInt(book.unit),
-            tick,
-            rawAmount,
-          } as RawDepth
-        }),
+        depths: book.depths
+          .map((depth) => {
+            const rawAmount = BigInt(depth.rawAmount)
+            const tick = BigInt(depth.tick)
+            return {
+              bookId: String(book.id),
+              unit: BigInt(book.unit),
+              tick,
+              rawAmount,
+            } as RawDepth
+          })
+          .sort((a, b) => Number(b.tick) - Number(a.tick)),
       })
     }),
   })
