@@ -328,12 +328,41 @@ export const limitOrder = async (
  * @param {`0x${string}`} inputToken The address of the token to be used as input.
  * @param {`0x${string}`} outputToken The address of the token to be received as output.
  * @param {string} amount The amount of input tokens for the order.
- * @param {Object} [options] Optional parameters for the market order.
+ * @param {Object} [options] Optional parameters for the limit order.
  * @param {PermitSignature} [options.signature] The permit signature for token approval.
- * @param {string} [options.rpcUrl] The RPC URL to use for executing the order.
- * @returns {Promise<void>} Promise resolving once the market order is executed.
+ * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
+ * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the limit order.
+ * @example
+ * import { signERC20Permit, marketOrder } from '@clober-dex/v2-sdk'
+ * import { privateKeyToAccount } from 'viem/accounts'
+ *
+ * const signature = await signERC20Permit(
+ *   421614,
+ *   privateKeyToAccount('0x...'),
+ *   '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   '100.123'
+ * )
+ *
+ * const transaction = await marketOrder(
+ *   421614,
+ *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *  '0x0000000000000000000000000000000000000000',
+ *  '100.123', // 100.123 USDC
+ *  { signature }
+ * )
+ *
+ * @example
+ * import { marketOrder } from '@clober-dex/v2-sdk'
+ *
+ * const transaction = await limitOrder(
+ *   421614,
+ *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *  '0x0000000000000000000000000000000000000000',
+ *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *  '0.13', // 0.13 ETH
+ * )
  */
-
 export const marketOrder = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
