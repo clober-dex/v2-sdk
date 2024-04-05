@@ -7,6 +7,7 @@ import { Depth } from './model/depth'
 export { CHAIN_IDS } from './constants/chain'
 export { Currency } from './model/currency'
 export { Depth } from './model/depth'
+export { OpenOrder } from './model/open-order'
 
 export type Market = {
   chainId: CHAIN_IDS

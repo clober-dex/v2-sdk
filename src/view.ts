@@ -5,6 +5,8 @@ import { CHAIN_IDS } from './constants/chain'
 import { Market } from './type'
 import { parsePrice } from './utils/prices'
 import { MAX_PRICE } from './constants/price'
+import { fetchOpenOrders } from './apis/open-order'
+import { OpenOrder } from './model/open-order'
 
 /**
  * Get market information by chain id and token addresses
@@ -205,4 +207,11 @@ export const getExpectedInput = async (
       }),
     ),
   }
+}
+
+export const getOpenOrders = async (
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+): Promise<OpenOrder[]> => {
+  return fetchOpenOrders(chainId, userAddress)
 }

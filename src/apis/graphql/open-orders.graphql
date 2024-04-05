@@ -1,0 +1,29 @@
+query getOpenOrders($userAddress: String!) {
+  openOrders(where: { user: $userAddress }) {
+    id
+    book {
+      id
+      base {
+        id
+        name
+        symbol
+        decimals
+      }
+      quote {
+        id
+        name
+        symbol
+        decimals
+      }
+      unit
+    }
+    tick
+    txHash
+    createdAt
+
+    rawAmount
+    rawFilledAmount
+    rawClaimedAmount
+    rawClaimableAmount
+  }
+}
