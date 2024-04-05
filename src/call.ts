@@ -124,7 +124,7 @@ export const openMarket = async (
  *  '0x0000000000000000000000000000000000000000',
  *  '100.123', // 100.123 USDC
  *  '4000.01', // price at 4000.01 (ETH/USDC)
- *  { signature: { r: '0x00', s: '0x00', v: 0, deadline: 0n } }
+ *  { signature }
  * )
  *
  * @example
@@ -151,7 +151,7 @@ export const limitOrder = async (
     postOnly?: boolean
     rpcUrl?: string
   },
-) => {
+): Promise<Transaction> => {
   const { signature, postOnly, rpcUrl } = options || {
     signature: undefined,
     postOnly: false,
