@@ -188,6 +188,7 @@ test('market bid with slippage tolerate', async () => {
       }),
       fetchAskDepth(publicClient.transport.url!),
     ])
+  expect(beforeAskDepth.length).toBeGreaterThan(1)
 
   await walletClient.sendTransaction({ ...transaction!, account })
 
@@ -243,7 +244,7 @@ test('market ask with slippage tolerate', async () => {
       }),
       fetchBidDepth(publicClient.transport.url!),
     ])
-  expect(beforeBidDepth.length).toBeGreaterThan(0)
+  expect(beforeBidDepth.length).toBeGreaterThan(1)
 
   await walletClient.sendTransaction({ ...transaction!, account })
 
