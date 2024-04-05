@@ -319,3 +319,101 @@ export const limitOrder = async (
     )
   }
 }
+
+/**
+ * Executes a market order on the specified chain for trading tokens.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {`0x${string}`} userAddress The Ethereum address of the user placing the order.
+ * @param {`0x${string}`} inputToken The address of the token to be used as input.
+ * @param {`0x${string}`} outputToken The address of the token to be received as output.
+ * @param {string} amount The amount of input tokens for the order.
+ * @param {Object} [options] Optional parameters for the market order.
+ * @param {PermitSignature} [options.signature] The permit signature for token approval.
+ * @param {string} [options.rpcUrl] The RPC URL to use for executing the order.
+ * @returns {Promise<void>} Promise resolving once the market order is executed.
+ */
+
+export const marketOrder = async (
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+  inputToken: `0x${string}`,
+  outputToken: `0x${string}`,
+  amount: string,
+  options?: {
+    signature?: PermitSignature
+    rpcUrl?: string
+  },
+): Promise<Transaction> => {
+  const { signature, rpcUrl } = options || {
+    signature: undefined,
+    rpcUrl: undefined,
+  }
+  const market = await fetchMarket(chainId, [inputToken, outputToken], rpcUrl)
+  const isBid = isAddressEqual(market.quote.address, inputToken)
+  if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
+    throw new Error(`
+       import { openMarket } from '@clober-dex/v2-sdk'
+
+       const transaction = await openMarket(
+            ${chainId},
+           '${inputToken}',
+           '${outputToken}',
+       )
+    `)
+  }
+
+  const tokensToSettle = [inputToken, outputToken].filter(
+    (address) => !isAddressEqual(address, zeroAddress),
+  )
+  const quoteAmount = parseUnits(
+    amount,
+    isBid ? market.quote.decimals : market.base.decimals,
+  )
+  const { result } = await getExpectedOutput(
+    chainId,
+    inputToken,
+    outputToken,
+    amount,
+    rpcUrl
+      ? {
+          rpcUrl,
+        }
+      : {},
+  )
+  const isETH = isAddressEqual(inputToken, zeroAddress)
+  const permitParamsList =
+    signature && !isETH
+      ? [
+          {
+            token: inputToken,
+            permitAmount: quoteAmount,
+            signature,
+          },
+        ]
+      : []
+
+  return buildTransaction(
+    chainId,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Controller,
+      abi: CONTROLLER_ABI,
+      functionName: 'take',
+      args: [
+        result.map(({ bookId, takenAmount }) => ({
+          id: bookId,
+          limitPrice: 0n,
+          quoteAmount: takenAmount,
+          hookData: zeroHash,
+        })),
+        tokensToSettle,
+        permitParamsList,
+        getDeadlineTimestampInSeconds(),
+      ],
+      value: isETH ? quoteAmount : 0n,
+    },
+    options?.rpcUrl,
+  )
+}
