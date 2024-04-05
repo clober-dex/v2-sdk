@@ -1,4 +1,10 @@
-import { isAddressEqual, parseUnits, zeroAddress, zeroHash } from 'viem'
+import {
+  encodeAbiParameters,
+  isAddressEqual,
+  parseUnits,
+  zeroAddress,
+  zeroHash,
+} from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { PermitSignature, Transaction } from './type'
@@ -13,6 +19,11 @@ import { parsePrice } from './utils/prices'
 import { fromPrice, invertPrice } from './utils/tick'
 import { getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
+import {
+  MAKE_ORDER_PARAMS_ABI,
+  TAKE_ORDER_PARAMS_ABI,
+} from './abis/core/params-abi'
+import { Action } from './constants/action'
 
 /**
  * Build a transaction to open a market.
@@ -259,6 +270,52 @@ export const limitOrder = async (
     )
   } else {
     // take x n and make
+    const makeAmount =
+      quoteAmount -
+      result.reduce((acc, { spendAmount }) => acc + spendAmount, 0n)
+    return buildTransaction(
+      chainId,
+      {
+        chain: CHAIN_MAP[chainId],
+        account: userAddress,
+        address: CONTRACT_ADDRESSES[chainId]!.Controller,
+        abi: CONTROLLER_ABI,
+        functionName: 'execute',
+        args: [
+          [
+            ...result.map(() => Action.TAKE),
+            ...(makeAmount > 0n ? [Action.MAKE] : []),
+          ],
+          [
+            ...result.map(({ bookId, takenAmount }) =>
+              encodeAbiParameters(TAKE_ORDER_PARAMS_ABI, [
+                {
+                  id: bookId,
+                  limitPrice: rawPrice,
+                  quoteAmount: takenAmount,
+                  hookData: zeroHash,
+                },
+              ]),
+            ),
+            ...(makeAmount > 0n
+              ? [
+                  encodeAbiParameters(MAKE_ORDER_PARAMS_ABI, [
+                    {
+                      ...makeParam,
+                      quoteAmount: makeAmount,
+                    },
+                  ]),
+                ]
+              : []),
+          ],
+          tokensToSettle,
+          permitParamsList,
+          [],
+          getDeadlineTimestampInSeconds(),
+        ],
+        value: isETH ? quoteAmount : 0n,
+      },
+      options?.rpcUrl,
+    )
   }
-  return undefined
 }
