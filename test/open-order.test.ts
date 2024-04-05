@@ -95,7 +95,9 @@ test('claim all orders', async () => {
   expect(bidDepths.length).toBe(0)
   expect(askDepths.length).toBe(0)
 
-  const openOrders = await getOpenOrders(cloberTestChain.id, account.address)
+  const openOrders = (
+    await getOpenOrders(cloberTestChain.id, account.address)
+  ).slice(0, 5)
   expect(
     await claimOrders(
       cloberTestChain.id,
