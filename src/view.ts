@@ -209,6 +209,20 @@ export const getExpectedInput = async (
   }
 }
 
+/**
+ * Retrieves open orders for the specified user on the given chain.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {`0x${string}`} userAddress The Ethereum address of the user.
+ * @returns {Promise<OpenOrder[]>} Promise resolving to an array of open orders.
+ * @example
+ * import { getOpenOrders } from '@clober-dex/v2-sdk'
+ *
+ * const openOrders = await getOpenOrders(
+ *   421614,
+ *  '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49'
+ * )
+ */
 export const getOpenOrders = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
