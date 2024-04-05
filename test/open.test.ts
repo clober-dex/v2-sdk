@@ -22,6 +22,7 @@ afterEach(async () => {
   )
 })
 
+// @dev: this test will be fail when the market is open
 test('try open market', async () => {
   const { publicClient, walletClient } = clients[0]
   const transaction = await openMarket(

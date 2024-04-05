@@ -197,6 +197,7 @@ test('get expected input bid', async () => {
   )
 })
 
+// @dev: this test will be fail when the market is open
 test('get expected input in not open book', async () => {
   const { takenAmount, spendAmount } = await getExpectedInput(
     arbitrumSepolia.id,

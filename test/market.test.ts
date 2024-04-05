@@ -40,6 +40,7 @@ test('fetch empty market', async () => {
   expect(market.bidBookOpen).toEqual(true)
 })
 
+// @dev: this test will be fail when the market is open
 test('fetch not open market', async () => {
   const market = await getMarket(
     arbitrumSepolia.id,

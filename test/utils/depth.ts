@@ -5,6 +5,9 @@ import { getMarketId } from '../../src/utils/market'
 import { formatPrice } from '../../src/utils/prices'
 import { invertPrice, toPrice } from '../../src/utils/tick'
 import { fetchCurrency } from '../../src/apis/currency'
+import { toBookId } from '../../src/utils/book-id'
+
+import { cloberTestChain } from './test-chain'
 
 const MAX_TICK = 2n ** 19n - 1n
 const BOOK_VIEWER_CONTRACT_ADDRESS =
@@ -53,7 +56,7 @@ const _abi = [
   },
 ] as const
 
-export const fetchDepth = async (
+const fetchDepth = async (
   chainId: CHAIN_IDS,
   inputToken: `0x${string}`,
   outputToken: `0x${string}`,
@@ -98,4 +101,48 @@ export const fetchDepth = async (
         ),
     amount: depth,
   }))
+}
+
+export const fetchAskDepth = async (rpcUrl: string) => {
+  const askBookId = toBookId(
+    '0x0000000000000000000000000000000000000000',
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    10n ** 12n,
+  )
+  return fetchDepth(
+    cloberTestChain.id,
+    '0x0000000000000000000000000000000000000000',
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    askBookId,
+    rpcUrl,
+  )
+}
+
+export const fetchBidDepth = async (rpcUrl: string) => {
+  const bidBookId = toBookId(
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '0x0000000000000000000000000000000000000000',
+    1n,
+  )
+  return fetchDepth(
+    cloberTestChain.id,
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    '0x0000000000000000000000000000000000000000',
+    bidBookId,
+    rpcUrl,
+  )
+}
+
+export const getSize = (
+  depth: { price: number; amount: bigint }[],
+  from: number,
+  to: number,
+) => {
+  return Number(
+    (
+      depth.find(({ price }) => from <= price && price <= to) ?? {
+        amount: 0n,
+      }
+    ).amount,
+  )
 }
