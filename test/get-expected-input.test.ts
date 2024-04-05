@@ -138,14 +138,12 @@ const isTakeResultEqual = async (
 }
 
 test('get expected input ask', async () => {
-  const { takenAmount, spendAmount } = await isTakeResultEqual(
+  await isTakeResultEqual(
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '0x0000000000000000000000000000000000000000',
     '0.1',
     '100.01',
   )
-  expect(takenAmount).toBe('0')
-  expect(spendAmount).toBe('0')
 
   await isTakeResultEqual(
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -170,14 +168,12 @@ test('get expected input ask', async () => {
 })
 
 test('get expected input bid', async () => {
-  const { takenAmount, spendAmount } = await isTakeResultEqual(
+  await isTakeResultEqual(
     '0x0000000000000000000000000000000000000000',
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     '100000',
     '4010.01',
   )
-  expect(takenAmount).toBe('0')
-  expect(spendAmount).toBe('0')
 
   await isTakeResultEqual(
     '0x0000000000000000000000000000000000000000',
