@@ -331,6 +331,8 @@ export const limitOrder = async (
  * @param {Object} [options] Optional parameters for the limit order.
  * @param {PermitSignature} [options.signature] The permit signature for token approval.
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
+ * @param {string} [options.limitPrice] The upper bound price to tolerate for the market bid, or the lower bound price to tolerate for the market ask.
+ * if the limit price is not provided, unlimited slippage is allowed.
  * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the limit order.
  * @example
  * import { signERC20Permit, marketOrder } from '@clober-dex/v2-sdk'
@@ -372,11 +374,13 @@ export const marketOrder = async (
   options?: {
     signature?: PermitSignature
     rpcUrl?: string
+    limitPrice?: string
   },
 ): Promise<Transaction> => {
-  const { signature, rpcUrl } = options || {
+  const { signature, rpcUrl, limitPrice } = options || {
     signature: undefined,
     rpcUrl: undefined,
+    limitPrice: undefined,
   }
   const market = await fetchMarket(chainId, [inputToken, outputToken], rpcUrl)
   const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -392,6 +396,11 @@ export const marketOrder = async (
     `)
   }
 
+  const rawLimitPrice = parsePrice(
+    Number(limitPrice ?? '0'),
+    market.quote.decimals,
+    market.base.decimals,
+  )
   const tokensToSettle = [inputToken, outputToken].filter(
     (address) => !isAddressEqual(address, zeroAddress),
   )
@@ -433,7 +442,7 @@ export const marketOrder = async (
       args: [
         result.map(({ bookId, takenAmount }) => ({
           id: bookId,
-          limitPrice: 0n,
+          limitPrice: isBid ? invertPrice(rawLimitPrice) : rawLimitPrice,
           quoteAmount: takenAmount,
           hookData: zeroHash,
         })),
