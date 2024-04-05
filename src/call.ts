@@ -17,13 +17,14 @@ import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
 import { fetchMarket } from './apis/market'
 import { parsePrice } from './utils/prices'
 import { fromPrice, invertPrice } from './utils/tick'
-import { getExpectedOutput } from './view'
+import { getExpectedOutput, getOpenOrders } from './view'
 import { toBookId } from './utils/book-id'
 import {
   MAKE_ORDER_PARAMS_ABI,
   TAKE_ORDER_PARAMS_ABI,
 } from './abis/core/params-abi'
 import { Action } from './constants/action'
+import { fetchIsApprovedForAll } from './utils/approval'
 
 /**
  * Build a transaction to open a market.
@@ -451,6 +452,118 @@ export const marketOrder = async (
         getDeadlineTimestampInSeconds(),
       ],
       value: isETH ? quoteAmount : 0n,
+    },
+    options?.rpcUrl,
+  )
+}
+
+/**
+ * Claims specified open order for settlement.
+ * [IMPORTANT] Set ApprovalForAll before calling this function.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {`0x${string}`} userAddress The Ethereum address of the user.
+ * @param {string} id An ID representing the open order to be claimed.
+ * @param {Object} [options] Optional parameters for claiming orders.
+ * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
+ * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the claim action.
+ * @throws {Error} Throws an error if no open orders are found for the specified user.
+ * @example
+ * import { getOpenOrders, claimOrders } from '@clober-dex/v2-sdk'
+ *
+ * const openOrders = await getOpenOrders(
+ *     421614,
+ *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * )
+ * const transaction = await claimOrders(
+ *    421614,
+ *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    openOrders.map((order) => order.id)
+ * )
+ */
+export const claimOrder = async (
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+  id: string,
+  options?: {
+    rpcUrl?: string
+  },
+) => {
+  return claimOrders(chainId, userAddress, [id], options)
+}
+
+/**
+ * Claims specified open orders for settlement.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {`0x${string}`} userAddress The Ethereum address of the user.
+ * @param {string[]} ids An array of IDs representing the open orders to be claimed.
+ * @param {Object} [options] Optional parameters for claiming orders.
+ * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
+ * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the claim action.
+ * @throws {Error} Throws an error if no open orders are found for the specified user.
+ * @example
+ * import { getOpenOrders, claimOrders } from '@clober-dex/v2-sdk'
+ *
+ * const openOrders = await getOpenOrders(
+ *     421614,
+ *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * )
+ * const transaction = await claimOrders(
+ *    421614,
+ *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    openOrders.map((order) => order.id)
+ * )
+ */
+export const claimOrders = async (
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+  ids: string[],
+  options?: {
+    rpcUrl?: string
+  },
+) => {
+  const isApprovedForAll = await fetchIsApprovedForAll(
+    chainId,
+    userAddress,
+    options?.rpcUrl,
+  )
+  if (!isApprovedForAll) {
+    throw new Error(`Not approved for all`)
+  }
+
+  const openOrders = (await getOpenOrders(chainId, userAddress)).filter(
+    (order) => ids.includes(order.id),
+  )
+  if (openOrders.length === 0) {
+    throw new Error(`No open orders found for ${userAddress}`)
+  }
+  const tokensToSettle = openOrders
+    .map((order) => [order.outputCurrency.address, order.inputCurrency.address])
+    .flat()
+    .filter(
+      (address, index, self) =>
+        self.findIndex((c) => isAddressEqual(c, address)) === index,
+    )
+    .filter((address) => !isAddressEqual(address, zeroAddress))
+
+  return buildTransaction(
+    chainId,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Controller,
+      abi: CONTROLLER_ABI,
+      functionName: 'claim',
+      args: [
+        openOrders.map((order) => ({
+          id: BigInt(order.id),
+          hookData: zeroHash,
+        })),
+        tokensToSettle,
+        [],
+        getDeadlineTimestampInSeconds(),
+      ],
     },
     options?.rpcUrl,
   )

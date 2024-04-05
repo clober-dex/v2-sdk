@@ -1,7 +1,7 @@
 import { Currency } from './currency'
 
 export type OpenOrder = {
-  id: bigint
+  id: string
   isBid: boolean
   inputCurrency: Currency
   outputCurrency: Currency

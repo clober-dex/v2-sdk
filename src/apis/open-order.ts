@@ -51,7 +51,7 @@ export async function fetchOpenOrders(
 export async function fetchOpenOrder(
   chainId: CHAIN_IDS,
   id: string,
-): Promise<OpenOrder | undefined> {
+): Promise<OpenOrder> {
   const { openOrder } = await getOpenOrder(
     {
       orderId: id,
@@ -61,7 +61,7 @@ export async function fetchOpenOrder(
     },
   )
   if (!openOrder) {
-    return undefined
+    throw new Error(`Open order not found: ${id}`)
   }
   const currencies = await Promise.all([
     fetchCurrency(chainId, getAddress(openOrder.book.base.id)),
@@ -117,7 +117,7 @@ const toOpenOrder = (
   const claimed = quoteToBase(tick, unit * rawClaimedAmount, false)
   const claimable = quoteToBase(tick, unit * rawClaimableAmount, false)
   return {
-    id: BigInt(openOrder.id),
+    id: openOrder.id,
     isBid,
     inputCurrency,
     outputCurrency,
