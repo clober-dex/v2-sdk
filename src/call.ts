@@ -204,7 +204,7 @@ export const limitOrder = async (
 
   const makeParam = {
     id: toBookId(inputToken, outputToken, unit),
-    tick,
+    tick: Number(tick),
     quoteAmount,
     hookData: zeroHash,
   }
