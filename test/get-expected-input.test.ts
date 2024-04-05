@@ -197,6 +197,28 @@ test('get expected input bid', async () => {
   )
 })
 
+test('get max expected input', async () => {
+  const { spendAmount: spendAmount1, takenAmount: takenAmount1 } =
+    await getExpectedInput(
+      arbitrumSepolia.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      '0x0000000000000000000000000000000000000000',
+      '5000',
+    )
+  expect(Number(spendAmount1)).toBeGreaterThan(0)
+  expect(Number(takenAmount1)).toBeGreaterThan(0)
+
+  const { spendAmount: spendAmount2, takenAmount: takenAmount2 } =
+    await getExpectedInput(
+      arbitrumSepolia.id,
+      '0x0000000000000000000000000000000000000000',
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      '1.3',
+    )
+  expect(Number(spendAmount2)).toBeGreaterThan(0)
+  expect(Number(takenAmount2)).toBeGreaterThan(0)
+})
+
 // @dev: this test will be fail when the market is open
 test('get expected input in not open book', async () => {
   const { takenAmount, spendAmount } = await getExpectedInput(

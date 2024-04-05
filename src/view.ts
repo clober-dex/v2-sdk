@@ -4,6 +4,7 @@ import { fetchMarket } from './apis/market'
 import { CHAIN_IDS } from './constants/chain'
 import { Market } from './type'
 import { parsePrice } from './utils/prices'
+import { MAX_PRICE } from './constants/price'
 
 /**
  * Get market information by chain id and token addresses
@@ -84,16 +85,20 @@ export const getExpectedOutput = async (
     options?.rpcUrl,
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
-  const limitPrice =
-    options?.limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
+  const rawLimitPrice =
+    options && options.limitPrice
+      ? parsePrice(
+          Number(options.limitPrice),
+          market.quote.decimals,
+          market.base.decimals,
+        )
+      : isBid
+        ? MAX_PRICE
+        : 0n
   const inputCurrency = isBid ? market.quote : market.base
   const result = market.spend({
     spendBase: !isBid,
-    limitPrice: parsePrice(
-      Number(limitPrice),
-      market.quote.decimals,
-      market.base.decimals,
-    ),
+    limitPrice: rawLimitPrice,
     amountIn: parseUnits(amountIn, inputCurrency.decimals),
   })
   const { takenAmount, spendAmount } = Object.values(result).reduce(
@@ -160,16 +165,20 @@ export const getExpectedInput = async (
     options?.rpcUrl,
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
-  const limitPrice =
-    options?.limitPrice ?? (isBid ? (Math.pow(2, 256) - 1).toFixed(0) : '0')
+  const rawLimitPrice =
+    options && options.limitPrice
+      ? parsePrice(
+          Number(options.limitPrice),
+          market.quote.decimals,
+          market.base.decimals,
+        )
+      : isBid
+        ? MAX_PRICE
+        : 0n
   const outputCurrency = isBid ? market.base : market.quote
   const result = market.take({
     takeQuote: !isBid,
-    limitPrice: parsePrice(
-      Number(limitPrice),
-      market.quote.decimals,
-      market.base.decimals,
-    ),
+    limitPrice: rawLimitPrice,
     amountOut: parseUnits(amountOut, outputCurrency.decimals),
   })
   const { takenAmount, spendAmount } = Object.values(result).reduce(
