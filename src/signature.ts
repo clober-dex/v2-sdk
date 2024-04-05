@@ -78,7 +78,7 @@ const _abi = [
  * import { signERC20Permit } from '@clober-dex/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
- * const { deadline, r, s, v } = await getExpectedOutput(
+ * const { deadline, r, s, v } = await signERC20Permit(
  *   421614,
  *   privateKeyToAccount('0x...')
  *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -89,7 +89,7 @@ const _abi = [
  * import { signERC20Permit } from '@clober-dex/v2-sdk'
  * import { mnemonicToAccount } from 'viem/accounts'
  *
- * const { deadline, r, s, v } = await getExpectedOutput(
+ * const { deadline, r, s, v } = await signERC20Permit(
  *   421614,
  *   mnemonicToAccount('legal ...')
  *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
