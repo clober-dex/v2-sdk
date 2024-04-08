@@ -5,11 +5,13 @@ import { CHAIN_IDS } from './chain'
 export const WETH_ADDRESSES: {
   [chain in CHAIN_IDS]: `0x${string}`[]
 } = {
+  [CHAIN_IDS.CLOBER_TEST_CHAIN]: [zeroAddress],
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: [zeroAddress],
 }
 
 export const STABLE_COIN_ADDRESSES: {
   [chain in CHAIN_IDS]: `0x${string}`[]
 } = {
+  [CHAIN_IDS.CLOBER_TEST_CHAIN]: ['0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'],
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: ['0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'],
 }

@@ -5,7 +5,7 @@ import {
   http,
 } from 'viem'
 
-import { cloberTestChain } from './test-chain'
+import { cloberTestChain } from '../../src/constants/test-chain'
 
 type TupleOf<T, N extends number, R extends unknown[]> = R['length'] extends N
   ? R

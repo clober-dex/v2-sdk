@@ -1,8 +1,7 @@
 import { Chain } from 'viem'
-import { arbitrumSepolia } from 'viem/chains'
 
 export const cloberTestChain: Chain = {
-  id: arbitrumSepolia.id,
+  id: 7777,
   name: 'Clober Test Chain',
   nativeCurrency: {
     name: 'Ether',

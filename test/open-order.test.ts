@@ -10,7 +10,8 @@ import {
 } from '@clober-dex/v2-sdk'
 import { mnemonicToAccount } from 'viem/accounts'
 
-import { cloberTestChain } from './utils/test-chain'
+import { cloberTestChain } from '../src/constants/test-chain'
+
 import { createProxyClients } from './utils/utils'
 import { FORK_URL, TEST_MNEMONIC } from './utils/constants'
 import { fetchBlockNumer } from './utils/chain'
@@ -110,7 +111,7 @@ test('claim all orders', async () => {
        import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
-            421614,
+            7777,
             privateKeyToAccount('0x...')
        )
     `)
@@ -187,7 +188,7 @@ test('cancel all orders', async () => {
        import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
-            421614,
+            7777,
             privateKeyToAccount('0x...')
        )
     `)

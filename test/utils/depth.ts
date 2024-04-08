@@ -6,8 +6,7 @@ import { formatPrice } from '../../src/utils/prices'
 import { invertPrice, toPrice } from '../../src/utils/tick'
 import { fetchCurrency } from '../../src/apis/currency'
 import { toBookId } from '../../src/utils/book-id'
-
-import { cloberTestChain } from './test-chain'
+import { cloberTestChain } from '../../src/constants/test-chain'
 
 const MAX_TICK = 2n ** 19n - 1n
 const BOOK_VIEWER_CONTRACT_ADDRESS =

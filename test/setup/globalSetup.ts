@@ -1,7 +1,7 @@
 import { startProxy } from '@viem/anvil'
 
 import { FORK_URL, TEST_MNEMONIC } from '../utils/constants'
-import { cloberTestChain } from '../utils/test-chain'
+import { cloberTestChain } from '../../src/constants/test-chain'
 import { fetchBlockNumer } from '../utils/chain'
 
 export default async function () {

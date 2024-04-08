@@ -2,7 +2,8 @@ import { afterEach, expect, test } from 'vitest'
 import { marketOrder, signERC20Permit, getMarket } from '@clober-dex/v2-sdk'
 import { mnemonicToAccount } from 'viem/accounts'
 
-import { cloberTestChain } from './utils/test-chain'
+import { cloberTestChain } from '../src/constants/test-chain'
+
 import { createProxyClients } from './utils/utils'
 import { FORK_URL, TEST_MNEMONIC } from './utils/constants'
 import { fetchTokenBalance } from './utils/currency'
@@ -39,7 +40,7 @@ test('market order in not open market', async () => {
        import { openMarket } from '@clober-dex/v2-sdk'
 
        const transaction = await openMarket(
-            421614,
+            7777,
            '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
            '0x0000000000000000000000000000000000000000',
        )
