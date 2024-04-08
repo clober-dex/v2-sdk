@@ -214,6 +214,8 @@ export const getExpectedInput = async (
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {string} id The ID of the open order.
+ * @param options
+ * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns {Promise<OpenOrder>} Promise resolving to the open order object, or undefined if not found.
  * @example
  * import { getOpenOrder } from '@clober-dex/v2-sdk'
@@ -226,8 +228,9 @@ export const getExpectedInput = async (
 export const getOpenOrder = async (
   chainId: CHAIN_IDS,
   id: string,
+  options?: { rpcUrl?: string },
 ): Promise<OpenOrder> => {
-  return fetchOpenOrder(chainId, id)
+  return fetchOpenOrder(chainId, id, options?.rpcUrl)
 }
 
 /**
@@ -235,6 +238,8 @@ export const getOpenOrder = async (
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
+ * @param options
+ * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns {Promise<OpenOrder[]>} Promise resolving to an array of open orders.
  * @example
  * import { getOpenOrders } from '@clober-dex/v2-sdk'
@@ -247,6 +252,7 @@ export const getOpenOrder = async (
 export const getOpenOrders = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
+  options?: { rpcUrl?: string },
 ): Promise<OpenOrder[]> => {
-  return fetchOpenOrders(chainId, userAddress)
+  return fetchOpenOrders(chainId, userAddress, options?.rpcUrl)
 }

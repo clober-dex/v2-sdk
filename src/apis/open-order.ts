@@ -21,6 +21,7 @@ const { getOpenOrders, getOpenOrder } = getBuiltGraphSDK()
 export async function fetchOpenOrders(
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
+  rpcUrl?: string,
 ): Promise<OpenOrder[]> {
   const { openOrders } = await getOpenOrders(
     {
@@ -41,7 +42,7 @@ export async function fetchOpenOrders(
         (address, index, self) =>
           self.findIndex((c) => isAddressEqual(c, address)) === index,
       )
-      .map((address) => fetchCurrency(chainId, address)),
+      .map((address) => fetchCurrency(chainId, address), rpcUrl),
   )
   return openOrders.map((openOrder) =>
     toOpenOrder(chainId, currencies, openOrder),
@@ -51,6 +52,7 @@ export async function fetchOpenOrders(
 export async function fetchOpenOrder(
   chainId: CHAIN_IDS,
   id: string,
+  rpcUrl?: string,
 ): Promise<OpenOrder> {
   const { openOrder } = await getOpenOrder(
     {
@@ -64,8 +66,8 @@ export async function fetchOpenOrder(
     throw new Error(`Open order not found: ${id}`)
   }
   const currencies = await Promise.all([
-    fetchCurrency(chainId, getAddress(openOrder.book.base.id)),
-    fetchCurrency(chainId, getAddress(openOrder.book.quote.id)),
+    fetchCurrency(chainId, getAddress(openOrder.book.base.id), rpcUrl),
+    fetchCurrency(chainId, getAddress(openOrder.book.quote.id), rpcUrl),
   ])
   return toOpenOrder(chainId, currencies, openOrder)
 }
