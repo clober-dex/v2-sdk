@@ -42,7 +42,7 @@ export async function fetchOpenOrders(
         (address, index, self) =>
           self.findIndex((c) => isAddressEqual(c, address)) === index,
       )
-      .map((address) => fetchCurrency(chainId, address), rpcUrl),
+      .map((address) => fetchCurrency(chainId, address, rpcUrl)),
   )
   return openOrders.map((openOrder) =>
     toOpenOrder(chainId, currencies, openOrder),

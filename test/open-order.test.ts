@@ -36,6 +36,9 @@ test('get open orders by user address', async () => {
   const openOrders = await getOpenOrders(
     cloberTestChain.id,
     '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+    {
+      rpcUrl: clients[0].publicClient.transport.url!,
+    },
   )
   expect(openOrders.length).toBeGreaterThan(0)
 })
@@ -44,13 +47,18 @@ test('get open orders by order id', async () => {
   const openOrder = await getOpenOrder(
     cloberTestChain.id,
     '46223845323662364279893361453861711542636620039907198451770258805035840307200',
+    {
+      rpcUrl: clients[0].publicClient.transport.url!,
+    },
   )
   expect(openOrder).toBeDefined()
 })
 
 test('get undefined open orders', async () => {
   expect(
-    await getOpenOrder(cloberTestChain.id, '200').catch((e) => e.message),
+    await getOpenOrder(cloberTestChain.id, '200', {
+      rpcUrl: clients[0].publicClient.transport.url!,
+    }).catch((e) => e.message),
   ).toEqual('Open order not found: 200')
 })
 
@@ -98,7 +106,9 @@ test('claim all orders', async () => {
   expect(askDepths.length).toBe(0)
 
   const openOrders = (
-    await getOpenOrders(cloberTestChain.id, account.address)
+    await getOpenOrders(cloberTestChain.id, account.address, {
+      rpcUrl: publicClient.transport.url!,
+    })
   ).slice(0, 5)
   expect(
     await claimOrders(
@@ -174,7 +184,11 @@ test('cancel all orders', async () => {
   expect(bidDepths.length).toBe(0)
   expect(askDepths.length).toBe(0)
 
-  const openOrders = (await getOpenOrders(cloberTestChain.id, account.address))
+  const openOrders = (
+    await getOpenOrders(cloberTestChain.id, account.address, {
+      rpcUrl: publicClient.transport.url!,
+    })
+  )
     .filter((order) => order.cancelable)
     .slice(0, 5)
   expect(

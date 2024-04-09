@@ -524,6 +524,9 @@ export const claimOrders = async (
     rpcUrl?: string
   },
 ): Promise<Transaction> => {
+  const { rpcUrl } = options || {
+    rpcUrl: undefined,
+  }
   const isApprovedForAll = await fetchIsApprovedForAll(
     chainId,
     userAddress,
@@ -540,9 +543,9 @@ export const claimOrders = async (
     `)
   }
 
-  const openOrders = (await getOpenOrders(chainId, userAddress)).filter(
-    (order) => ids.includes(order.id),
-  )
+  const openOrders = (
+    await getOpenOrders(chainId, userAddress, rpcUrl ? { rpcUrl } : {})
+  ).filter((order) => ids.includes(order.id))
   if (openOrders.length === 0) {
     throw new Error(`No claimable open orders found for ${userAddress}`)
   }
@@ -644,6 +647,9 @@ export const cancelOrders = async (
     rpcUrl?: string
   },
 ): Promise<Transaction> => {
+  const { rpcUrl } = options || {
+    rpcUrl: undefined,
+  }
   const isApprovedForAll = await fetchIsApprovedForAll(
     chainId,
     userAddress,
@@ -660,9 +666,9 @@ export const cancelOrders = async (
     `)
   }
 
-  const openOrders = (await getOpenOrders(chainId, userAddress)).filter(
-    (order) => ids.includes(order.id) && order.cancelable,
-  )
+  const openOrders = (
+    await getOpenOrders(chainId, userAddress, rpcUrl ? { rpcUrl } : {})
+  ).filter((order) => ids.includes(order.id) && order.cancelable)
   if (openOrders.length === 0) {
     throw new Error(`No cancelable open orders found for ${userAddress}`)
   }
