@@ -1,3 +1,5 @@
+import { PRICE_PRECISION } from '../constants/price'
+
 import { divide } from './math'
 import { toPrice } from './tick'
 
@@ -6,7 +8,8 @@ export const baseToQuote = (
   base: bigint,
   roundingUp: boolean,
 ): bigint => {
-  return divide(base * toPrice(tick), 1n << 128n, roundingUp)
+  const y = 1n << PRICE_PRECISION
+  return divide(base * toPrice(tick), y, roundingUp)
 }
 
 export const quoteToBase = (
@@ -14,5 +17,6 @@ export const quoteToBase = (
   quote: bigint,
   roundingUp: boolean,
 ): bigint => {
-  return divide(quote << 128n, toPrice(tick), roundingUp)
+  const x = quote << PRICE_PRECISION
+  return divide(x, toPrice(tick), roundingUp)
 }
