@@ -75,7 +75,7 @@ const _abi = [
  * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns {Promise<PermitSignature>} Promise resolving to the permit signature.
  * @example
- * import { signERC20Permit } from '@clober-dex/v2-sdk'
+ * import { signERC20Permit } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
  * const { deadline, r, s, v } = await signERC20Permit(
@@ -86,7 +86,7 @@ const _abi = [
  * )
  *
  * @example
- * import { signERC20Permit } from '@clober-dex/v2-sdk'
+ * import { signERC20Permit } from '@clober/v2-sdk'
  * import { mnemonicToAccount } from 'viem/accounts'
  *
  * const { deadline, r, s, v } = await signERC20Permit(

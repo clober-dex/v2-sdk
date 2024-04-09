@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
-import { getMarket } from '@clober-dex/v2-sdk'
+import { getMarket } from '@clober/v2-sdk'
 
 import { publicClient } from './utils/constants'
 

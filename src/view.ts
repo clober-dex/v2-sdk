@@ -18,7 +18,7 @@ import { OpenOrder } from './model/open-order'
  * @returns A market {@link Market}
  *
  * @example
- * import { getMarket } from '@clober-dex/v2-sdk'
+ * import { getMarket } from '@clober/v2-sdk'
  *
  * const market = await getMarket(
  *   421614,
@@ -61,7 +61,7 @@ export const getMarket = async (
  * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
- * import { getExpectedOutput } from '@clober-dex/v2-sdk'
+ * import { getExpectedOutput } from '@clober/v2-sdk'
  *
  * const { takenAmount, spendAmount } = await getExpectedOutput(
  *   421614,
@@ -141,7 +141,7 @@ export const getExpectedOutput = async (
  * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
- * import { getExpectedInput } from '@clober-dex/v2-sdk'
+ * import { getExpectedInput } from '@clober/v2-sdk'
  *
  * const { takenAmount, spendAmount } = await getExpectedInput(
  *   421614,
@@ -218,7 +218,7 @@ export const getExpectedInput = async (
  * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns {Promise<OpenOrder>} Promise resolving to the open order object, or undefined if not found.
  * @example
- * import { getOpenOrder } from '@clober-dex/v2-sdk'
+ * import { getOpenOrder } from '@clober/v2-sdk'
  *
  * const openOrder = await getOpenOrder(
  *   421614,
@@ -242,7 +242,7 @@ export const getOpenOrder = async (
  * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns {Promise<OpenOrder[]>} Promise resolving to an array of open orders.
  * @example
- * import { getOpenOrders } from '@clober-dex/v2-sdk'
+ * import { getOpenOrders } from '@clober/v2-sdk'
  *
  * const openOrders = await getOpenOrders(
  *   421614,

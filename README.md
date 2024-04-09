@@ -1,4 +1,4 @@
 ## Install
 ```bash
-npm i @clober-dex/v2-sdk
+npm i @clober/v2-sdk
 ```

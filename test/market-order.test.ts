@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { marketOrder } from '@clober-dex/v2-sdk'
+import { marketOrder } from '@clober/v2-sdk'
 
 import { cloberTestChain } from './utils/test-chain'
 import { publicClient } from './utils/constants'
@@ -17,7 +17,7 @@ test.runIf(IS_LOCAL)('market order in not open market', async () => {
       { rpcUrl: publicClient.transport.url! },
     ).catch((e) => e.message),
   ).toEqual(`
-       import { openMarket } from '@clober-dex/v2-sdk'
+       import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
             ${cloberTestChain.id},

@@ -36,7 +36,7 @@ import { fetchIsApprovedForAll } from './utils/approval'
  * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns A Promise resolving to a transaction object. If the market is already open, returns undefined.
  * @example
- * import { openMarket } from '@clober-dex/v2-sdk'
+ * import { openMarket } from '@clober/v2-sdk'
  *
  * const transaction = await openMarket(
  *   421614,
@@ -108,7 +108,7 @@ export const openMarket = async (
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
  * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the limit order.
  * @example
- * import { signERC20Permit, limitOrder } from '@clober-dex/v2-sdk'
+ * import { signERC20Permit, limitOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
  * const signature = await signERC20Permit(
@@ -129,7 +129,7 @@ export const openMarket = async (
  * )
  *
  * @example
- * import { limitOrder } from '@clober-dex/v2-sdk'
+ * import { limitOrder } from '@clober/v2-sdk'
  *
  * const transaction = await limitOrder(
  *   421614,
@@ -162,7 +162,7 @@ export const limitOrder = async (
   const isBid = isAddressEqual(market.quote.address, inputToken)
   if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
     throw new Error(`
-       import { openMarket } from '@clober-dex/v2-sdk'
+       import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
             ${chainId},
@@ -336,7 +336,7 @@ export const limitOrder = async (
  * if the limit price is not provided, unlimited slippage is allowed.
  * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the limit order.
  * @example
- * import { signERC20Permit, marketOrder } from '@clober-dex/v2-sdk'
+ * import { signERC20Permit, marketOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
  * const signature = await signERC20Permit(
@@ -356,7 +356,7 @@ export const limitOrder = async (
  * )
  *
  * @example
- * import { marketOrder } from '@clober-dex/v2-sdk'
+ * import { marketOrder } from '@clober/v2-sdk'
  *
  * const transaction = await limitOrder(
  *   421614,
@@ -387,7 +387,7 @@ export const marketOrder = async (
   const isBid = isAddressEqual(market.quote.address, inputToken)
   if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
     throw new Error(`
-       import { openMarket } from '@clober-dex/v2-sdk'
+       import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
             ${chainId},
@@ -469,7 +469,7 @@ export const marketOrder = async (
  * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the claim action.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
  * @example
- * import { getOpenOrders, claimOrders } from '@clober-dex/v2-sdk'
+ * import { getOpenOrders, claimOrders } from '@clober/v2-sdk'
  *
  * const openOrders = await getOpenOrders(
  *     421614,
@@ -504,7 +504,7 @@ export const claimOrder = async (
  * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the claim action.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
  * @example
- * import { getOpenOrders, claimOrders } from '@clober-dex/v2-sdk'
+ * import { getOpenOrders, claimOrders } from '@clober/v2-sdk'
  *
  * const openOrders = await getOpenOrders(
  *     421614,
@@ -534,7 +534,7 @@ export const claimOrders = async (
   )
   if (!isApprovedForAll) {
     throw new Error(`
-       import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
+       import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
             ${chainId},
@@ -592,7 +592,7 @@ export const claimOrders = async (
  * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the cancel action.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
  * @example
- * import { getOpenOrders, cancelOrders } from '@clober-dex/v2-sdk'
+ * import { getOpenOrders, cancelOrders } from '@clober/v2-sdk'
  *
  * const openOrders = await getOpenOrders(
  *     421614,
@@ -627,7 +627,7 @@ export const cancelOrder = async (
  * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the cancel action.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
  * @example
- * import { getOpenOrders, cancelOrders } from '@clober-dex/v2-sdk'
+ * import { getOpenOrders, cancelOrders } from '@clober/v2-sdk'
  *
  * const openOrders = await getOpenOrders(
  *     421614,
@@ -657,7 +657,7 @@ export const cancelOrders = async (
   )
   if (!isApprovedForAll) {
     throw new Error(`
-       import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
+       import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
             ${chainId},

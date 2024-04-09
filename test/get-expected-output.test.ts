@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { getExpectedOutput } from '@clober-dex/v2-sdk'
+import { getExpectedOutput } from '@clober/v2-sdk'
 import { arbitrumSepolia } from 'viem/chains'
 import { formatUnits, isAddressEqual, parseUnits, zeroHash } from 'viem'
 

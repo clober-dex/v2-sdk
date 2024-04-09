@@ -34,7 +34,7 @@ const _abi = [
  * @param {string} options.rpcUrl The RPC URL to use for executing the transaction.
  * @returns {Promise<`0x${string}` | undefined>} Promise resolving to the transaction hash. If the account is already approved for all, the promise resolves to `undefined`.
  * @example
- * import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
+ * import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
  * const hash = await setApprovalOfOpenOrdersForAll(
@@ -43,7 +43,7 @@ const _abi = [
  * )
  *
  * @example
- * import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
+ * import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
  * import { mnemonicToAccount } from 'viem/accounts'
  *
  * const hash = await setApprovalOfOpenOrdersForAll(

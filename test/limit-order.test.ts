@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { limitOrder, signERC20Permit } from '@clober-dex/v2-sdk'
+import { limitOrder, signERC20Permit } from '@clober/v2-sdk'
 import { formatUnits } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
@@ -22,7 +22,7 @@ test.runIf(IS_LOCAL)('limit order in not open market', async () => {
       { rpcUrl: publicClient.transport.url! },
     ).catch((e) => e.message),
   ).toEqual(`
-       import { openMarket } from '@clober-dex/v2-sdk'
+       import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
             ${cloberTestChain.id},

@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { openMarket } from '@clober-dex/v2-sdk'
+import { openMarket } from '@clober/v2-sdk'
 
 import { publicClient } from './utils/constants'
 import { cloberTestChain } from './utils/test-chain'

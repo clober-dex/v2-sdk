@@ -5,7 +5,7 @@ import {
   claimOrders,
   setApprovalOfOpenOrdersForAll,
   cancelOrders,
-} from '@clober-dex/v2-sdk'
+} from '@clober/v2-sdk'
 
 import { cloberTestChain } from './utils/test-chain'
 import { account, publicClient, walletClient } from './utils/constants'
@@ -45,7 +45,7 @@ test.runIf(IS_LOCAL)('claim all orders', async () => {
       { rpcUrl: publicClient.transport.url! },
     ).catch((e) => e.message),
   ).toEqual(`
-       import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
+       import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
             ${cloberTestChain.id},
@@ -86,7 +86,7 @@ test.runIf(IS_LOCAL)('cancel all orders', async () => {
       { rpcUrl: publicClient.transport.url! },
     ).catch((e) => e.message),
   ).toEqual(`
-       import { setApprovalOfOpenOrdersForAll } from '@clober-dex/v2-sdk'
+       import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
             ${cloberTestChain.id},
