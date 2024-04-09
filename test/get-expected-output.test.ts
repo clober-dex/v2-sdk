@@ -14,11 +14,13 @@ import { fetchMarket } from '../src/apis/market'
 import { parsePrice } from '../src/utils/prices'
 import { invertPrice } from '../src/utils/tick'
 
+import { FORK_URL } from './utils/constants'
+
 const BOOK_VIEWER_CONTRACT_ADDRESS =
-  '0x8676558Af8D8a4A7fd7fC6A7b435D231393a2A76'
+  '0xA7603C4c895a533E66c30EA76cC6F6A6A0c5cbFe'
 const publicClient = createPublicClient({
   chain: arbitrumSepolia,
-  transport: http(),
+  transport: http(FORK_URL),
 })
 
 const _ABI = [
@@ -39,6 +41,11 @@ const _ABI = [
           {
             internalType: 'uint256',
             name: 'baseAmount',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'minQuoteAmount',
             type: 'uint256',
           },
           {
@@ -106,6 +113,7 @@ const isSpendResultEqual = async (
               market.base.decimals,
             ),
         baseAmount: parseUnits(amountIn, inputCurrency.decimals),
+        minQuoteAmount: 0n,
         hookData: zeroHash,
       },
     ],
@@ -116,7 +124,7 @@ const isSpendResultEqual = async (
     inputToken,
     outputToken,
     amountIn,
-    { limitPrice },
+    { limitPrice, rpcUrl: publicClient.transport.url! },
   )
 
   expect(takenAmount).toBe(
