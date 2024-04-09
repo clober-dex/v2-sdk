@@ -1,8 +1,9 @@
 import { expect, test } from 'vitest'
-import { createPublicClient, getAddress, http } from 'viem'
-import { arbitrumSepolia } from 'viem/chains'
+import { getAddress } from 'viem'
 
 import { lnWad } from '../src/utils/math'
+
+import { publicClient } from './utils/constants'
 
 const _abi = [
   {
@@ -63,11 +64,6 @@ const randomInteger = (start: number, end: number) => {
 
 const MIN_PRICE = 1350587n
 const MAX_PRICE = 4647684107270898330752324302845848816923571339324334n
-
-const publicClient = createPublicClient({
-  chain: arbitrumSepolia,
-  transport: http(),
-})
 
 test('lnWad', async () => {
   const randomValues = [

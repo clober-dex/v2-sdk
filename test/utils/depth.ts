@@ -1,4 +1,5 @@
 import { createPublicClient, http, isAddressEqual } from 'viem'
+import { arbitrumSepolia } from 'viem/chains'
 
 import { CHAIN_MAP, CHAIN_IDS } from '../../src/constants/chain'
 import { getMarketId } from '../../src/utils/market'
@@ -6,11 +7,11 @@ import { formatPrice } from '../../src/utils/prices'
 import { invertPrice, toPrice } from '../../src/utils/tick'
 import { fetchCurrency } from '../../src/apis/currency'
 import { toBookId } from '../../src/utils/book-id'
-import { cloberTestChain } from '../../src/constants/test-chain'
+import { CONTRACT_ADDRESSES } from '../../src/constants/addresses'
+
+import { cloberTestChain } from './test-chain'
 
 const MAX_TICK = 2n ** 19n - 1n
-const BOOK_VIEWER_CONTRACT_ADDRESS =
-  '0x8676558Af8D8a4A7fd7fC6A7b435D231393a2A76'
 const _abi = [
   {
     inputs: [
@@ -81,10 +82,10 @@ const fetchDepth = async (
     transport: http(rpcUrl),
   })
   const depths = await publicClient.readContract({
-    address: BOOK_VIEWER_CONTRACT_ADDRESS,
+    address: CONTRACT_ADDRESSES[arbitrumSepolia.id]!.BookViewer,
     abi: _abi,
     functionName: 'getLiquidity',
-    args: [bookId, Number(MAX_TICK), 10n],
+    args: [bookId, Number(MAX_TICK), 50n],
   })
   return depths.map(({ tick, depth }: { tick: number; depth: bigint }) => ({
     price: isBid

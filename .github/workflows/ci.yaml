@@ -46,9 +46,10 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
       - name: Run test
-        run: ARBITRUM_SEPOLIA_RPC_URL=$ARBITRUM_SEPOLIA_RPC_URL npm run test
+        run: DEV_PRIVATE_KEY=$DEV_PRIVATE_KEY ARBITRUM_SEPOLIA_RPC_URL=$ARBITRUM_SEPOLIA_RPC_URL npm run test
         env:
           ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+          DEV_PRIVATE_KEY: ${{ secrets.DEV_PRIVATE_KEY }}
 
   check-lint:
     name: Check TS

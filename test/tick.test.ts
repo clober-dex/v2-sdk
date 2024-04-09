@@ -1,9 +1,10 @@
 import { expect, test } from 'vitest'
-import { createPublicClient, getAddress, http } from 'viem'
-import { arbitrumSepolia } from 'viem/chains'
+import { getAddress } from 'viem'
 
 import { fromPrice, toPrice } from '../src/utils/tick'
 import { baseToQuote, quoteToBase } from '../src/utils/decimals'
+
+import { publicClient } from './utils/constants'
 
 const _abi = [
   {
@@ -116,11 +117,6 @@ const MAX_PRICE = 4647684107270898330752324302845848816923571339324334n
 const randomInteger = (start: number, end: number) => {
   return Math.floor(Math.random() * (end - start + 1) + start)
 }
-
-const publicClient = createPublicClient({
-  chain: arbitrumSepolia,
-  transport: http(),
-})
 
 test('index to price', async () => {
   const randomPriceIndices = [
