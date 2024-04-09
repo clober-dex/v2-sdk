@@ -10,7 +10,9 @@ import {
 import { cloberTestChain } from './utils/test-chain'
 import { account, publicClient, walletClient } from './utils/constants'
 
-test('get open orders by user address', async () => {
+const IS_LOCAL = process.env.IS_LOCAL === 'true'
+
+test.runIf(IS_LOCAL)('get open orders by user address', async () => {
   const openOrders = await getOpenOrders(
     cloberTestChain.id,
     '0xf18Be2a91cF31Fc3f8D828b6c714e1806a75e0AA',
@@ -21,7 +23,7 @@ test('get open orders by user address', async () => {
   expect(openOrders.length).toBeGreaterThan(0)
 })
 
-test('get undefined open orders', async () => {
+test.runIf(IS_LOCAL)('get undefined open orders', async () => {
   expect(
     await getOpenOrder(cloberTestChain.id, '200', {
       rpcUrl: publicClient.transport.url!,
@@ -29,7 +31,7 @@ test('get undefined open orders', async () => {
   ).toEqual('Open order not found: 200')
 })
 
-test.skip('claim all orders', async () => {
+test.runIf(IS_LOCAL)('claim all orders', async () => {
   const openOrders = (
     await getOpenOrders(cloberTestChain.id, account.address, {
       rpcUrl: publicClient.transport.url!,
@@ -68,7 +70,7 @@ test.skip('claim all orders', async () => {
   await walletClient.sendTransaction({ ...transaction, account })
 })
 
-test.skip('cancel all orders', async () => {
+test.runIf(IS_LOCAL)('cancel all orders', async () => {
   const openOrders = (
     await getOpenOrders(cloberTestChain.id, account.address, {
       rpcUrl: publicClient.transport.url!,

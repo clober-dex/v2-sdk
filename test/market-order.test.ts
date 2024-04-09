@@ -4,7 +4,9 @@ import { marketOrder } from '@clober-dex/v2-sdk'
 import { cloberTestChain } from './utils/test-chain'
 import { publicClient } from './utils/constants'
 
-test('market order in not open market', async () => {
+const IS_LOCAL = process.env.IS_LOCAL === 'true'
+
+test.runIf(IS_LOCAL)('market order in not open market', async () => {
   expect(
     await marketOrder(
       cloberTestChain.id,

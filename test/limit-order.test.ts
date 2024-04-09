@@ -8,7 +8,9 @@ import { fetchAskDepth, fetchBidDepth, getSize } from './utils/depth'
 import { account, publicClient, walletClient } from './utils/constants'
 import { cloberTestChain } from './utils/test-chain'
 
-test('limit order in not open market', async () => {
+const IS_LOCAL = process.env.IS_LOCAL === 'true'
+
+test.runIf(IS_LOCAL)('limit order in not open market', async () => {
   expect(
     await limitOrder(
       arbitrumSepolia.id,
@@ -30,7 +32,7 @@ test('limit order in not open market', async () => {
     `)
 })
 
-test('make bid order', async () => {
+test.runIf(IS_LOCAL)('make bid order', async () => {
   const signature = await signERC20Permit(
     cloberTestChain.id,
     account,
@@ -82,7 +84,7 @@ test('make bid order', async () => {
   )
 })
 
-test('make ask order', async () => {
+test.runIf(IS_LOCAL)('make ask order', async () => {
   const transaction = await limitOrder(
     cloberTestChain.id,
     account.address,
@@ -121,7 +123,7 @@ test('make ask order', async () => {
   )
 })
 
-test('limit bid order', async () => {
+test.runIf(IS_LOCAL)('limit bid order', async () => {
   const beforeBidDepth = await fetchBidDepth(publicClient.transport.url!)
   const makeTx = await limitOrder(
     cloberTestChain.id,
@@ -198,7 +200,7 @@ test('limit bid order', async () => {
   )
 })
 
-test('limit ask order', async () => {
+test.runIf(IS_LOCAL)('limit ask order', async () => {
   const beforeAskDepth = await fetchAskDepth(publicClient.transport.url!)
   const signature = await signERC20Permit(
     cloberTestChain.id,
