@@ -1,11 +1,17 @@
+import BigNumber from 'bignumber.js'
+
+import { PRICE_PRECISION } from '../constants/price'
+
 export const formatPrice = (
   price: bigint,
   quoteDecimals: number,
   baseDecimals: number,
 ): number => {
-  return (
-    (Number(price) / Math.pow(2, 128)) * 10 ** (baseDecimals - quoteDecimals)
-  )
+  return new BigNumber(price.toString())
+    .div(new BigNumber(2).pow(PRICE_PRECISION.toString()))
+    .times(new BigNumber(10).pow(baseDecimals))
+    .div(new BigNumber(10).pow(quoteDecimals))
+    .toNumber()
 }
 
 export const parsePrice = (
@@ -13,7 +19,11 @@ export const parsePrice = (
   quoteDecimals: number,
   baseDecimals: number,
 ): bigint => {
+  const value = new BigNumber(price)
+    .times(new BigNumber(2).pow(PRICE_PRECISION.toString()))
+    .times(new BigNumber(10).pow(quoteDecimals))
+    .div(new BigNumber(10).pow(baseDecimals))
   return BigInt(
-    price * Math.pow(2, 128) * Math.pow(10, quoteDecimals - baseDecimals),
+    value.isInteger() ? value.toFixed() : value.integerValue().toFixed(),
   )
 }

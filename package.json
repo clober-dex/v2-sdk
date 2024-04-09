@@ -39,5 +39,8 @@
     "typescript": "^5.4.3",
     "viem": "^2.9.6",
     "vitest": "^1.4.0"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.1.2"
   }
 }
