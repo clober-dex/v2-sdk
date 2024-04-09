@@ -8,8 +8,6 @@ import {
   TAKER_DEFAULT_POLICY,
 } from '../src/constants/fee'
 
-import { FEE_POLICY_WRAPPER_ADDRESS } from './utils/addresses'
-
 const _abi = [
   {
     inputs: [],
@@ -118,6 +116,8 @@ const _abi = [
     type: 'function',
   },
 ] as const
+
+const FEE_POLICY_WRAPPER_ADDRESS = '0x226Dad19a0C0E0faEB488601B61B1B67E434db6a'
 
 const publicClient = createPublicClient({
   chain: arbitrumSepolia,
