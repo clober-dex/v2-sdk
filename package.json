@@ -1,6 +1,6 @@
 {
   "name": "@clober-dex/v2-sdk",
-  "version": "0.0.1.dev",
+  "version": "0.0.1",
   "description": "🛠 An SDK for building applications on top of Clober V2",
   "main": "./dist/esm/index.js",
   "files": [
