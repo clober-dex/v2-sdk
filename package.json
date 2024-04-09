@@ -13,7 +13,7 @@
   "scripts": {
     "lint": "eslint --ext .ts src --fix",
     "docs": "npm run build-graph && typedoc --out docs src/index.ts --sort kind",
-    "test": "vitest --root test --config vitest.config.ts",
+    "test": "vitest --root test --config vitest.config.ts --max-concurrency=0",
     "clean": "rm -rf dist && rm -rf src/.graphclient",
     "build": "npm run clean && npm run build-graph && npm run build:cjs && npm run build:esm+types",
     "build-graph": "graphclient build --dir src",

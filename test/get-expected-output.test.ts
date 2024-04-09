@@ -1,27 +1,14 @@
 import { expect, test } from 'vitest'
 import { getExpectedOutput } from '@clober-dex/v2-sdk'
 import { arbitrumSepolia } from 'viem/chains'
-import {
-  createPublicClient,
-  formatUnits,
-  http,
-  isAddressEqual,
-  parseUnits,
-  zeroHash,
-} from 'viem'
+import { formatUnits, isAddressEqual, parseUnits, zeroHash } from 'viem'
 
 import { fetchMarket } from '../src/apis/market'
 import { parsePrice } from '../src/utils/prices'
 import { invertPrice } from '../src/utils/tick'
+import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
 
-import { FORK_URL } from './utils/constants'
-
-const BOOK_VIEWER_CONTRACT_ADDRESS =
-  '0xA7603C4c895a533E66c30EA76cC6F6A6A0c5cbFe'
-const publicClient = createPublicClient({
-  chain: arbitrumSepolia,
-  transport: http(FORK_URL),
-})
+import { publicClient } from './utils/constants'
 
 const _ABI = [
   {
@@ -91,7 +78,7 @@ const isSpendResultEqual = async (
   const isBid = isAddressEqual(market.quote.address, inputToken)
   const inputCurrency = isBid ? market.quote : market.base
   const [takenQuoteAmount, spendBaseAmount] = await publicClient.readContract({
-    address: BOOK_VIEWER_CONTRACT_ADDRESS,
+    address: CONTRACT_ADDRESSES[arbitrumSepolia.id]!.BookViewer,
     abi: _ABI,
     functionName: 'getExpectedOutput',
     args: [
@@ -212,6 +199,7 @@ test('get max expected output', async () => {
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       '0x0000000000000000000000000000000000000000',
       '5000',
+      { rpcUrl: publicClient.transport.url! },
     )
   expect(Number(spendAmount1)).toBeGreaterThan(0)
   expect(Number(takenAmount1)).toBeGreaterThan(0)
@@ -222,6 +210,7 @@ test('get max expected output', async () => {
       '0x0000000000000000000000000000000000000000',
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       '1.3',
+      { rpcUrl: publicClient.transport.url! },
     )
   expect(Number(spendAmount2)).toBeGreaterThan(0)
   expect(Number(takenAmount2)).toBeGreaterThan(0)
@@ -231,9 +220,10 @@ test('get max expected output', async () => {
 test('get expected output in not open book', async () => {
   const { takenAmount, spendAmount } = await getExpectedOutput(
     arbitrumSepolia.id,
-    '0xf18201e84ab80beef65c1eb68eea1eb1006d0e69',
+    '0xf18Be2a91cF31Fc3f8D828b6c714e1806a75e0AA',
     '0x0000000000000000000000000000000000000000',
     '10000',
+    { rpcUrl: publicClient.transport.url! },
   )
   expect(takenAmount).toBe('0')
   expect(spendAmount).toBe('0')
