@@ -1,6 +1,6 @@
 {
   "name": "@clober/v2-sdk",
-  "version": "0.0.2",
+  "version": "0.0.2-a",
   "description": "🛠 An SDK for building applications on top of Clober V2",
   "files": [
     "dist"
@@ -24,7 +24,7 @@
     "lint": "eslint --ext .ts src --fix",
     "docs": "typedoc --out docs src/index.ts --sort kind",
     "test": "vitest --root test --config vitest.config.ts --max-concurrency=0",
-    "clean": "rm -rf dist && rm -rf .graphclient",
+    "clean": "rm -rf dist",
     "build": "npm run clean && npm run build:cjs && npm run build:esm+types",
     "build:cjs": "tsc --project tsconfig.build.json --module commonjs --verbatimModuleSyntax false --outDir ./dist/cjs && echo > ./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm+types": "tsc --project tsconfig.build.json --module es2020 --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types && echo > ./dist/esm/package.json '{\"type\":\"module\"}'"
