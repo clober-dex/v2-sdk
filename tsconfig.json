@@ -2,8 +2,5 @@
   "extends": "./tsconfig.base.json",
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.test.ts"],
-  "compilerOptions": {
-    "types": ["node"],
-    "lib": ["DOM"]
-  }
+  "references": [{ "path": "./scripts/tsconfig.json" }]
 }
