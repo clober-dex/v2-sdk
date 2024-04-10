@@ -85,7 +85,7 @@ const fetchDepth = async (
     address: CONTRACT_ADDRESSES[arbitrumSepolia.id]!.BookViewer,
     abi: _abi,
     functionName: 'getLiquidity',
-    args: [bookId, Number(MAX_TICK), 50n],
+    args: [bookId, Number(MAX_TICK), 100n],
   })
   return depths.map(({ tick, depth }: { tick: number; depth: bigint }) => ({
     price: isBid
