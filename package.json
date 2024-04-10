@@ -22,11 +22,10 @@
   },
   "scripts": {
     "lint": "eslint --ext .ts src --fix",
-    "docs": "npm run build-graph && typedoc --out docs src/index.ts --sort kind",
+    "docs": "typedoc --out docs src/index.ts --sort kind",
     "test": "vitest --root test --config vitest.config.ts --max-concurrency=0",
-    "clean": "rm -rf dist && rm -rf src/.graphclient",
-    "build": "npm run clean && npm run build-graph && npm run build:cjs && npm run build:esm+types",
-    "build-graph": "graphclient build --dir src",
+    "clean": "rm -rf dist && rm -rf .graphclient",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm+types",
     "build:cjs": "tsc --project tsconfig.build.json --module commonjs --verbatimModuleSyntax false --outDir ./dist/cjs && echo > ./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm+types": "tsc --project tsconfig.build.json --module es2020 --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types && echo > ./dist/esm/package.json '{\"type\":\"module\"}'"
   },
@@ -34,7 +33,6 @@
   "author": "Clober<official@clober.io>",
   "license": "MIT",
   "devDependencies": {
-    "@graphprotocol/client-cli": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
     "@viem/anvil": "^0.0.9",
@@ -49,12 +47,6 @@
     "vitest": "^1.4.0"
   },
   "dependencies": {
-    "@graphql-mesh/cache-localforage": "^0.97.5",
-    "@graphql-mesh/graphql": "^0.97.5",
-    "@graphql-mesh/http": "^0.98.8",
-    "@graphql-mesh/merger-bare": "^0.97.6",
-    "@graphql-mesh/utils": "^0.97.5",
-    "@whatwg-node/fetch": "^0.9.17",
     "bignumber.js": "^9.1.2",
     "viem": "^2.9.6"
   }
