@@ -1,6 +1,6 @@
 {
   "name": "@clober/v2-sdk",
-  "version": "0.0.3",
+  "version": "0.0.3-a",
   "description": "🛠 An SDK for building applications on top of Clober V2",
   "files": [
     "dist"
@@ -9,13 +9,6 @@
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
   "typings": "./dist/types/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "default": "./dist/cjs/index.js"
-    }
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/clober-dex/v2-sdk.git"
