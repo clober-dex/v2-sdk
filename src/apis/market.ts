@@ -2,15 +2,32 @@ import { getAddress, isAddressEqual } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
 import { Market } from '../model/market'
-import { SUBGRAPH_URL } from '../constants/subgraph-url'
-import { getBuiltGraphSDK } from '../.graphclient'
-import { Book } from '../model/book'
+import { Book, BookDto } from '../model/book'
 import type { RawDepth } from '../model/depth'
 import { getMarketId } from '../utils/market'
 
 import { fetchCurrency } from './currency'
+import { fetchSubgraph } from './subgraph'
 
-const { getBooks } = getBuiltGraphSDK()
+const getBooks = async (
+  chainId: CHAIN_IDS,
+  baseTokenAddress: `0x${string}`,
+  quoteTokenAddress: `0x${string}`,
+) => {
+  return fetchSubgraph<{
+    data: {
+      books: BookDto[]
+    }
+  }>(
+    chainId,
+    'getBooks',
+    'query getBooks($baseTokenAddress: String!, $quoteTokenAddress: String!) { books( where: {base: $baseTokenAddress, quote: $quoteTokenAddress, makerPolicy: "8888308", takerPolicy: "8889608", hooks: "0x0000000000000000000000000000000000000000"} ) { id base { id name symbol decimals } quote { id name symbol decimals } unit depths { tick price rawAmount } } }',
+    {
+      baseTokenAddress: baseTokenAddress.toLowerCase(),
+      quoteTokenAddress: quoteTokenAddress.toLowerCase(),
+    },
+  )
+}
 
 export async function fetchMarket(
   chainId: CHAIN_IDS,
@@ -29,29 +46,17 @@ export async function fetchMarket(
   const [
     quoteCurrency,
     baseCurrency,
-    { books: bidBooks },
-    { books: askBooks },
+    {
+      data: { books: bidBooks },
+    },
+    {
+      data: { books: askBooks },
+    },
   ] = await Promise.all([
     fetchCurrency(chainId, quoteTokenAddress, rpcUrl),
     fetchCurrency(chainId, baseTokenAddress, rpcUrl),
-    getBooks(
-      {
-        quoteTokenAddress: quoteTokenAddress.toLowerCase(),
-        baseTokenAddress: baseTokenAddress.toLowerCase(),
-      },
-      {
-        url: SUBGRAPH_URL[chainId],
-      },
-    ),
-    getBooks(
-      {
-        quoteTokenAddress: baseTokenAddress.toLowerCase(),
-        baseTokenAddress: quoteTokenAddress.toLowerCase(),
-      },
-      {
-        url: SUBGRAPH_URL[chainId],
-      },
-    ),
+    getBooks(chainId, quoteTokenAddress, baseTokenAddress),
+    getBooks(chainId, baseTokenAddress, quoteTokenAddress),
   ])
 
   return new Market({

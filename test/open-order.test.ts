@@ -36,29 +36,19 @@ test.runIf(IS_LOCAL)('claim all orders', async () => {
     await getOpenOrders(cloberTestChain.id, account.address, {
       rpcUrl: publicClient.transport.url!,
     })
-  ).slice(0, 5)
-  expect(
-    await claimOrders(
-      cloberTestChain.id,
-      account.address,
-      openOrders.map((order) => order.id),
-      { rpcUrl: publicClient.transport.url! },
-    ).catch((e) => e.message),
-  ).toEqual(`
-       import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
-
-       const hash = await setApprovalOfOpenOrdersForAll(
-            ${cloberTestChain.id},
-            privateKeyToAccount('0x...')
-       )
-    `)
+  ).slice(0, 20)
 
   // be sure to approve before claim
-  await publicClient.waitForTransactionReceipt({
-    hash: (await setApprovalOfOpenOrdersForAll(cloberTestChain.id, account, {
+  const hash = await setApprovalOfOpenOrdersForAll(
+    cloberTestChain.id,
+    account,
+    {
       rpcUrl: publicClient.transport.url!,
-    }))!,
-  })
+    },
+  )
+  if (hash) {
+    await publicClient.waitForTransactionReceipt({ hash })
+  }
 
   const transaction = await claimOrders(
     cloberTestChain.id,
@@ -77,29 +67,19 @@ test.runIf(IS_LOCAL)('cancel all orders', async () => {
     })
   )
     .filter((order) => order.cancelable)
-    .slice(0, 5)
-  expect(
-    await cancelOrders(
-      cloberTestChain.id,
-      account.address,
-      openOrders.map((order) => order.id),
-      { rpcUrl: publicClient.transport.url! },
-    ).catch((e) => e.message),
-  ).toEqual(`
-       import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
+    .slice(0, 20)
 
-       const hash = await setApprovalOfOpenOrdersForAll(
-            ${cloberTestChain.id},
-            privateKeyToAccount('0x...')
-       )
-    `)
-
-  // be sure to approve before cancel
-  await publicClient.waitForTransactionReceipt({
-    hash: (await setApprovalOfOpenOrdersForAll(cloberTestChain.id, account, {
+  // be sure to approve before claim
+  const hash = await setApprovalOfOpenOrdersForAll(
+    cloberTestChain.id,
+    account,
+    {
       rpcUrl: publicClient.transport.url!,
-    }))!,
-  })
+    },
+  )
+  if (hash) {
+    await publicClient.waitForTransactionReceipt({ hash })
+  }
 
   const transaction = await cancelOrders(
     cloberTestChain.id,

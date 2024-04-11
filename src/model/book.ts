@@ -6,6 +6,28 @@ import { baseToQuote, quoteToBase } from '../utils/decimals'
 import type { Currency } from './currency'
 import type { RawDepth } from './depth'
 
+export type BookDto = {
+  id: string
+  base: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
+  }
+  quote: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
+  }
+  unit: string
+  depths: {
+    tick: string
+    price: string
+    rawAmount: string
+  }[]
+}
+
 export class Book {
   id: bigint
   base: Currency
