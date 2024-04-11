@@ -8,14 +8,16 @@ const IS_LOCAL = process.env.IS_LOCAL === 'true'
 
 test.runIf(IS_LOCAL)('market order in not open market', async () => {
   expect(
-    await marketOrder(
-      cloberTestChain.id,
-      '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
-      '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
-      '0x0000000000000000000000000000000000000000',
-      '10',
-      { rpcUrl: publicClient.transport.url! },
-    ).catch((e) => e.message),
+    await marketOrder({
+      chainId: cloberTestChain.id,
+      userAddress: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
+      inputToken: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
+      outputToken: '0x0000000000000000000000000000000000000000',
+      amount: '10',
+      options: {
+        rpcUrl: publicClient.transport.url!,
+      },
+    }).catch((e) => e.message),
   ).toEqual(`
        import { openMarket } from '@clober/v2-sdk'
 

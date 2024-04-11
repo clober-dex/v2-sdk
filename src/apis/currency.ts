@@ -1,7 +1,8 @@
-import { createPublicClient, http, isAddressEqual, zeroAddress } from 'viem'
+import { isAddressEqual, zeroAddress } from 'viem'
 
 import type { Currency } from '../model/currency'
-import { CHAIN_IDS, CHAIN_MAP } from '../constants/chain'
+import { CHAIN_IDS } from '../constants/chain'
+import { cachedPublicClients } from '../constants/client'
 
 const _abi = [
   {
@@ -48,7 +49,6 @@ const _abi = [
 export const fetchCurrency = async (
   chainId: CHAIN_IDS,
   address: `0x${string}`,
-  rpcUrl?: string,
 ): Promise<Currency> => {
   if (isAddressEqual(address, zeroAddress)) {
     return {
@@ -59,12 +59,8 @@ export const fetchCurrency = async (
     }
   }
 
-  const publicClient = createPublicClient({
-    chain: CHAIN_MAP[chainId],
-    transport: rpcUrl ? http(rpcUrl) : http(),
-  })
   const [{ result: name }, { result: symbol }, { result: decimals }] =
-    await publicClient.multicall({
+    await cachedPublicClients[chainId].multicall({
       contracts: [
         {
           address,

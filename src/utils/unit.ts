@@ -1,7 +1,8 @@
-import { createPublicClient, http, isAddressEqual, zeroAddress } from 'viem'
+import { isAddressEqual, zeroAddress } from 'viem'
 
 import { Currency } from '../model/currency'
-import { CHAIN_IDS, CHAIN_MAP } from '../constants/chain'
+import { CHAIN_IDS } from '../constants/chain'
+import { cachedPublicClients } from '../constants/client'
 
 const _abi = [
   {
@@ -19,19 +20,11 @@ const _abi = [
   },
 ] as const
 
-export const calculateUnit = async (
-  chainId: CHAIN_IDS,
-  quote: Currency,
-  rpcUrl?: string,
-) => {
+export const calculateUnit = async (chainId: CHAIN_IDS, quote: Currency) => {
   if (isAddressEqual(quote.address, zeroAddress)) {
     return 10n ** 12n
   }
-  const publicClient = createPublicClient({
-    chain: CHAIN_MAP[chainId],
-    transport: rpcUrl ? http(rpcUrl) : http(),
-  })
-  const totalSupply = await publicClient.readContract({
+  const totalSupply = await cachedPublicClients[chainId].readContract({
     address: quote.address,
     abi: _abi,
     functionName: 'totalSupply',

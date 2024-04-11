@@ -7,7 +7,7 @@ import {
 } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
-import { PermitSignature, Transaction } from './type'
+import { DefaultOptions, PermitSignature, Transaction } from './type'
 import { calculateUnit } from './utils/unit'
 import { CONTROLLER_ABI } from './abis/core/controller-abi'
 import { getDeadlineTimestampInSeconds } from './utils/time'
@@ -25,6 +25,7 @@ import {
 } from './abis/core/params-abi'
 import { Action } from './constants/action'
 import { fetchIsApprovedForAll } from './utils/approval'
+import { decorator } from './utils/decorator'
 
 /**
  * Build a transaction to open a market.
@@ -44,29 +45,25 @@ import { fetchIsApprovedForAll } from './utils/approval'
  *  '0x0000000000000000000000000000000000000000'
  * )
  */
-export const openMarket = async (
-  chainId: CHAIN_IDS,
-  inputToken: `0x${string}`,
-  outputToken: `0x${string}`,
-  options?: {
-    rpcUrl?: string
-  },
-): Promise<Transaction | undefined> => {
-  const market = await fetchMarket(
+export const openMarket = decorator(
+  async ({
     chainId,
-    [inputToken, outputToken],
-    options?.rpcUrl,
-  )
-  const isBid = isAddressEqual(market.quote.address, inputToken)
-  if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
-    const unit = await calculateUnit(
-      chainId,
-      isBid ? market.quote : market.base,
-      options?.rpcUrl,
-    )
-    return buildTransaction(
-      chainId,
-      {
+    inputToken,
+    outputToken,
+  }: {
+    chainId: CHAIN_IDS
+    inputToken: `0x${string}`
+    outputToken: `0x${string}`
+    options?: DefaultOptions
+  }): Promise<Transaction | undefined> => {
+    const market = await fetchMarket(chainId, [inputToken, outputToken])
+    const isBid = isAddressEqual(market.quote.address, inputToken)
+    if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
+      const unit = await calculateUnit(
+        chainId,
+        isBid ? market.quote : market.base,
+      )
+      return buildTransaction(chainId, {
         address: CONTRACT_ADDRESSES[chainId]!.Controller,
         abi: CONTROLLER_ABI,
         functionName: 'open',
@@ -86,12 +83,11 @@ export const openMarket = async (
           ],
           getDeadlineTimestampInSeconds(),
         ],
-      },
-      options?.rpcUrl,
-    )
-  }
-  return undefined
-}
+      })
+    }
+    return undefined
+  },
+)
 
 /**
  * Places a limit order on the specified chain for trading tokens.
@@ -140,28 +136,31 @@ export const openMarket = async (
  *  '4000.01', // price at 4000.01 (ETH/USDC)
  * )
  */
-export const limitOrder = async (
-  chainId: CHAIN_IDS,
-  userAddress: `0x${string}`,
-  inputToken: `0x${string}`,
-  outputToken: `0x${string}`,
-  amount: string,
-  price: string,
-  options?: {
-    signature?: PermitSignature
-    postOnly?: boolean
-    rpcUrl?: string
-  },
-): Promise<Transaction> => {
-  const { signature, postOnly, rpcUrl } = options || {
-    signature: undefined,
-    postOnly: false,
-    rpcUrl: undefined,
-  }
-  const market = await fetchMarket(chainId, [inputToken, outputToken], rpcUrl)
-  const isBid = isAddressEqual(market.quote.address, inputToken)
-  if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
-    throw new Error(`
+export const limitOrder = decorator(
+  async ({
+    chainId,
+    userAddress,
+    inputToken,
+    outputToken,
+    amount,
+    price,
+    options,
+  }: {
+    chainId: CHAIN_IDS
+    userAddress: `0x${string}`
+    inputToken: `0x${string}`
+    outputToken: `0x${string}`
+    amount: string
+    price: string
+    options?: {
+      signature?: PermitSignature
+      postOnly?: boolean
+    } & DefaultOptions
+  }): Promise<Transaction> => {
+    const market = await fetchMarket(chainId, [inputToken, outputToken])
+    const isBid = isAddressEqual(market.quote.address, inputToken)
+    if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
+      throw new Error(`
        import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
@@ -170,60 +169,53 @@ export const limitOrder = async (
            '${outputToken}',
        )
     `)
-  }
+    }
 
-  const rawPrice = parsePrice(
-    Number(price),
-    market.quote.decimals,
-    market.base.decimals,
-  )
-  const tick = isBid ? fromPrice(rawPrice) : fromPrice(invertPrice(rawPrice))
-  const tokensToSettle = [inputToken, outputToken].filter(
-    (address) => !isAddressEqual(address, zeroAddress),
-  )
-  const quoteAmount = parseUnits(
-    amount,
-    isBid ? market.quote.decimals : market.base.decimals,
-  )
-  const [unit, { result }] = await Promise.all([
-    calculateUnit(chainId, isBid ? market.quote : market.base, rpcUrl),
-    getExpectedOutput(
-      chainId,
-      inputToken,
-      outputToken,
+    const rawPrice = parsePrice(
+      Number(price),
+      market.quote.decimals,
+      market.base.decimals,
+    )
+    const tick = isBid ? fromPrice(rawPrice) : fromPrice(invertPrice(rawPrice))
+    const tokensToSettle = [inputToken, outputToken].filter(
+      (address) => !isAddressEqual(address, zeroAddress),
+    )
+    const quoteAmount = parseUnits(
       amount,
-      rpcUrl
-        ? {
-            limitPrice: price,
-            rpcUrl,
-          }
-        : {
-            limitPrice: price,
-          },
-    ),
-  ])
-  const isETH = isAddressEqual(inputToken, zeroAddress)
-  const permitParamsList =
-    signature && !isETH
-      ? [
-          {
-            token: inputToken,
-            permitAmount: quoteAmount,
-            signature,
-          },
-        ]
-      : []
+      isBid ? market.quote.decimals : market.base.decimals,
+    )
+    const [unit, { result }] = await Promise.all([
+      calculateUnit(chainId, isBid ? market.quote : market.base),
+      getExpectedOutput({
+        chainId,
+        inputToken,
+        outputToken,
+        amountIn: amount,
+        options: {
+          ...options,
+        },
+      }),
+    ])
+    const isETH = isAddressEqual(inputToken, zeroAddress)
+    const permitParamsList =
+      options?.signature && !isETH
+        ? [
+            {
+              token: inputToken,
+              permitAmount: quoteAmount,
+              signature: options.signature,
+            },
+          ]
+        : []
 
-  const makeParam = {
-    id: toBookId(inputToken, outputToken, unit),
-    tick: Number(tick),
-    quoteAmount,
-    hookData: zeroHash,
-  }
-  if (postOnly === true || result.length === 0) {
-    return buildTransaction(
-      chainId,
-      {
+    const makeParam = {
+      id: toBookId(inputToken, outputToken, unit),
+      tick: Number(tick),
+      quoteAmount,
+      hookData: zeroHash,
+    }
+    if (options?.postOnly === true || result.length === 0) {
+      return buildTransaction(chainId, {
         chain: CHAIN_MAP[chainId],
         account: userAddress,
         address: CONTRACT_ADDRESSES[chainId]!.Controller,
@@ -236,14 +228,10 @@ export const limitOrder = async (
           getDeadlineTimestampInSeconds(),
         ],
         value: isETH ? quoteAmount : 0n,
-      },
-      options?.rpcUrl,
-    )
-  } else if (result.length === 1) {
-    // take and make
-    return buildTransaction(
-      chainId,
-      {
+      })
+    } else if (result.length === 1) {
+      // take and make
+      return buildTransaction(chainId, {
         chain: CHAIN_MAP[chainId],
         account: userAddress,
         address: CONTRACT_ADDRESSES[chainId]!.Controller,
@@ -266,17 +254,13 @@ export const limitOrder = async (
           getDeadlineTimestampInSeconds(),
         ],
         value: isETH ? quoteAmount : 0n,
-      },
-      options?.rpcUrl,
-    )
-  } else {
-    // take x n and make
-    const makeAmount =
-      quoteAmount -
-      result.reduce((acc, { spendAmount }) => acc + spendAmount, 0n)
-    return buildTransaction(
-      chainId,
-      {
+      })
+    } else {
+      // take x n and make
+      const makeAmount =
+        quoteAmount -
+        result.reduce((acc, { spendAmount }) => acc + spendAmount, 0n)
+      return buildTransaction(chainId, {
         chain: CHAIN_MAP[chainId],
         account: userAddress,
         address: CONTRACT_ADDRESSES[chainId]!.Controller,
@@ -315,11 +299,10 @@ export const limitOrder = async (
           getDeadlineTimestampInSeconds(),
         ],
         value: isETH ? quoteAmount : 0n,
-      },
-      options?.rpcUrl,
-    )
-  }
-}
+      })
+    }
+  },
+)
 
 /**
  * Executes a market order on the specified chain for trading tokens.
@@ -366,27 +349,29 @@ export const limitOrder = async (
  *  '0.13', // 0.13 ETH
  * )
  */
-export const marketOrder = async (
-  chainId: CHAIN_IDS,
-  userAddress: `0x${string}`,
-  inputToken: `0x${string}`,
-  outputToken: `0x${string}`,
-  amount: string,
-  options?: {
-    signature?: PermitSignature
-    rpcUrl?: string
-    limitPrice?: string
-  },
-): Promise<Transaction> => {
-  const { signature, rpcUrl, limitPrice } = options || {
-    signature: undefined,
-    rpcUrl: undefined,
-    limitPrice: undefined,
-  }
-  const market = await fetchMarket(chainId, [inputToken, outputToken], rpcUrl)
-  const isBid = isAddressEqual(market.quote.address, inputToken)
-  if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
-    throw new Error(`
+export const marketOrder = decorator(
+  async ({
+    chainId,
+    userAddress,
+    inputToken,
+    outputToken,
+    amount,
+    options,
+  }: {
+    chainId: CHAIN_IDS
+    userAddress: `0x${string}`
+    inputToken: `0x${string}`
+    outputToken: `0x${string}`
+    amount: string
+    options?: {
+      signature?: PermitSignature
+      limitPrice?: string
+    } & DefaultOptions
+  }): Promise<Transaction> => {
+    const market = await fetchMarket(chainId, [inputToken, outputToken])
+    const isBid = isAddressEqual(market.quote.address, inputToken)
+    if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
+      throw new Error(`
        import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
@@ -395,46 +380,42 @@ export const marketOrder = async (
            '${outputToken}',
        )
     `)
-  }
+    }
 
-  const rawLimitPrice = parsePrice(
-    Number(limitPrice ?? '0'),
-    market.quote.decimals,
-    market.base.decimals,
-  )
-  const tokensToSettle = [inputToken, outputToken].filter(
-    (address) => !isAddressEqual(address, zeroAddress),
-  )
-  const quoteAmount = parseUnits(
-    amount,
-    isBid ? market.quote.decimals : market.base.decimals,
-  )
-  const { result } = await getExpectedOutput(
-    chainId,
-    inputToken,
-    outputToken,
-    amount,
-    rpcUrl
-      ? {
-          rpcUrl,
-        }
-      : {},
-  )
-  const isETH = isAddressEqual(inputToken, zeroAddress)
-  const permitParamsList =
-    signature && !isETH
-      ? [
-          {
-            token: inputToken,
-            permitAmount: quoteAmount,
-            signature,
-          },
-        ]
-      : []
+    const rawLimitPrice = parsePrice(
+      Number(options?.limitPrice ?? '0'),
+      market.quote.decimals,
+      market.base.decimals,
+    )
+    const tokensToSettle = [inputToken, outputToken].filter(
+      (address) => !isAddressEqual(address, zeroAddress),
+    )
+    const quoteAmount = parseUnits(
+      amount,
+      isBid ? market.quote.decimals : market.base.decimals,
+    )
+    const { result } = await getExpectedOutput({
+      chainId,
+      inputToken,
+      outputToken,
+      amountIn: amount,
+      options: {
+        ...options,
+      },
+    })
+    const isETH = isAddressEqual(inputToken, zeroAddress)
+    const permitParamsList =
+      options?.signature && !isETH
+        ? [
+            {
+              token: inputToken,
+              permitAmount: quoteAmount,
+              signature: options.signature,
+            },
+          ]
+        : []
 
-  return buildTransaction(
-    chainId,
-    {
+    return buildTransaction(chainId, {
       chain: CHAIN_MAP[chainId],
       account: userAddress,
       address: CONTRACT_ADDRESSES[chainId]!.Controller,
@@ -452,10 +433,9 @@ export const marketOrder = async (
         getDeadlineTimestampInSeconds(),
       ],
       value: isETH ? quoteAmount : 0n,
-    },
-    options?.rpcUrl,
-  )
-}
+    })
+  },
+)
 
 /**
  * Claims specified open order for settlement.
@@ -481,16 +461,26 @@ export const marketOrder = async (
  *    openOrders.map((order) => order.id)
  * )
  */
-export const claimOrder = async (
-  chainId: CHAIN_IDS,
-  userAddress: `0x${string}`,
-  id: string,
-  options?: {
-    rpcUrl?: string
+export const claimOrder = decorator(
+  async ({
+    chainId,
+    userAddress,
+    id,
+    options,
+  }: {
+    chainId: CHAIN_IDS
+    userAddress: `0x${string}`
+    id: string
+    options?: DefaultOptions
+  }): Promise<Transaction> => {
+    return claimOrders({
+      chainId,
+      userAddress,
+      ids: [id],
+      options: { ...options },
+    })
   },
-): Promise<Transaction> => {
-  return claimOrders(chainId, userAddress, [id], options)
-}
+)
 
 /**
  * Claims specified open orders for settlement.
@@ -516,24 +506,21 @@ export const claimOrder = async (
  *    openOrders.map((order) => order.id)
  * )
  */
-export const claimOrders = async (
-  chainId: CHAIN_IDS,
-  userAddress: `0x${string}`,
-  ids: string[],
-  options?: {
-    rpcUrl?: string
-  },
-): Promise<Transaction> => {
-  const { rpcUrl } = options || {
-    rpcUrl: undefined,
-  }
-  const isApprovedForAll = await fetchIsApprovedForAll(
+export const claimOrders = decorator(
+  async ({
     chainId,
     userAddress,
-    options?.rpcUrl,
-  )
-  if (!isApprovedForAll) {
-    throw new Error(`
+    ids,
+    options,
+  }: {
+    chainId: CHAIN_IDS
+    userAddress: `0x${string}`
+    ids: string[]
+    options?: DefaultOptions
+  }): Promise<Transaction> => {
+    const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
+    if (!isApprovedForAll) {
+      throw new Error(`
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
@@ -541,26 +528,27 @@ export const claimOrders = async (
             privateKeyToAccount('0x...')
        )
     `)
-  }
+    }
 
-  const openOrders = (
-    await getOpenOrders(chainId, userAddress, rpcUrl ? { rpcUrl } : {})
-  ).filter((order) => ids.includes(order.id))
-  if (openOrders.length === 0) {
-    throw new Error(`No claimable open orders found for ${userAddress}`)
-  }
-  const tokensToSettle = openOrders
-    .map((order) => [order.outputCurrency.address, order.inputCurrency.address])
-    .flat()
-    .filter(
-      (address, index, self) =>
-        self.findIndex((c) => isAddressEqual(c, address)) === index,
-    )
-    .filter((address) => !isAddressEqual(address, zeroAddress))
+    const openOrders = (
+      await getOpenOrders({ chainId, userAddress, options: { ...options } })
+    ).filter((order) => ids.includes(order.id))
+    if (openOrders.length === 0) {
+      throw new Error(`No claimable open orders found for ${userAddress}`)
+    }
+    const tokensToSettle = openOrders
+      .map((order) => [
+        order.outputCurrency.address,
+        order.inputCurrency.address,
+      ])
+      .flat()
+      .filter(
+        (address, index, self) =>
+          self.findIndex((c) => isAddressEqual(c, address)) === index,
+      )
+      .filter((address) => !isAddressEqual(address, zeroAddress))
 
-  return buildTransaction(
-    chainId,
-    {
+    return buildTransaction(chainId, {
       chain: CHAIN_MAP[chainId],
       account: userAddress,
       address: CONTRACT_ADDRESSES[chainId]!.Controller,
@@ -575,10 +563,9 @@ export const claimOrders = async (
         [],
         getDeadlineTimestampInSeconds(),
       ],
-    },
-    options?.rpcUrl,
-  )
-}
+    })
+  },
+)
 
 /**
  * Cancels specified open order if the order is not fully filled.
@@ -604,16 +591,26 @@ export const claimOrders = async (
  *    openOrders.map((order) => order.id)
  * )
  */
-export const cancelOrder = async (
-  chainId: CHAIN_IDS,
-  userAddress: `0x${string}`,
-  id: string,
-  options?: {
-    rpcUrl?: string
+export const cancelOrder = decorator(
+  async ({
+    chainId,
+    userAddress,
+    id,
+    options,
+  }: {
+    chainId: CHAIN_IDS
+    userAddress: `0x${string}`
+    id: string
+    options?: DefaultOptions
+  }): Promise<Transaction> => {
+    return cancelOrders({
+      chainId,
+      userAddress,
+      ids: [id],
+      options: { ...options },
+    })
   },
-): Promise<Transaction> => {
-  return cancelOrders(chainId, userAddress, [id], options)
-}
+)
 
 /**
  * Cancels specified open orders if orders are not fully filled.
@@ -639,24 +636,21 @@ export const cancelOrder = async (
  *    openOrders.map((order) => order.id)
  * )
  */
-export const cancelOrders = async (
-  chainId: CHAIN_IDS,
-  userAddress: `0x${string}`,
-  ids: string[],
-  options?: {
-    rpcUrl?: string
-  },
-): Promise<Transaction> => {
-  const { rpcUrl } = options || {
-    rpcUrl: undefined,
-  }
-  const isApprovedForAll = await fetchIsApprovedForAll(
+export const cancelOrders = decorator(
+  async ({
     chainId,
     userAddress,
-    options?.rpcUrl,
-  )
-  if (!isApprovedForAll) {
-    throw new Error(`
+    ids,
+    options,
+  }: {
+    chainId: CHAIN_IDS
+    userAddress: `0x${string}`
+    ids: string[]
+    options?: DefaultOptions
+  }): Promise<Transaction> => {
+    const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
+    if (!isApprovedForAll) {
+      throw new Error(`
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
@@ -664,26 +658,27 @@ export const cancelOrders = async (
             privateKeyToAccount('0x...')
        )
     `)
-  }
+    }
 
-  const openOrders = (
-    await getOpenOrders(chainId, userAddress, rpcUrl ? { rpcUrl } : {})
-  ).filter((order) => ids.includes(order.id) && order.cancelable)
-  if (openOrders.length === 0) {
-    throw new Error(`No cancelable open orders found for ${userAddress}`)
-  }
-  const tokensToSettle = openOrders
-    .map((order) => [order.outputCurrency.address, order.inputCurrency.address])
-    .flat()
-    .filter(
-      (address, index, self) =>
-        self.findIndex((c) => isAddressEqual(c, address)) === index,
-    )
-    .filter((address) => !isAddressEqual(address, zeroAddress))
+    const openOrders = (
+      await getOpenOrders({ chainId, userAddress, options: { ...options } })
+    ).filter((order) => ids.includes(order.id) && order.cancelable)
+    if (openOrders.length === 0) {
+      throw new Error(`No cancelable open orders found for ${userAddress}`)
+    }
+    const tokensToSettle = openOrders
+      .map((order) => [
+        order.outputCurrency.address,
+        order.inputCurrency.address,
+      ])
+      .flat()
+      .filter(
+        (address, index, self) =>
+          self.findIndex((c) => isAddressEqual(c, address)) === index,
+      )
+      .filter((address) => !isAddressEqual(address, zeroAddress))
 
-  return buildTransaction(
-    chainId,
-    {
+    return buildTransaction(chainId, {
       chain: CHAIN_MAP[chainId],
       account: userAddress,
       address: CONTRACT_ADDRESSES[chainId]!.Controller,
@@ -699,7 +694,6 @@ export const cancelOrders = async (
         [],
         getDeadlineTimestampInSeconds(),
       ],
-    },
-    options?.rpcUrl,
-  )
-}
+    })
+  },
+)

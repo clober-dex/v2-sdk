@@ -6,12 +6,14 @@ import { getMarket } from '@clober/v2-sdk'
 import { publicClient } from './utils/constants'
 
 test('fetch open market', async () => {
-  const market = await getMarket(
-    arbitrumSepolia.id,
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '0x0000000000000000000000000000000000000000',
-    { rpcUrl: publicClient.transport.url! },
-  )
+  const market = await getMarket({
+    chainId: arbitrumSepolia.id,
+    token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    token1: '0x0000000000000000000000000000000000000000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
 
   expect(market.makerFee).toEqual(-0.03)
   expect(market.takerFee).toEqual(0.1)
@@ -35,34 +37,40 @@ test('fetch open market', async () => {
 })
 
 test('fetch empty market', async () => {
-  const market = await getMarket(
-    arbitrumSepolia.id,
-    '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
-    '0x0000000000000000000000000000000000000000',
-    { rpcUrl: publicClient.transport.url! },
-  )
+  const market = await getMarket({
+    chainId: arbitrumSepolia.id,
+    token0: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
+    token1: '0x0000000000000000000000000000000000000000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
   expect(market.bidBookOpen).toEqual(true)
 })
 
 // @dev: this test will be fail when the market is open
 test('fetch not open market', async () => {
-  const market = await getMarket(
-    arbitrumSepolia.id,
-    '0xf18Be2a91cF31Fc3f8D828b6c714e1806a75e0AA',
-    '0x0000000000000000000000000000000000000000',
-    { rpcUrl: publicClient.transport.url! },
-  )
+  const market = await getMarket({
+    chainId: arbitrumSepolia.id,
+    token0: '0xf18Be2a91cF31Fc3f8D828b6c714e1806a75e0AA',
+    token1: '0x0000000000000000000000000000000000000000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
   expect(market.bidBookOpen).toEqual(false)
   expect(market.askBookOpen).toEqual(false)
 })
 
 test('fetch invalid market', async () => {
   expect(
-    await getMarket(
-      arbitrumSepolia.id,
-      '0x0000000000000000000000000000000000000000',
-      '0x0000000000000000000000000000000000000000',
-      { rpcUrl: publicClient.transport.url! },
-    ).catch((e) => e.message),
+    await getMarket({
+      chainId: arbitrumSepolia.id,
+      token0: '0x0000000000000000000000000000000000000000',
+      token1: '0x0000000000000000000000000000000000000000',
+      options: {
+        rpcUrl: publicClient.transport.url!,
+      },
+    }).catch((e) => e.message),
   ).toEqual('Token0 and token1 must be different')
 })
