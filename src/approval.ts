@@ -4,6 +4,7 @@ import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { decorator } from './utils/decorator'
+import { DefaultOptions } from './type'
 
 const _abi = [
   {
@@ -60,9 +61,7 @@ export const setApprovalOfOpenOrdersForAll = decorator(
   }: {
     chainId: CHAIN_IDS
     account: HDAccount | PrivateKeyAccount
-    options?: {
-      rpcUrl: string
-    }
+    options?: DefaultOptions
   }): Promise<`0x${string}` | undefined> => {
     const isApprovedForAll = await fetchIsApprovedForAll(
       chainId,

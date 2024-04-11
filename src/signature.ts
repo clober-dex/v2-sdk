@@ -11,7 +11,7 @@ import { CHAIN_IDS } from './constants/chain'
 import { getDeadlineTimestampInSeconds } from './utils/time'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchCurrency } from './apis/currency'
-import { PermitSignature } from './type'
+import { DefaultOptions, PermitSignature } from './type'
 import { cachedPublicClients } from './constants/client'
 import { decorator } from './utils/decorator'
 
@@ -107,9 +107,7 @@ export const signERC20Permit = decorator(
     account: HDAccount | PrivateKeyAccount
     token: `0x${string}`
     amount: string
-    options?: {
-      rpcUrl: string
-    }
+    options?: DefaultOptions
   }): Promise<PermitSignature> => {
     const currency = await fetchCurrency(chainId, token)
     const spender = CONTRACT_ADDRESSES[chainId]!.Controller

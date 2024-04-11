@@ -36,7 +36,7 @@ export const getMarket = decorator(
     chainId: CHAIN_IDS
     token0: `0x${string}`
     token1: `0x${string}`
-    options?: { rpcUrl?: string }
+    options?: DefaultOptions
   }): Promise<Market> => {
     if (isAddressEqual(token0, token1)) {
       throw new Error('Token0 and token1 must be different')
@@ -173,7 +173,7 @@ export const getExpectedInput = decorator(
     inputToken: `0x${string}`
     outputToken: `0x${string}`
     amountOut: string
-    options?: { limitPrice?: string; rpcUrl?: string }
+    options?: { limitPrice?: string } & DefaultOptions
   }): Promise<{
     takenAmount: string
     spendAmount: string
@@ -247,7 +247,7 @@ export const getOpenOrder = decorator(
   }: {
     chainId: CHAIN_IDS
     id: string
-    options?: { rpcUrl?: string }
+    options?: DefaultOptions
   }): Promise<OpenOrder> => {
     return fetchOpenOrder(chainId, id)
   },
@@ -276,7 +276,7 @@ export const getOpenOrders = decorator(
   }: {
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
-    options?: { rpcUrl?: string }
+    options?: DefaultOptions
   }): Promise<OpenOrder[]> => {
     return fetchOpenOrders(chainId, userAddress)
   },

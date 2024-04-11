@@ -54,9 +54,7 @@ export const openMarket = decorator(
     chainId: CHAIN_IDS
     inputToken: `0x${string}`
     outputToken: `0x${string}`
-    options?: {
-      rpcUrl?: string
-    }
+    options?: DefaultOptions
   }): Promise<Transaction | undefined> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -473,9 +471,7 @@ export const claimOrder = decorator(
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
     id: string
-    options?: {
-      rpcUrl?: string
-    }
+    options?: DefaultOptions
   }): Promise<Transaction> => {
     return claimOrders({
       chainId,
@@ -520,9 +516,7 @@ export const claimOrders = decorator(
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
     ids: string[]
-    options?: {
-      rpcUrl?: string
-    }
+    options?: DefaultOptions
   }): Promise<Transaction> => {
     const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
     if (!isApprovedForAll) {
@@ -607,9 +601,7 @@ export const cancelOrder = decorator(
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
     id: string
-    options?: {
-      rpcUrl?: string
-    }
+    options?: DefaultOptions
   }): Promise<Transaction> => {
     return cancelOrders({
       chainId,
@@ -654,9 +646,7 @@ export const cancelOrders = decorator(
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
     ids: string[]
-    options?: {
-      rpcUrl?: string
-    }
+    options?: DefaultOptions
   }): Promise<Transaction> => {
     const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
     if (!isApprovedForAll) {
