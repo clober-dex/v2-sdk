@@ -244,13 +244,12 @@ export const getOpenOrder = decorator(
   async ({
     chainId,
     id,
-    options,
   }: {
     chainId: CHAIN_IDS
     id: string
     options?: { rpcUrl?: string }
   }): Promise<OpenOrder> => {
-    return fetchOpenOrder(chainId, id, options?.rpcUrl)
+    return fetchOpenOrder(chainId, id)
   },
 )
 
@@ -274,12 +273,11 @@ export const getOpenOrders = decorator(
   async ({
     chainId,
     userAddress,
-    options,
   }: {
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
     options?: { rpcUrl?: string }
   }): Promise<OpenOrder[]> => {
-    return fetchOpenOrders(chainId, userAddress, options?.rpcUrl)
+    return fetchOpenOrders(chainId, userAddress)
   },
 )
