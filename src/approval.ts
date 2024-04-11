@@ -3,6 +3,7 @@ import { createWalletClient, HDAccount, http, PrivateKeyAccount } from 'viem'
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchIsApprovedForAll } from './utils/approval'
+import { decorator } from './utils/decorator'
 
 const _abi = [
   {
@@ -51,28 +52,37 @@ const _abi = [
  *   mnemonicToAccount('legal ...')
  * )
  */
-export const setApprovalOfOpenOrdersForAll = async (
-  chainId: CHAIN_IDS,
-  account: HDAccount | PrivateKeyAccount,
-  options?: {
-    rpcUrl: string
+export const setApprovalOfOpenOrdersForAll = decorator(
+  async ({
+    chainId,
+    account,
+    options,
+  }: {
+    chainId: CHAIN_IDS
+    account: HDAccount | PrivateKeyAccount
+    options?: {
+      rpcUrl: string
+    }
+  }): Promise<`0x${string}` | undefined> => {
+    const isApprovedForAll = await fetchIsApprovedForAll(
+      chainId,
+      account.address,
+    )
+    if (isApprovedForAll) {
+      return undefined
+    }
+    const walletClient = createWalletClient({
+      chain: CHAIN_MAP[chainId],
+      account,
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    return walletClient.writeContract({
+      account,
+      chain: CHAIN_MAP[chainId],
+      address: CONTRACT_ADDRESSES[chainId]!.BookManager,
+      abi: _abi,
+      functionName: 'setApprovalForAll',
+      args: [CONTRACT_ADDRESSES[chainId]!.Controller, true],
+    })
   },
-): Promise<`0x${string}` | undefined> => {
-  const isApprovedForAll = await fetchIsApprovedForAll(chainId, account.address)
-  if (isApprovedForAll) {
-    return undefined
-  }
-  const walletClient = createWalletClient({
-    chain: CHAIN_MAP[chainId],
-    account,
-    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-  })
-  return walletClient.writeContract({
-    account,
-    chain: CHAIN_MAP[chainId],
-    address: CONTRACT_ADDRESSES[chainId]!.BookManager,
-    abi: _abi,
-    functionName: 'setApprovalForAll',
-    args: [CONTRACT_ADDRESSES[chainId]!.Controller, true],
-  })
-}
+)

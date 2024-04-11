@@ -12,15 +12,17 @@ const IS_LOCAL = process.env.IS_LOCAL === 'true'
 
 test.runIf(IS_LOCAL)('limit order in not open market', async () => {
   expect(
-    await limitOrder(
-      arbitrumSepolia.id,
-      '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
-      '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
-      '0x0000000000000000000000000000000000000000',
-      '10',
-      '1000',
-      { rpcUrl: publicClient.transport.url! },
-    ).catch((e) => e.message),
+    await limitOrder({
+      chainId: arbitrumSepolia.id,
+      userAddress: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
+      inputToken: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
+      outputToken: '0x0000000000000000000000000000000000000000',
+      amount: '10',
+      price: '1000',
+      options: {
+        rpcUrl: publicClient.transport.url!,
+      },
+    }).catch((e) => e.message),
   ).toEqual(`
        import { openMarket } from '@clober/v2-sdk'
 
@@ -33,22 +35,28 @@ test.runIf(IS_LOCAL)('limit order in not open market', async () => {
 })
 
 test.runIf(IS_LOCAL)('make bid order', async () => {
-  const signature = await signERC20Permit(
-    cloberTestChain.id,
+  const signature = await signERC20Permit({
+    chainId: cloberTestChain.id,
     account,
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '1000',
-    { rpcUrl: publicClient.transport.url! },
-  )
-  const transaction = await limitOrder(
-    cloberTestChain.id,
-    account.address,
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '0x0000000000000000000000000000000000000000',
-    '1000',
-    '0.01',
-    { signature, rpcUrl: publicClient.transport.url!, postOnly: true },
-  )
+    token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    amount: '1000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
+  const transaction = await limitOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    outputToken: '0x0000000000000000000000000000000000000000',
+    amount: '1000',
+    price: '0.01',
+    options: {
+      signature,
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+    },
+  })
 
   const [beforeBalance, beforeDepth] = await Promise.all([
     fetchTokenBalance(
@@ -85,15 +93,18 @@ test.runIf(IS_LOCAL)('make bid order', async () => {
 })
 
 test.runIf(IS_LOCAL)('make ask order', async () => {
-  const transaction = await limitOrder(
-    cloberTestChain.id,
-    account.address,
-    '0x0000000000000000000000000000000000000000',
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '0.001',
-    '8000.01',
-    { rpcUrl: publicClient.transport.url!, postOnly: true },
-  )
+  const transaction = await limitOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    inputToken: '0x0000000000000000000000000000000000000000',
+    outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    amount: '0.001',
+    price: '8000.01',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+    },
+  })
 
   const [beforeBalance, beforeDepth] = await Promise.all([
     publicClient.getBalance({
@@ -125,17 +136,21 @@ test.runIf(IS_LOCAL)('make ask order', async () => {
 
 test.runIf(IS_LOCAL)('limit bid order', async () => {
   const beforeBidDepth = await fetchBidDepth(publicClient.transport.url!)
-  const makeTx = await limitOrder(
-    cloberTestChain.id,
-    account.address,
-    '0x0000000000000000000000000000000000000000',
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '0.001',
-    beforeBidDepth.length === 0
-      ? '5001'
-      : (beforeBidDepth[0]!.price + 1).toString(),
-    { rpcUrl: publicClient.transport.url!, postOnly: true },
-  )
+  const makeTx = await limitOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    inputToken: '0x0000000000000000000000000000000000000000',
+    outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    amount: '0.001',
+    price:
+      beforeBidDepth.length === 0
+        ? '5001'
+        : (beforeBidDepth[0]!.price + 1).toString(),
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+    },
+  })
   await publicClient.waitForTransactionReceipt({
     hash: await walletClient.sendTransaction({
       ...makeTx!,
@@ -155,24 +170,30 @@ test.runIf(IS_LOCAL)('limit bid order', async () => {
       address: account.address,
     }),
   ])
-  const signature = await signERC20Permit(
-    cloberTestChain.id,
+  const signature = await signERC20Permit({
+    chainId: cloberTestChain.id,
     account,
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '100000',
-    { rpcUrl: publicClient.transport.url! },
-  )
-  const transaction = await limitOrder(
-    cloberTestChain.id,
-    account.address,
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '0x0000000000000000000000000000000000000000',
-    '100000',
-    beforeBidDepth.length === 0
-      ? '5002'
-      : (beforeBidDepth[0]!.price + 2).toString(),
-    { signature, rpcUrl: publicClient.transport.url! },
-  )
+    token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    amount: '100000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
+  const transaction = await limitOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    outputToken: '0x0000000000000000000000000000000000000000',
+    amount: '100000',
+    price:
+      beforeBidDepth.length === 0
+        ? '5002'
+        : (beforeBidDepth[0]!.price + 2).toString(),
+    options: {
+      signature,
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
 
   const hash = await walletClient.sendTransaction({
     ...transaction!,
@@ -202,24 +223,31 @@ test.runIf(IS_LOCAL)('limit bid order', async () => {
 
 test.runIf(IS_LOCAL)('limit ask order', async () => {
   const beforeAskDepth = await fetchAskDepth(publicClient.transport.url!)
-  const signature = await signERC20Permit(
-    cloberTestChain.id,
+  const signature = await signERC20Permit({
+    chainId: cloberTestChain.id,
     account,
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '100',
-    { rpcUrl: publicClient.transport.url! },
-  )
-  const makeTx = await limitOrder(
-    cloberTestChain.id,
-    account.address,
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '0x0000000000000000000000000000000000000000',
-    '100',
-    beforeAskDepth.length === 0
-      ? '4999'
-      : (beforeAskDepth[0]!.price - 1).toString(),
-    { signature, rpcUrl: publicClient.transport.url!, postOnly: true },
-  )
+    token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    amount: '100',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
+  const makeTx = await limitOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    outputToken: '0x0000000000000000000000000000000000000000',
+    amount: '100',
+    price:
+      beforeAskDepth.length === 0
+        ? '4999'
+        : (beforeAskDepth[0]!.price - 1).toString(),
+    options: {
+      signature,
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+    },
+  })
   await publicClient.waitForTransactionReceipt({
     hash: await walletClient.sendTransaction({
       ...makeTx!,
@@ -228,17 +256,20 @@ test.runIf(IS_LOCAL)('limit ask order', async () => {
     }),
   })
 
-  const transaction = await limitOrder(
-    cloberTestChain.id,
-    account.address,
-    '0x0000000000000000000000000000000000000000',
-    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    '0.001',
-    beforeAskDepth.length === 0
-      ? '4998'
-      : (beforeAskDepth[0]!.price - 2).toString(),
-    { rpcUrl: publicClient.transport.url! },
-  )
+  const transaction = await limitOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    inputToken: '0x0000000000000000000000000000000000000000',
+    outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    amount: '0.001',
+    price:
+      beforeAskDepth.length === 0
+        ? '4998'
+        : (beforeAskDepth[0]!.price - 2).toString(),
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
 
   const [beforeUSDCBalance, beforeETHBalance] = await Promise.all([
     fetchTokenBalance(

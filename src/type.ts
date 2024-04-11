@@ -36,3 +36,7 @@ export type PermitSignature = {
   r: `0x${string}`
   s: `0x${string}`
 }
+
+export type DefaultOptions = {
+  rpcUrl?: string
+}

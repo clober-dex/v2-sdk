@@ -1,9 +1,8 @@
 import { expect, test } from 'vitest'
-import { getExpectedInput } from '@clober/v2-sdk'
+import { getExpectedInput, getMarket } from '@clober/v2-sdk'
 import { arbitrumSepolia } from 'viem/chains'
 import { formatUnits, isAddressEqual, parseUnits, zeroHash } from 'viem'
 
-import { fetchMarket } from '../src/apis/market'
 import { parsePrice } from '../src/utils/prices'
 import { invertPrice } from '../src/utils/tick'
 import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
@@ -70,10 +69,14 @@ const isTakeResultEqual = async (
   amountOut: string,
   limitPrice: string,
 ) => {
-  const market = await fetchMarket(arbitrumSepolia.id, [
-    inputToken,
-    outputToken,
-  ])
+  const market = await getMarket({
+    chainId: arbitrumSepolia.id,
+    token0: inputToken,
+    token1: outputToken,
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
 
   const isBid = isAddressEqual(market.quote.address, inputToken)
   const outputCurrency = isBid ? market.base : market.quote
@@ -106,13 +109,16 @@ const isTakeResultEqual = async (
     ],
   })
 
-  const { takenAmount, spendAmount } = await getExpectedInput(
-    arbitrumSepolia.id,
+  const { takenAmount, spendAmount } = await getExpectedInput({
+    chainId: arbitrumSepolia.id,
     inputToken,
     outputToken,
     amountOut,
-    { limitPrice, rpcUrl: publicClient.transport.url! },
-  )
+    options: {
+      limitPrice,
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
 
   expect(takenAmount).toBe(
     formatUnits(
@@ -194,13 +200,15 @@ test('get expected input bid', async () => {
 
 // @dev: this test will be fail when the market is open
 test('get expected input in not open book', async () => {
-  const { takenAmount, spendAmount } = await getExpectedInput(
-    arbitrumSepolia.id,
-    '0xf18Be2a91cF31Fc3f8D828b6c714e1806a75e0AA',
-    '0x0000000000000000000000000000000000000000',
-    '0.1',
-    { rpcUrl: publicClient.transport.url! },
-  )
+  const { takenAmount, spendAmount } = await getExpectedInput({
+    chainId: arbitrumSepolia.id,
+    inputToken: '0xf18Be2a91cF31Fc3f8D828b6c714e1806a75e0AA',
+    outputToken: '0x0000000000000000000000000000000000000000',
+    amountOut: '0.1',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
   expect(takenAmount).toBe('0')
   expect(spendAmount).toBe('0')
 })
