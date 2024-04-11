@@ -1,7 +1,6 @@
-import { createPublicClient, http } from 'viem'
-
-import { CHAIN_IDS, CHAIN_MAP } from '../constants/chain'
+import { CHAIN_IDS } from '../constants/chain'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
+import { cachedPublicClients } from '../constants/client'
 
 const _abi = [
   {
@@ -33,13 +32,8 @@ const _abi = [
 export async function fetchIsApprovedForAll(
   chainId: CHAIN_IDS,
   owner: `0x${string}`,
-  rpcUrl?: string,
 ): Promise<boolean> {
-  const publicClient = createPublicClient({
-    chain: CHAIN_MAP[chainId],
-    transport: rpcUrl ? http(rpcUrl) : http(),
-  })
-  return publicClient.readContract({
+  return cachedPublicClients[chainId].readContract({
     address: CONTRACT_ADDRESSES[chainId]!.BookManager,
     abi: _abi,
     functionName: 'isApprovedForAll',

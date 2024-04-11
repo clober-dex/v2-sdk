@@ -58,11 +58,7 @@ export const setApprovalOfOpenOrdersForAll = async (
     rpcUrl: string
   },
 ): Promise<`0x${string}` | undefined> => {
-  const isApprovedForAll = await fetchIsApprovedForAll(
-    chainId,
-    account.address,
-    options?.rpcUrl,
-  )
+  const isApprovedForAll = await fetchIsApprovedForAll(chainId, account.address)
   if (isApprovedForAll) {
     return undefined
   }

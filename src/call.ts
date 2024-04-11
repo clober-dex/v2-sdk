@@ -52,43 +52,34 @@ export const openMarket = async (
     rpcUrl?: string
   },
 ): Promise<Transaction | undefined> => {
-  const market = await fetchMarket(
-    chainId,
-    [inputToken, outputToken],
-    options?.rpcUrl,
-  )
+  const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
   if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
     const unit = await calculateUnit(
       chainId,
       isBid ? market.quote : market.base,
-      options?.rpcUrl,
     )
-    return buildTransaction(
-      chainId,
-      {
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'open',
-        args: [
-          [
-            {
-              key: {
-                base: inputToken,
-                unit,
-                quote: outputToken,
-                makerPolicy: MAKER_DEFAULT_POLICY.value,
-                hooks: zeroAddress,
-                takerPolicy: TAKER_DEFAULT_POLICY.value,
-              },
-              hookData: zeroHash,
+    return buildTransaction(chainId, {
+      address: CONTRACT_ADDRESSES[chainId]!.Controller,
+      abi: CONTROLLER_ABI,
+      functionName: 'open',
+      args: [
+        [
+          {
+            key: {
+              base: inputToken,
+              unit,
+              quote: outputToken,
+              makerPolicy: MAKER_DEFAULT_POLICY.value,
+              hooks: zeroAddress,
+              takerPolicy: TAKER_DEFAULT_POLICY.value,
             },
-          ],
-          getDeadlineTimestampInSeconds(),
+            hookData: zeroHash,
+          },
         ],
-      },
-      options?.rpcUrl,
-    )
+        getDeadlineTimestampInSeconds(),
+      ],
+    })
   }
   return undefined
 }
@@ -158,7 +149,7 @@ export const limitOrder = async (
     postOnly: false,
     rpcUrl: undefined,
   }
-  const market = await fetchMarket(chainId, [inputToken, outputToken], rpcUrl)
+  const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
   if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
     throw new Error(`
@@ -186,7 +177,7 @@ export const limitOrder = async (
     isBid ? market.quote.decimals : market.base.decimals,
   )
   const [unit, { result }] = await Promise.all([
-    calculateUnit(chainId, isBid ? market.quote : market.base, rpcUrl),
+    calculateUnit(chainId, isBid ? market.quote : market.base),
     getExpectedOutput(
       chainId,
       inputToken,
@@ -221,103 +212,91 @@ export const limitOrder = async (
     hookData: zeroHash,
   }
   if (postOnly === true || result.length === 0) {
-    return buildTransaction(
-      chainId,
-      {
-        chain: CHAIN_MAP[chainId],
-        account: userAddress,
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'make',
-        args: [
-          [makeParam],
-          tokensToSettle,
-          permitParamsList,
-          getDeadlineTimestampInSeconds(),
-        ],
-        value: isETH ? quoteAmount : 0n,
-      },
-      options?.rpcUrl,
-    )
+    return buildTransaction(chainId, {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Controller,
+      abi: CONTROLLER_ABI,
+      functionName: 'make',
+      args: [
+        [makeParam],
+        tokensToSettle,
+        permitParamsList,
+        getDeadlineTimestampInSeconds(),
+      ],
+      value: isETH ? quoteAmount : 0n,
+    })
   } else if (result.length === 1) {
     // take and make
-    return buildTransaction(
-      chainId,
-      {
-        chain: CHAIN_MAP[chainId],
-        account: userAddress,
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'limit',
-        args: [
-          [
-            {
-              takeBookId: result[0]!.bookId,
-              makeBookId: makeParam.id,
-              limitPrice: rawPrice,
-              tick: makeParam.tick,
-              quoteAmount,
-              takeHookData: zeroHash,
-              makeHookData: makeParam.hookData,
-            },
-          ],
-          tokensToSettle,
-          permitParamsList,
-          getDeadlineTimestampInSeconds(),
+    return buildTransaction(chainId, {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Controller,
+      abi: CONTROLLER_ABI,
+      functionName: 'limit',
+      args: [
+        [
+          {
+            takeBookId: result[0]!.bookId,
+            makeBookId: makeParam.id,
+            limitPrice: rawPrice,
+            tick: makeParam.tick,
+            quoteAmount,
+            takeHookData: zeroHash,
+            makeHookData: makeParam.hookData,
+          },
         ],
-        value: isETH ? quoteAmount : 0n,
-      },
-      options?.rpcUrl,
-    )
+        tokensToSettle,
+        permitParamsList,
+        getDeadlineTimestampInSeconds(),
+      ],
+      value: isETH ? quoteAmount : 0n,
+    })
   } else {
     // take x n and make
     const makeAmount =
       quoteAmount -
       result.reduce((acc, { spendAmount }) => acc + spendAmount, 0n)
-    return buildTransaction(
-      chainId,
-      {
-        chain: CHAIN_MAP[chainId],
-        account: userAddress,
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'execute',
-        args: [
-          [
-            ...result.map(() => Action.TAKE),
-            ...(makeAmount > 0n ? [Action.MAKE] : []),
-          ],
-          [
-            ...result.map(({ bookId, takenAmount }) =>
-              encodeAbiParameters(TAKE_ORDER_PARAMS_ABI, [
-                {
-                  id: bookId,
-                  limitPrice: rawPrice,
-                  quoteAmount: takenAmount,
-                  hookData: zeroHash,
-                },
-              ]),
-            ),
-            ...(makeAmount > 0n
-              ? [
-                  encodeAbiParameters(MAKE_ORDER_PARAMS_ABI, [
-                    {
-                      ...makeParam,
-                      quoteAmount: makeAmount,
-                    },
-                  ]),
-                ]
-              : []),
-          ],
-          tokensToSettle,
-          permitParamsList,
-          [],
-          getDeadlineTimestampInSeconds(),
+    return buildTransaction(chainId, {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Controller,
+      abi: CONTROLLER_ABI,
+      functionName: 'execute',
+      args: [
+        [
+          ...result.map(() => Action.TAKE),
+          ...(makeAmount > 0n ? [Action.MAKE] : []),
         ],
-        value: isETH ? quoteAmount : 0n,
-      },
-      options?.rpcUrl,
-    )
+        [
+          ...result.map(({ bookId, takenAmount }) =>
+            encodeAbiParameters(TAKE_ORDER_PARAMS_ABI, [
+              {
+                id: bookId,
+                limitPrice: rawPrice,
+                quoteAmount: takenAmount,
+                hookData: zeroHash,
+              },
+            ]),
+          ),
+          ...(makeAmount > 0n
+            ? [
+                encodeAbiParameters(MAKE_ORDER_PARAMS_ABI, [
+                  {
+                    ...makeParam,
+                    quoteAmount: makeAmount,
+                  },
+                ]),
+              ]
+            : []),
+        ],
+        tokensToSettle,
+        permitParamsList,
+        [],
+        getDeadlineTimestampInSeconds(),
+      ],
+      value: isETH ? quoteAmount : 0n,
+    })
   }
 }
 
@@ -383,7 +362,7 @@ export const marketOrder = async (
     rpcUrl: undefined,
     limitPrice: undefined,
   }
-  const market = await fetchMarket(chainId, [inputToken, outputToken], rpcUrl)
+  const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
   if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
     throw new Error(`
@@ -432,29 +411,25 @@ export const marketOrder = async (
         ]
       : []
 
-  return buildTransaction(
-    chainId,
-    {
-      chain: CHAIN_MAP[chainId],
-      account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Controller,
-      abi: CONTROLLER_ABI,
-      functionName: 'take',
-      args: [
-        result.map(({ bookId, takenAmount }) => ({
-          id: bookId,
-          limitPrice: isBid ? invertPrice(rawLimitPrice) : rawLimitPrice,
-          quoteAmount: takenAmount,
-          hookData: zeroHash,
-        })),
-        tokensToSettle,
-        permitParamsList,
-        getDeadlineTimestampInSeconds(),
-      ],
-      value: isETH ? quoteAmount : 0n,
-    },
-    options?.rpcUrl,
-  )
+  return buildTransaction(chainId, {
+    chain: CHAIN_MAP[chainId],
+    account: userAddress,
+    address: CONTRACT_ADDRESSES[chainId]!.Controller,
+    abi: CONTROLLER_ABI,
+    functionName: 'take',
+    args: [
+      result.map(({ bookId, takenAmount }) => ({
+        id: bookId,
+        limitPrice: isBid ? invertPrice(rawLimitPrice) : rawLimitPrice,
+        quoteAmount: takenAmount,
+        hookData: zeroHash,
+      })),
+      tokensToSettle,
+      permitParamsList,
+      getDeadlineTimestampInSeconds(),
+    ],
+    value: isETH ? quoteAmount : 0n,
+  })
 }
 
 /**
@@ -527,11 +502,7 @@ export const claimOrders = async (
   const { rpcUrl } = options || {
     rpcUrl: undefined,
   }
-  const isApprovedForAll = await fetchIsApprovedForAll(
-    chainId,
-    userAddress,
-    options?.rpcUrl,
-  )
+  const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
   if (!isApprovedForAll) {
     throw new Error(`
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
@@ -558,26 +529,22 @@ export const claimOrders = async (
     )
     .filter((address) => !isAddressEqual(address, zeroAddress))
 
-  return buildTransaction(
-    chainId,
-    {
-      chain: CHAIN_MAP[chainId],
-      account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Controller,
-      abi: CONTROLLER_ABI,
-      functionName: 'claim',
-      args: [
-        openOrders.map((order) => ({
-          id: BigInt(order.id),
-          hookData: zeroHash,
-        })),
-        tokensToSettle,
-        [],
-        getDeadlineTimestampInSeconds(),
-      ],
-    },
-    options?.rpcUrl,
-  )
+  return buildTransaction(chainId, {
+    chain: CHAIN_MAP[chainId],
+    account: userAddress,
+    address: CONTRACT_ADDRESSES[chainId]!.Controller,
+    abi: CONTROLLER_ABI,
+    functionName: 'claim',
+    args: [
+      openOrders.map((order) => ({
+        id: BigInt(order.id),
+        hookData: zeroHash,
+      })),
+      tokensToSettle,
+      [],
+      getDeadlineTimestampInSeconds(),
+    ],
+  })
 }
 
 /**
@@ -650,11 +617,7 @@ export const cancelOrders = async (
   const { rpcUrl } = options || {
     rpcUrl: undefined,
   }
-  const isApprovedForAll = await fetchIsApprovedForAll(
-    chainId,
-    userAddress,
-    options?.rpcUrl,
-  )
+  const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
   if (!isApprovedForAll) {
     throw new Error(`
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
@@ -681,25 +644,21 @@ export const cancelOrders = async (
     )
     .filter((address) => !isAddressEqual(address, zeroAddress))
 
-  return buildTransaction(
-    chainId,
-    {
-      chain: CHAIN_MAP[chainId],
-      account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Controller,
-      abi: CONTROLLER_ABI,
-      functionName: 'cancel',
-      args: [
-        openOrders.map((order) => ({
-          id: BigInt(order.id),
-          leftQuoteAmount: 0n,
-          hookData: zeroHash,
-        })),
-        tokensToSettle,
-        [],
-        getDeadlineTimestampInSeconds(),
-      ],
-    },
-    options?.rpcUrl,
-  )
+  return buildTransaction(chainId, {
+    chain: CHAIN_MAP[chainId],
+    account: userAddress,
+    address: CONTRACT_ADDRESSES[chainId]!.Controller,
+    abi: CONTROLLER_ABI,
+    functionName: 'cancel',
+    args: [
+      openOrders.map((order) => ({
+        id: BigInt(order.id),
+        leftQuoteAmount: 0n,
+        hookData: zeroHash,
+      })),
+      tokensToSettle,
+      [],
+      getDeadlineTimestampInSeconds(),
+    ],
+  })
 }

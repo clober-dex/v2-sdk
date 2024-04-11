@@ -35,7 +35,7 @@ export const getMarket = async (
   if (isAddressEqual(token0, token1)) {
     throw new Error('Token0 and token1 must be different')
   }
-  const market = await fetchMarket(chainId, [token0, token1], options?.rpcUrl)
+  const market = await fetchMarket(chainId, [token0, token1])
   return {
     chainId,
     quote: market.quote,
@@ -81,11 +81,7 @@ export const getExpectedOutput = async (
   spendAmount: string
   result: { bookId: bigint; takenAmount: bigint; spendAmount: bigint }[]
 }> => {
-  const market = await fetchMarket(
-    chainId,
-    [inputToken, outputToken],
-    options?.rpcUrl,
-  )
+  const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
   const rawLimitPrice =
     options && options.limitPrice
@@ -161,11 +157,7 @@ export const getExpectedInput = async (
   spendAmount: string
   result: { bookId: bigint; takenAmount: bigint; spendAmount: bigint }[]
 }> => {
-  const market = await fetchMarket(
-    chainId,
-    [inputToken, outputToken],
-    options?.rpcUrl,
-  )
+  const market = await fetchMarket(chainId, [inputToken, outputToken])
   const isBid = isAddressEqual(market.quote.address, inputToken)
   const rawLimitPrice =
     options && options.limitPrice

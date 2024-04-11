@@ -32,7 +32,6 @@ const getBooks = async (
 export async function fetchMarket(
   chainId: CHAIN_IDS,
   tokenAddresses: `0x${string}`[],
-  rpcUrl?: string,
 ): Promise<Market> {
   if (tokenAddresses.length !== 2) {
     throw new Error('Invalid token pair')
@@ -53,8 +52,8 @@ export async function fetchMarket(
       data: { books: askBooks },
     },
   ] = await Promise.all([
-    fetchCurrency(chainId, quoteTokenAddress, rpcUrl),
-    fetchCurrency(chainId, baseTokenAddress, rpcUrl),
+    fetchCurrency(chainId, quoteTokenAddress),
+    fetchCurrency(chainId, baseTokenAddress),
     getBooks(chainId, quoteTokenAddress, baseTokenAddress),
     getBooks(chainId, baseTokenAddress, quoteTokenAddress),
   ])

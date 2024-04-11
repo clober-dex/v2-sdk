@@ -1,19 +1,18 @@
 import {
-  createPublicClient,
   HDAccount,
   hexToSignature,
-  http,
   parseUnits,
   PrivateKeyAccount,
   verifyTypedData,
   zeroHash,
 } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
+import { CHAIN_IDS } from './constants/chain'
 import { getDeadlineTimestampInSeconds } from './utils/time'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchCurrency } from './apis/currency'
 import { PermitSignature } from './type'
+import { cachedPublicClients } from './constants/client'
 
 const _abi = [
   {
@@ -105,15 +104,11 @@ export const signERC20Permit = async (
     rpcUrl: string
   },
 ): Promise<PermitSignature> => {
-  const currency = await fetchCurrency(chainId, token, options?.rpcUrl)
+  const currency = await fetchCurrency(chainId, token)
   const spender = CONTRACT_ADDRESSES[chainId]!.Controller
-  const publicClient = createPublicClient({
-    chain: CHAIN_MAP[chainId],
-    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-  })
   const value = parseUnits(amount, currency.decimals)
   const [{ result: nonce }, { result: version }, { result: name }] =
-    await publicClient.multicall({
+    await cachedPublicClients[chainId].multicall({
       allowFailure: true,
       contracts: [
         {
