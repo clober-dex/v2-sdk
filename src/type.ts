@@ -41,7 +41,8 @@ export type DefaultOptions = {
   rpcUrl?: string
 }
 
-export type CurrencyAmount = {
+export type CurrencyFlow = {
   currency: Currency
   amount: string
+  direction: 'in' | 'out'
 }

@@ -8,7 +8,7 @@ import {
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type {
-  CurrencyAmount,
+  CurrencyFlow,
   DefaultOptions,
   PermitSignature,
   Transaction,
@@ -102,7 +102,7 @@ export const openMarket = decorator(
  * @param {PermitSignature} [options.signature] The permit signature for token approval.
  * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
- * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyAmount, take: CurrencyAmount } }>}
+ * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyFlow, take: CurrencyFlow } }>}
  * Promise resolving to the transaction object representing the limit order with the result of the order.
  * @example
  * import { signERC20Permit, limitOrder } from '@clober/v2-sdk'
@@ -160,8 +160,8 @@ export const limitOrder = decorator(
   }): Promise<{
     transaction: Transaction
     result: {
-      make: CurrencyAmount
-      take: CurrencyAmount
+      make: CurrencyFlow
+      take: CurrencyFlow
     }
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
@@ -245,10 +245,12 @@ export const limitOrder = decorator(
               isBid ? market.quote.decimals : market.base.decimals,
             ),
             currency: isBid ? market.quote : market.base,
+            direction: 'in',
           },
           take: {
             amount: '0',
             currency: isBid ? market.base : market.quote,
+            direction: 'out',
           },
         },
       }
@@ -286,10 +288,12 @@ export const limitOrder = decorator(
               isBid ? market.quote.decimals : market.base.decimals,
             ),
             currency: isBid ? market.quote : market.base,
+            direction: 'in',
           },
           take: {
             amount: spendAmount,
             currency: isBid ? market.base : market.quote,
+            direction: 'out',
           },
         },
       }
