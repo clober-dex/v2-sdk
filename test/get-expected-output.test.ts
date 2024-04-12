@@ -202,7 +202,7 @@ test('get expected output bid', async () => {
 test('get expected output in not open book', async () => {
   const { takenAmount, spendAmount } = await getExpectedOutput({
     chainId: arbitrumSepolia.id,
-    inputToken: '0xf18Be2a91cF31Fc3f8D828b6c714e1806a75e0AA',
+    inputToken: '0x0e12A07A610056067063cB208882fD5a032B1505',
     outputToken: '0x0000000000000000000000000000000000000000',
     amountIn: '10000',
     options: {

@@ -52,7 +52,7 @@ test('fetch empty market', async () => {
 test('fetch not open market', async () => {
   const market = await getMarket({
     chainId: arbitrumSepolia.id,
-    token0: '0xf18Be2a91cF31Fc3f8D828b6c714e1806a75e0AA',
+    token0: '0x0e12A07A610056067063cB208882fD5a032B1505',
     token1: '0x0000000000000000000000000000000000000000',
     options: {
       rpcUrl: publicClient.transport.url!,
