@@ -342,5 +342,5 @@ test('limit ask order', async () => {
   expect(
     getSize(afterMarket.asks, 3450, 3451) -
       getSize(beforeMarket.asks, 3450, 3451),
-  ).toEqual(1008553000000000000n)
+  ).toEqual(1008553000000000000)
 })
