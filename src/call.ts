@@ -1,7 +1,18 @@
-import { isAddressEqual, parseUnits, zeroAddress, zeroHash } from 'viem'
+import {
+  formatUnits,
+  isAddressEqual,
+  parseUnits,
+  zeroAddress,
+  zeroHash,
+} from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
-import type { DefaultOptions, PermitSignature, Transaction } from './type'
+import type {
+  CurrencyAmount,
+  DefaultOptions,
+  PermitSignature,
+  Transaction,
+} from './type'
 import { calculateUnit } from './utils/unit'
 import { CONTROLLER_ABI } from './abis/core/controller-abi'
 import { getDeadlineTimestampInSeconds } from './utils/time'
@@ -91,7 +102,8 @@ export const openMarket = decorator(
  * @param {PermitSignature} [options.signature] The permit signature for token approval.
  * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
- * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the limit order.
+ * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyAmount, take: CurrencyAmount } }>}
+ * Promise resolving to the transaction object representing the limit order with the result of the order.
  * @example
  * import { signERC20Permit, limitOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
@@ -103,7 +115,7 @@ export const openMarket = decorator(
  *   '100.123'
  * )
  *
- * const transaction = await limitOrder(
+ * const { transaction } = await limitOrder(
  *   421614,
  *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
  *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -116,7 +128,7 @@ export const openMarket = decorator(
  * @example
  * import { limitOrder } from '@clober/v2-sdk'
  *
- * const transaction = await limitOrder(
+ * const { transaction } = await limitOrder(
  *   421614,
  *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
  *  '0x0000000000000000000000000000000000000000',
@@ -145,7 +157,13 @@ export const limitOrder = decorator(
       signature?: PermitSignature
       postOnly?: boolean
     } & DefaultOptions
-  }): Promise<Transaction> => {
+  }): Promise<{
+    transaction: Transaction
+    result: {
+      make: CurrencyAmount
+      take: CurrencyAmount
+    }
+  }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
     if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
@@ -205,46 +223,76 @@ export const limitOrder = decorator(
       hookData: zeroHash,
     }
     if (options?.postOnly === true || spendAmount === '0') {
-      return buildTransaction(chainId, {
-        chain: CHAIN_MAP[chainId],
-        account: userAddress,
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'make',
-        args: [
-          [makeParam],
-          tokensToSettle,
-          permitParamsList,
-          getDeadlineTimestampInSeconds(),
-        ],
-        value: isETH ? quoteAmount : 0n,
-      })
+      return {
+        transaction: await buildTransaction(chainId, {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'make',
+          args: [
+            [makeParam],
+            tokensToSettle,
+            permitParamsList,
+            getDeadlineTimestampInSeconds(),
+          ],
+          value: isETH ? quoteAmount : 0n,
+        }),
+        result: {
+          make: {
+            amount: formatUnits(
+              quoteAmount,
+              isBid ? market.quote.decimals : market.base.decimals,
+            ),
+            currency: isBid ? market.quote : market.base,
+          },
+          take: {
+            amount: '0',
+            currency: isBid ? market.base : market.quote,
+          },
+        },
+      }
     } else {
       // take and make
-      return buildTransaction(chainId, {
-        chain: CHAIN_MAP[chainId],
-        account: userAddress,
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'limit',
-        args: [
-          [
-            {
-              takeBookId: bookId,
-              makeBookId: makeParam.id,
-              limitPrice: rawPrice,
-              tick: makeParam.tick,
-              quoteAmount,
-              takeHookData: zeroHash,
-              makeHookData: makeParam.hookData,
-            },
+      return {
+        transaction: await buildTransaction(chainId, {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'limit',
+          args: [
+            [
+              {
+                takeBookId: bookId,
+                makeBookId: makeParam.id,
+                limitPrice: rawPrice,
+                tick: makeParam.tick,
+                quoteAmount,
+                takeHookData: zeroHash,
+                makeHookData: makeParam.hookData,
+              },
+            ],
+            tokensToSettle,
+            permitParamsList,
+            getDeadlineTimestampInSeconds(),
           ],
-          tokensToSettle,
-          permitParamsList,
-          getDeadlineTimestampInSeconds(),
-        ],
-        value: isETH ? quoteAmount : 0n,
-      })
+          value: isETH ? quoteAmount : 0n,
+        }),
+        result: {
+          make: {
+            amount: formatUnits(
+              quoteAmount,
+              isBid ? market.quote.decimals : market.base.decimals,
+            ),
+            currency: isBid ? market.quote : market.base,
+          },
+          take: {
+            amount: spendAmount,
+            currency: isBid ? market.base : market.quote,
+          },
+        },
+      }
     }
   },
 )
