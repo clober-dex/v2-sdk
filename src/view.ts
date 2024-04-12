@@ -2,11 +2,11 @@ import { formatUnits, isAddressEqual, parseUnits } from 'viem'
 
 import { fetchMarket } from './apis/market'
 import { CHAIN_IDS } from './constants/chain'
-import { DefaultOptions, Market } from './type'
+import type { DefaultOptions, Market } from './type'
 import { parsePrice } from './utils/prices'
 import { MAX_PRICE } from './constants/price'
 import { fetchOpenOrder, fetchOpenOrders } from './apis/open-order'
-import { OpenOrder } from './model/open-order'
+import { type OpenOrder } from './model/open-order'
 import { decorator } from './utils/decorator'
 
 /**
@@ -15,6 +15,7 @@ import { decorator } from './utils/decorator'
  * @param token0 - token0 address
  * @param token1 - token1 address
  * @param options
+ * @param options.n - number of depth levels to fetch
  * @param options.rpcUrl - RPC URL of the blockchain
  * @returns A market {@link Market}
  *
@@ -32,16 +33,19 @@ export const getMarket = decorator(
     chainId,
     token0,
     token1,
+    options,
   }: {
     chainId: CHAIN_IDS
     token0: `0x${string}`
     token1: `0x${string}`
-    options?: DefaultOptions
+    options?: {
+      n?: number
+    } & DefaultOptions
   }): Promise<Market> => {
     if (isAddressEqual(token0, token1)) {
       throw new Error('Token0 and token1 must be different')
     }
-    const market = await fetchMarket(chainId, [token0, token1])
+    const market = await fetchMarket(chainId, [token0, token1], options?.n)
     return {
       chainId,
       quote: market.quote,
@@ -93,7 +97,7 @@ export const getExpectedOutput = decorator(
   }): Promise<{
     takenAmount: string
     spendAmount: string
-    result: { bookId: bigint; takenAmount: bigint; spendAmount: bigint }[]
+    bookId: bigint
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -108,34 +112,21 @@ export const getExpectedOutput = decorator(
           ? MAX_PRICE
           : 0n
     const inputCurrency = isBid ? market.quote : market.base
-    const result = market.spend({
+    const { takenQuoteAmount, spendBaseAmount, bookId } = market.spend({
       spendBase: !isBid,
       limitPrice: rawLimitPrice,
       amountIn: parseUnits(amountIn, inputCurrency.decimals),
     })
-    const { takenAmount, spendAmount } = Object.values(result).reduce(
-      (acc, { takenAmount, spendAmount }) => ({
-        takenAmount: acc.takenAmount + takenAmount,
-        spendAmount: acc.spendAmount + spendAmount,
-      }),
-      { takenAmount: 0n, spendAmount: 0n },
-    )
     return {
       takenAmount: formatUnits(
-        takenAmount,
+        takenQuoteAmount,
         isBid ? market.base.decimals : market.quote.decimals,
       ),
       spendAmount: formatUnits(
-        spendAmount,
+        spendBaseAmount,
         isBid ? market.quote.decimals : market.base.decimals,
       ),
-      result: Object.entries(result).map(
-        ([bookId, { takenAmount, spendAmount }]) => ({
-          bookId: BigInt(bookId),
-          takenAmount,
-          spendAmount,
-        }),
-      ),
+      bookId,
     }
   },
 )
@@ -177,7 +168,7 @@ export const getExpectedInput = decorator(
   }): Promise<{
     takenAmount: string
     spendAmount: string
-    result: { bookId: bigint; takenAmount: bigint; spendAmount: bigint }[]
+    bookId: bigint
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -192,34 +183,21 @@ export const getExpectedInput = decorator(
           ? MAX_PRICE
           : 0n
     const outputCurrency = isBid ? market.base : market.quote
-    const result = market.take({
+    const { takenQuoteAmount, spendBaseAmount, bookId } = market.take({
       takeQuote: !isBid,
       limitPrice: rawLimitPrice,
       amountOut: parseUnits(amountOut, outputCurrency.decimals),
     })
-    const { takenAmount, spendAmount } = Object.values(result).reduce(
-      (acc, { takenAmount, spendAmount }) => ({
-        takenAmount: acc.takenAmount + takenAmount,
-        spendAmount: acc.spendAmount + spendAmount,
-      }),
-      { takenAmount: 0n, spendAmount: 0n },
-    )
     return {
       takenAmount: formatUnits(
-        takenAmount,
+        takenQuoteAmount,
         isBid ? market.base.decimals : market.quote.decimals,
       ),
       spendAmount: formatUnits(
-        spendAmount,
+        spendBaseAmount,
         isBid ? market.quote.decimals : market.base.decimals,
       ),
-      result: Object.entries(result).map(
-        ([bookId, { takenAmount, spendAmount }]) => ({
-          bookId: BigInt(bookId),
-          takenAmount,
-          spendAmount,
-        }),
-      ),
+      bookId,
     }
   },
 )

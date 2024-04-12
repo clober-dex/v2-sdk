@@ -1,4 +1,4 @@
-import { Currency } from './currency'
+import type { Currency } from './currency'
 
 export type OpenOrderDto = {
   id: string

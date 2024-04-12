@@ -1,4 +1,4 @@
-import { CHAIN_IDS, DefaultOptions } from '../type'
+import { CHAIN_IDS, type DefaultOptions } from '../type'
 import { buildPublicClient } from '../constants/client'
 
 export function decorator<
@@ -11,9 +11,9 @@ export function decorator<
   return async (args: Args) => {
     const { chainId, options } = args as {
       chainId: CHAIN_IDS
-      options: DefaultOptions
+      options?: DefaultOptions
     }
-    buildPublicClient(chainId, options.rpcUrl)
+    buildPublicClient(chainId, options?.rpcUrl)
     return fn(args)
   }
 }

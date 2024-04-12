@@ -1,4 +1,6 @@
 import { expect, test } from 'vitest'
+import { createPublicClient, http } from 'viem'
+import { arbitrumSepolia } from 'viem/chains'
 
 import { FeePolicy } from '../src/model/fee-policy'
 import {
@@ -6,7 +8,7 @@ import {
   TAKER_DEFAULT_POLICY,
 } from '../src/constants/fee'
 
-import { publicClient } from './utils/constants'
+import { FORK_URL } from './utils/constants'
 
 const _abi = [
   {
@@ -118,6 +120,11 @@ const _abi = [
 ] as const
 
 const FEE_POLICY_WRAPPER_ADDRESS = '0x226Dad19a0C0E0faEB488601B61B1B67E434db6a'
+
+const publicClient = createPublicClient({
+  chain: arbitrumSepolia,
+  transport: http(FORK_URL),
+})
 
 const encode = async (usesQuote: boolean, rate: number) => {
   const mockPolicy = new FeePolicy(usesQuote, BigInt(rate))

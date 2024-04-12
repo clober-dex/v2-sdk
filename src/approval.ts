@@ -1,10 +1,15 @@
-import { createWalletClient, HDAccount, http, PrivateKeyAccount } from 'viem'
+import {
+  http,
+  createWalletClient,
+  type HDAccount,
+  type PrivateKeyAccount,
+} from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { decorator } from './utils/decorator'
-import { DefaultOptions } from './type'
+import type { DefaultOptions } from './type'
 
 const _abi = [
   {

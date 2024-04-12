@@ -1,13 +1,13 @@
-import { Account } from 'viem'
+import type { Account } from 'viem'
 
 import { CHAIN_IDS } from './constants/chain'
-import { Currency } from './model/currency'
-import { Depth } from './model/depth'
+import type { Currency } from './model/currency'
+import type { Depth } from './model/depth'
 
 export { CHAIN_IDS } from './constants/chain'
-export { Currency } from './model/currency'
-export { Depth } from './model/depth'
-export { OpenOrder } from './model/open-order'
+export type { Currency } from './model/currency'
+export type { Depth } from './model/depth'
+export type { OpenOrder } from './model/open-order'
 
 export type Market = {
   chainId: CHAIN_IDS
