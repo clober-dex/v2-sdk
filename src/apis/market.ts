@@ -44,7 +44,6 @@ const getBook = async (
     quote: isBid ? quoteCurrency : baseCurrency,
     unit,
     depths: depths.map(({ tick, depth }: { tick: number; depth: bigint }) => ({
-      unit,
       tick: BigInt(tick),
       rawAmount: depth,
     })),
