@@ -150,6 +150,7 @@ export const limitOrder = decorator(
     const isBid = isAddressEqual(market.quote.address, inputToken)
     if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
       throw new Error(`
+       Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
@@ -316,6 +317,7 @@ export const marketOrder = decorator(
     const isBid = isAddressEqual(market.quote.address, inputToken)
     if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
       throw new Error(`
+       Open the market before placing a market order.
        import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
@@ -467,6 +469,7 @@ export const claimOrders = decorator(
     const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
     if (!isApprovedForAll) {
       throw new Error(`
+       Set ApprovalForAll before calling this function.
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
@@ -597,6 +600,7 @@ export const cancelOrders = decorator(
     const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
     if (!isApprovedForAll) {
       throw new Error(`
+       Set ApprovalForAll before calling this function.
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(

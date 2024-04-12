@@ -41,6 +41,7 @@ test('limit order in not open market', async () => {
       price: '1000',
     }).catch((e) => e.message),
   ).toEqual(`
+       Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
