@@ -34,6 +34,7 @@ export class Book {
   unit: bigint
   quote: Currency
   depths: RawDepth[]
+  isOpened: boolean
 
   constructor({
     id,
@@ -41,18 +42,21 @@ export class Book {
     quote,
     unit,
     depths,
+    isOpened,
   }: {
     id: bigint
     base: Currency
     quote: Currency
     unit: bigint
     depths: RawDepth[]
+    isOpened: boolean
   }) {
     this.id = id
     this.base = base
     this.unit = unit
     this.quote = quote
     this.depths = depths
+    this.isOpened = isOpened
   }
 
   take = ({

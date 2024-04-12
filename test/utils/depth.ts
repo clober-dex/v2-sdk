@@ -74,8 +74,8 @@ const fetchDepth = async (
   ])
   const isBid = isAddressEqual(inputToken, quoteTokenAddress)
   const [quoteCurrency, baseCurrency] = await Promise.all([
-    fetchCurrency(chainId, quoteTokenAddress, rpcUrl),
-    fetchCurrency(chainId, baseTokenAddress, rpcUrl),
+    fetchCurrency(chainId, quoteTokenAddress),
+    fetchCurrency(chainId, baseTokenAddress),
   ])
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],

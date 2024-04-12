@@ -1,10 +1,4 @@
-import {
-  encodeAbiParameters,
-  isAddressEqual,
-  parseUnits,
-  zeroAddress,
-  zeroHash,
-} from 'viem'
+import { isAddressEqual, parseUnits, zeroAddress, zeroHash } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type { DefaultOptions, PermitSignature, Transaction } from './type'
@@ -19,11 +13,6 @@ import { parsePrice } from './utils/prices'
 import { fromPrice, invertPrice } from './utils/tick'
 import { getExpectedOutput, getOpenOrders } from './view'
 import { toBookId } from './utils/book-id'
-import {
-  MAKE_ORDER_PARAMS_ABI,
-  TAKE_ORDER_PARAMS_ABI,
-} from './abis/core/params-abi'
-import { Action } from './constants/action'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { decorator } from './utils/decorator'
 
@@ -184,7 +173,7 @@ export const limitOrder = decorator(
       amount,
       isBid ? market.quote.decimals : market.base.decimals,
     )
-    const [unit, { result }] = await Promise.all([
+    const [unit, { spendAmount, bookId }] = await Promise.all([
       calculateUnit(chainId, isBid ? market.quote : market.base),
       getExpectedOutput({
         chainId,
@@ -214,7 +203,7 @@ export const limitOrder = decorator(
       quoteAmount,
       hookData: zeroHash,
     }
-    if (options?.postOnly === true || result.length === 0) {
+    if (options?.postOnly === true || spendAmount === '0') {
       return buildTransaction(chainId, {
         chain: CHAIN_MAP[chainId],
         account: userAddress,
@@ -229,7 +218,7 @@ export const limitOrder = decorator(
         ],
         value: isETH ? quoteAmount : 0n,
       })
-    } else if (result.length === 1) {
+    } else {
       // take and make
       return buildTransaction(chainId, {
         chain: CHAIN_MAP[chainId],
@@ -240,7 +229,7 @@ export const limitOrder = decorator(
         args: [
           [
             {
-              takeBookId: result[0]!.bookId,
+              takeBookId: bookId,
               makeBookId: makeParam.id,
               limitPrice: rawPrice,
               tick: makeParam.tick,
@@ -251,51 +240,6 @@ export const limitOrder = decorator(
           ],
           tokensToSettle,
           permitParamsList,
-          getDeadlineTimestampInSeconds(),
-        ],
-        value: isETH ? quoteAmount : 0n,
-      })
-    } else {
-      // take x n and make
-      const makeAmount =
-        quoteAmount -
-        result.reduce((acc, { spendAmount }) => acc + spendAmount, 0n)
-      return buildTransaction(chainId, {
-        chain: CHAIN_MAP[chainId],
-        account: userAddress,
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'execute',
-        args: [
-          [
-            ...result.map(() => Action.TAKE),
-            ...(makeAmount > 0n ? [Action.MAKE] : []),
-          ],
-          [
-            ...result.map(({ bookId, takenAmount }) =>
-              encodeAbiParameters(TAKE_ORDER_PARAMS_ABI, [
-                {
-                  id: bookId,
-                  limitPrice: rawPrice,
-                  quoteAmount: takenAmount,
-                  hookData: zeroHash,
-                },
-              ]),
-            ),
-            ...(makeAmount > 0n
-              ? [
-                  encodeAbiParameters(MAKE_ORDER_PARAMS_ABI, [
-                    {
-                      ...makeParam,
-                      quoteAmount: makeAmount,
-                    },
-                  ]),
-                ]
-              : []),
-          ],
-          tokensToSettle,
-          permitParamsList,
-          [],
           getDeadlineTimestampInSeconds(),
         ],
         value: isETH ? quoteAmount : 0n,
@@ -394,7 +338,7 @@ export const marketOrder = decorator(
       amount,
       isBid ? market.quote.decimals : market.base.decimals,
     )
-    const { result } = await getExpectedOutput({
+    const { bookId, takenAmount } = await getExpectedOutput({
       chainId,
       inputToken,
       outputToken,
@@ -422,12 +366,14 @@ export const marketOrder = decorator(
       abi: CONTROLLER_ABI,
       functionName: 'take',
       args: [
-        result.map(({ bookId, takenAmount }) => ({
-          id: bookId,
-          limitPrice: isBid ? invertPrice(rawLimitPrice) : rawLimitPrice,
-          quoteAmount: takenAmount,
-          hookData: zeroHash,
-        })),
+        [
+          {
+            id: bookId,
+            limitPrice: isBid ? invertPrice(rawLimitPrice) : rawLimitPrice,
+            quoteAmount: takenAmount,
+            hookData: zeroHash,
+          },
+        ],
         tokensToSettle,
         permitParamsList,
         getDeadlineTimestampInSeconds(),
