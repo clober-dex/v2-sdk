@@ -1,6 +1,6 @@
 import { isAddressEqual, zeroAddress } from 'viem'
 
-import { Currency } from '../model/currency'
+import { type Currency } from '../model/currency'
 import { CHAIN_IDS } from '../constants/chain'
 import { cachedPublicClients } from '../constants/client'
 

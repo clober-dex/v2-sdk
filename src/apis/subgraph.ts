@@ -20,10 +20,10 @@ export async function fetchSubgraph<T>(
   })
 
   if (response.ok) {
-    return response.json()
+    return response.json() as Promise<T>
   } else {
     const errorResponse = await response.json()
 
-    throw new Error(errorResponse.message || 'Unknown Error')
+    throw new Error((errorResponse as any).message || 'Unknown Error')
   }
 }

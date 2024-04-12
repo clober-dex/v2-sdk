@@ -7,7 +7,7 @@ import {
 } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
-import { DefaultOptions, PermitSignature, Transaction } from './type'
+import type { DefaultOptions, PermitSignature, Transaction } from './type'
 import { calculateUnit } from './utils/unit'
 import { CONTROLLER_ABI } from './abis/core/controller-abi'
 import { getDeadlineTimestampInSeconds } from './utils/time'

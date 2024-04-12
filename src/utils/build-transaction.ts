@@ -1,10 +1,10 @@
 import {
   encodeFunctionData,
-  SimulateContractParameters,
-  WriteContractParameters,
+  type SimulateContractParameters,
+  type WriteContractParameters,
 } from 'viem'
 
-import { CHAIN_IDS, Transaction } from '../type'
+import { CHAIN_IDS, type Transaction } from '../type'
 import { cachedPublicClients } from '../constants/client'
 
 export const buildTransaction = async (

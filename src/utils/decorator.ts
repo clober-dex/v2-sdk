@@ -1,4 +1,4 @@
-import { CHAIN_IDS, DefaultOptions } from '../type'
+import { CHAIN_IDS, type DefaultOptions } from '../type'
 import { buildPublicClient } from '../constants/client'
 
 export function decorator<

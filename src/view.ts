@@ -2,11 +2,11 @@ import { formatUnits, isAddressEqual, parseUnits } from 'viem'
 
 import { fetchMarket } from './apis/market'
 import { CHAIN_IDS } from './constants/chain'
-import { DefaultOptions, Market } from './type'
+import type { DefaultOptions, Market } from './type'
 import { parsePrice } from './utils/prices'
 import { MAX_PRICE } from './constants/price'
 import { fetchOpenOrder, fetchOpenOrders } from './apis/open-order'
-import { OpenOrder } from './model/open-order'
+import { type OpenOrder } from './model/open-order'
 import { decorator } from './utils/decorator'
 
 /**
