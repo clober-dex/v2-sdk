@@ -80,7 +80,7 @@ test.runIf(IS_LOCAL)('cancel all orders', async () => {
       },
     })
   )
-    .filter((order) => order.cancelable)
+    .filter((order) => order.isCancelable)
     .slice(0, 20)
 
   // be sure to approve before claim

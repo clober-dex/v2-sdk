@@ -139,6 +139,6 @@ const toOpenOrder = (
       currency: outputCurrency,
       value: formatUnits(claimable, outputCurrency.decimals),
     },
-    cancelable: rawAmount > rawFilledAmount,
+    isCancelable: rawAmount > rawFilledAmount,
   }
 }
