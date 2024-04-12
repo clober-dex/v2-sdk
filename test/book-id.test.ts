@@ -1,4 +1,6 @@
 import { expect, test } from 'vitest'
+import { createPublicClient, http } from 'viem'
+import { arbitrumSepolia } from 'viem/chains'
 
 import { toBookId } from '../src/utils/book-id'
 import {
@@ -6,7 +8,7 @@ import {
   TAKER_DEFAULT_POLICY,
 } from '../src/constants/fee'
 
-import { publicClient } from './utils/constants'
+import { FORK_URL } from './utils/constants'
 
 const _abi = [
   {
@@ -63,6 +65,11 @@ const _abi = [
 ] as const
 
 const BOOK_ID_WRAPPER_ADDRESS = '0xbBa11dC70D31578fA426FB0EaCed79EB844F93A7'
+
+const publicClient = createPublicClient({
+  chain: arbitrumSepolia,
+  transport: http(FORK_URL),
+})
 
 test('check toBookId function', async () => {
   const bidBookKey = {

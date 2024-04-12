@@ -1,9 +1,15 @@
 import { expect, test } from 'vitest'
-import { getAddress } from 'viem'
+import { createPublicClient, getAddress, http } from 'viem'
+import { arbitrumSepolia } from 'viem/chains'
 
 import { lnWad } from '../src/utils/math'
 
-import { publicClient } from './utils/constants'
+import { FORK_URL } from './utils/constants'
+
+const publicClient = createPublicClient({
+  chain: arbitrumSepolia,
+  transport: http(FORK_URL),
+})
 
 const _abi = [
   {
