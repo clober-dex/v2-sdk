@@ -13,13 +13,13 @@ export const buildTransaction = async (
 ): Promise<Transaction> => {
   const data = encodeFunctionData(args)
   const [gas, gasPrice] = await Promise.all([
-    cachedPublicClients[chainId].estimateGas({
+    cachedPublicClients[chainId]!.estimateGas({
       account: args.account,
       data,
       to: args.address,
       value: args.value || 0n,
     }),
-    cachedPublicClients[chainId].getGasPrice(),
+    cachedPublicClients[chainId]!.getGasPrice(),
   ])
   return {
     gas,
