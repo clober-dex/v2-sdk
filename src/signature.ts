@@ -10,7 +10,7 @@ import {
 import { CHAIN_IDS } from './constants/chain'
 import { getDeadlineTimestampInSeconds } from './utils/time'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
-import { fetchCurrency } from './apis/currency'
+import { fetchCurrency } from './utils/currency'
 import { DefaultOptions, PermitSignature } from './type'
 import { cachedPublicClients } from './constants/client'
 import { decorator } from './utils/decorator'

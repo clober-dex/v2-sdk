@@ -7,8 +7,8 @@ import { quoteToBase } from '../utils/decimals'
 import { formatPrice } from '../utils/prices'
 import { invertPrice, toPrice } from '../utils/tick'
 import { OpenOrder, OpenOrderDto } from '../model/open-order'
+import { fetchCurrency } from '../utils/currency'
 
-import { fetchCurrency } from './currency'
 import { fetchSubgraph } from './subgraph'
 
 const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
