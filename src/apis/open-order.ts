@@ -2,11 +2,11 @@ import { formatUnits, getAddress, isAddressEqual } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
 import { getMarketId } from '../utils/market'
-import { Currency } from '../model/currency'
+import type { Currency } from '../model/currency'
 import { quoteToBase } from '../utils/decimals'
 import { formatPrice } from '../utils/prices'
 import { invertPrice, toPrice } from '../utils/tick'
-import { OpenOrder, OpenOrderDto } from '../model/open-order'
+import type { OpenOrder, OpenOrderDto } from '../model/open-order'
 import { fetchCurrency } from '../utils/currency'
 
 import { fetchSubgraph } from './subgraph'
@@ -139,6 +139,9 @@ const toOpenOrder = (
       currency: outputCurrency,
       value: formatUnits(claimable, outputCurrency.decimals),
     },
-    isCancelable: rawAmount > rawFilledAmount,
+    cancelable: {
+      currency: outputCurrency,
+      value: formatUnits(amount - filled, base.decimals),
+    },
   }
 }
