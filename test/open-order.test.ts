@@ -8,6 +8,7 @@ import {
   limitOrder,
   claimOrder,
 } from '@clober/v2-sdk'
+import { getAddress } from 'viem'
 
 import { buildPublicClient } from '../src/constants/client'
 
@@ -15,6 +16,7 @@ import { cloberTestChain } from './utils/test-chain'
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
 import { createProxyClients } from './utils/utils'
 import { fetchOpenOrders } from './utils/open-order'
+import { fetchTokenBalance } from './utils/currency'
 
 const clients = createProxyClients(
   Array.from({ length: 4 }, () => Math.floor(new Date().getTime())).map(
@@ -122,7 +124,12 @@ test('claim order', async () => {
     await publicClient.waitForTransactionReceipt({ hash })
   }
 
-  const { transaction } = await claimOrder({
+  const beforeBalance = await fetchTokenBalance(
+    cloberTestChain.id,
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    account.address,
+  )
+  const { transaction, result } = await claimOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
     id: '50784203244917507140848199044778666621202412111794785971205812514094254653440',
@@ -133,6 +140,12 @@ test('claim order', async () => {
 
   await walletClient.sendTransaction({ ...transaction, account })
 
+  const afterBalance = await fetchTokenBalance(
+    cloberTestChain.id,
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    account.address,
+  )
+
   expect(
     (
       await fetchOpenOrders(cloberTestChain.id, [
@@ -140,57 +153,88 @@ test('claim order', async () => {
       ])
     ).map((order) => order.claimable),
   ).toEqual([0n])
+  expect(afterBalance - beforeBalance).toEqual(350131739n)
+  expect(result.direction).toEqual('out')
+  expect(result.currency.address).toEqual(
+    getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
 })
 
 test('claim orders', async () => {
-  const { publicClient, walletClient } = clients[2] as any
+  const { publicClient, walletClient } = clients[3] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
+
+  await publicClient.waitForTransactionReceipt({
+    hash: await walletClient.sendTransaction({
+      account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+      to: account.address,
+      value: 2000000000000000000n,
+    }),
+  })
+
+  expect(
+    (
+      await fetchOpenOrders(cloberTestChain.id, [
+        50784203244917507140848199044778666621202412111794785971205812514094254653440n, // ask
+        50784203244917507140848199044778666621202412111794785971205812483307929075712n, // ask
+        46223845323662364279893361453861711542636620039907198451770260500482770337792n, // bid
+        46223845323662364279893361453861711542636620039907198451770259962821584355328n, // bid
+      ])
+    ).map((order) => order.claimable),
+  ).toEqual([0n, 0n, 0n, 0n])
+
+  const { transaction: takeTx1 } = await limitOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    inputToken: '0x0000000000000000000000000000000000000000',
+    outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    amount: '2',
+    price: '3250.01',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
+  await walletClient.sendTransaction({
+    ...takeTx1!,
+    account,
+    gasPrice: takeTx1!.gasPrice! * 2n,
+  })
 
   const signature = await signERC20Permit({
     chainId: cloberTestChain.id,
     account,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    amount: '100000',
-    options: {
-      rpcUrl: publicClient.transport.url!,
-    },
+    amount: '5000000',
+    options: { rpcUrl: publicClient.transport.url! },
   })
-  const { transaction: takeTx } = await limitOrder({
+  const { transaction: takeTx2 } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0x0000000000000000000000000000000000000000',
-    amount: '100000',
-    price: '3505.01',
+    amount: '5000000',
+    price: '3555.01',
     options: {
       signature,
       rpcUrl: publicClient.transport.url!,
     },
   })
-
-  expect(
-    (
-      await fetchOpenOrders(cloberTestChain.id, [
-        50784203244917507140848199044778666621202412111794785971205812514094254653440n,
-        50784203244917507140848199044778666621202412111794785971205812483307929075712n,
-      ])
-    ).map((order) => order.claimable),
-  ).toEqual([0n, 0n])
-
   await walletClient.sendTransaction({
-    ...takeTx!,
+    ...takeTx2!,
     account,
-    gasPrice: takeTx!.gasPrice! * 2n,
+    gasPrice: takeTx2!.gasPrice! * 2n,
   })
 
   expect(
     (
       await fetchOpenOrders(cloberTestChain.id, [
-        50784203244917507140848199044778666621202412111794785971205812514094254653440n,
-        50784203244917507140848199044778666621202412111794785971205812483307929075712n,
+        50784203244917507140848199044778666621202412111794785971205812514094254653440n, // ask
+        50784203244917507140848199044778666621202412111794785971205812483307929075712n, // ask
+        46223845323662364279893361453861711542636620039907198451770260500482770337792n, // bid
+        46223845323662364279893361453861711542636620039907198451770259962821584355328n, // bid
       ])
     ).map((order) => order.claimable),
-  ).toEqual([100030n, 60018n])
+  ).toEqual([100030n, 60018n, 3471041312n, 1000300090n])
 
   // be sure to approve before claim
   const hash = await setApprovalOfOpenOrdersForAll({
@@ -204,12 +248,24 @@ test('claim orders', async () => {
     await publicClient.waitForTransactionReceipt({ hash })
   }
 
-  const { transaction } = await claimOrders({
+  const [beforeUSDCBalance, beforeETHBalance] = await Promise.all([
+    fetchTokenBalance(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      account.address,
+    ),
+    publicClient.getBalance({
+      address: account.address,
+    }),
+  ])
+  const { transaction, result } = await claimOrders({
     chainId: cloberTestChain.id,
     userAddress: account.address,
     ids: [
-      '50784203244917507140848199044778666621202412111794785971205812514094254653440',
-      '50784203244917507140848199044778666621202412111794785971205812483307929075712',
+      '50784203244917507140848199044778666621202412111794785971205812514094254653440', // ask
+      '50784203244917507140848199044778666621202412111794785971205812483307929075712', // ask
+      '46223845323662364279893361453861711542636620039907198451770260500482770337792', // bid
+      '46223845323662364279893361453861711542636620039907198451770259962821584355328', // bid
     ],
     options: {
       rpcUrl: publicClient.transport.url!,
@@ -218,12 +274,38 @@ test('claim orders', async () => {
 
   await walletClient.sendTransaction({ ...transaction, account })
 
+  const [afterUSDCBalance, afterETHBalance] = await Promise.all([
+    fetchTokenBalance(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      account.address,
+    ),
+    publicClient.getBalance({
+      address: account.address,
+    }),
+  ])
+
   expect(
     (
       await fetchOpenOrders(cloberTestChain.id, [
-        50784203244917507140848199044778666621202412111794785971205812514094254653440n,
-        50784203244917507140848199044778666621202412111794785971205812483307929075712n,
+        50784203244917507140848199044778666621202412111794785971205812514094254653440n, // ask
+        50784203244917507140848199044778666621202412111794785971205812483307929075712n, // ask
+        46223845323662364279893361453861711542636620039907198451770260500482770337792n, // bid
+        46223845323662364279893361453861711542636620039907198451770259962821584355328n, // bid
       ])
     ).map((order) => order.claimable),
-  ).toEqual([0n, 0n])
+  ).toEqual([0n, 0n, 0n, 0n])
+  expect(afterUSDCBalance - beforeUSDCBalance).toEqual(560799798n)
+  expect(Number(afterETHBalance - beforeETHBalance)).greaterThan(
+    1290000000000000000,
+  )
+  expect(result.length).toEqual(2)
+  expect(result[0].direction).toEqual('out')
+  expect(result[0].currency.address).toEqual(
+    getAddress('0x0000000000000000000000000000000000000000'),
+  )
+  expect(result[1].direction).toEqual('out')
+  expect(result[1].currency.address).toEqual(
+    getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
 })

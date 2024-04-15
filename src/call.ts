@@ -574,11 +574,23 @@ export const claimOrders = decorator(
           getDeadlineTimestampInSeconds(),
         ],
       }),
-      result: openOrders.map((order) => ({
-        currency: order.claimable.currency,
-        amount: order.claimable.value,
-        direction: 'out',
-      })),
+      result: openOrders
+        .map((order) => ({
+          currency: order.claimable.currency,
+          amount: order.claimable.value,
+        }))
+        .reduce((acc, { currency, amount }) => {
+          const index = acc.findIndex((c) =>
+            isAddressEqual(c.currency.address, currency.address),
+          )
+          if (index === -1) {
+            return [...acc, { currency, amount, direction: 'out' }]
+          }
+          acc[index].amount = (
+            Number(acc[index].amount) + Number(amount)
+          ).toString()
+          return acc
+        }, [] as CurrencyFlow[]),
     }
   },
 )
