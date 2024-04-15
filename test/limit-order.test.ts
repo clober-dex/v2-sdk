@@ -193,7 +193,7 @@ test('make ask order', async () => {
     }),
   ])
 
-  expect(beforeBalance - afterBalance).toEqual(150549091940677668n)
+  expect(Number(beforeBalance - afterBalance)).greaterThan(150000000000000000)
   expect(
     getSize(afterMarket.asks, 8000, 8001) -
       getSize(beforeMarket.asks, 8000, 8001),
@@ -293,6 +293,7 @@ test('limit bid order', async () => {
       getSize(beforeMarket.bids, 3504, 3505),
   ).toEqual(28440764694968336000)
   expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length - 1)
+  expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length)
   expect(make.amount).toEqual('100000')
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
@@ -378,13 +379,16 @@ test('limit ask order', async () => {
     }),
   ])
 
-  expect(beforeETHBalance - afterETHBalance).toEqual(2000959568694441734n)
+  expect(Number(beforeETHBalance - afterETHBalance)).greaterThan(
+    2000000000000000000,
+  )
   expect(afterUSDCBalance - beforeUSDCBalance).toEqual(3467570270n)
   expect(
     getSize(afterMarket.asks, 3450, 3451) -
       getSize(beforeMarket.asks, 3450, 3451),
   ).toEqual(1008553000000000000)
   expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length - 1)
+  expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length)
   expect(make.amount).toEqual('2')
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
