@@ -293,7 +293,7 @@ test('limit bid order', async () => {
       getSize(beforeMarket.bids, 3504, 3505),
   ).toEqual(28440764694968336000)
   expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length - 1)
-  expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length)
+  expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length + 1)
   expect(make.amount).toEqual('100000')
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
@@ -388,7 +388,7 @@ test('limit ask order', async () => {
       getSize(beforeMarket.asks, 3450, 3451),
   ).toEqual(1008553000000000000)
   expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length - 1)
-  expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length)
+  expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length + 1)
   expect(make.amount).toEqual('2')
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
