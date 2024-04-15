@@ -697,7 +697,9 @@ export const cancelOrders = decorator(
 
     const openOrders = (
       await getOpenOrders({ chainId, userAddress, options: { ...options } })
-    ).filter((order) => ids.includes(order.id) && order.claimable.value !== '0')
+    ).filter(
+      (order) => ids.includes(order.id) && order.cancelable.value !== '0',
+    )
     if (openOrders.length === 0) {
       throw new Error(`No cancelable open orders found for ${userAddress}`)
     }
