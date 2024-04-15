@@ -731,11 +731,23 @@ export const cancelOrders = decorator(
           getDeadlineTimestampInSeconds(),
         ],
       }),
-      result: openOrders.map((order) => ({
-        currency: order.cancelable.currency,
-        amount: order.cancelable.value,
-        direction: 'out',
-      })),
+      result: openOrders
+        .map((order) => ({
+          currency: order.cancelable.currency,
+          amount: order.cancelable.value,
+        }))
+        .reduce((acc, { currency, amount }) => {
+          const index = acc.findIndex((c) =>
+            isAddressEqual(c.currency.address, currency.address),
+          )
+          if (index === -1) {
+            return [...acc, { currency, amount, direction: 'out' }]
+          }
+          acc[index].amount = (
+            Number(acc[index].amount) + Number(amount)
+          ).toString()
+          return acc
+        }, [] as CurrencyFlow[]),
     }
   },
 )
