@@ -26,6 +26,7 @@ import { getExpectedOutput, getOpenOrders } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { decorator } from './utils/decorator'
+import { SUBGRAPH_URL } from './constants/subgraph-url'
 
 /**
  * Build a transaction to open a market.
@@ -526,6 +527,9 @@ export const claimOrders = decorator(
     ids: string[]
     options?: DefaultOptions
   }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
+    if (!SUBGRAPH_URL[chainId]) {
+      throw new Error(`Subgraph URL not found for chainId: ${chainId}`)
+    }
     const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
     if (!isApprovedForAll) {
       throw new Error(`
@@ -682,6 +686,9 @@ export const cancelOrders = decorator(
     ids: string[]
     options?: DefaultOptions
   }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
+    if (!SUBGRAPH_URL[chainId]) {
+      throw new Error(`Subgraph URL not found for chainId: ${chainId}`)
+    }
     const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
     if (!isApprovedForAll) {
       throw new Error(`

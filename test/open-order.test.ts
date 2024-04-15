@@ -21,7 +21,7 @@ import { fetchOpenOrders } from './utils/open-order'
 import { fetchTokenBalance } from './utils/currency'
 
 const clients = createProxyClients(
-  Array.from({ length: 6 }, () => Math.floor(new Date().getTime())).map(
+  Array.from({ length: 7 }, () => Math.floor(new Date().getTime())).map(
     (id) => id,
   ),
 )
@@ -427,4 +427,31 @@ test('cancel orders', async () => {
   expect(Number(afterETHBalance - beforeETHBalance)).lessThan(
     100000000000000000,
   )
+})
+
+test('fail when subgraph url is not provided', async () => {
+  const { publicClient } = clients[6] as any
+  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
+
+  await expect(
+    claimOrder({
+      chainId: 7777,
+      userAddress: account.address,
+      id: '50784203244917507140848199044778666621202412111794785971205812514094254653440',
+      options: {
+        rpcUrl: publicClient.transport.url!,
+      },
+    }),
+  ).rejects.toThrow('Subgraph URL not found for chainId: 7777')
+
+  await expect(
+    cancelOrder({
+      chainId: 7777,
+      userAddress: account.address,
+      id: '50784203244917507140848199044778666621202412111794785971205812514094254653440',
+      options: {
+        rpcUrl: publicClient.transport.url!,
+      },
+    }),
+  ).rejects.toThrow('Subgraph URL not found for chainId: 7777')
 })
