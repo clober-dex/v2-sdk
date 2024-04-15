@@ -149,7 +149,7 @@ test('make ask order', async () => {
     userAddress: account.address,
     inputToken: '0x0000000000000000000000000000000000000000',
     outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    amount: '0.0015',
+    amount: '0.15',
     price: '8000.01',
     options: {
       rpcUrl: publicClient.transport.url!,
@@ -193,12 +193,12 @@ test('make ask order', async () => {
     }),
   ])
 
-  expect(beforeBalance - afterBalance).toEqual(2048655440677668n)
+  expect(beforeBalance - afterBalance).toEqual(150549091940677668n)
   expect(
     getSize(afterMarket.asks, 8000, 8001) -
       getSize(beforeMarket.asks, 8000, 8001),
-  ).toEqual(1500000000000000)
-  expect(make.amount).toEqual('0.0015')
+  ).toEqual(150045000000000000)
+  expect(make.amount).toEqual('0.15')
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
@@ -284,7 +284,7 @@ test('limit bid order', async () => {
     }),
   ])
 
-  expect(beforeUSDCBalance - afterUSDCBalance).toEqual(100000000000n) // todo: check result
+  expect(beforeUSDCBalance - afterUSDCBalance).toEqual(100000000000n)
   expect(afterETHBalance - beforeETHBalance).toEqual(1327704033001898034n)
   expect(
     getSize(afterMarket.bids, 3504, 3505) -
