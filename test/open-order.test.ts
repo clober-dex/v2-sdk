@@ -7,6 +7,8 @@ import {
   signERC20Permit,
   limitOrder,
   claimOrder,
+  cancelOrder,
+  cancelOrders,
 } from '@clober/v2-sdk'
 import { getAddress } from 'viem'
 
@@ -19,7 +21,7 @@ import { fetchOpenOrders } from './utils/open-order'
 import { fetchTokenBalance } from './utils/currency'
 
 const clients = createProxyClients(
-  Array.from({ length: 4 }, () => Math.floor(new Date().getTime())).map(
+  Array.from({ length: 6 }, () => Math.floor(new Date().getTime())).map(
     (id) => id,
   ),
 )
@@ -307,5 +309,122 @@ test('claim orders', async () => {
   expect(result[1].direction).toEqual('out')
   expect(result[1].currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
+})
+
+test('cancel order', async () => {
+  const { publicClient, walletClient } = clients[4] as any
+  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
+
+  // be sure to approve before claim
+  const hash = await setApprovalOfOpenOrdersForAll({
+    chainId: cloberTestChain.id,
+    account,
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
+  if (hash) {
+    await publicClient.waitForTransactionReceipt({ hash })
+  }
+
+  const beforeBalance = await publicClient.getBalance({
+    address: account.address,
+  })
+  const { transaction, result } = await cancelOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    id: '50784203244917507140848199044778666621202412111794785971205812514094254653440',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
+  await walletClient.sendTransaction({ ...transaction, account })
+  const afterBalance = await publicClient.getBalance({
+    address: account.address,
+  })
+
+  // can't check `result.amount` because it's subgraph result
+  expect(Number(afterBalance - beforeBalance)).lessThan(100030000000000000)
+  expect(result.direction).toEqual('out')
+  expect(result.currency.address).toEqual(
+    getAddress('0x0000000000000000000000000000000000000000'),
+  )
+})
+test('cancel orders', async () => {
+  const { publicClient, walletClient } = clients[5] as any
+  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
+
+  const orderIds = [
+    '46223845323662364279893361453861711542636620039907198451770259165675654217728',
+    '50784203244917507140848199044778666621202412111794785971205811992925743087616',
+  ]
+
+  const status = await fetchOpenOrders(
+    cloberTestChain.id,
+    orderIds.map((id) => BigInt(id)),
+  )
+  expect(status.map((order) => order.open - order.claimable)).toEqual([
+    15004501350n,
+    100030n,
+  ])
+
+  // be sure to approve before claim
+  const hash = await setApprovalOfOpenOrdersForAll({
+    chainId: cloberTestChain.id,
+    account,
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
+  if (hash) {
+    await publicClient.waitForTransactionReceipt({ hash })
+  }
+
+  const [beforeUSDCBalance, beforeETHBalance] = await Promise.all([
+    fetchTokenBalance(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      account.address,
+    ),
+    publicClient.getBalance({
+      address: account.address,
+    }),
+  ])
+  const { transaction, result } = await cancelOrders({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    ids: orderIds,
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
+  })
+  await walletClient.sendTransaction({ ...transaction, account })
+
+  const [afterUSDCBalance, afterETHBalance] = await Promise.all([
+    fetchTokenBalance(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      account.address,
+    ),
+    publicClient.getBalance({
+      address: account.address,
+    }),
+  ])
+  expect(result.length).toEqual(2)
+  expect(result[0].direction).toEqual('out')
+  expect(result[0].currency.address).toEqual(
+    getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
+  // can't check `result[0].amount` because it's subgraph result
+  expect(afterUSDCBalance - beforeUSDCBalance).toEqual(14999999999n)
+
+  expect(result[1].direction).toEqual('out')
+  expect(result[1].currency.address).toEqual(
+    getAddress('0x0000000000000000000000000000000000000000'),
+  )
+  // can't check `result[1].amount` because it's subgraph result
+  expect(Number(afterETHBalance - beforeETHBalance)).lessThan(
+    100000000000000000,
   )
 })
