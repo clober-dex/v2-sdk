@@ -117,6 +117,9 @@ const toOpenOrder = (
     : unit * rawFilledAmount
   const claimed = quoteToBase(tick, unit * rawClaimedAmount, false)
   const claimable = quoteToBase(tick, unit * rawClaimableAmount, false)
+  const cancelable = isBid
+    ? unit * (rawAmount - rawFilledAmount)
+    : quoteToBase(tick, unit * (rawAmount - rawFilledAmount), false)
   return {
     id: openOrder.id,
     isBid,
@@ -141,7 +144,7 @@ const toOpenOrder = (
     },
     cancelable: {
       currency: inputCurrency,
-      value: formatUnits(amount - filled, inputCurrency.decimals),
+      value: formatUnits(cancelable, inputCurrency.decimals),
     },
   }
 }
