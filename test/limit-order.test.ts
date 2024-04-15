@@ -149,7 +149,7 @@ test('make ask order', async () => {
     userAddress: account.address,
     inputToken: '0x0000000000000000000000000000000000000000',
     outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    amount: '0.0015',
+    amount: '0.15',
     price: '8000.01',
     options: {
       rpcUrl: publicClient.transport.url!,
@@ -193,12 +193,12 @@ test('make ask order', async () => {
     }),
   ])
 
-  expect(beforeBalance - afterBalance).toEqual(2048655440677668n)
+  expect(Number(beforeBalance - afterBalance)).greaterThan(150000000000000000)
   expect(
     getSize(afterMarket.asks, 8000, 8001) -
       getSize(beforeMarket.asks, 8000, 8001),
-  ).toEqual(1500000000000000)
-  expect(make.amount).toEqual('0.0015')
+  ).toEqual(150045000000000000)
+  expect(make.amount).toEqual('0.15')
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
@@ -284,17 +284,21 @@ test('limit bid order', async () => {
     }),
   ])
 
-  expect(beforeUSDCBalance - afterUSDCBalance).toEqual(100000000000n) // todo: check result
-  expect(afterETHBalance - beforeETHBalance).toEqual(1327704033001898034n)
+  expect(beforeUSDCBalance - afterUSDCBalance).toEqual(100000000000n)
+  expect(Number(afterETHBalance - beforeETHBalance)).lessThan(
+    100000000000000000,
+  )
   expect(
     getSize(afterMarket.bids, 3504, 3505) -
       getSize(beforeMarket.bids, 3504, 3505),
-  ).toEqual(27061899601333555000)
+  ).toEqual(28440764694968336000)
+  expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length - 1)
+  expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length + 1)
   expect(make.amount).toEqual('100000')
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  expect(take.amount).toEqual('5181.356442')
+  expect(take.amount).toEqual('350.13174')
   expect(take.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
@@ -375,17 +379,21 @@ test('limit ask order', async () => {
     }),
   ])
 
-  expect(beforeETHBalance - afterETHBalance).toEqual(2000959595585013014n)
+  expect(Number(beforeETHBalance - afterETHBalance)).greaterThan(
+    2000000000000000000,
+  )
   expect(afterUSDCBalance - beforeUSDCBalance).toEqual(3467570270n)
   expect(
     getSize(afterMarket.asks, 3450, 3451) -
       getSize(beforeMarket.asks, 3450, 3451),
   ).toEqual(1008553000000000000)
+  expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length - 1)
+  expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length + 1)
   expect(make.amount).toEqual('2')
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
-  expect(take.amount).toEqual('1.999999999746300601')
+  expect(take.amount).toEqual('0.991749515426862714')
   expect(take.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )

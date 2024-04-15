@@ -201,6 +201,7 @@ export const limitOrder = decorator(
         amountIn: amount,
         options: {
           ...options,
+          limitPrice: price,
         },
       }),
     ])
@@ -268,7 +269,7 @@ export const limitOrder = decorator(
               {
                 takeBookId: bookId,
                 makeBookId: makeParam.id,
-                limitPrice: rawPrice,
+                limitPrice: isBid ? invertPrice(rawPrice) : rawPrice,
                 tick: makeParam.tick,
                 quoteAmount,
                 takeHookData: zeroHash,
@@ -399,6 +400,7 @@ export const marketOrder = decorator(
       amountIn: amount,
       options: {
         ...options,
+        // todo: pass limit price
       },
     })
     const isETH = isAddressEqual(inputToken, zeroAddress)
