@@ -140,8 +140,8 @@ const toOpenOrder = (
       value: formatUnits(claimable, outputCurrency.decimals),
     },
     cancelable: {
-      currency: outputCurrency,
-      value: formatUnits(amount - filled, base.decimals),
+      currency: inputCurrency,
+      value: formatUnits(amount - filled, inputCurrency.decimals),
     },
   }
 }
