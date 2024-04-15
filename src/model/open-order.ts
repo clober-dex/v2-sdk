@@ -39,5 +39,5 @@ export type OpenOrder = {
   filled: { currency: Currency; value: string }
   claimed: { currency: Currency; value: string }
   claimable: { currency: Currency; value: string }
-  cancelable: boolean
+  cancelable: { currency: Currency; value: string }
 }

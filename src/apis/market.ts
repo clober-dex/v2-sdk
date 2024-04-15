@@ -12,8 +12,7 @@ import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { cachedPublicClients } from '../constants/client'
 import { BOOK_VIEWER_ABI } from '../abis/core/book-viewer-abi'
 import { fetchIsOpened } from '../utils/open'
-
-import { fetchCurrency } from './currency'
+import { fetchCurrency } from '../utils/currency'
 
 const getBook = async (
   chainId: CHAIN_IDS,

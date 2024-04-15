@@ -1,7 +1,18 @@
-import { isAddressEqual, parseUnits, zeroAddress, zeroHash } from 'viem'
+import {
+  formatUnits,
+  isAddressEqual,
+  parseUnits,
+  zeroAddress,
+  zeroHash,
+} from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
-import type { DefaultOptions, PermitSignature, Transaction } from './type'
+import type {
+  CurrencyFlow,
+  DefaultOptions,
+  PermitSignature,
+  Transaction,
+} from './type'
 import { calculateUnit } from './utils/unit'
 import { CONTROLLER_ABI } from './abis/core/controller-abi'
 import { getDeadlineTimestampInSeconds } from './utils/time'
@@ -91,7 +102,8 @@ export const openMarket = decorator(
  * @param {PermitSignature} [options.signature] The permit signature for token approval.
  * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
- * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the limit order.
+ * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyFlow, take: CurrencyFlow } }>}
+ * Promise resolving to the transaction object representing the limit order with the result of the order.
  * @example
  * import { signERC20Permit, limitOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
@@ -103,7 +115,7 @@ export const openMarket = decorator(
  *   '100.123'
  * )
  *
- * const transaction = await limitOrder(
+ * const { transaction } = await limitOrder(
  *   421614,
  *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
  *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -116,7 +128,7 @@ export const openMarket = decorator(
  * @example
  * import { limitOrder } from '@clober/v2-sdk'
  *
- * const transaction = await limitOrder(
+ * const { transaction } = await limitOrder(
  *   421614,
  *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
  *  '0x0000000000000000000000000000000000000000',
@@ -145,11 +157,18 @@ export const limitOrder = decorator(
       signature?: PermitSignature
       postOnly?: boolean
     } & DefaultOptions
-  }): Promise<Transaction> => {
+  }): Promise<{
+    transaction: Transaction
+    result: {
+      make: CurrencyFlow
+      take: CurrencyFlow
+    }
+  }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
     if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
       throw new Error(`
+       Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
@@ -204,46 +223,80 @@ export const limitOrder = decorator(
       hookData: zeroHash,
     }
     if (options?.postOnly === true || spendAmount === '0') {
-      return buildTransaction(chainId, {
-        chain: CHAIN_MAP[chainId],
-        account: userAddress,
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'make',
-        args: [
-          [makeParam],
-          tokensToSettle,
-          permitParamsList,
-          getDeadlineTimestampInSeconds(),
-        ],
-        value: isETH ? quoteAmount : 0n,
-      })
+      return {
+        transaction: await buildTransaction(chainId, {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'make',
+          args: [
+            [makeParam],
+            tokensToSettle,
+            permitParamsList,
+            getDeadlineTimestampInSeconds(),
+          ],
+          value: isETH ? quoteAmount : 0n,
+        }),
+        result: {
+          make: {
+            amount: formatUnits(
+              quoteAmount,
+              isBid ? market.quote.decimals : market.base.decimals,
+            ),
+            currency: isBid ? market.quote : market.base,
+            direction: 'in',
+          },
+          take: {
+            amount: '0',
+            currency: isBid ? market.base : market.quote,
+            direction: 'out',
+          },
+        },
+      }
     } else {
       // take and make
-      return buildTransaction(chainId, {
-        chain: CHAIN_MAP[chainId],
-        account: userAddress,
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'limit',
-        args: [
-          [
-            {
-              takeBookId: bookId,
-              makeBookId: makeParam.id,
-              limitPrice: rawPrice,
-              tick: makeParam.tick,
-              quoteAmount,
-              takeHookData: zeroHash,
-              makeHookData: makeParam.hookData,
-            },
+      return {
+        transaction: await buildTransaction(chainId, {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'limit',
+          args: [
+            [
+              {
+                takeBookId: bookId,
+                makeBookId: makeParam.id,
+                limitPrice: rawPrice,
+                tick: makeParam.tick,
+                quoteAmount,
+                takeHookData: zeroHash,
+                makeHookData: makeParam.hookData,
+              },
+            ],
+            tokensToSettle,
+            permitParamsList,
+            getDeadlineTimestampInSeconds(),
           ],
-          tokensToSettle,
-          permitParamsList,
-          getDeadlineTimestampInSeconds(),
-        ],
-        value: isETH ? quoteAmount : 0n,
-      })
+          value: isETH ? quoteAmount : 0n,
+        }),
+        result: {
+          make: {
+            amount: formatUnits(
+              quoteAmount,
+              isBid ? market.quote.decimals : market.base.decimals,
+            ),
+            currency: isBid ? market.quote : market.base,
+            direction: 'in',
+          },
+          take: {
+            amount: spendAmount,
+            currency: isBid ? market.base : market.quote,
+            direction: 'out',
+          },
+        },
+      }
     }
   },
 )
@@ -316,6 +369,7 @@ export const marketOrder = decorator(
     const isBid = isAddressEqual(market.quote.address, inputToken)
     if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
       throw new Error(`
+       Open the market before placing a market order.
        import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
@@ -392,7 +446,8 @@ export const marketOrder = decorator(
  * @param {string} id An ID representing the open order to be claimed.
  * @param {Object} [options] Optional parameters for claiming orders.
  * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the claim action.
+ * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow }>}
+ * Promise resolving to the transaction object representing the claim action with the result of the order.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
  * @example
  * import { getOpenOrders, claimOrders } from '@clober/v2-sdk'
@@ -418,13 +473,17 @@ export const claimOrder = decorator(
     userAddress: `0x${string}`
     id: string
     options?: DefaultOptions
-  }): Promise<Transaction> => {
-    return claimOrders({
+  }): Promise<{ transaction: Transaction; result: CurrencyFlow }> => {
+    const { transaction, result } = await claimOrders({
       chainId,
       userAddress,
       ids: [id],
       options: { ...options },
     })
+    return {
+      transaction,
+      result: result[0],
+    }
   },
 )
 
@@ -437,7 +496,8 @@ export const claimOrder = decorator(
  * @param {string[]} ids An array of IDs representing the open orders to be claimed.
  * @param {Object} [options] Optional parameters for claiming orders.
  * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the claim action.
+ * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow[] }>}
+ * Promise resolving to the transaction object representing the claim action with the result of the orders.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
  * @example
  * import { getOpenOrders, claimOrders } from '@clober/v2-sdk'
@@ -463,10 +523,11 @@ export const claimOrders = decorator(
     userAddress: `0x${string}`
     ids: string[]
     options?: DefaultOptions
-  }): Promise<Transaction> => {
+  }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
     const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
     if (!isApprovedForAll) {
       throw new Error(`
+       Set ApprovalForAll before calling this function.
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
@@ -494,22 +555,29 @@ export const claimOrders = decorator(
       )
       .filter((address) => !isAddressEqual(address, zeroAddress))
 
-    return buildTransaction(chainId, {
-      chain: CHAIN_MAP[chainId],
-      account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Controller,
-      abi: CONTROLLER_ABI,
-      functionName: 'claim',
-      args: [
-        openOrders.map((order) => ({
-          id: BigInt(order.id),
-          hookData: zeroHash,
-        })),
-        tokensToSettle,
-        [],
-        getDeadlineTimestampInSeconds(),
-      ],
-    })
+    return {
+      transaction: await buildTransaction(chainId, {
+        chain: CHAIN_MAP[chainId],
+        account: userAddress,
+        address: CONTRACT_ADDRESSES[chainId]!.Controller,
+        abi: CONTROLLER_ABI,
+        functionName: 'claim',
+        args: [
+          openOrders.map((order) => ({
+            id: BigInt(order.id),
+            hookData: zeroHash,
+          })),
+          tokensToSettle,
+          [],
+          getDeadlineTimestampInSeconds(),
+        ],
+      }),
+      result: openOrders.map((order) => ({
+        currency: order.claimable.currency,
+        amount: order.claimable.value,
+        direction: 'out',
+      })),
+    }
   },
 )
 
@@ -522,7 +590,8 @@ export const claimOrders = decorator(
  * @param {string} id An ID representing the open order to be canceled
  * @param {Object} [options] Optional parameters for canceling orders.
  * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the cancel action.
+ * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow }>}
+ * Promise resolving to the transaction object representing the cancel action with the result of the order.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
  * @example
  * import { getOpenOrders, cancelOrders } from '@clober/v2-sdk'
@@ -548,13 +617,17 @@ export const cancelOrder = decorator(
     userAddress: `0x${string}`
     id: string
     options?: DefaultOptions
-  }): Promise<Transaction> => {
-    return cancelOrders({
+  }): Promise<{ transaction: Transaction; result: CurrencyFlow }> => {
+    const { transaction, result } = await cancelOrders({
       chainId,
       userAddress,
       ids: [id],
       options: { ...options },
     })
+    return {
+      transaction,
+      result: result[0],
+    }
   },
 )
 
@@ -567,7 +640,8 @@ export const cancelOrder = decorator(
  * @param {string[]} ids An array of IDs representing the open orders to be canceled.
  * @param {Object} [options] Optional parameters for canceling orders.
  * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the cancel action.
+ * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow[] }>
+ * Promise resolving to the transaction object representing the cancel action with the result of the orders.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
  * @example
  * import { getOpenOrders, cancelOrders } from '@clober/v2-sdk'
@@ -593,10 +667,11 @@ export const cancelOrders = decorator(
     userAddress: `0x${string}`
     ids: string[]
     options?: DefaultOptions
-  }): Promise<Transaction> => {
+  }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
     const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
     if (!isApprovedForAll) {
       throw new Error(`
+       Set ApprovalForAll before calling this function.
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
        const hash = await setApprovalOfOpenOrdersForAll(
@@ -608,7 +683,7 @@ export const cancelOrders = decorator(
 
     const openOrders = (
       await getOpenOrders({ chainId, userAddress, options: { ...options } })
-    ).filter((order) => ids.includes(order.id) && order.cancelable)
+    ).filter((order) => ids.includes(order.id) && order.claimable.value !== '0')
     if (openOrders.length === 0) {
       throw new Error(`No cancelable open orders found for ${userAddress}`)
     }
@@ -624,22 +699,29 @@ export const cancelOrders = decorator(
       )
       .filter((address) => !isAddressEqual(address, zeroAddress))
 
-    return buildTransaction(chainId, {
-      chain: CHAIN_MAP[chainId],
-      account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Controller,
-      abi: CONTROLLER_ABI,
-      functionName: 'cancel',
-      args: [
-        openOrders.map((order) => ({
-          id: BigInt(order.id),
-          leftQuoteAmount: 0n,
-          hookData: zeroHash,
-        })),
-        tokensToSettle,
-        [],
-        getDeadlineTimestampInSeconds(),
-      ],
-    })
+    return {
+      transaction: await buildTransaction(chainId, {
+        chain: CHAIN_MAP[chainId],
+        account: userAddress,
+        address: CONTRACT_ADDRESSES[chainId]!.Controller,
+        abi: CONTROLLER_ABI,
+        functionName: 'cancel',
+        args: [
+          openOrders.map((order) => ({
+            id: BigInt(order.id),
+            leftQuoteAmount: 0n,
+            hookData: zeroHash,
+          })),
+          tokensToSettle,
+          [],
+          getDeadlineTimestampInSeconds(),
+        ],
+      }),
+      result: openOrders.map((order) => ({
+        currency: order.cancelable.currency,
+        amount: order.cancelable.value,
+        direction: 'out',
+      })),
+    }
   },
 )

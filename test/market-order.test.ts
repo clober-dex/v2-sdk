@@ -19,6 +19,7 @@ test.runIf(IS_LOCAL)('market order in not open market', async () => {
       },
     }).catch((e) => e.message),
   ).toEqual(`
+       Open the market before placing a market order.
        import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(

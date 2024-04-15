@@ -1,6 +1,7 @@
 import { expect, test, afterEach } from 'vitest'
 import { getMarket, limitOrder, signERC20Permit } from '@clober/v2-sdk'
 import { arbitrumSepolia } from 'viem/chains'
+import { getAddress } from 'viem'
 
 import { buildPublicClient } from '../src/constants/client'
 
@@ -41,6 +42,7 @@ test('limit order in not open market', async () => {
       price: '1000',
     }).catch((e) => e.message),
   ).toEqual(`
+       Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
 
        const transaction = await openMarket(
@@ -64,7 +66,10 @@ test('make bid order', async () => {
       rpcUrl: publicClient.transport.url!,
     },
   })
-  const transaction = await limitOrder({
+  const {
+    transaction,
+    result: { make, take },
+  } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -122,13 +127,24 @@ test('make bid order', async () => {
   expect(
     getSize(afterMarket.bids, 0, 0.01) - getSize(beforeMarket.bids, 0, 0.01),
   ).toEqual(100039694430551600000)
+  expect(make.amount).toEqual('1')
+  expect(make.currency.address).toEqual(
+    getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
+  expect(take.amount).toEqual('0')
+  expect(take.currency.address).toEqual(
+    '0x0000000000000000000000000000000000000000',
+  )
 })
 
 test('make ask order', async () => {
   const { publicClient, walletClient } = clients[2] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
-  const transaction = await limitOrder({
+  const {
+    transaction,
+    result: { make, take },
+  } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
     inputToken: '0x0000000000000000000000000000000000000000',
@@ -182,6 +198,14 @@ test('make ask order', async () => {
     getSize(afterMarket.asks, 8000, 8001) -
       getSize(beforeMarket.asks, 8000, 8001),
   ).toEqual(1500000000000000)
+  expect(make.amount).toEqual('0.0015')
+  expect(make.currency.address).toEqual(
+    '0x0000000000000000000000000000000000000000',
+  )
+  expect(take.amount).toEqual('0')
+  expect(take.currency.address).toEqual(
+    getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
 })
 
 test('limit bid order', async () => {
@@ -217,7 +241,10 @@ test('limit bid order', async () => {
       rpcUrl: publicClient.transport.url!,
     },
   })
-  const transaction = await limitOrder({
+  const {
+    transaction,
+    result: { make, take },
+  } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -263,6 +290,14 @@ test('limit bid order', async () => {
     getSize(afterMarket.bids, 3504, 3505) -
       getSize(beforeMarket.bids, 3504, 3505),
   ).toEqual(27061899601333555000)
+  expect(make.amount).toEqual('100000')
+  expect(make.currency.address).toEqual(
+    getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
+  expect(take.amount).toEqual('5181.356442')
+  expect(take.currency.address).toEqual(
+    '0x0000000000000000000000000000000000000000',
+  )
 })
 
 test('limit ask order', async () => {
@@ -277,7 +312,10 @@ test('limit ask order', async () => {
     }),
   })
 
-  const transaction = await limitOrder({
+  const {
+    transaction,
+    result: { make, take },
+  } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
     inputToken: '0x0000000000000000000000000000000000000000',
@@ -343,4 +381,12 @@ test('limit ask order', async () => {
     getSize(afterMarket.asks, 3450, 3451) -
       getSize(beforeMarket.asks, 3450, 3451),
   ).toEqual(1008553000000000000)
+  expect(make.amount).toEqual('2')
+  expect(make.currency.address).toEqual(
+    '0x0000000000000000000000000000000000000000',
+  )
+  expect(take.amount).toEqual('1.999999999746300601')
+  expect(take.currency.address).toEqual(
+    getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
 })

@@ -40,3 +40,9 @@ export type PermitSignature = {
 export type DefaultOptions = {
   rpcUrl?: string
 }
+
+export type CurrencyFlow = {
+  currency: Currency
+  amount: string
+  direction: 'in' | 'out'
+}
