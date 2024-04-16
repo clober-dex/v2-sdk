@@ -22,13 +22,13 @@ import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
 import { fetchMarket } from './apis/market'
 import { parsePrice } from './utils/prices'
 import { fromPrice, invertPrice } from './utils/tick'
-import { getExpectedOutput, getOpenOrders } from './view'
+import { getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { decorator } from './utils/decorator'
-import { SUBGRAPH_URL } from './constants/subgraph-url'
 import { fetchOrders } from './utils/order'
 import { quoteToBase } from './utils/decimals'
+import { applyPercent } from './utils/bigint'
 
 /**
  * Build a transaction to open a market.
@@ -684,16 +684,12 @@ export const cancelOrders = decorator(
     chainId,
     userAddress,
     ids,
-    options,
   }: {
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
     ids: string[]
     options?: DefaultOptions
   }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
-    if (!SUBGRAPH_URL[chainId]) {
-      throw new Error(`Subgraph URL not found for chainId: ${chainId}`)
-    }
     const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
     if (!isApprovedForAll) {
       throw new Error(`
@@ -707,19 +703,16 @@ export const cancelOrders = decorator(
     `)
     }
 
-    const openOrders = (
-      await getOpenOrders({ chainId, userAddress, options: { ...options } })
+    const orders = (
+      await fetchOrders(
+        chainId,
+        ids.map((id) => BigInt(id)),
+      )
     ).filter(
-      (order) => ids.includes(order.id) && order.cancelable.value !== '0',
+      (order) => isAddressEqual(order.owner, userAddress) && order.open > 0n,
     )
-    if (openOrders.length === 0) {
-      throw new Error(`No cancelable open orders found for ${userAddress}`)
-    }
-    const tokensToSettle = openOrders
-      .map((order) => [
-        order.outputCurrency.address,
-        order.inputCurrency.address,
-      ])
+    const tokensToSettle = orders
+      .map((order) => [order.baseCurrency.address, order.quoteCurrency.address])
       .flat()
       .filter(
         (address, index, self) =>
@@ -735,8 +728,8 @@ export const cancelOrders = decorator(
         abi: CONTROLLER_ABI,
         functionName: 'cancel',
         args: [
-          openOrders.map((order) => ({
-            id: BigInt(order.id),
+          orders.map(({ orderId }) => ({
+            id: orderId,
             leftQuoteAmount: 0n,
             hookData: zeroHash,
           })),
@@ -745,11 +738,19 @@ export const cancelOrders = decorator(
           getDeadlineTimestampInSeconds(),
         ],
       }),
-      result: openOrders
-        .map((order) => ({
-          currency: order.cancelable.currency,
-          amount: order.cancelable.value,
-        }))
+      result: orders
+        .map((order) => {
+          const amount = applyPercent(
+            order.unit * order.open,
+            100 +
+              (Number(MAKER_DEFAULT_POLICY.rate) * 100) /
+                Number(MAKER_DEFAULT_POLICY.RATE_PRECISION),
+          )
+          return {
+            currency: order.quoteCurrency,
+            amount: formatUnits(amount, order.quoteCurrency.decimals),
+          }
+        })
         .reduce((acc, { currency, amount }) => {
           const index = acc.findIndex((c) =>
             isAddressEqual(c.currency.address, currency.address),

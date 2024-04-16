@@ -348,12 +348,12 @@ test('cancel order', async () => {
     address: account.address,
   })
 
-  // can't check `result.amount` because it's subgraph result
   expect(Number(afterBalance - beforeBalance)).lessThan(100030000000000000)
   expect(result.direction).toEqual('out')
   expect(result.currency.address).toEqual(
     getAddress('0x0000000000000000000000000000000000000000'),
   )
+  expect(Number(result.amount)).lessThan(0.1)
 })
 test('cancel orders', async () => {
   const { publicClient, walletClient } = clients[5] as any
@@ -420,31 +420,15 @@ test('cancel orders', async () => {
   expect(result[0].currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  // can't check `result[0].amount` because it's subgraph result
+  expect(result[0].amount).toEqual('14999.999999')
   expect(afterUSDCBalance - beforeUSDCBalance).toEqual(14999999999n)
 
   expect(result[1].direction).toEqual('out')
   expect(result[1].currency.address).toEqual(
     getAddress('0x0000000000000000000000000000000000000000'),
   )
-  // can't check `result[1].amount` because it's subgraph result
   expect(Number(afterETHBalance - beforeETHBalance)).lessThan(
     100000000000000000,
   )
-})
-
-test('fail when subgraph url is not provided', async () => {
-  const { publicClient } = clients[6] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
-
-  await expect(
-    cancelOrder({
-      chainId: 7777,
-      userAddress: account.address,
-      id: '50784203244917507140848199044778666621202412111794785971205812514094254653440',
-      options: {
-        rpcUrl: publicClient.transport.url!,
-      },
-    }),
-  ).rejects.toThrow('Subgraph URL not found for chainId: 7777')
+  expect(Number(result[1].amount)).lessThan(0.1)
 })
