@@ -1,6 +1,6 @@
-import { CHAIN_IDS } from '../../src'
-import { cachedPublicClients } from '../../src/constants/client'
-import { CONTRACT_ADDRESSES } from '../../src/constants/addresses'
+import { CHAIN_IDS } from '../index'
+import { cachedPublicClients } from '../constants/client'
+import { CONTRACT_ADDRESSES } from '../constants/addresses'
 
 const _abi = [
   {
@@ -41,7 +41,7 @@ const _abi = [
   },
 ] as const
 
-export const fetchOrder = async (
+export const fetchOrders = async (
   chainId: CHAIN_IDS,
   orderIds: bigint[],
 ): Promise<
