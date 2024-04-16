@@ -22,10 +22,13 @@ import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
 import { fetchMarket } from './apis/market'
 import { parsePrice } from './utils/prices'
 import { fromPrice, invertPrice } from './utils/tick'
-import { getExpectedOutput, getOpenOrders } from './view'
+import { getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { decorator } from './utils/decorator'
+import { fetchOrders } from './utils/order'
+import { quoteToBase } from './utils/decimals'
+import { applyPercent } from './utils/bigint'
 
 /**
  * Build a transaction to open a market.
@@ -39,11 +42,11 @@ import { decorator } from './utils/decorator'
  * @example
  * import { openMarket } from '@clober/v2-sdk'
  *
- * const transaction = await openMarket(
- *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000'
- * )
+ * const transaction = await openMarket({
+ *   chainId: 421614,
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000'
+ * })
  */
 export const openMarket = decorator(
   async ({
@@ -108,34 +111,34 @@ export const openMarket = decorator(
  * import { signERC20Permit, limitOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
- * const signature = await signERC20Permit(
- *   421614,
- *   privateKeyToAccount('0x...'),
- *   '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   '100.123'
- * )
+ * const signature = await signERC20Permit({
+ *   chainId: 421614,
+ *   account: privateKeyToAccount('0x...'),
+ *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   amount: '100.123'
+ * })
  *
- * const { transaction } = await limitOrder(
- *   421614,
- *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000',
- *  '100.123', // 100.123 USDC
- *  '4000.01', // price at 4000.01 (ETH/USDC)
- *  { signature }
- * )
+ * const { transaction } = await limitOrder({
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000',
+ *   amount: '100.123', // 100.123 USDC
+ *   price: '4000.01', // price at 4000.01 (ETH/USDC)
+ *   options: { signature }
+ * })
  *
  * @example
  * import { limitOrder } from '@clober/v2-sdk'
  *
- * const { transaction } = await limitOrder(
- *   421614,
- *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
- *  '0x0000000000000000000000000000000000000000',
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0.13', // 0.13 ETH
- *  '4000.01', // price at 4000.01 (ETH/USDC)
- * )
+ * const { transaction } = await limitOrder({
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *   inputToken: '0x0000000000000000000000000000000000000000',
+ *   outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   amount: '0.13', // 0.13 ETH
+ *   price: '4000.01', // price at 4000.01 (ETH/USDC)
+ * })
  */
 export const limitOrder = decorator(
   async ({
@@ -320,31 +323,31 @@ export const limitOrder = decorator(
  * import { signERC20Permit, marketOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
- * const signature = await signERC20Permit(
- *   421614,
- *   privateKeyToAccount('0x...'),
- *   '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   '100.123'
- * )
+ * const signature = await signERC20Permit({
+ *   chainId: 421614,
+ *   account: privateKeyToAccount('0x...'),
+ *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   amount: '100.123'
+ * })
  *
- * const transaction = await marketOrder(
- *   421614,
- *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000',
- *  '100.123', // 100.123 USDC
- *  { signature }
- * )
+ * const transaction = await marketOrder({
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000',
+ *   amount: '100.123', // 100.123 USDC
+ *   options: { signature }
+ * })
  *
  * @example
  * import { marketOrder } from '@clober/v2-sdk'
  *
  * const transaction = await limitOrder(
- *   421614,
- *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
- *  '0x0000000000000000000000000000000000000000',
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0.13', // 0.13 ETH
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *   inputToken: '0x0000000000000000000000000000000000000000',
+ *   outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   options: '0.13', // 0.13 ETH
  * )
  */
 export const marketOrder = decorator(
@@ -454,15 +457,15 @@ export const marketOrder = decorator(
  * @example
  * import { getOpenOrders, claimOrders } from '@clober/v2-sdk'
  *
- * const openOrders = await getOpenOrders(
- *     421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
- * )
- * const transaction = await claimOrders(
- *    421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *    openOrders.map((order) => order.id)
- * )
+ * const openOrders = await getOpenOrders({
+ *     chainId: 421614,
+ *     userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * })
+ * const transaction = await claimOrders({
+ *    chainId: 421614,
+ *    userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    id: openOrders.map((order) => order.id)
+ * })
  */
 export const claimOrder = decorator(
   async ({
@@ -504,14 +507,14 @@ export const claimOrder = decorator(
  * @example
  * import { getOpenOrders, claimOrders } from '@clober/v2-sdk'
  *
- * const openOrders = await getOpenOrders(
- *     421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
- * )
+ * const openOrders = await getOpenOrders({
+ *     chainId: 421614,
+ *     userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * })
  * const transaction = await claimOrders(
- *    421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *    openOrders.map((order) => order.id)
+ *    chainId: 421614,
+ *    userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    ids: openOrders.map((order) => order.id)
  * )
  */
 export const claimOrders = decorator(
@@ -519,7 +522,6 @@ export const claimOrders = decorator(
     chainId,
     userAddress,
     ids,
-    options,
   }: {
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
@@ -539,17 +541,17 @@ export const claimOrders = decorator(
     `)
     }
 
-    const openOrders = (
-      await getOpenOrders({ chainId, userAddress, options: { ...options } })
-    ).filter((order) => ids.includes(order.id))
-    if (openOrders.length === 0) {
-      throw new Error(`No claimable open orders found for ${userAddress}`)
-    }
-    const tokensToSettle = openOrders
-      .map((order) => [
-        order.outputCurrency.address,
-        order.inputCurrency.address,
-      ])
+    const orders = (
+      await fetchOrders(
+        chainId,
+        ids.map((id) => BigInt(id)),
+      )
+    ).filter(
+      (order) =>
+        isAddressEqual(order.owner, userAddress) && order.claimable > 0n,
+    )
+    const tokensToSettle = orders
+      .map((order) => [order.baseCurrency.address, order.quoteCurrency.address])
       .flat()
       .filter(
         (address, index, self) =>
@@ -565,8 +567,8 @@ export const claimOrders = decorator(
         abi: CONTROLLER_ABI,
         functionName: 'claim',
         args: [
-          openOrders.map((order) => ({
-            id: BigInt(order.id),
+          orders.map(({ orderId }) => ({
+            id: orderId,
             hookData: zeroHash,
           })),
           tokensToSettle,
@@ -574,11 +576,30 @@ export const claimOrders = decorator(
           getDeadlineTimestampInSeconds(),
         ],
       }),
-      result: openOrders.map((order) => ({
-        currency: order.claimable.currency,
-        amount: order.claimable.value,
-        direction: 'out',
-      })),
+      result: orders
+        .map((order) => {
+          const amount = quoteToBase(
+            order.tick,
+            order.unit * order.claimable,
+            false,
+          )
+          return {
+            currency: order.baseCurrency,
+            amount: formatUnits(amount, order.baseCurrency.decimals),
+          }
+        })
+        .reduce((acc, { currency, amount }) => {
+          const index = acc.findIndex((c) =>
+            isAddressEqual(c.currency.address, currency.address),
+          )
+          if (index === -1) {
+            return [...acc, { currency, amount, direction: 'out' }]
+          }
+          acc[index].amount = (
+            Number(acc[index].amount) + Number(amount)
+          ).toString()
+          return acc
+        }, [] as CurrencyFlow[]),
     }
   },
 )
@@ -598,15 +619,15 @@ export const claimOrders = decorator(
  * @example
  * import { getOpenOrders, cancelOrders } from '@clober/v2-sdk'
  *
- * const openOrders = await getOpenOrders(
- *     421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
- * )
- * const transaction = await cancelOrders(
- *    421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *    openOrders.map((order) => order.id)
- * )
+ * const openOrders = await getOpenOrders({
+ *     chainId: 421614,
+ *     userAddress:'0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * })
+ * const transaction = await cancelOrders({
+ *    chainId: 421614,
+ *    userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    id: openOrders.map((order) => order.id)
+ * })
  */
 export const cancelOrder = decorator(
   async ({
@@ -648,22 +669,21 @@ export const cancelOrder = decorator(
  * @example
  * import { getOpenOrders, cancelOrders } from '@clober/v2-sdk'
  *
- * const openOrders = await getOpenOrders(
- *     421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
- * )
- * const transaction = await cancelOrders(
- *    421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *    openOrders.map((order) => order.id)
- * )
+ * const openOrders = await getOpenOrders({
+ *     chainId: 421614,
+ *     userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * })
+ * const transaction = await cancelOrders({
+ *    chainId: 421614,
+ *    userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    ids: openOrders.map((order) => order.id)
+ * })
  */
 export const cancelOrders = decorator(
   async ({
     chainId,
     userAddress,
     ids,
-    options,
   }: {
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
@@ -683,17 +703,16 @@ export const cancelOrders = decorator(
     `)
     }
 
-    const openOrders = (
-      await getOpenOrders({ chainId, userAddress, options: { ...options } })
-    ).filter((order) => ids.includes(order.id) && order.claimable.value !== '0')
-    if (openOrders.length === 0) {
-      throw new Error(`No cancelable open orders found for ${userAddress}`)
-    }
-    const tokensToSettle = openOrders
-      .map((order) => [
-        order.outputCurrency.address,
-        order.inputCurrency.address,
-      ])
+    const orders = (
+      await fetchOrders(
+        chainId,
+        ids.map((id) => BigInt(id)),
+      )
+    ).filter(
+      (order) => isAddressEqual(order.owner, userAddress) && order.open > 0n,
+    )
+    const tokensToSettle = orders
+      .map((order) => [order.baseCurrency.address, order.quoteCurrency.address])
       .flat()
       .filter(
         (address, index, self) =>
@@ -709,8 +728,8 @@ export const cancelOrders = decorator(
         abi: CONTROLLER_ABI,
         functionName: 'cancel',
         args: [
-          openOrders.map((order) => ({
-            id: BigInt(order.id),
+          orders.map(({ orderId }) => ({
+            id: orderId,
             leftQuoteAmount: 0n,
             hookData: zeroHash,
           })),
@@ -719,11 +738,32 @@ export const cancelOrders = decorator(
           getDeadlineTimestampInSeconds(),
         ],
       }),
-      result: openOrders.map((order) => ({
-        currency: order.cancelable.currency,
-        amount: order.cancelable.value,
-        direction: 'out',
-      })),
+      result: orders
+        .map((order) => {
+          const amount = applyPercent(
+            order.unit * order.open,
+            100 +
+              (Number(MAKER_DEFAULT_POLICY.rate) * 100) /
+                Number(MAKER_DEFAULT_POLICY.RATE_PRECISION),
+            6,
+          )
+          return {
+            currency: order.quoteCurrency,
+            amount: formatUnits(amount, order.quoteCurrency.decimals),
+          }
+        })
+        .reduce((acc, { currency, amount }) => {
+          const index = acc.findIndex((c) =>
+            isAddressEqual(c.currency.address, currency.address),
+          )
+          if (index === -1) {
+            return [...acc, { currency, amount, direction: 'out' }]
+          }
+          acc[index].amount = (
+            Number(acc[index].amount) + Number(amount)
+          ).toString()
+          return acc
+        }, [] as CurrencyFlow[]),
     }
   },
 )

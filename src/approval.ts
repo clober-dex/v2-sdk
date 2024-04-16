@@ -44,10 +44,10 @@ const _abi = [
  * import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
- * const hash = await setApprovalOfOpenOrdersForAll(
- *   421614,
- *   privateKeyToAccount('0x...')
- * )
+ * const hash = await setApprovalOfOpenOrdersForAll({
+ *   chainId: 421614,
+ *   account: privateKeyToAccount('0x...')
+ * })
  *
  * @example
  * import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'

@@ -2,12 +2,14 @@ import { formatUnits, isAddressEqual, parseUnits } from 'viem'
 
 import { fetchMarket } from './apis/market'
 import { CHAIN_IDS } from './constants/chain'
-import type { DefaultOptions, Market } from './type'
+import type { ChartLog, DefaultOptions, Market } from './type'
 import { parsePrice } from './utils/prices'
 import { MAX_PRICE } from './constants/price'
 import { fetchOpenOrder, fetchOpenOrders } from './apis/open-order'
 import { type OpenOrder } from './model/open-order'
 import { decorator } from './utils/decorator'
+import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
+import { CHART_LOG_INTERVALS } from './type'
 
 /**
  * Get market information by chain id and token addresses
@@ -22,11 +24,11 @@ import { decorator } from './utils/decorator'
  * @example
  * import { getMarket } from '@clober/v2-sdk'
  *
- * const market = await getMarket(
- *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000',
- * )
+ * const market = await getMarket({
+ *   chainId: 421614,
+ *   token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   token1: '0x0000000000000000000000000000000000000000',
+ * })
  */
 export const getMarket = decorator(
   async ({
@@ -74,12 +76,12 @@ export const getMarket = decorator(
  * @example
  * import { getExpectedOutput } from '@clober/v2-sdk'
  *
- * const { takenAmount, spendAmount } = await getExpectedOutput(
- *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000',
- *  '1000.123', // spend 1000.123 USDC
- * )
+ * const { takenAmount, spendAmount } = await getExpectedOutput({
+ *   chainId: 421614,
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000',
+ *   amountIn: '1000.123', // spend 1000.123 USDC
+ * })
  */
 export const getExpectedOutput = decorator(
   async ({
@@ -145,12 +147,12 @@ export const getExpectedOutput = decorator(
  * @example
  * import { getExpectedInput } from '@clober/v2-sdk'
  *
- * const { takenAmount, spendAmount } = await getExpectedInput(
- *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000',
- *  '0.1', // take 0.1 ETH
- * )
+ * const { takenAmount, spendAmount } = await getExpectedInput({
+ *   chainId: 421614,
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000',
+ *   amountOut: '0.1', // take 0.1 ETH
+ * })
  */
 export const getExpectedInput = decorator(
   async ({
@@ -213,10 +215,10 @@ export const getExpectedInput = decorator(
  * @example
  * import { getOpenOrder } from '@clober/v2-sdk'
  *
- * const openOrder = await getOpenOrder(
- *   421614,
- *  '46223845323662364279893361453861711542636620039907198451770258805035840307200'
- * )
+ * const openOrder = await getOpenOrder({
+ *   chainId: 421614,
+ *   id: '46223845323662364279893361453861711542636620039907198451770258805035840307200'
+ * })
  */
 export const getOpenOrder = decorator(
   async ({
@@ -242,10 +244,10 @@ export const getOpenOrder = decorator(
  * @example
  * import { getOpenOrders } from '@clober/v2-sdk'
  *
- * const openOrders = await getOpenOrders(
- *   421614,
- *  '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49'
- * )
+ * const openOrders = await getOpenOrders({
+ *   chainId: 421614,
+ *   userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49'
+ * })
  */
 export const getOpenOrders = decorator(
   async ({
@@ -257,5 +259,80 @@ export const getOpenOrders = decorator(
     options?: DefaultOptions
   }): Promise<OpenOrder[]> => {
     return fetchOpenOrders(chainId, userAddress)
+  },
+)
+
+/**
+ * Retrieves the latest chart log for a specific market.
+ *
+ * @param {CHAIN_IDS} params.chainId - The ID of the blockchain.
+ * @param {`0x${string}`} params.quote - The address of the quote token.
+ * @param {`0x${string}`} params.base - The address of the base token.
+ * @returns {Promise<ChartLog>} A promise that resolves with the latest chart log.
+ *
+ * @example
+ * import { getLatestChartLog } from '@clober/v2-sdk'
+ *
+ * const logs = await getLatestChartLog({
+ *   chainId: 421614,
+ *   quote: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   base: '0x0000000000000000000000000000000000000000',
+ * })
+ */
+export const getLatestChartLog = decorator(
+  async ({
+    chainId,
+    quote,
+    base,
+  }: {
+    chainId: CHAIN_IDS
+    quote: `0x${string}`
+    base: `0x${string}`
+  }): Promise<ChartLog> => {
+    return fetchLatestChartLog(chainId, `${base}/${quote}`)
+  },
+)
+
+/**
+ * Retrieves chart logs for a specific market within a specified time interval.
+ *
+ * @param {CHAIN_IDS} params.chainId - The ID of the chain.
+ * @param {`0x${string}`} params.quote - The address of the quote token.
+ * @param {`0x${string}`} params.base - The address of the base token.
+ * @param {CHART_LOG_INTERVALS} params.intervalType - The type of time interval for the chart logs.
+ * @param {number} params.from - The start of the time interval (Unix timestamp in seconds).
+ * @param {number} params.to - The end of the time interval (Unix timestamp in seconds).
+ * @returns {Promise<ChartLog[]>} A promise that resolves with an array of chart logs within the specified interval.
+ *
+ * @example
+ * import { getLatestChartLog, CHART_LOG_INTERVALS } from '@clober/v2-sdk'
+ *
+ * const logs = await getChartLogs({
+ *   chainId: 421614,
+ *   quote: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   base: '0x0000000000000000000000000000000000000000',
+ *   intervalType: CHART_LOG_INTERVALS.oneDay,
+ *   from: 1687305600,
+ *   to: 1713312000,
+ * })
+ */
+
+export const getChartLogs = decorator(
+  async ({
+    chainId,
+    quote,
+    base,
+    intervalType,
+    from,
+    to,
+  }: {
+    chainId: CHAIN_IDS
+    quote: `0x${string}`
+    base: `0x${string}`
+    intervalType: CHART_LOG_INTERVALS
+    from: number
+    to: number
+  }): Promise<ChartLog[]> => {
+    return fetchChartLogs(chainId, `${base}/${quote}`, intervalType, from, to)
   },
 )
