@@ -8,6 +8,8 @@ import { formatPrice } from '../utils/prices'
 import { invertPrice, toPrice } from '../utils/tick'
 import type { OpenOrder, OpenOrderDto } from '../model/open-order'
 import { fetchCurrency } from '../utils/currency'
+import { applyPercent } from '../utils/bigint'
+import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 
 import { fetchSubgraph } from './subgraph'
 
@@ -144,7 +146,16 @@ const toOpenOrder = (
     },
     cancelable: {
       currency: inputCurrency,
-      value: formatUnits(cancelable, inputCurrency.decimals),
+      value: formatUnits(
+        applyPercent(
+          cancelable,
+          100 +
+            (Number(MAKER_DEFAULT_POLICY.rate) * 100) /
+              Number(MAKER_DEFAULT_POLICY.RATE_PRECISION),
+          6,
+        ),
+        inputCurrency.decimals,
+      ),
     },
   }
 }

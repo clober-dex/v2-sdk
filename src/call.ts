@@ -745,6 +745,7 @@ export const cancelOrders = decorator(
             100 +
               (Number(MAKER_DEFAULT_POLICY.rate) * 100) /
                 Number(MAKER_DEFAULT_POLICY.RATE_PRECISION),
+            6,
           )
           return {
             currency: order.quoteCurrency,
