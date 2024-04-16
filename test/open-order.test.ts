@@ -43,7 +43,7 @@ test('get open orders by user address', async () => {
 
   const openOrders = await getOpenOrders({
     chainId: cloberTestChain.id,
-    userAddress: '0xf18Be2a91cF31Fc3f8D828b6c714e1806a75e0AA',
+    userAddress: '0x000000000000000000000000000000000000dead',
     options: {
       rpcUrl: publicClient.transport.url!,
     },
@@ -160,6 +160,7 @@ test('claim order', async () => {
   expect(result.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
+  expect(result.amount).toEqual('350.131739')
 })
 
 test('claim orders', async () => {
@@ -302,12 +303,15 @@ test('claim orders', async () => {
     1290000000000000000,
   )
   expect(result.length).toEqual(2)
-  expect(result[0].direction).toEqual('out')
-  expect(result[0].currency.address).toEqual(
-    getAddress('0x0000000000000000000000000000000000000000'),
-  )
+  expect(result[1].amount).toEqual('1.2918788605298377')
   expect(result[1].direction).toEqual('out')
   expect(result[1].currency.address).toEqual(
+    getAddress('0x0000000000000000000000000000000000000000'),
+  )
+
+  expect(result[0].amount).toEqual('560.799798')
+  expect(result[0].direction).toEqual('out')
+  expect(result[0].currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
 })
@@ -432,17 +436,6 @@ test('cancel orders', async () => {
 test('fail when subgraph url is not provided', async () => {
   const { publicClient } = clients[6] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
-
-  await expect(
-    claimOrder({
-      chainId: 7777,
-      userAddress: account.address,
-      id: '50784203244917507140848199044778666621202412111794785971205812514094254653440',
-      options: {
-        rpcUrl: publicClient.transport.url!,
-      },
-    }),
-  ).rejects.toThrow('Subgraph URL not found for chainId: 7777')
 
   await expect(
     cancelOrder({

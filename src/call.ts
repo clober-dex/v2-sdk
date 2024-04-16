@@ -27,6 +27,8 @@ import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { decorator } from './utils/decorator'
 import { SUBGRAPH_URL } from './constants/subgraph-url'
+import { fetchOrders } from './utils/order'
+import { quoteToBase } from './utils/decimals'
 
 /**
  * Build a transaction to open a market.
@@ -520,16 +522,12 @@ export const claimOrders = decorator(
     chainId,
     userAddress,
     ids,
-    options,
   }: {
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
     ids: string[]
     options?: DefaultOptions
   }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
-    if (!SUBGRAPH_URL[chainId]) {
-      throw new Error(`Subgraph URL not found for chainId: ${chainId}`)
-    }
     const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
     if (!isApprovedForAll) {
       throw new Error(`
@@ -543,17 +541,17 @@ export const claimOrders = decorator(
     `)
     }
 
-    const openOrders = (
-      await getOpenOrders({ chainId, userAddress, options: { ...options } })
-    ).filter((order) => ids.includes(order.id))
-    if (openOrders.length === 0) {
-      throw new Error(`No claimable open orders found for ${userAddress}`)
-    }
-    const tokensToSettle = openOrders
-      .map((order) => [
-        order.outputCurrency.address,
-        order.inputCurrency.address,
-      ])
+    const orders = (
+      await fetchOrders(
+        chainId,
+        ids.map((id) => BigInt(id)),
+      )
+    ).filter(
+      (order) =>
+        isAddressEqual(order.owner, userAddress) && order.claimable > 0n,
+    )
+    const tokensToSettle = orders
+      .map((order) => [order.baseCurrency.address, order.quoteCurrency.address])
       .flat()
       .filter(
         (address, index, self) =>
@@ -569,8 +567,8 @@ export const claimOrders = decorator(
         abi: CONTROLLER_ABI,
         functionName: 'claim',
         args: [
-          openOrders.map((order) => ({
-            id: BigInt(order.id),
+          orders.map(({ orderId }) => ({
+            id: orderId,
             hookData: zeroHash,
           })),
           tokensToSettle,
@@ -578,11 +576,18 @@ export const claimOrders = decorator(
           getDeadlineTimestampInSeconds(),
         ],
       }),
-      result: openOrders
-        .map((order) => ({
-          currency: order.claimable.currency,
-          amount: order.claimable.value,
-        }))
+      result: orders
+        .map((order) => {
+          const amount = quoteToBase(
+            order.tick,
+            order.unit * order.claimable,
+            false,
+          )
+          return {
+            currency: order.baseCurrency,
+            amount: formatUnits(amount, order.baseCurrency.decimals),
+          }
+        })
         .reduce((acc, { currency, amount }) => {
           const index = acc.findIndex((c) =>
             isAddressEqual(c.currency.address, currency.address),
