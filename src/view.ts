@@ -22,11 +22,11 @@ import { decorator } from './utils/decorator'
  * @example
  * import { getMarket } from '@clober/v2-sdk'
  *
- * const market = await getMarket(
- *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000',
- * )
+ * const market = await getMarket({
+ *   chainId: 421614,
+ *   token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   token1: '0x0000000000000000000000000000000000000000',
+ * })
  */
 export const getMarket = decorator(
   async ({
@@ -74,12 +74,12 @@ export const getMarket = decorator(
  * @example
  * import { getExpectedOutput } from '@clober/v2-sdk'
  *
- * const { takenAmount, spendAmount } = await getExpectedOutput(
- *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000',
- *  '1000.123', // spend 1000.123 USDC
- * )
+ * const { takenAmount, spendAmount } = await getExpectedOutput({
+ *   chainId: 421614,
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000',
+ *   amountIn: '1000.123', // spend 1000.123 USDC
+ * })
  */
 export const getExpectedOutput = decorator(
   async ({
@@ -145,12 +145,12 @@ export const getExpectedOutput = decorator(
  * @example
  * import { getExpectedInput } from '@clober/v2-sdk'
  *
- * const { takenAmount, spendAmount } = await getExpectedInput(
- *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000',
- *  '0.1', // take 0.1 ETH
- * )
+ * const { takenAmount, spendAmount } = await getExpectedInput({
+ *   chainId: 421614,
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000',
+ *   amountOut: '0.1', // take 0.1 ETH
+ * })
  */
 export const getExpectedInput = decorator(
   async ({
@@ -213,10 +213,10 @@ export const getExpectedInput = decorator(
  * @example
  * import { getOpenOrder } from '@clober/v2-sdk'
  *
- * const openOrder = await getOpenOrder(
- *   421614,
- *  '46223845323662364279893361453861711542636620039907198451770258805035840307200'
- * )
+ * const openOrder = await getOpenOrder({
+ *   chainId: 421614,
+ *   id: '46223845323662364279893361453861711542636620039907198451770258805035840307200'
+ * })
  */
 export const getOpenOrder = decorator(
   async ({
@@ -242,10 +242,10 @@ export const getOpenOrder = decorator(
  * @example
  * import { getOpenOrders } from '@clober/v2-sdk'
  *
- * const openOrders = await getOpenOrders(
- *   421614,
- *  '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49'
- * )
+ * const openOrders = await getOpenOrders({
+ *   chainId: 421614,
+ *   userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49'
+ * })
  */
 export const getOpenOrders = decorator(
   async ({
