@@ -41,7 +41,7 @@ const _abi = [
   },
 ] as const
 
-export const fetchOpenOrders = async (
+export const fetchOrder = async (
   chainId: CHAIN_IDS,
   orderIds: bigint[],
 ): Promise<

@@ -17,7 +17,7 @@ import { buildPublicClient } from '../src/constants/client'
 import { cloberTestChain } from './utils/test-chain'
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
 import { createProxyClients } from './utils/utils'
-import { fetchOpenOrders } from './utils/open-order'
+import { fetchOrder } from './utils/open-order'
 import { fetchTokenBalance } from './utils/currency'
 
 const clients = createProxyClients(
@@ -94,7 +94,7 @@ test('claim order', async () => {
 
   expect(
     (
-      await fetchOpenOrders(cloberTestChain.id, [
+      await fetchOrder(cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n,
       ])
     ).map((order) => order.claimable),
@@ -108,7 +108,7 @@ test('claim order', async () => {
 
   expect(
     (
-      await fetchOpenOrders(cloberTestChain.id, [
+      await fetchOrder(cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n,
       ])
     ).map((order) => order.claimable),
@@ -150,7 +150,7 @@ test('claim order', async () => {
 
   expect(
     (
-      await fetchOpenOrders(cloberTestChain.id, [
+      await fetchOrder(cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n,
       ])
     ).map((order) => order.claimable),
@@ -176,7 +176,7 @@ test('claim orders', async () => {
 
   expect(
     (
-      await fetchOpenOrders(cloberTestChain.id, [
+      await fetchOrder(cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n, // ask
         50784203244917507140848199044778666621202412111794785971205812483307929075712n, // ask
         46223845323662364279893361453861711542636620039907198451770260500482770337792n, // bid
@@ -229,7 +229,7 @@ test('claim orders', async () => {
 
   expect(
     (
-      await fetchOpenOrders(cloberTestChain.id, [
+      await fetchOrder(cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n, // ask
         50784203244917507140848199044778666621202412111794785971205812483307929075712n, // ask
         46223845323662364279893361453861711542636620039907198451770260500482770337792n, // bid
@@ -289,7 +289,7 @@ test('claim orders', async () => {
 
   expect(
     (
-      await fetchOpenOrders(cloberTestChain.id, [
+      await fetchOrder(cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n, // ask
         50784203244917507140848199044778666621202412111794785971205812483307929075712n, // ask
         46223845323662364279893361453861711542636620039907198451770260500482770337792n, // bid
@@ -360,7 +360,7 @@ test('cancel orders', async () => {
     '50784203244917507140848199044778666621202412111794785971205811992925743087616',
   ]
 
-  const status = await fetchOpenOrders(
+  const status = await fetchOrder(
     cloberTestChain.id,
     orderIds.map((id) => BigInt(id)),
   )
