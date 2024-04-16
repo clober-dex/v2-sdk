@@ -42,11 +42,11 @@ import { applyPercent } from './utils/bigint'
  * @example
  * import { openMarket } from '@clober/v2-sdk'
  *
- * const transaction = await openMarket(
- *   421614,
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000'
- * )
+ * const transaction = await openMarket({
+ *   chainId: 421614,
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000'
+ * })
  */
 export const openMarket = decorator(
   async ({
@@ -111,34 +111,34 @@ export const openMarket = decorator(
  * import { signERC20Permit, limitOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
- * const signature = await signERC20Permit(
- *   421614,
- *   privateKeyToAccount('0x...'),
- *   '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   '100.123'
- * )
+ * const signature = await signERC20Permit({
+ *   chainId: 421614,
+ *   account: privateKeyToAccount('0x...'),
+ *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   amount: '100.123'
+ * })
  *
- * const { transaction } = await limitOrder(
- *   421614,
- *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000',
- *  '100.123', // 100.123 USDC
- *  '4000.01', // price at 4000.01 (ETH/USDC)
- *  { signature }
- * )
+ * const { transaction } = await limitOrder({
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000',
+ *   amount: '100.123', // 100.123 USDC
+ *   price: '4000.01', // price at 4000.01 (ETH/USDC)
+ *   options: { signature }
+ * })
  *
  * @example
  * import { limitOrder } from '@clober/v2-sdk'
  *
- * const { transaction } = await limitOrder(
- *   421614,
- *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
- *  '0x0000000000000000000000000000000000000000',
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0.13', // 0.13 ETH
- *  '4000.01', // price at 4000.01 (ETH/USDC)
- * )
+ * const { transaction } = await limitOrder({
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *   inputToken: '0x0000000000000000000000000000000000000000',
+ *   outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   amount: '0.13', // 0.13 ETH
+ *   price: '4000.01', // price at 4000.01 (ETH/USDC)
+ * })
  */
 export const limitOrder = decorator(
   async ({
@@ -323,31 +323,31 @@ export const limitOrder = decorator(
  * import { signERC20Permit, marketOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
- * const signature = await signERC20Permit(
- *   421614,
- *   privateKeyToAccount('0x...'),
- *   '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   '100.123'
- * )
+ * const signature = await signERC20Permit({
+ *   chainId: 421614,
+ *   account: privateKeyToAccount('0x...'),
+ *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   amount: '100.123'
+ * })
  *
- * const transaction = await marketOrder(
- *   421614,
- *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0x0000000000000000000000000000000000000000',
- *  '100.123', // 100.123 USDC
- *  { signature }
- * )
+ * const transaction = await marketOrder({
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000',
+ *   amount: '100.123', // 100.123 USDC
+ *   options: { signature }
+ * })
  *
  * @example
  * import { marketOrder } from '@clober/v2-sdk'
  *
  * const transaction = await limitOrder(
- *   421614,
- *  '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
- *  '0x0000000000000000000000000000000000000000',
- *  '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *  '0.13', // 0.13 ETH
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *   inputToken: '0x0000000000000000000000000000000000000000',
+ *   outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   options: '0.13', // 0.13 ETH
  * )
  */
 export const marketOrder = decorator(
@@ -457,15 +457,15 @@ export const marketOrder = decorator(
  * @example
  * import { getOpenOrders, claimOrders } from '@clober/v2-sdk'
  *
- * const openOrders = await getOpenOrders(
- *     421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
- * )
- * const transaction = await claimOrders(
- *    421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *    openOrders.map((order) => order.id)
- * )
+ * const openOrders = await getOpenOrders({
+ *     chainId: 421614,
+ *     userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * })
+ * const transaction = await claimOrders({
+ *    chainId: 421614,
+ *    userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    id: openOrders.map((order) => order.id)
+ * })
  */
 export const claimOrder = decorator(
   async ({
@@ -507,14 +507,14 @@ export const claimOrder = decorator(
  * @example
  * import { getOpenOrders, claimOrders } from '@clober/v2-sdk'
  *
- * const openOrders = await getOpenOrders(
- *     421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
- * )
+ * const openOrders = await getOpenOrders({
+ *     chainId: 421614,
+ *     userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * })
  * const transaction = await claimOrders(
- *    421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *    openOrders.map((order) => order.id)
+ *    chainId: 421614,
+ *    userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    ids: openOrders.map((order) => order.id)
  * )
  */
 export const claimOrders = decorator(
@@ -619,15 +619,15 @@ export const claimOrders = decorator(
  * @example
  * import { getOpenOrders, cancelOrders } from '@clober/v2-sdk'
  *
- * const openOrders = await getOpenOrders(
- *     421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
- * )
- * const transaction = await cancelOrders(
- *    421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *    openOrders.map((order) => order.id)
- * )
+ * const openOrders = await getOpenOrders({
+ *     chainId: 421614,
+ *     userAddress:'0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * })
+ * const transaction = await cancelOrders({
+ *    chainId: 421614,
+ *    userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    id: openOrders.map((order) => order.id)
+ * })
  */
 export const cancelOrder = decorator(
   async ({
@@ -669,15 +669,15 @@ export const cancelOrder = decorator(
  * @example
  * import { getOpenOrders, cancelOrders } from '@clober/v2-sdk'
  *
- * const openOrders = await getOpenOrders(
- *     421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
- * )
- * const transaction = await cancelOrders(
- *    421614,
- *    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *    openOrders.map((order) => order.id)
- * )
+ * const openOrders = await getOpenOrders({
+ *     chainId: 421614,
+ *     userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
+ * })
+ * const transaction = await cancelOrders({
+ *    chainId: 421614,
+ *    userAddress: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *    ids: openOrders.map((order) => order.id)
+ * })
  */
 export const cancelOrders = decorator(
   async ({
