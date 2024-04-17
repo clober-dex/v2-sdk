@@ -72,7 +72,7 @@ test('claim order', async () => {
 
   const signature = await signERC20Permit({
     chainId: cloberTestChain.id,
-    account,
+    walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '100000',
     options: {
@@ -117,7 +117,7 @@ test('claim order', async () => {
   // be sure to approve before claim
   const hash = await setApprovalOfOpenOrdersForAll({
     chainId: cloberTestChain.id,
-    account,
+    walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
     },
@@ -205,7 +205,7 @@ test('claim orders', async () => {
 
   const signature = await signERC20Permit({
     chainId: cloberTestChain.id,
-    account,
+    walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '5000000',
     options: { rpcUrl: publicClient.transport.url! },
@@ -242,7 +242,7 @@ test('claim orders', async () => {
   // be sure to approve before claim
   const hash = await setApprovalOfOpenOrdersForAll({
     chainId: cloberTestChain.id,
-    account,
+    walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
     },
@@ -323,7 +323,7 @@ test('cancel order', async () => {
   // be sure to approve before claim
   const hash = await setApprovalOfOpenOrdersForAll({
     chainId: cloberTestChain.id,
-    account,
+    walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
     },
@@ -376,7 +376,7 @@ test('cancel orders', async () => {
   // be sure to approve before claim
   const hash = await setApprovalOfOpenOrdersForAll({
     chainId: cloberTestChain.id,
-    account,
+    walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
     },
