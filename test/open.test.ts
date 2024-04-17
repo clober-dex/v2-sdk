@@ -36,6 +36,7 @@ test('try open market', async () => {
   const hash = await walletClient.sendTransaction({
     ...transaction!,
     account,
+    gasPrice: transaction!.gasPrice! * 2n,
   })
   const receipt = await publicClient.waitForTransactionReceipt({
     hash,
