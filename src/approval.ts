@@ -1,7 +1,5 @@
 import { WalletClient } from 'viem'
 
-import { account } from '../test/utils/constants'
-
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchIsApprovedForAll } from './utils/approval'
@@ -71,15 +69,18 @@ export const setApprovalOfOpenOrdersForAll = decorator(
     walletClient: WalletClient
     options?: DefaultOptions
   }): Promise<`0x${string}` | undefined> => {
+    if (!walletClient.account) {
+      throw new Error('Account is not found')
+    }
     const isApprovedForAll = await fetchIsApprovedForAll(
       chainId,
-      account.address,
+      walletClient.account.address,
     )
     if (isApprovedForAll) {
       return undefined
     }
     return walletClient.writeContract({
-      account,
+      account: walletClient.account,
       chain: CHAIN_MAP[chainId],
       address: CONTRACT_ADDRESSES[chainId]!.BookManager,
       abi: _abi,
