@@ -75,18 +75,6 @@ const _abi = [
  * @returns {Promise<PermitSignature>} Promise resolving to the permit signature.
  * @example
  * import { signERC20Permit } from '@clober/v2-sdk'
- * import { privateKeyToAccount } from 'viem/accounts'
- *
- * const { deadline, r, s, v } = await signERC20Permit({
- *   chainId: 421614,
- *   account: privateKeyToAccount('0x...')
- *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   amount: '1000.123', // spend 1000.123 USDC
- * })
- *
- * @example
- * import { signERC20Permit } from '@clober/v2-sdk'
- * import { mnemonicToAccount } from 'viem/accounts'
  *
  * const walletClient = createWalletClient({
  *   chain: arbitrumSepolia,

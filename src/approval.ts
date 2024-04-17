@@ -38,15 +38,6 @@ const _abi = [
  * @returns {Promise<`0x${string}` | undefined>} Promise resolving to the transaction hash. If the account is already approved for all, the promise resolves to `undefined`.
  * @example
  * import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
- * import { privateKeyToAccount } from 'viem/accounts'
- *
- * const hash = await setApprovalOfOpenOrdersForAll({
- *   chainId: 421614,
- *   account: privateKeyToAccount('0x...')
- * })
- *
- * @example
- * import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
  * import { mnemonicToAccount } from 'viem/accounts'
  *
  * const walletClient = createWalletClient({
@@ -55,10 +46,10 @@ const _abi = [
  *   transport: http(),
  * })
  *
- * const hash = await setApprovalOfOpenOrdersForAll(
- *   421614,
+ * const hash = await setApprovalOfOpenOrdersForAll({
+ *   chainId: 421614,
  *   walletClient
- * )
+ * })
  */
 export const setApprovalOfOpenOrdersForAll = decorator(
   async ({

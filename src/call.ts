@@ -113,7 +113,7 @@ export const openMarket = decorator(
  *
  * const signature = await signERC20Permit({
  *   chainId: 421614,
- *   account: privateKeyToAccount('0x...'),
+ *   walletClient,
  *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   amount: '100.123'
  * })
@@ -325,7 +325,7 @@ export const limitOrder = decorator(
  *
  * const signature = await signERC20Permit({
  *   chainId: 421614,
- *   account: privateKeyToAccount('0x...'),
+ *   walletClient,
  *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   amount: '100.123'
  * })
@@ -339,16 +339,6 @@ export const limitOrder = decorator(
  *   options: { signature }
  * })
  *
- * @example
- * import { marketOrder } from '@clober/v2-sdk'
- *
- * const transaction = await limitOrder(
- *   chainId: 421614,
- *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
- *   inputToken: '0x0000000000000000000000000000000000000000',
- *   outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   options: '0.13', // 0.13 ETH
- * )
  */
 export const marketOrder = decorator(
   async ({
@@ -534,10 +524,10 @@ export const claimOrders = decorator(
        Set ApprovalForAll before calling this function.
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
-       const hash = await setApprovalOfOpenOrdersForAll(
-            ${chainId},
-            privateKeyToAccount('0x...')
-       )
+       const hash = await setApprovalOfOpenOrdersForAll({
+            chainId: ${chainId},
+            walletClient, // use viem
+       })
     `)
     }
 
@@ -696,10 +686,10 @@ export const cancelOrders = decorator(
        Set ApprovalForAll before calling this function.
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
-       const hash = await setApprovalOfOpenOrdersForAll(
-            ${chainId},
-            privateKeyToAccount('0x...')
-       )
+       const hash = await setApprovalOfOpenOrdersForAll({
+            chainId: ${chainId},
+            walletClient, // use viem
+       })
     `)
     }
 
