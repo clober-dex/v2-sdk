@@ -18,6 +18,7 @@ export default async function () {
       accounts: 10,
       balance: 1000, // 1000 ETH
       autoImpersonate: true,
+      gasPrice: 0,
     },
   })
 }

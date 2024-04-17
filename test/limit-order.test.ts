@@ -59,7 +59,7 @@ test('make bid order', async () => {
 
   const signature = await signERC20Permit({
     chainId: cloberTestChain.id,
-    account,
+    walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '1',
     options: {
@@ -234,7 +234,7 @@ test('limit bid order', async () => {
   )
   const signature = await signERC20Permit({
     chainId: cloberTestChain.id,
-    account,
+    walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '100000',
     options: {

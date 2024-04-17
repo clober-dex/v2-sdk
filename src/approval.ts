@@ -1,9 +1,6 @@
-import {
-  http,
-  createWalletClient,
-  type HDAccount,
-  type PrivateKeyAccount,
-} from 'viem'
+import { WalletClient } from 'viem'
+
+import { account } from '../test/utils/constants'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
@@ -33,10 +30,11 @@ const _abi = [
 ] as const
 
 /**
+ * @dev This function relates with `viem` dependency
  * Sets approval of all open orders for the specified account on the given chain.
  *
  * @param {CHAIN_IDS} chainId The chain ID.
- * @param {HDAccount | PrivateKeyAccount} account The Ethereum account for which approval is to be set.
+ * @param {WalletClient} walletClient The wallet client.
  * @param {Object} [options] Optional parameters for setting approval.
  * @param {string} options.rpcUrl The RPC URL to use for executing the transaction.
  * @returns {Promise<`0x${string}` | undefined>} Promise resolving to the transaction hash. If the account is already approved for all, the promise resolves to `undefined`.
@@ -53,19 +51,24 @@ const _abi = [
  * import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
  * import { mnemonicToAccount } from 'viem/accounts'
  *
+ * const walletClient = createWalletClient({
+ *   chain: arbitrumSepolia,
+ *   account: mnemonicToAccount('legal ...'),
+ *   transport: http(),
+ * })
+ *
  * const hash = await setApprovalOfOpenOrdersForAll(
  *   421614,
- *   mnemonicToAccount('legal ...')
+ *   walletClient
  * )
  */
 export const setApprovalOfOpenOrdersForAll = decorator(
   async ({
     chainId,
-    account,
-    options,
+    walletClient,
   }: {
     chainId: CHAIN_IDS
-    account: HDAccount | PrivateKeyAccount
+    walletClient: WalletClient
     options?: DefaultOptions
   }): Promise<`0x${string}` | undefined> => {
     const isApprovedForAll = await fetchIsApprovedForAll(
@@ -75,11 +78,6 @@ export const setApprovalOfOpenOrdersForAll = decorator(
     if (isApprovedForAll) {
       return undefined
     }
-    const walletClient = createWalletClient({
-      chain: CHAIN_MAP[chainId],
-      account,
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
     return walletClient.writeContract({
       account,
       chain: CHAIN_MAP[chainId],

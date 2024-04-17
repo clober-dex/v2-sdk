@@ -1,9 +1,8 @@
 import {
-  HDAccount,
   hexToSignature,
   parseUnits,
-  PrivateKeyAccount,
   verifyTypedData,
+  WalletClient,
   zeroHash,
 } from 'viem'
 
@@ -64,11 +63,11 @@ const _abi = [
 ] as const
 
 /**
+ * @dev This function relates with `viem` dependency
  * Signs an ERC20 permit using EIP-712 encoding.
  *
  * @param {CHAIN_IDS} chainId The chain ID.
- * @param {HDAccount | PrivateKeyAccount} account The Ethereum account used for signing using
- * [viem - Local Accounts (Private Key, Mnemonic, etc)](https://viem.sh/docs/accounts/local#local-accounts-private-key-mnemonic-etc).
+ * @param {WalletClient} walletClient The wallet client.
  * @param {`0x${string}`} token The ERC20 token address.
  * @param {string} amount The amount of tokens to permit.
  * @param options
@@ -89,9 +88,15 @@ const _abi = [
  * import { signERC20Permit } from '@clober/v2-sdk'
  * import { mnemonicToAccount } from 'viem/accounts'
  *
+ * const walletClient = createWalletClient({
+ *   chain: arbitrumSepolia,
+ *   account: mnemonicToAccount('legal ...'),
+ *   transport: http(),
+ * })
+ *
  * const { deadline, r, s, v } = await signERC20Permit({
  *   chainId: 421614,
- *   account: mnemonicToAccount('legal ...')
+ *   walletClient
  *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   amount: '1000.123', // spend 1000.123 USDC
  * })
@@ -99,19 +104,23 @@ const _abi = [
 export const signERC20Permit = decorator(
   async ({
     chainId,
-    account,
+    walletClient,
     token,
     amount,
   }: {
     chainId: CHAIN_IDS
-    account: HDAccount | PrivateKeyAccount
+    walletClient: WalletClient
     token: `0x${string}`
     amount: string
     options?: DefaultOptions
   }): Promise<PermitSignature> => {
+    if (!walletClient.account) {
+      throw new Error('Account is not found')
+    }
     const currency = await fetchCurrency(chainId, token)
     const spender = CONTRACT_ADDRESSES[chainId]!.Controller
     const value = parseUnits(amount, currency.decimals)
+    const owner = walletClient.account.address
     const [{ result: nonce }, { result: version }, { result: name }] =
       await cachedPublicClients[chainId].multicall({
         allowFailure: true,
@@ -120,7 +129,7 @@ export const signERC20Permit = decorator(
             address: token,
             abi: _abi,
             functionName: 'nonces',
-            args: [account.address],
+            args: [owner],
           },
           {
             address: token,
@@ -152,7 +161,7 @@ export const signERC20Permit = decorator(
         verifyingContract: currency.address,
       },
       message: {
-        owner: account.address,
+        owner,
         spender,
         value,
         nonce,
@@ -175,13 +184,14 @@ export const signERC20Permit = decorator(
         ],
       },
     } as const
-    const signature = await account.signTypedData({
+    const signature = await walletClient.signTypedData({
       ...data,
+      account: walletClient.account,
     })
     const valid = await verifyTypedData({
       ...data,
       signature,
-      address: account.address,
+      address: owner,
     })
     if (!valid) {
       throw new Error('Invalid signature')
