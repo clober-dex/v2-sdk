@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
-import { getMarket } from '@clober/v2-sdk'
+import { getMarket, getQuoteToken } from '@clober/v2-sdk'
 
 import { buildPublicClient } from '../src/constants/client'
 
@@ -13,6 +13,32 @@ const clients = createProxyClients(
     (id) => id,
   ),
 )
+
+test('get quote token', async () => {
+  expect(
+    getQuoteToken({
+      chainId: arbitrumSepolia.id,
+      token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      token1: '0x0000000000000000000000000000000000000000',
+    }),
+  ).toEqual(getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'))
+
+  expect(
+    getQuoteToken({
+      chainId: arbitrumSepolia.id,
+      token0: '0x0000000000000000000000000000000000000001',
+      token1: '0x0000000000000000000000000000000000000000',
+    }),
+  ).toEqual(getAddress('0x0000000000000000000000000000000000000000'))
+
+  expect(
+    getQuoteToken({
+      chainId: arbitrumSepolia.id,
+      token0: '0x0000000000000000000000000000000000000001',
+      token1: '0x0000000000000000000000000000000000000002',
+    }),
+  ).toEqual(getAddress('0x0000000000000000000000000000000000000001'))
+})
 
 test('fetch open market', async () => {
   const { publicClient } = clients[0] as any
