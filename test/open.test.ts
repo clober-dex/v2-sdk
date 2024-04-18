@@ -32,6 +32,9 @@ test('try open market', async () => {
     chainId: cloberTestChain.id,
     inputToken: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
     outputToken: '0x0000000000000000000000000000000000000000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
   })
   await walletClient.sendTransaction({
     ...transaction1!,
@@ -53,6 +56,9 @@ test('try open market', async () => {
     chainId: cloberTestChain.id,
     inputToken: '0x0000000000000000000000000000000000000000',
     outputToken: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+    },
   })
   await walletClient.sendTransaction({
     ...transaction2!,
