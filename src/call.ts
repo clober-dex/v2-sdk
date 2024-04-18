@@ -169,6 +169,9 @@ export const limitOrder = decorator(
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
+    const [inputCurrency, outputCurrency] = isBid
+      ? [market.quote, market.base]
+      : [market.base, market.quote]
     if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
       throw new Error(`
        Open the market before placing a limit order.
@@ -191,12 +194,9 @@ export const limitOrder = decorator(
     const tokensToSettle = [inputToken, outputToken].filter(
       (address) => !isAddressEqual(address, zeroAddress),
     )
-    const quoteAmount = parseUnits(
-      amount,
-      isBid ? market.quote.decimals : market.base.decimals,
-    )
+    const quoteAmount = parseUnits(amount, inputCurrency.decimals)
     const [unit, { spendAmount, bookId }] = await Promise.all([
-      calculateUnit(chainId, isBid ? market.quote : market.base),
+      calculateUnit(chainId, inputCurrency),
       getExpectedOutput({
         chainId,
         inputToken,
@@ -244,16 +244,13 @@ export const limitOrder = decorator(
         }),
         result: {
           make: {
-            amount: formatUnits(
-              quoteAmount,
-              isBid ? market.quote.decimals : market.base.decimals,
-            ),
-            currency: isBid ? market.quote : market.base,
+            amount: formatUnits(quoteAmount, inputCurrency.decimals),
+            currency: inputCurrency,
             direction: 'in',
           },
           take: {
             amount: '0',
-            currency: isBid ? market.base : market.quote,
+            currency: outputCurrency,
             direction: 'out',
           },
         },
@@ -287,16 +284,13 @@ export const limitOrder = decorator(
         }),
         result: {
           make: {
-            amount: formatUnits(
-              quoteAmount,
-              isBid ? market.quote.decimals : market.base.decimals,
-            ),
-            currency: isBid ? market.quote : market.base,
+            amount: formatUnits(quoteAmount, inputCurrency.decimals),
+            currency: inputCurrency,
             direction: 'in',
           },
           take: {
             amount: spendAmount,
-            currency: isBid ? market.base : market.quote,
+            currency: outputCurrency,
             direction: 'out',
           },
         },
