@@ -297,7 +297,7 @@ test('take with eth', async () => {
     inputToken: '0x0000000000000000000000000000000000000000',
     outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amountIn: '1.001',
-    amountOut: '1000',
+    amountOut: '1005',
     options: {
       rpcUrl: publicClient.transport.url!,
     },
@@ -339,17 +339,17 @@ test('take with eth', async () => {
     }),
   ])
 
-  expect(afterUSDCBalance - beforeUSDCBalance).toEqual(3867722122n)
+  expect(afterUSDCBalance - beforeUSDCBalance).toEqual(1005000000n)
   expect(Number(beforeETHBalance)).toBeGreaterThan(Number(afterETHBalance))
-  expect(afterMarket.bids.length).toEqual(1)
+  expect(afterMarket.bids.length).toEqual(4)
 
-  expect(result.spend.amount).toEqual('3867.722122')
+  expect(result.spend.amount).toEqual('0.287437077314383477')
   expect(result.spend.currency.address).toEqual(
     getAddress('0x0000000000000000000000000000000000000000'),
   )
   expect(result.spend.direction).toEqual('in')
 
-  expect(result.take.amount).toEqual('1.001000997')
+  expect(result.take.amount).toEqual('1005')
   expect(result.take.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
