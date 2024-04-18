@@ -61,8 +61,8 @@ test('try open market', async () => {
   })
   const market2 = await getMarket({
     chainId: cloberTestChain.id,
-    token0: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
-    token1: '0x0000000000000000000000000000000000000000',
+    token0: '0x0000000000000000000000000000000000000000',
+    token1: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
     options: {
       rpcUrl: publicClient.transport.url!,
     },
