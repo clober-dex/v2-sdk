@@ -448,12 +448,12 @@ export const marketOrder = decorator(
           spend: {
             amount: spendAmount,
             currency: inputCurrency,
-            direction: 'out',
+            direction: 'in',
           },
           take: {
             amount: takenAmount,
             currency: outputCurrency,
-            direction: 'in',
+            direction: 'out',
           },
         },
       }
@@ -510,12 +510,12 @@ export const marketOrder = decorator(
           spend: {
             amount: spendAmount,
             currency: inputCurrency,
-            direction: 'out',
+            direction: 'in',
           },
           take: {
             amount: takenAmount,
             currency: outputCurrency,
-            direction: 'in',
+            direction: 'out',
           },
         },
       }
