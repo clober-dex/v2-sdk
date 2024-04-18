@@ -33,24 +33,17 @@ test('limit order in not open market', async () => {
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   expect(
-    await limitOrder({
-      chainId: arbitrumSepolia.id,
-      userAddress: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
-      inputToken: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
-      outputToken: '0x0000000000000000000000000000000000000000',
-      amount: '10',
-      price: '1000',
-    }).catch((e) => e.message),
-  ).toEqual(`
-       Open the market before placing a limit order.
-       import { openMarket } from '@clober/v2-sdk'
-
-       const transaction = await openMarket(
-            ${cloberTestChain.id},
-           '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
-           '0x0000000000000000000000000000000000000000',
-       )
-    `)
+    (
+      await limitOrder({
+        chainId: arbitrumSepolia.id,
+        userAddress: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
+        inputToken: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
+        outputToken: '0x0000000000000000000000000000000000000000',
+        amount: '10',
+        price: '1000',
+      }).catch((e) => e.message)
+    ).includes('Open the market before placing a limit order.'),
+  ).toEqual(true)
 })
 
 test('make bid order', async () => {

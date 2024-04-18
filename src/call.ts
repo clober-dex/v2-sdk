@@ -22,7 +22,7 @@ import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
 import { fetchMarket } from './apis/market'
 import { parsePrice } from './utils/prices'
 import { fromPrice, invertPrice } from './utils/tick'
-import { getExpectedOutput } from './view'
+import { getExpectedInput, getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { decorator } from './utils/decorator'
@@ -113,7 +113,7 @@ export const openMarket = decorator(
  *
  * const signature = await signERC20Permit({
  *   chainId: 421614,
- *   account: privateKeyToAccount('0x...'),
+ *   walletClient,
  *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   amount: '100.123'
  * })
@@ -177,11 +177,11 @@ export const limitOrder = decorator(
        Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
 
-       const transaction = await openMarket(
-            ${chainId},
-           '${inputToken}',
-           '${outputToken}',
-       )
+       const transaction = await openMarket({
+            chainId: ${chainId},
+            inputToken: '${inputToken}',
+            outputToken: '${outputToken}',
+       })
     `)
     }
 
@@ -301,25 +301,29 @@ export const limitOrder = decorator(
 
 /**
  * Executes a market order on the specified chain for trading tokens.
+ * If only `amountIn` is provided, spend the specified amount of input tokens.
+ * If `amountIn` and `amountOut` are provided, take the appropriate amount of output tokens with the specified input amount.
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user placing the order.
  * @param {`0x${string}`} inputToken The address of the token to be used as input.
  * @param {`0x${string}`} outputToken The address of the token to be received as output.
- * @param {string} amount The amount of input tokens for the order.
- * @param {Object} [options] Optional parameters for the limit order.
+ * @param {string} amountIn The amount of input tokens for the order to spend.
+ * @param {string} amountOut The amount of output tokens for the order to take.
+ * @param {Object} [options] Optional parameters for the market order.
  * @param {PermitSignature} [options.signature] The permit signature for token approval.
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
- * @param {string} [options.limitPrice] The upper bound price to tolerate for the market bid, or the lower bound price to tolerate for the market ask.
- * if the limit price is not provided, unlimited slippage is allowed.
- * @returns {Promise<Transaction>} Promise resolving to the transaction object representing the limit order.
+ * @param {number} [options.slippage] The maximum slippage percentage allowed for the order.
+ * if the slippage is not provided, unlimited slippage is allowed.
+ * @returns {Promise<{ transaction: Transaction, result: { spend: CurrencyFlow, take: CurrencyFlow } }>}
+ * Promise resolving to the transaction object representing the market order with the result of the order.
  * @example
  * import { signERC20Permit, marketOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
  * const signature = await signERC20Permit({
  *   chainId: 421614,
- *   account: privateKeyToAccount('0x...'),
+ *   walletClient,
  *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   amount: '100.123'
  * })
@@ -333,16 +337,6 @@ export const limitOrder = decorator(
  *   options: { signature }
  * })
  *
- * @example
- * import { marketOrder } from '@clober/v2-sdk'
- *
- * const transaction = await limitOrder(
- *   chainId: 421614,
- *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
- *   inputToken: '0x0000000000000000000000000000000000000000',
- *   outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   options: '0.13', // 0.13 ETH
- * )
  */
 export const marketOrder = decorator(
   async ({
@@ -350,22 +344,36 @@ export const marketOrder = decorator(
     userAddress,
     inputToken,
     outputToken,
-    amount,
+    amountIn,
+    amountOut,
     options,
   }: {
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
     inputToken: `0x${string}`
     outputToken: `0x${string}`
-    amount: string
+    amountIn: string
+    amountOut?: string
     options?: {
       signature?: PermitSignature
-      limitPrice?: string
+      slippage?: number
     } & DefaultOptions
-  }): Promise<Transaction> => {
+  }): Promise<{
+    transaction: Transaction
+    result: {
+      take: CurrencyFlow
+      spend: CurrencyFlow
+    }
+  }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
-    const isBid = isAddressEqual(market.quote.address, inputToken)
-    if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
+    const isTakingBid = isAddressEqual(market.base.address, inputToken)
+    const [inputCurrency, outputCurrency] = isTakingBid
+      ? [market.base, market.quote]
+      : [market.quote, market.base]
+    if (
+      (isTakingBid && !market.bidBookOpen) ||
+      (!isTakingBid && !market.askBookOpen)
+    ) {
       throw new Error(`
        Open the market before placing a market order.
        import { openMarket } from '@clober/v2-sdk'
@@ -377,62 +385,137 @@ export const marketOrder = decorator(
        )
     `)
     }
-
-    const rawLimitPrice = parsePrice(
-      Number(options?.limitPrice ?? '0'),
-      market.quote.decimals,
-      market.base.decimals,
-    )
     const tokensToSettle = [inputToken, outputToken].filter(
       (address) => !isAddressEqual(address, zeroAddress),
     )
-    const quoteAmount = parseUnits(
-      amount,
-      isBid ? market.quote.decimals : market.base.decimals,
-    )
-    const { bookId, takenAmount } = await getExpectedOutput({
-      chainId,
-      inputToken,
-      outputToken,
-      amountIn: amount,
-      options: {
-        ...options,
-        // todo: pass limit price
-      },
-    })
     const isETH = isAddressEqual(inputToken, zeroAddress)
-    const permitParamsList =
-      options?.signature && !isETH
-        ? [
-            {
-              token: inputToken,
-              permitAmount: quoteAmount,
-              signature: options.signature,
-            },
-          ]
-        : []
 
-    return buildTransaction(chainId, {
-      chain: CHAIN_MAP[chainId],
-      account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Controller,
-      abi: CONTROLLER_ABI,
-      functionName: 'take',
-      args: [
-        [
-          {
-            id: bookId,
-            limitPrice: isBid ? invertPrice(rawLimitPrice) : rawLimitPrice,
-            quoteAmount: takenAmount,
-            hookData: zeroHash,
+    if (amountIn && !amountOut) {
+      const { bookId, takenAmount, spendAmount } = await getExpectedOutput({
+        chainId,
+        inputToken,
+        outputToken,
+        amountIn,
+        options: {
+          ...options,
+          // don't need to check limit price for market order
+        },
+      })
+      const baseAmount = parseUnits(amountIn, inputCurrency.decimals)
+      return {
+        transaction: await buildTransaction(chainId, {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'spend',
+          args: [
+            [
+              {
+                id: bookId,
+                limitPrice: 0n,
+                baseAmount,
+                minQuoteAmount: options?.slippage
+                  ? applyPercent(
+                      parseUnits(takenAmount, outputCurrency.decimals),
+                      100 - options.slippage,
+                    )
+                  : 0n,
+                hookData: zeroHash,
+              },
+            ],
+            tokensToSettle,
+            options?.signature && !isETH
+              ? [
+                  {
+                    token: inputToken,
+                    permitAmount: baseAmount,
+                    signature: options.signature,
+                  },
+                ]
+              : [],
+            getDeadlineTimestampInSeconds(),
+          ],
+          value: isETH ? baseAmount : 0n,
+        }),
+        result: {
+          spend: {
+            amount: spendAmount,
+            currency: inputCurrency,
+            direction: 'in',
           },
-        ],
-        tokensToSettle,
-        permitParamsList,
-        getDeadlineTimestampInSeconds(),
-      ],
-      value: isETH ? quoteAmount : 0n,
-    })
+          take: {
+            amount: takenAmount,
+            currency: outputCurrency,
+            direction: 'out',
+          },
+        },
+      }
+    } else if (amountIn && amountOut) {
+      const { bookId, spendAmount, takenAmount } = await getExpectedInput({
+        chainId,
+        inputToken,
+        outputToken,
+        amountOut,
+        options: {
+          ...options,
+          // don't need to check limit price for market order
+        },
+      })
+      const quoteAmount = parseUnits(amountOut, outputCurrency.decimals)
+      const baseAmount = parseUnits(
+        amountIn ?? spendAmount,
+        inputCurrency.decimals,
+      )
+      return {
+        transaction: await buildTransaction(chainId, {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'take',
+          args: [
+            [
+              {
+                id: bookId,
+                limitPrice: 0n,
+                quoteAmount,
+                maxBaseAmount: options?.slippage
+                  ? applyPercent(baseAmount, 100 + options.slippage)
+                  : 2n ** 256n - 1n,
+                hookData: zeroHash,
+              },
+            ],
+            tokensToSettle,
+            options?.signature && !isETH
+              ? [
+                  {
+                    token: inputToken,
+                    permitAmount: baseAmount,
+                    signature: options.signature,
+                  },
+                ]
+              : [],
+            getDeadlineTimestampInSeconds(),
+          ],
+          value: isETH ? baseAmount : 0n,
+        }),
+        result: {
+          spend: {
+            amount: spendAmount,
+            currency: inputCurrency,
+            direction: 'in',
+          },
+          take: {
+            amount: takenAmount,
+            currency: outputCurrency,
+            direction: 'out',
+          },
+        },
+      }
+    } else {
+      throw new Error('Either amountIn or amountOut must be provided')
+    }
   },
 )
 
@@ -528,10 +611,10 @@ export const claimOrders = decorator(
        Set ApprovalForAll before calling this function.
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
-       const hash = await setApprovalOfOpenOrdersForAll(
-            ${chainId},
-            privateKeyToAccount('0x...')
-       )
+       const hash = await setApprovalOfOpenOrdersForAll({
+            chainId: ${chainId},
+            walletClient, // use viem
+       })
     `)
     }
 
@@ -690,10 +773,10 @@ export const cancelOrders = decorator(
        Set ApprovalForAll before calling this function.
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
-       const hash = await setApprovalOfOpenOrdersForAll(
-            ${chainId},
-            privateKeyToAccount('0x...')
-       )
+       const hash = await setApprovalOfOpenOrdersForAll({
+            chainId: ${chainId},
+            walletClient, // use viem
+       })
     `)
     }
 
