@@ -53,6 +53,7 @@ export const openMarket = decorator(
     chainId,
     inputToken,
     outputToken,
+    options,
   }: {
     chainId: CHAIN_IDS
     inputToken: `0x${string}`
@@ -66,27 +67,31 @@ export const openMarket = decorator(
         chainId,
         isBid ? market.quote : market.base,
       )
-      return buildTransaction(chainId, {
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'open',
-        args: [
-          [
-            {
-              key: {
-                base: outputToken,
-                unit,
-                quote: inputToken,
-                makerPolicy: MAKER_DEFAULT_POLICY.value,
-                hooks: zeroAddress,
-                takerPolicy: TAKER_DEFAULT_POLICY.value,
+      return buildTransaction(
+        chainId,
+        {
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'open',
+          args: [
+            [
+              {
+                key: {
+                  base: outputToken,
+                  unit,
+                  quote: inputToken,
+                  makerPolicy: MAKER_DEFAULT_POLICY.value,
+                  hooks: zeroAddress,
+                  takerPolicy: TAKER_DEFAULT_POLICY.value,
+                },
+                hookData: zeroHash,
               },
-              hookData: zeroHash,
-            },
+            ],
+            getDeadlineTimestampInSeconds(),
           ],
-          getDeadlineTimestampInSeconds(),
-        ],
-      })
+        },
+        options?.gasLimit,
+      )
     }
     return undefined
   },
@@ -228,20 +233,24 @@ export const limitOrder = decorator(
     }
     if (options?.postOnly === true || spendAmount === '0') {
       return {
-        transaction: await buildTransaction(chainId, {
-          chain: CHAIN_MAP[chainId],
-          account: userAddress,
-          address: CONTRACT_ADDRESSES[chainId]!.Controller,
-          abi: CONTROLLER_ABI,
-          functionName: 'make',
-          args: [
-            [makeParam],
-            tokensToSettle,
-            permitParamsList,
-            getDeadlineTimestampInSeconds(),
-          ],
-          value: isETH ? quoteAmount : 0n,
-        }),
+        transaction: await buildTransaction(
+          chainId,
+          {
+            chain: CHAIN_MAP[chainId],
+            account: userAddress,
+            address: CONTRACT_ADDRESSES[chainId]!.Controller,
+            abi: CONTROLLER_ABI,
+            functionName: 'make',
+            args: [
+              [makeParam],
+              tokensToSettle,
+              permitParamsList,
+              getDeadlineTimestampInSeconds(),
+            ],
+            value: isETH ? quoteAmount : 0n,
+          },
+          options?.gasLimit,
+        ),
         result: {
           make: {
             amount: formatUnits(quoteAmount, inputCurrency.decimals),
@@ -258,30 +267,34 @@ export const limitOrder = decorator(
     } else {
       // take and make
       return {
-        transaction: await buildTransaction(chainId, {
-          chain: CHAIN_MAP[chainId],
-          account: userAddress,
-          address: CONTRACT_ADDRESSES[chainId]!.Controller,
-          abi: CONTROLLER_ABI,
-          functionName: 'limit',
-          args: [
-            [
-              {
-                takeBookId: bookId,
-                makeBookId: makeParam.id,
-                limitPrice: isBid ? invertPrice(rawPrice) : rawPrice,
-                tick: makeParam.tick,
-                quoteAmount,
-                takeHookData: zeroHash,
-                makeHookData: makeParam.hookData,
-              },
+        transaction: await buildTransaction(
+          chainId,
+          {
+            chain: CHAIN_MAP[chainId],
+            account: userAddress,
+            address: CONTRACT_ADDRESSES[chainId]!.Controller,
+            abi: CONTROLLER_ABI,
+            functionName: 'limit',
+            args: [
+              [
+                {
+                  takeBookId: bookId,
+                  makeBookId: makeParam.id,
+                  limitPrice: isBid ? invertPrice(rawPrice) : rawPrice,
+                  tick: makeParam.tick,
+                  quoteAmount,
+                  takeHookData: zeroHash,
+                  makeHookData: makeParam.hookData,
+                },
+              ],
+              tokensToSettle,
+              permitParamsList,
+              getDeadlineTimestampInSeconds(),
             ],
-            tokensToSettle,
-            permitParamsList,
-            getDeadlineTimestampInSeconds(),
-          ],
-          value: isETH ? quoteAmount : 0n,
-        }),
+            value: isETH ? quoteAmount : 0n,
+          },
+          options?.gasLimit,
+        ),
         result: {
           make: {
             amount: formatUnits(quoteAmount, inputCurrency.decimals),
@@ -403,41 +416,45 @@ export const marketOrder = decorator(
       })
       const baseAmount = parseUnits(amountIn, inputCurrency.decimals)
       return {
-        transaction: await buildTransaction(chainId, {
-          chain: CHAIN_MAP[chainId],
-          account: userAddress,
-          address: CONTRACT_ADDRESSES[chainId]!.Controller,
-          abi: CONTROLLER_ABI,
-          functionName: 'spend',
-          args: [
-            [
-              {
-                id: bookId,
-                limitPrice: 0n,
-                baseAmount,
-                minQuoteAmount: options?.slippage
-                  ? applyPercent(
-                      parseUnits(takenAmount, outputCurrency.decimals),
-                      100 - options.slippage,
-                    )
-                  : 0n,
-                hookData: zeroHash,
-              },
+        transaction: await buildTransaction(
+          chainId,
+          {
+            chain: CHAIN_MAP[chainId],
+            account: userAddress,
+            address: CONTRACT_ADDRESSES[chainId]!.Controller,
+            abi: CONTROLLER_ABI,
+            functionName: 'spend',
+            args: [
+              [
+                {
+                  id: bookId,
+                  limitPrice: 0n,
+                  baseAmount,
+                  minQuoteAmount: options?.slippage
+                    ? applyPercent(
+                        parseUnits(takenAmount, outputCurrency.decimals),
+                        100 - options.slippage,
+                      )
+                    : 0n,
+                  hookData: zeroHash,
+                },
+              ],
+              tokensToSettle,
+              options?.signature && !isETH
+                ? [
+                    {
+                      token: inputToken,
+                      permitAmount: baseAmount,
+                      signature: options.signature,
+                    },
+                  ]
+                : [],
+              getDeadlineTimestampInSeconds(),
             ],
-            tokensToSettle,
-            options?.signature && !isETH
-              ? [
-                  {
-                    token: inputToken,
-                    permitAmount: baseAmount,
-                    signature: options.signature,
-                  },
-                ]
-              : [],
-            getDeadlineTimestampInSeconds(),
-          ],
-          value: isETH ? baseAmount : 0n,
-        }),
+            value: isETH ? baseAmount : 0n,
+          },
+          options?.gasLimit,
+        ),
         result: {
           spend: {
             amount: spendAmount,
@@ -468,38 +485,42 @@ export const marketOrder = decorator(
         inputCurrency.decimals,
       )
       return {
-        transaction: await buildTransaction(chainId, {
-          chain: CHAIN_MAP[chainId],
-          account: userAddress,
-          address: CONTRACT_ADDRESSES[chainId]!.Controller,
-          abi: CONTROLLER_ABI,
-          functionName: 'take',
-          args: [
-            [
-              {
-                id: bookId,
-                limitPrice: 0n,
-                quoteAmount,
-                maxBaseAmount: options?.slippage
-                  ? applyPercent(baseAmount, 100 + options.slippage)
-                  : 2n ** 256n - 1n,
-                hookData: zeroHash,
-              },
+        transaction: await buildTransaction(
+          chainId,
+          {
+            chain: CHAIN_MAP[chainId],
+            account: userAddress,
+            address: CONTRACT_ADDRESSES[chainId]!.Controller,
+            abi: CONTROLLER_ABI,
+            functionName: 'take',
+            args: [
+              [
+                {
+                  id: bookId,
+                  limitPrice: 0n,
+                  quoteAmount,
+                  maxBaseAmount: options?.slippage
+                    ? applyPercent(baseAmount, 100 + options.slippage)
+                    : 2n ** 256n - 1n,
+                  hookData: zeroHash,
+                },
+              ],
+              tokensToSettle,
+              options?.signature && !isETH
+                ? [
+                    {
+                      token: inputToken,
+                      permitAmount: baseAmount,
+                      signature: options.signature,
+                    },
+                  ]
+                : [],
+              getDeadlineTimestampInSeconds(),
             ],
-            tokensToSettle,
-            options?.signature && !isETH
-              ? [
-                  {
-                    token: inputToken,
-                    permitAmount: baseAmount,
-                    signature: options.signature,
-                  },
-                ]
-              : [],
-            getDeadlineTimestampInSeconds(),
-          ],
-          value: isETH ? baseAmount : 0n,
-        }),
+            value: isETH ? baseAmount : 0n,
+          },
+          options?.gasLimit,
+        ),
         result: {
           spend: {
             amount: spendAmount,
@@ -599,6 +620,7 @@ export const claimOrders = decorator(
     chainId,
     userAddress,
     ids,
+    options,
   }: {
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
@@ -637,22 +659,26 @@ export const claimOrders = decorator(
       .filter((address) => !isAddressEqual(address, zeroAddress))
 
     return {
-      transaction: await buildTransaction(chainId, {
-        chain: CHAIN_MAP[chainId],
-        account: userAddress,
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'claim',
-        args: [
-          orders.map(({ orderId }) => ({
-            id: orderId,
-            hookData: zeroHash,
-          })),
-          tokensToSettle,
-          [],
-          getDeadlineTimestampInSeconds(),
-        ],
-      }),
+      transaction: await buildTransaction(
+        chainId,
+        {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'claim',
+          args: [
+            orders.map(({ orderId }) => ({
+              id: orderId,
+              hookData: zeroHash,
+            })),
+            tokensToSettle,
+            [],
+            getDeadlineTimestampInSeconds(),
+          ],
+        },
+        options?.gasLimit,
+      ),
       result: orders
         .map((order) => {
           const amount = quoteToBase(
@@ -761,6 +787,7 @@ export const cancelOrders = decorator(
     chainId,
     userAddress,
     ids,
+    options,
   }: {
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
@@ -798,23 +825,27 @@ export const cancelOrders = decorator(
       .filter((address) => !isAddressEqual(address, zeroAddress))
 
     return {
-      transaction: await buildTransaction(chainId, {
-        chain: CHAIN_MAP[chainId],
-        account: userAddress,
-        address: CONTRACT_ADDRESSES[chainId]!.Controller,
-        abi: CONTROLLER_ABI,
-        functionName: 'cancel',
-        args: [
-          orders.map(({ orderId }) => ({
-            id: orderId,
-            leftQuoteAmount: 0n,
-            hookData: zeroHash,
-          })),
-          tokensToSettle,
-          [],
-          getDeadlineTimestampInSeconds(),
-        ],
-      }),
+      transaction: await buildTransaction(
+        chainId,
+        {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'cancel',
+          args: [
+            orders.map(({ orderId }) => ({
+              id: orderId,
+              leftQuoteAmount: 0n,
+              hookData: zeroHash,
+            })),
+            tokensToSettle,
+            [],
+            getDeadlineTimestampInSeconds(),
+          ],
+        },
+        options?.gasLimit,
+      ),
       result: orders
         .map((order) => {
           const amount = applyPercent(

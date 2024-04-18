@@ -39,6 +39,7 @@ export type PermitSignature = {
 
 export type DefaultOptions = {
   rpcUrl?: string
+  gasLimit?: bigint
 }
 
 export type CurrencyFlow = {
