@@ -74,9 +74,9 @@ export const openMarket = decorator(
           [
             {
               key: {
-                base: inputToken,
+                base: outputToken,
                 unit,
-                quote: outputToken,
+                quote: inputToken,
                 makerPolicy: MAKER_DEFAULT_POLICY.value,
                 hooks: zeroAddress,
                 takerPolicy: TAKER_DEFAULT_POLICY.value,
