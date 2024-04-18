@@ -283,6 +283,14 @@ test('take with eth', async () => {
   const { publicClient, walletClient } = clients[3] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
+  await publicClient.waitForTransactionReceipt({
+    hash: await walletClient.sendTransaction({
+      account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+      to: account.address,
+      value: 2000000000000000000n,
+    }),
+  })
+
   const { transaction, result } = await marketOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
