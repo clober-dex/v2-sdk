@@ -22,17 +22,6 @@ export const CONTROLLER_ABI = [
     type: 'error',
   },
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-    ],
-    name: 'AddressInsufficientBalance',
-    type: 'error',
-  },
-  {
     inputs: [],
     name: 'ControllerSlippage',
     type: 'error',
@@ -49,7 +38,23 @@ export const CONTROLLER_ABI = [
   },
   {
     inputs: [],
-    name: 'FailedInnerCall',
+    name: 'FailedCall',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'balance',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'needed',
+        type: 'uint256',
+      },
+    ],
+    name: 'InsufficientBalance',
     type: 'error',
   },
   {
@@ -117,11 +122,6 @@ export const CONTROLLER_ABI = [
       },
     ],
     name: 'SafeERC20FailedOperation',
-    type: 'error',
-  },
-  {
-    inputs: [],
-    name: 'ValueTransferFailed',
     type: 'error',
   },
   {
@@ -445,7 +445,7 @@ export const CONTROLLER_ABI = [
         type: 'uint192',
       },
     ],
-    name: 'getLowestPrice',
+    name: 'getHighestPrice',
     outputs: [
       {
         internalType: 'uint256',
@@ -801,6 +801,11 @@ export const CONTROLLER_ABI = [
             type: 'uint256',
           },
           {
+            internalType: 'uint256',
+            name: 'minQuoteAmount',
+            type: 'uint256',
+          },
+          {
             internalType: 'bytes',
             name: 'hookData',
             type: 'bytes',
@@ -887,6 +892,11 @@ export const CONTROLLER_ABI = [
           {
             internalType: 'uint256',
             name: 'quoteAmount',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'maxBaseAmount',
             type: 'uint256',
           },
           {
