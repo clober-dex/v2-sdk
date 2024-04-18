@@ -174,11 +174,11 @@ export const limitOrder = decorator(
        Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
 
-       const transaction = await openMarket(
-            ${chainId},
-           '${inputToken}',
-           '${outputToken}',
-       )
+       const transaction = await openMarket({
+            chainId: ${chainId},
+            inputToken: '${inputToken}',
+            outputToken: '${outputToken}',
+       })
     `)
     }
 
