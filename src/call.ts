@@ -467,9 +467,14 @@ export const marketOrder = decorator(
         },
       })
       const quoteAmount = parseUnits(amountOut, outputCurrency.decimals)
-      const baseAmount =
+      const baseAmount = parseUnits(spendAmount, inputCurrency.decimals)
+      const maxBaseAmount =
         options?.erc20PermitParam?.permitAmount ??
-        parseUnits(spendAmount, inputCurrency.decimals)
+        (options?.slippage
+          ? applyPercent(baseAmount, 100 + options.slippage)
+          : isETH
+            ? baseAmount
+            : 2n ** 256n - 1n)
       return {
         transaction: await buildTransaction(
           chainId,
@@ -485,9 +490,7 @@ export const marketOrder = decorator(
                   id: bookId,
                   limitPrice: 0n,
                   quoteAmount,
-                  maxBaseAmount: options?.slippage
-                    ? applyPercent(baseAmount, 100 + options.slippage)
-                    : 2n ** 256n - 1n,
+                  maxBaseAmount,
                   hookData: zeroHash,
                 },
               ],
@@ -495,7 +498,7 @@ export const marketOrder = decorator(
               options?.erc20PermitParam ? [options.erc20PermitParam] : [],
               getDeadlineTimestampInSeconds(),
             ],
-            value: isETH ? baseAmount : 0n,
+            value: isETH ? maxBaseAmount : 0n,
           },
           options?.gasLimit,
         ),
