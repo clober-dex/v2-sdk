@@ -50,7 +50,7 @@ test('spend with token', async () => {
   const { publicClient, walletClient } = clients[1] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
-  const signature = await signERC20Permit({
+  const erc20PermitParams = await signERC20Permit({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -66,7 +66,7 @@ test('spend with token', async () => {
     outputToken: '0x0000000000000000000000000000000000000000',
     amountIn: '1000000',
     options: {
-      signature,
+      erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
     },
   })
@@ -204,7 +204,7 @@ test('take with token', async () => {
   const { publicClient, walletClient } = clients[3] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
-  const signature = await signERC20Permit({
+  const erc20PermitParams = await signERC20Permit({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -221,7 +221,7 @@ test('take with token', async () => {
     amountIn: '1000000',
     amountOut: '1.001',
     options: {
-      signature,
+      erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
     },
   })

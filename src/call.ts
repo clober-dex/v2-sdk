@@ -10,7 +10,7 @@ import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type {
   CurrencyFlow,
   DefaultOptions,
-  PermitSignature,
+  ERC20PermitParam,
   Transaction,
 } from './type'
 import { calculateUnit } from './utils/unit'
@@ -107,7 +107,7 @@ export const openMarket = decorator(
  * @param {string} amount The amount of input tokens for the order.
  * @param {string} price The price at which the order should be executed.
  * @param {Object} [options] Optional parameters for the limit order.
- * @param {PermitSignature} [options.signature] The permit signature for token approval.
+ * @param {erc20PermitParam} [options.erc20PermitParam] The permit signature for token approval.
  * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
  * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyFlow, take: CurrencyFlow } }>}
@@ -116,7 +116,7 @@ export const openMarket = decorator(
  * import { signERC20Permit, limitOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
- * const signature = await signERC20Permit({
+ * const erc20PermitParam = await signERC20Permit({
  *   chainId: 421614,
  *   walletClient,
  *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -130,7 +130,7 @@ export const openMarket = decorator(
  *   outputToken: '0x0000000000000000000000000000000000000000',
  *   amount: '100.123', // 100.123 USDC
  *   price: '4000.01', // price at 4000.01 (ETH/USDC)
- *   options: { signature }
+ *   options: { erc20PermitParam }
  * })
  *
  * @example
@@ -162,7 +162,7 @@ export const limitOrder = decorator(
     amount: string
     price: string
     options?: {
-      signature?: PermitSignature
+      erc20PermitParam?: ERC20PermitParam
       postOnly?: boolean
     } & DefaultOptions
   }): Promise<{
@@ -214,17 +214,6 @@ export const limitOrder = decorator(
       }),
     ])
     const isETH = isAddressEqual(inputToken, zeroAddress)
-    const permitParamsList =
-      options?.signature && !isETH
-        ? [
-            {
-              token: inputToken,
-              permitAmount: quoteAmount,
-              signature: options.signature,
-            },
-          ]
-        : []
-
     const makeParam = {
       id: toBookId(inputToken, outputToken, unit),
       tick: Number(tick),
@@ -244,7 +233,7 @@ export const limitOrder = decorator(
             args: [
               [makeParam],
               tokensToSettle,
-              permitParamsList,
+              options?.erc20PermitParam ? [options.erc20PermitParam] : [],
               getDeadlineTimestampInSeconds(),
             ],
             value: isETH ? quoteAmount : 0n,
@@ -288,7 +277,7 @@ export const limitOrder = decorator(
                 },
               ],
               tokensToSettle,
-              permitParamsList,
+              options?.erc20PermitParam ? [options.erc20PermitParam] : [],
               getDeadlineTimestampInSeconds(),
             ],
             value: isETH ? quoteAmount : 0n,
@@ -324,7 +313,7 @@ export const limitOrder = decorator(
  * @param {string} amountIn The amount of input tokens for the order to spend.
  * @param {string} amountOut The amount of output tokens for the order to take.
  * @param {Object} [options] Optional parameters for the market order.
- * @param {PermitSignature} [options.signature] The permit signature for token approval.
+ * @param {erc20PermitParam} [options.erc20PermitParam] The permit signature for token approval.
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
  * @param {number} [options.slippage] The maximum slippage percentage allowed for the order.
  * if the slippage is not provided, unlimited slippage is allowed.
@@ -334,7 +323,7 @@ export const limitOrder = decorator(
  * import { signERC20Permit, marketOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
- * const signature = await signERC20Permit({
+ * const erc20PermitParam = await signERC20Permit({
  *   chainId: 421614,
  *   walletClient,
  *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -347,7 +336,7 @@ export const limitOrder = decorator(
  *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   outputToken: '0x0000000000000000000000000000000000000000',
  *   amount: '100.123', // 100.123 USDC
- *   options: { signature }
+ *   options: { erc20PermitParam }
  * })
  *
  */
@@ -368,7 +357,7 @@ export const marketOrder = decorator(
     amountIn: string
     amountOut?: string
     options?: {
-      signature?: PermitSignature
+      erc20PermitParam?: ERC20PermitParam
       slippage?: number
     } & DefaultOptions
   }): Promise<{
@@ -440,15 +429,7 @@ export const marketOrder = decorator(
                 },
               ],
               tokensToSettle,
-              options?.signature && !isETH
-                ? [
-                    {
-                      token: inputToken,
-                      permitAmount: baseAmount,
-                      signature: options.signature,
-                    },
-                  ]
-                : [],
+              options?.erc20PermitParam ? [options.erc20PermitParam] : [],
               getDeadlineTimestampInSeconds(),
             ],
             value: isETH ? baseAmount : 0n,
@@ -506,15 +487,7 @@ export const marketOrder = decorator(
                 },
               ],
               tokensToSettle,
-              options?.signature && !isETH
-                ? [
-                    {
-                      token: inputToken,
-                      permitAmount: baseAmount,
-                      signature: options.signature,
-                    },
-                  ]
-                : [],
+              options?.erc20PermitParam ? [options.erc20PermitParam] : [],
               getDeadlineTimestampInSeconds(),
             ],
             value: isETH ? baseAmount : 0n,

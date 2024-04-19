@@ -50,7 +50,7 @@ test('make bid order', async () => {
   const { publicClient, walletClient } = clients[1] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
-  const signature = await signERC20Permit({
+  const erc20PermitParams = await signERC20Permit({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -70,7 +70,7 @@ test('make bid order', async () => {
     amount: '1',
     price: '0.01',
     options: {
-      signature,
+      erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
     },
@@ -225,7 +225,7 @@ test('limit bid order', async () => {
       }),
     ],
   )
-  const signature = await signERC20Permit({
+  const erc20PermitParams = await signERC20Permit({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -245,7 +245,7 @@ test('limit bid order', async () => {
     amount: '100000',
     price: '3505.01',
     options: {
-      signature,
+      erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
     },
   })
