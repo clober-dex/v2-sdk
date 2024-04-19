@@ -1,16 +1,10 @@
-import {
-  hexToSignature,
-  parseUnits,
-  verifyTypedData,
-  WalletClient,
-  zeroHash,
-} from 'viem'
+import { hexToSignature, parseUnits, verifyTypedData, WalletClient } from 'viem'
 
 import { CHAIN_IDS } from './constants/chain'
 import { getDeadlineTimestampInSeconds } from './utils/time'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchCurrency } from './utils/currency'
-import { DefaultOptions, PermitSignature } from './type'
+import { DefaultOptions, ERC20PermitParam } from './type'
 import { cachedPublicClients } from './constants/client'
 import { decorator } from './utils/decorator'
 
@@ -72,7 +66,7 @@ const _abi = [
  * @param {string} amount The amount of tokens to permit.
  * @param options
  * @param options.rpcUrl The RPC URL of the blockchain.
- * @returns {Promise<PermitSignature>} Promise resolving to the permit signature.
+ * @returns {Promise<erc20PermitParam | undefined>} The signed permit.
  * @example
  * import { signERC20Permit } from '@clober/v2-sdk'
  *
@@ -101,7 +95,7 @@ export const signERC20Permit = decorator(
     token: `0x${string}`
     amount: string
     options?: DefaultOptions
-  }): Promise<PermitSignature> => {
+  }): Promise<ERC20PermitParam | undefined> => {
     if (!walletClient.account) {
       throw new Error('Account is not found')
     }
@@ -133,12 +127,7 @@ export const signERC20Permit = decorator(
       })
 
     if (nonce === undefined || !name) {
-      return {
-        r: zeroHash,
-        s: zeroHash,
-        v: 0,
-        deadline: 0n,
-      }
+      return undefined
     }
     const deadline = getDeadlineTimestampInSeconds()
     const data = {
@@ -186,10 +175,14 @@ export const signERC20Permit = decorator(
     }
     const { v, s, r } = hexToSignature(signature)
     return {
-      v: Number(v),
-      s,
-      r,
-      deadline,
+      token,
+      permitAmount: value,
+      signature: {
+        v: Number(v),
+        s,
+        r,
+        deadline,
+      },
     }
   },
 )

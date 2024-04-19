@@ -37,6 +37,12 @@ export type PermitSignature = {
   s: `0x${string}`
 }
 
+export type ERC20PermitParam = {
+  token: `0x${string}`
+  permitAmount: bigint
+  signature: PermitSignature
+}
+
 export type DefaultOptions = {
   rpcUrl?: string
   gasLimit?: bigint

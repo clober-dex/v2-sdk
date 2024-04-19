@@ -70,7 +70,7 @@ test('claim order', async () => {
   const { publicClient, walletClient } = clients[2] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
-  const signature = await signERC20Permit({
+  const erc20PermitParam = await signERC20Permit({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -87,7 +87,7 @@ test('claim order', async () => {
     amount: '100000',
     price: '3505.01',
     options: {
-      signature,
+      erc20PermitParam: erc20PermitParam!,
       rpcUrl: publicClient.transport.url!,
     },
   })
@@ -203,7 +203,7 @@ test('claim orders', async () => {
     gasPrice: takeTx1!.gasPrice! * 2n,
   })
 
-  const signature = await signERC20Permit({
+  const erc20PermitParam = await signERC20Permit({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -218,7 +218,7 @@ test('claim orders', async () => {
     amount: '5000000',
     price: '3555.01',
     options: {
-      signature,
+      erc20PermitParam: erc20PermitParam!,
       rpcUrl: publicClient.transport.url!,
     },
   })
