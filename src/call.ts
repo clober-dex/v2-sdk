@@ -304,7 +304,7 @@ export const limitOrder = decorator(
 /**
  * Executes a market order on the specified chain for trading tokens.
  * If only `amountIn` is provided, spend the specified amount of input tokens.
- * If `amountIn` and `amountOut` are provided, take the appropriate amount of output tokens with the specified input amount.
+ * If only `amountOut` is provided, take the specified amount of output tokens.
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user placing the order.
@@ -354,7 +354,7 @@ export const marketOrder = decorator(
     userAddress: `0x${string}`
     inputToken: `0x${string}`
     outputToken: `0x${string}`
-    amountIn: string
+    amountIn?: string
     amountOut?: string
     options?: {
       erc20PermitParam?: ERC20PermitParam
@@ -367,6 +367,12 @@ export const marketOrder = decorator(
       spend: CurrencyFlow
     }
   }> => {
+    if (!amountIn && !amountOut) {
+      throw new Error('Either amountIn or amountOut must be provided')
+    } else if (amountIn && amountOut) {
+      throw new Error('Only one of amountIn or amountOut can be provided')
+    }
+
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isTakingBid = isAddressEqual(market.base.address, inputToken)
     const [inputCurrency, outputCurrency] = isTakingBid
@@ -449,7 +455,7 @@ export const marketOrder = decorator(
           },
         },
       }
-    } else if (amountIn && amountOut) {
+    } else if (!amountIn && amountOut) {
       const { bookId, spendAmount, takenAmount } = await getExpectedInput({
         chainId,
         inputToken,
@@ -461,10 +467,9 @@ export const marketOrder = decorator(
         },
       })
       const quoteAmount = parseUnits(amountOut, outputCurrency.decimals)
-      const baseAmount = parseUnits(
-        amountIn ?? spendAmount,
-        inputCurrency.decimals,
-      )
+      const baseAmount =
+        options?.erc20PermitParam?.permitAmount ??
+        parseUnits(spendAmount, inputCurrency.decimals)
       return {
         transaction: await buildTransaction(
           chainId,

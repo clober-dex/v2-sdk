@@ -10,7 +10,7 @@ import { createProxyClients } from './utils/utils'
 import { fetchTokenBalance } from './utils/currency'
 
 const clients = createProxyClients(
-  Array.from({ length: 5 }, () => Math.floor(new Date().getTime())).map(
+  Array.from({ length: 6 }, () => Math.floor(new Date().getTime())).map(
     (id) => id,
   ),
 )
@@ -218,7 +218,6 @@ test('take with token', async () => {
     userAddress: account.address,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0x0000000000000000000000000000000000000000',
-    amountIn: '1000000',
     amountOut: '1.001',
     options: {
       erc20PermitParam: erc20PermitParams!,
@@ -296,7 +295,6 @@ test('take with eth', async () => {
     userAddress: account.address,
     inputToken: '0x0000000000000000000000000000000000000000',
     outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    amountIn: '1.001',
     amountOut: '1005',
     options: {
       rpcUrl: publicClient.transport.url!,
@@ -354,4 +352,37 @@ test('take with eth', async () => {
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
   expect(result.take.direction).toEqual('out')
+})
+
+test('revert market order', async () => {
+  const { publicClient } = clients[4] as any
+  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
+
+  expect(
+    (
+      await marketOrder({
+        chainId: cloberTestChain.id,
+        userAddress: account.address,
+        inputToken: '0x0000000000000000000000000000000000000000',
+        outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+        options: {
+          rpcUrl: publicClient.transport.url!,
+        },
+      }).catch((e) => e.message)
+    ).includes('Either amountIn or amountOut must be provided'),
+  ).toEqual(true)
+
+  expect(
+    (
+      await marketOrder({
+        chainId: cloberTestChain.id,
+        userAddress: account.address,
+        inputToken: '0x0000000000000000000000000000000000000000',
+        outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+        options: {
+          rpcUrl: publicClient.transport.url!,
+        },
+      }).catch((e) => e.message)
+    ).includes('Only one of amountIn or amountOut can be provided'),
+  ).toEqual(true)
 })
