@@ -379,6 +379,8 @@ test('revert market order', async () => {
         userAddress: account.address,
         inputToken: '0x0000000000000000000000000000000000000000',
         outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+        amountIn: '1',
+        amountOut: '1',
         options: {
           rpcUrl: publicClient.transport.url!,
         },
