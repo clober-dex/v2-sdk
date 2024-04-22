@@ -20,7 +20,30 @@ const _abi = [
   },
 ] as const
 
+const buildCurrencyCacheKey = (chainId: CHAIN_IDS, address: `0x${string}`) =>
+  `${chainId}:${address}`
+const unitCache = new Map<string, bigint>()
+const getUnitFromCache = (
+  chainId: CHAIN_IDS,
+  address: `0x${string}`,
+): bigint | undefined => unitCache.get(buildCurrencyCacheKey(chainId, address))
+const setUnitToCache = (
+  chainId: CHAIN_IDS,
+  address: `0x${string}`,
+  unit: bigint,
+) => unitCache.set(buildCurrencyCacheKey(chainId, address), unit)
+
 export const calculateUnit = async (chainId: CHAIN_IDS, quote: Currency) => {
+  const cachedUnit = getUnitFromCache(chainId, quote.address)
+  if (cachedUnit !== undefined) {
+    return cachedUnit
+  }
+  const unit = await calculateUnitInner(chainId, quote)
+  setUnitToCache(chainId, quote.address, unit)
+  return unit
+}
+
+const calculateUnitInner = async (chainId: CHAIN_IDS, quote: Currency) => {
   if (isAddressEqual(quote.address, zeroAddress)) {
     return 10n ** 12n
   }
