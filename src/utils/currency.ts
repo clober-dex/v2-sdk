@@ -46,7 +46,79 @@ const _abi = [
   },
 ] as const
 
+const buildCurrencyCacheKey = (chainId: CHAIN_IDS, address: `0x${string}`) =>
+  `${chainId}:${address}`
+const currencyCache = new Map<string, Currency>()
+const getCurrencyFromCache = (
+  chainId: CHAIN_IDS,
+  address: `0x${string}`,
+): Currency | undefined =>
+  currencyCache.get(buildCurrencyCacheKey(chainId, address))
+const setCurrencyToCache = (
+  chainId: CHAIN_IDS,
+  address: `0x${string}`,
+  currency: Currency,
+) => currencyCache.set(buildCurrencyCacheKey(chainId, address), currency)
+
 export const fetchCurrency = async (
+  chainId: CHAIN_IDS,
+  address: `0x${string}`,
+): Promise<Currency> => {
+  const cachedCurrency = getCurrencyFromCache(chainId, address)
+  if (cachedCurrency) {
+    return cachedCurrency
+  }
+
+  const currency = await fetchCurrencyInner(chainId, address)
+  setCurrencyToCache(chainId, address, currency)
+  return currency
+}
+
+export const fetchCurrencyMap = async (
+  chainId: CHAIN_IDS,
+  addresses: `0x${string}`[],
+): Promise<{
+  [address: `0x${string}`]: Currency
+}> => {
+  addresses = addresses
+    .filter((address) => !isAddressEqual(address, zeroAddress))
+    .filter((address, index, self) => self.indexOf(address) === index)
+  const cachedCurrencies = addresses
+    .map((address) => getCurrencyFromCache(chainId, address))
+    .filter((currency) => currency !== undefined) as Currency[]
+  const uncachedAddresses = addresses.filter(
+    (address) =>
+      !cachedCurrencies.some((currency) => currency.address === address),
+  )
+  const uncachedCurrencies = await fetchCurrencyMapInner(
+    chainId,
+    uncachedAddresses,
+  )
+  for (const currency of Object.values(uncachedCurrencies)) {
+    setCurrencyToCache(chainId, currency.address, currency)
+  }
+
+  return {
+    ...cachedCurrencies.reduce(
+      (acc, currency) => {
+        acc[getAddress(currency.address)] = currency
+        return acc
+      },
+      {} as {
+        [address: `0x${string}`]: Currency
+      },
+    ),
+    ...uncachedCurrencies,
+    [zeroAddress as `0x${string}`]: {
+      address: zeroAddress,
+      name: 'Ethereum',
+      symbol: 'ETH',
+      decimals: 18,
+    } as Currency,
+  }
+}
+
+const fetchCurrencyInner = async (
   chainId: CHAIN_IDS,
   address: `0x${string}`,
 ): Promise<Currency> => {
@@ -87,7 +159,7 @@ export const fetchCurrency = async (
   }
 }
 
-export const fetchCurrencyMap = async (
+const fetchCurrencyMapInner = async (
   chainId: CHAIN_IDS,
   addresses: `0x${string}`[],
 ): Promise<{
@@ -138,13 +210,8 @@ export const fetchCurrencyMap = async (
         acc[getAddress(currency.address)] = currency
         return acc
       },
-      {
-        [zeroAddress as `0x${string}`]: {
-          address: zeroAddress,
-          name: 'Ethereum',
-          symbol: 'ETH',
-          decimals: 18,
-        } as Currency,
+      {} as {
+        [address: `0x${string}`]: Currency
       },
     )
 }
