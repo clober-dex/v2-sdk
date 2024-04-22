@@ -1,4 +1,3 @@
-import { isAddressEqual } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
 import { CHAIN_IDS } from '../constants/chain'
@@ -21,11 +20,6 @@ const getBook = async (
   n: number,
 ): Promise<Book> => {
   const unit = await calculateUnit(chainId, quoteCurrency)
-  const isBid = isAddressEqual(
-    quoteCurrency.address,
-    getMarketId(chainId, [quoteCurrency.address, baseCurrency.address])
-      .quoteTokenAddress,
-  )
   const bookId = toBookId(quoteCurrency.address, baseCurrency.address, unit)
   const [depths, isOpened] = await Promise.all([
     cachedPublicClients[chainId].readContract({
@@ -39,8 +33,8 @@ const getBook = async (
 
   return new Book({
     id: bookId,
-    base: isBid ? baseCurrency : quoteCurrency,
-    quote: isBid ? quoteCurrency : baseCurrency,
+    base: baseCurrency,
+    quote: quoteCurrency,
     unit,
     depths: depths.map(({ tick, depth }: { tick: number; depth: bigint }) => ({
       tick: BigInt(tick),

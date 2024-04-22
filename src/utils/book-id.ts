@@ -3,8 +3,8 @@ import { encodeAbiParameters, keccak256, zeroAddress } from 'viem'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../constants/fee'
 
 export const toBookId = (
-  inputToken: `0x${string}`,
-  outputToken: `0x${string}`,
+  quote: `0x${string}`,
+  base: `0x${string}`,
   unit: bigint,
 ) => {
   const value = keccak256(
@@ -18,9 +18,9 @@ export const toBookId = (
         { name: 'takerPolicy', type: 'uint24' },
       ],
       [
-        outputToken,
+        base,
         unit,
-        inputToken,
+        quote,
         Number(MAKER_DEFAULT_POLICY.value),
         zeroAddress,
         Number(TAKER_DEFAULT_POLICY.value),
