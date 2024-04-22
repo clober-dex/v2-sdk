@@ -169,7 +169,7 @@ export const limitOrder = decorator(
     transaction: Transaction
     result: {
       make: CurrencyFlow
-      take: CurrencyFlow
+      taken: CurrencyFlow
     }
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
@@ -200,7 +200,7 @@ export const limitOrder = decorator(
       (address) => !isAddressEqual(address, zeroAddress),
     )
     const quoteAmount = parseUnits(amount, inputCurrency.decimals)
-    const [unit, { spendAmount, bookId }] = await Promise.all([
+    const [unit, { spentAmount, bookId }] = await Promise.all([
       calculateUnit(chainId, inputCurrency),
       getExpectedOutput({
         chainId,
@@ -220,7 +220,7 @@ export const limitOrder = decorator(
       quoteAmount,
       hookData: zeroHash,
     }
-    if (options?.postOnly === true || spendAmount === '0') {
+    if (options?.postOnly === true || spentAmount === '0') {
       return {
         transaction: await buildTransaction(
           chainId,
@@ -246,7 +246,7 @@ export const limitOrder = decorator(
             currency: inputCurrency,
             direction: 'in',
           },
-          take: {
+          taken: {
             amount: '0',
             currency: outputCurrency,
             direction: 'out',
@@ -290,8 +290,8 @@ export const limitOrder = decorator(
             currency: inputCurrency,
             direction: 'in',
           },
-          take: {
-            amount: spendAmount,
+          taken: {
+            amount: spentAmount,
             currency: outputCurrency,
             direction: 'out',
           },
@@ -317,7 +317,7 @@ export const limitOrder = decorator(
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
  * @param {number} [options.slippage] The maximum slippage percentage allowed for the order.
  * if the slippage is not provided, unlimited slippage is allowed.
- * @returns {Promise<{ transaction: Transaction, result: { spend: CurrencyFlow, take: CurrencyFlow } }>}
+ * @returns {Promise<{ transaction: Transaction, result: { spent: CurrencyFlow, taken: CurrencyFlow } }>}
  * Promise resolving to the transaction object representing the market order with the result of the order.
  * @example
  * import { signERC20Permit, marketOrder } from '@clober/v2-sdk'
@@ -363,8 +363,8 @@ export const marketOrder = decorator(
   }): Promise<{
     transaction: Transaction
     result: {
-      take: CurrencyFlow
-      spend: CurrencyFlow
+      taken: CurrencyFlow
+      spent: CurrencyFlow
     }
   }> => {
     if (!amountIn && !amountOut) {
@@ -399,7 +399,7 @@ export const marketOrder = decorator(
     const isETH = isAddressEqual(inputToken, zeroAddress)
 
     if (amountIn && !amountOut) {
-      const { bookId, takenAmount, spendAmount } = await getExpectedOutput({
+      const { bookId, takenAmount, spentAmount } = await getExpectedOutput({
         chainId,
         inputToken,
         outputToken,
@@ -443,12 +443,12 @@ export const marketOrder = decorator(
           options?.gasLimit,
         ),
         result: {
-          spend: {
-            amount: spendAmount,
+          spent: {
+            amount: spentAmount,
             currency: inputCurrency,
             direction: 'in',
           },
-          take: {
+          taken: {
             amount: takenAmount,
             currency: outputCurrency,
             direction: 'out',
@@ -456,7 +456,7 @@ export const marketOrder = decorator(
         },
       }
     } else if (!amountIn && amountOut) {
-      const { bookId, spendAmount, takenAmount } = await getExpectedInput({
+      const { bookId, spentAmount, takenAmount } = await getExpectedInput({
         chainId,
         inputToken,
         outputToken,
@@ -467,7 +467,7 @@ export const marketOrder = decorator(
         },
       })
       const quoteAmount = parseUnits(amountOut, outputCurrency.decimals)
-      const baseAmount = parseUnits(spendAmount, inputCurrency.decimals)
+      const baseAmount = parseUnits(spentAmount, inputCurrency.decimals)
       const maxBaseAmount =
         options?.erc20PermitParam?.permitAmount ??
         (options?.slippage
@@ -503,12 +503,12 @@ export const marketOrder = decorator(
           options?.gasLimit,
         ),
         result: {
-          spend: {
-            amount: spendAmount,
+          spent: {
+            amount: spentAmount,
             currency: inputCurrency,
             direction: 'in',
           },
-          take: {
+          taken: {
             amount: takenAmount,
             currency: outputCurrency,
             direction: 'out',

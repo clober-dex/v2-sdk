@@ -61,7 +61,7 @@ test('make bid order', async () => {
   })
   const {
     transaction,
-    result: { make, take },
+    result: { make, taken },
   } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
@@ -124,8 +124,8 @@ test('make bid order', async () => {
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  expect(take.amount).toEqual('0')
-  expect(take.currency.address).toEqual(
+  expect(taken.amount).toEqual('0')
+  expect(taken.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
 })
@@ -136,7 +136,7 @@ test('make ask order', async () => {
 
   const {
     transaction,
-    result: { make, take },
+    result: { make, taken },
   } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
@@ -195,8 +195,8 @@ test('make ask order', async () => {
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
-  expect(take.amount).toEqual('0')
-  expect(take.currency.address).toEqual(
+  expect(taken.amount).toEqual('0')
+  expect(taken.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
 })
@@ -236,7 +236,7 @@ test('limit bid order', async () => {
   })
   const {
     transaction,
-    result: { make, take },
+    result: { make, taken },
   } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
@@ -291,8 +291,8 @@ test('limit bid order', async () => {
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  expect(take.amount).toEqual('350.13174')
-  expect(take.currency.address).toEqual(
+  expect(taken.amount).toEqual('350.13174')
+  expect(taken.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
 })
@@ -311,7 +311,7 @@ test('limit ask order', async () => {
 
   const {
     transaction,
-    result: { make, take },
+    result: { make, taken },
   } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
@@ -386,8 +386,8 @@ test('limit ask order', async () => {
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
-  expect(take.amount).toEqual('0.991749515426862714')
-  expect(take.currency.address).toEqual(
+  expect(taken.amount).toEqual('0.991749515426862714')
+  expect(taken.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
 })

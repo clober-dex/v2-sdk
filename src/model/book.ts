@@ -67,11 +67,11 @@ export class Book {
     amountOut: bigint
   }) => {
     let takenQuoteAmount = 0n
-    let spendBaseAmount = 0n
+    let spentBaseAmount = 0n
     if (this.depths.length === 0) {
       return {
         takenQuoteAmount,
-        spendBaseAmount,
+        spentBaseAmount,
       }
     }
 
@@ -113,7 +113,7 @@ export class Book {
       }
 
       takenQuoteAmount += quoteAmount
-      spendBaseAmount += baseAmount
+      spentBaseAmount += baseAmount
       if (amountOut <= takenQuoteAmount) {
         break
       }
@@ -122,7 +122,7 @@ export class Book {
     }
     return {
       takenQuoteAmount,
-      spendBaseAmount,
+      spentBaseAmount,
     }
   }
 
@@ -134,11 +134,11 @@ export class Book {
     amountIn: bigint
   }) => {
     let takenQuoteAmount = 0n
-    let spendBaseAmount = 0n
+    let spentBaseAmount = 0n
     if (this.depths.length === 0) {
       return {
         takenQuoteAmount,
-        spendBaseAmount,
+        spentBaseAmount,
       }
     }
 
@@ -147,14 +147,14 @@ export class Book {
       .map((depth) => depth.tick)
     let index = 0
     let tick = ticks[index]!
-    while (spendBaseAmount <= amountIn && tick > -8388608n) {
+    while (spentBaseAmount <= amountIn && tick > -8388608n) {
       if (limitPrice > toPrice(tick)) {
         break
       }
       let maxAmount = TAKER_DEFAULT_POLICY.usesQuote
-        ? amountIn - spendBaseAmount
+        ? amountIn - spentBaseAmount
         : TAKER_DEFAULT_POLICY.calculateOriginalAmount(
-            amountIn - spendBaseAmount,
+            amountIn - spentBaseAmount,
             false,
           )
       maxAmount = baseToQuote(tick, maxAmount, false) / this.unit
@@ -180,13 +180,13 @@ export class Book {
       }
 
       takenQuoteAmount += quoteAmount
-      spendBaseAmount += baseAmount
+      spentBaseAmount += baseAmount
       index++
       tick = ticks[index]!
     }
     return {
       takenQuoteAmount,
-      spendBaseAmount,
+      spentBaseAmount,
     }
   }
 }

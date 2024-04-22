@@ -77,7 +77,7 @@ export const getMarket = decorator(
  * @example
  * import { getExpectedOutput } from '@clober/v2-sdk'
  *
- * const { takenAmount, spendAmount } = await getExpectedOutput({
+ * const { takenAmount, spentAmount } = await getExpectedOutput({
  *   chainId: 421614,
  *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   outputToken: '0x0000000000000000000000000000000000000000',
@@ -99,7 +99,7 @@ export const getExpectedOutput = decorator(
     options?: { limitPrice?: string } & DefaultOptions
   }): Promise<{
     takenAmount: string
-    spendAmount: string
+    spentAmount: string
     bookId: bigint
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
@@ -115,8 +115,8 @@ export const getExpectedOutput = decorator(
           ? MAX_PRICE
           : 0n
     const inputCurrency = isBid ? market.quote : market.base
-    const { takenQuoteAmount, spendBaseAmount, bookId } = market.spend({
-      spendBase: !isBid,
+    const { takenQuoteAmount, spentBaseAmount, bookId } = market.spend({
+      spentBase: !isBid,
       limitPrice: rawLimitPrice,
       amountIn: parseUnits(amountIn, inputCurrency.decimals),
     })
@@ -125,8 +125,8 @@ export const getExpectedOutput = decorator(
         takenQuoteAmount,
         isBid ? market.base.decimals : market.quote.decimals,
       ),
-      spendAmount: formatUnits(
-        spendBaseAmount,
+      spentAmount: formatUnits(
+        spentBaseAmount,
         isBid ? market.quote.decimals : market.base.decimals,
       ),
       bookId,
@@ -144,11 +144,11 @@ export const getExpectedOutput = decorator(
  * @param options
  * @param options.limitPrice The maximum limit price to take.
  * @param options.rpcUrl The RPC URL of the blockchain.
- * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
+ * @returns A Promise resolving to an object containing the taken amount, spent amount and result of the calculation.
  * @example
  * import { getExpectedInput } from '@clober/v2-sdk'
  *
- * const { takenAmount, spendAmount } = await getExpectedInput({
+ * const { takenAmount, spentAmount } = await getExpectedInput({
  *   chainId: 421614,
  *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   outputToken: '0x0000000000000000000000000000000000000000',
@@ -170,7 +170,7 @@ export const getExpectedInput = decorator(
     options?: { limitPrice?: string } & DefaultOptions
   }): Promise<{
     takenAmount: string
-    spendAmount: string
+    spentAmount: string
     bookId: bigint
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
@@ -186,7 +186,7 @@ export const getExpectedInput = decorator(
           ? MAX_PRICE
           : 0n
     const outputCurrency = isBid ? market.base : market.quote
-    const { takenQuoteAmount, spendBaseAmount, bookId } = market.take({
+    const { takenQuoteAmount, spentBaseAmount, bookId } = market.take({
       takeQuote: !isBid,
       limitPrice: rawLimitPrice,
       amountOut: parseUnits(amountOut, outputCurrency.decimals),
@@ -196,8 +196,8 @@ export const getExpectedInput = decorator(
         takenQuoteAmount,
         isBid ? market.base.decimals : market.quote.decimals,
       ),
-      spendAmount: formatUnits(
-        spendBaseAmount,
+      spentAmount: formatUnits(
+        spentBaseAmount,
         isBid ? market.quote.decimals : market.base.decimals,
       ),
       bookId,
