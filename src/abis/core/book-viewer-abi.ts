@@ -83,7 +83,7 @@ export const BOOK_VIEWER_ABI = [
       },
       {
         internalType: 'uint256',
-        name: 'spendBaseAmount',
+        name: 'spentBaseAmount',
         type: 'uint256',
       },
     ],
@@ -134,7 +134,7 @@ export const BOOK_VIEWER_ABI = [
       },
       {
         internalType: 'uint256',
-        name: 'spendBaseAmount',
+        name: 'spentBaseAmount',
         type: 'uint256',
       },
     ],

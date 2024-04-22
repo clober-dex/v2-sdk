@@ -29,7 +29,7 @@ const main = async () => {
 
   const {
     transaction,
-    result: { make, take },
+    result: { make, taken },
   } = await limitOrder({
     chainId: arbitrumSepolia.id,
     userAddress: walletClient.account.address,
@@ -47,7 +47,7 @@ const main = async () => {
   })
   console.log(`limit order hash: ${hash}`)
   console.log(`make: `, make)
-  console.log(`take: `, take)
+  console.log(`taken: `, taken)
 
   const market = await getMarket({
     chainId: arbitrumSepolia.id,

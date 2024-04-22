@@ -113,15 +113,15 @@ export class Market {
   }
 
   spend = ({
-    spendBase,
+    spentBase,
     limitPrice,
-    amountIn, // base if spendBase, quote otherwise
+    amountIn, // base if spentBase, quote otherwise
   }: {
-    spendBase: boolean
+    spentBase: boolean
     limitPrice: bigint
     amountIn: bigint
   }) => {
-    if (spendBase) {
+    if (spentBase) {
       return {
         bookId: this.bidBook.id,
         ...this.bidBook.spend({

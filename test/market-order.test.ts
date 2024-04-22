@@ -111,17 +111,17 @@ test('spend with token', async () => {
   expect(Number(afterETHBalance)).toBeGreaterThan(Number(beforeETHBalance))
   expect(afterMarket.asks.length).toEqual(0)
 
-  expect(result.spend.amount).toEqual('5181.356442')
-  expect(result.spend.currency.address).toEqual(
+  expect(result.spent.amount).toEqual('5181.356442')
+  expect(result.spent.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  expect(result.spend.direction).toEqual('in')
+  expect(result.spent.direction).toEqual('in')
 
-  expect(result.take.amount).toEqual('1.329068601')
-  expect(result.take.currency.address).toEqual(
+  expect(result.taken.amount).toEqual('1.329068601')
+  expect(result.taken.currency.address).toEqual(
     getAddress('0x0000000000000000000000000000000000000000'),
   )
-  expect(result.take.direction).toEqual('out')
+  expect(result.taken.direction).toEqual('out')
 })
 
 test('spend with eth', async () => {
@@ -187,17 +187,17 @@ test('spend with eth', async () => {
   expect(afterUSDCBalance - beforeUSDCBalance).toEqual(3498370348n)
   expect(afterMarket.bids.length).toEqual(3)
 
-  expect(result.spend.amount).toEqual('1.00099999997605376')
-  expect(result.spend.currency.address).toEqual(
+  expect(result.spent.amount).toEqual('1.00099999997605376')
+  expect(result.spent.currency.address).toEqual(
     getAddress('0x0000000000000000000000000000000000000000'),
   )
-  expect(result.spend.direction).toEqual('in')
+  expect(result.spent.direction).toEqual('in')
 
-  expect(result.take.amount).toEqual('3498.370348')
-  expect(result.take.currency.address).toEqual(
+  expect(result.taken.amount).toEqual('3498.370348')
+  expect(result.taken.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  expect(result.take.direction).toEqual('out')
+  expect(result.taken.direction).toEqual('out')
 })
 
 test('take with token', async () => {
@@ -265,17 +265,17 @@ test('take with token', async () => {
   expect(Number(afterETHBalance)).toBeGreaterThan(Number(beforeETHBalance))
   expect(afterMarket.asks.length).toEqual(1)
 
-  expect(result.spend.amount).toEqual('3867.722122')
-  expect(result.spend.currency.address).toEqual(
+  expect(result.spent.amount).toEqual('3867.722122')
+  expect(result.spent.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  expect(result.spend.direction).toEqual('in')
+  expect(result.spent.direction).toEqual('in')
 
-  expect(result.take.amount).toEqual('1.001000997')
-  expect(result.take.currency.address).toEqual(
+  expect(result.taken.amount).toEqual('1.001000997')
+  expect(result.taken.currency.address).toEqual(
     getAddress('0x0000000000000000000000000000000000000000'),
   )
-  expect(result.take.direction).toEqual('out')
+  expect(result.taken.direction).toEqual('out')
 })
 
 test('take with eth', async () => {
@@ -341,17 +341,17 @@ test('take with eth', async () => {
   expect(Number(beforeETHBalance)).toBeGreaterThan(Number(afterETHBalance))
   expect(afterMarket.bids.length).toEqual(4)
 
-  expect(result.spend.amount).toEqual('0.287437077314383477')
-  expect(result.spend.currency.address).toEqual(
+  expect(result.spent.amount).toEqual('0.287437077314383477')
+  expect(result.spent.currency.address).toEqual(
     getAddress('0x0000000000000000000000000000000000000000'),
   )
-  expect(result.spend.direction).toEqual('in')
+  expect(result.spent.direction).toEqual('in')
 
-  expect(result.take.amount).toEqual('1005')
-  expect(result.take.currency.address).toEqual(
+  expect(result.taken.amount).toEqual('1005')
+  expect(result.taken.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  expect(result.take.direction).toEqual('out')
+  expect(result.taken.direction).toEqual('out')
 })
 
 test('revert market order', async () => {

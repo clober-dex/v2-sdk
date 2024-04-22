@@ -36,7 +36,7 @@ const isTakeResultEqual = async (
 
   const isBid = isAddressEqual(market.quote.address, inputToken)
   const outputCurrency = isBid ? market.base : market.quote
-  const [takenQuoteAmount, spendBaseAmount] = await publicClient.readContract({
+  const [takenQuoteAmount, spentBaseAmount] = await publicClient.readContract({
     address: CONTRACT_ADDRESSES[arbitrumSepolia.id]!.BookViewer,
     abi: BOOK_VIEWER_ABI,
     functionName: 'getExpectedInput',
@@ -65,7 +65,7 @@ const isTakeResultEqual = async (
     ],
   })
 
-  const { takenAmount, spendAmount } = await getExpectedInput({
+  const { takenAmount, spentAmount } = await getExpectedInput({
     chainId: cloberTestChain.id,
     inputToken,
     outputToken,
@@ -82,15 +82,15 @@ const isTakeResultEqual = async (
       isBid ? market.base.decimals : market.quote.decimals,
     ),
   )
-  expect(spendAmount).toBe(
+  expect(spentAmount).toBe(
     formatUnits(
-      spendBaseAmount,
+      spentBaseAmount,
       isBid ? market.quote.decimals : market.base.decimals,
     ),
   )
   return {
     takenAmount,
-    spendAmount,
+    spentAmount,
   }
 }
 
@@ -178,12 +178,12 @@ test('get expected input in not open book', async () => {
   const { publicClient } = clients[2] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
-  const { takenAmount, spendAmount } = await getExpectedInput({
+  const { takenAmount, spentAmount } = await getExpectedInput({
     chainId: arbitrumSepolia.id,
     inputToken: '0x0e12A07A610056067063cB208882fD5a032B1505',
     outputToken: '0x0000000000000000000000000000000000000000',
     amountOut: '0.1',
   })
   expect(takenAmount).toBe('0')
-  expect(spendAmount).toBe('0')
+  expect(spentAmount).toBe('0')
 })
