@@ -169,6 +169,10 @@ const fetchCurrencyMapInner = async (
     .filter((address) => !isAddressEqual(address, zeroAddress))
     .filter((address, index, self) => self.indexOf(address) === index)
 
+  if (addresses.length === 0) {
+    return {}
+  }
+
   const result = await cachedPublicClients[chainId]!.multicall({
     contracts: [
       ...addresses.map((address) => ({
