@@ -10,16 +10,14 @@ import type { OpenOrder, OpenOrderDto } from '../model/open-order'
 import { fetchCurrency } from '../utils/currency'
 import { applyPercent } from '../utils/bigint'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
-
-import { fetchSubgraph } from './subgraph'
+import { cachedSubgraph } from '../constants/subgraph'
 
 const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
-  return fetchSubgraph<{
+  return cachedSubgraph[chainId].get<{
     data: {
       openOrder: OpenOrderDto | null
     }
   }>(
-    chainId,
     'getOpenOrder',
     'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
     {
@@ -32,12 +30,11 @@ const getOpenOrders = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ) => {
-  return fetchSubgraph<{
+  return cachedSubgraph[chainId].get<{
     data: {
       openOrders: OpenOrderDto[]
     }
   }>(
-    chainId,
     'getOpenOrders',
     'query getOpenOrders($userAddress: String!) { openOrders(where: { user: $userAddress }) { id book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
     {
