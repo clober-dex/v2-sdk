@@ -13,12 +13,12 @@ import {
 import { getAddress } from 'viem'
 
 import { buildPublicClient } from '../src/constants/client'
-import { fetchOrders } from '../src/utils/order'
 
 import { cloberTestChain } from './utils/test-chain'
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
 import { createProxyClients } from './utils/utils'
 import { fetchTokenBalance } from './utils/currency'
+import { fetchOrders } from './utils/order'
 
 const clients = createProxyClients(
   Array.from({ length: 7 }, () => Math.floor(new Date().getTime())).map(
@@ -137,6 +137,7 @@ test('claim order', async () => {
     id: '50784203244917507140848199044778666621202412111794785971205812514094254653440',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -272,6 +273,7 @@ test('claim orders', async () => {
     ],
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -341,6 +343,7 @@ test('cancel order', async () => {
     id: '50784203244917507140848199044778666621202412111794785971205812514094254653440',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   await walletClient.sendTransaction({ ...transaction, account })
@@ -401,6 +404,7 @@ test('cancel orders', async () => {
     ids: orderIds,
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   await walletClient.sendTransaction({ ...transaction, account })
