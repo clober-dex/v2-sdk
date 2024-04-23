@@ -26,7 +26,7 @@ const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
   )
 }
 
-const getOpenOrders = async (
+const getOpenOrdersByUserAddress = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ) => {
@@ -35,21 +35,21 @@ const getOpenOrders = async (
       openOrders: OpenOrderDto[]
     }
   }>(
-    'getOpenOrders',
-    'query getOpenOrders($userAddress: String!) { openOrders(where: { user: $userAddress }) { id book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
+    'getOpenOrdersByUserAddress',
+    'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }) { id book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
     {
       userAddress: userAddress.toLowerCase(),
     },
   )
 }
 
-export async function fetchOpenOrders(
+export async function fetchOpenOrdersByUserAddress(
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
-  } = await getOpenOrders(chainId, userAddress)
+  } = await getOpenOrdersByUserAddress(chainId, userAddress)
   const currencies = await Promise.all(
     openOrders
       .map((openOrder) => [
