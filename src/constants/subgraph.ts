@@ -11,7 +11,7 @@ class Subgraph {
   private subgraphURL: string
   constructor(chainId: CHAIN_IDS) {
     if (!SUBGRAPH_URL[chainId]) {
-      throw new Error('Unsupported chain')
+      throw new Error('Unsupported chain for subgraph')
     }
     this.subgraphURL = SUBGRAPH_URL[chainId]
   }
@@ -48,7 +48,7 @@ export const buildSubgraph = (
   chainId: CHAIN_IDS,
   useSubgraph: boolean = true,
 ) => {
-  if (useSubgraph) {
+  if (useSubgraph && SUBGRAPH_URL[chainId]) {
     cachedSubgraph[chainId] = new Subgraph(chainId)
   }
 }
