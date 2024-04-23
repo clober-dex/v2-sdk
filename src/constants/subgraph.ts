@@ -43,12 +43,15 @@ class Subgraph {
   }
 }
 
-export const cachedSubgraph: Record<CHAIN_IDS, Subgraph> = {} as const
+export const cachedSubgraph: Record<CHAIN_IDS, Subgraph | undefined> =
+  {} as const
 export const buildSubgraph = (
   chainId: CHAIN_IDS,
   useSubgraph: boolean = true,
 ) => {
-  if (useSubgraph && SUBGRAPH_URL[chainId]) {
+  if (!useSubgraph) {
+    cachedSubgraph[chainId] = undefined
+  } else if (useSubgraph && SUBGRAPH_URL[chainId]) {
     cachedSubgraph[chainId] = new Subgraph(chainId)
   }
 }
