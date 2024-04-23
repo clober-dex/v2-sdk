@@ -1,4 +1,4 @@
-import { SUBGRAPH_URL } from '../constants/subgraph-url'
+import { SUBGRAPH_URL } from '../constants/subgraph'
 import { CHAIN_IDS } from '../constants/chain'
 
 export async function fetchSubgraph<T>(
