@@ -53,7 +53,6 @@ test('check fromOrderId function', async () => {
     userAddress: '0x000000000000000000000000000000000000dead',
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   for (const openOrder of openOrders) {
