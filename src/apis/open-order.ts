@@ -26,6 +26,20 @@ const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
   )
 }
 
+const getOpenOrders = async (chainId: CHAIN_IDS, orderIds: string[]) => {
+  return cachedSubgraph[chainId]!.get<{
+    data: {
+      openOrders: OpenOrderDto[]
+    }
+  }>(
+    'getOpenOrders',
+    'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
+    {
+      orderIds,
+    },
+  )
+}
+
 const getOpenOrdersByUserAddress = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
@@ -83,6 +97,31 @@ export async function fetchOpenOrder(
     fetchCurrency(chainId, getAddress(openOrder.book.quote.id)),
   ])
   return toOpenOrder(chainId, currencies, openOrder)
+}
+
+export async function fetchOpenOrders(
+  chainId: CHAIN_IDS,
+  ids: string[],
+): Promise<OpenOrder[]> {
+  const {
+    data: { openOrders },
+  } = await getOpenOrders(chainId, ids)
+  const currencies = await Promise.all(
+    openOrders
+      .map((openOrder) => [
+        getAddress(openOrder.book.base.id),
+        getAddress(openOrder.book.quote.id),
+      ])
+      .flat()
+      .filter(
+        (address, index, self) =>
+          self.findIndex((c) => isAddressEqual(c, address)) === index,
+      )
+      .map((address) => fetchCurrency(chainId, address)),
+  )
+  return openOrders.map((openOrder) =>
+    toOpenOrder(chainId, currencies, openOrder),
+  )
 }
 
 const toOpenOrder = (

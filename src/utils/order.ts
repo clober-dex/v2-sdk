@@ -1,10 +1,16 @@
-import { getAddress } from 'viem'
+import { formatUnits, getAddress, isAddressEqual, zeroAddress } from 'viem'
 
-import { CHAIN_IDS, Currency } from '../index'
+import { CHAIN_IDS, OpenOrder } from '../index'
 import { cachedPublicClients } from '../constants/client'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
+import { cachedSubgraph } from '../constants/subgraph'
+import { fetchOpenOrders } from '../apis/open-order'
+import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 
 import { fetchCurrencyMap } from './currency'
+import { quoteToBase } from './decimals'
+import { getMarketId } from './market'
+import { applyPercent } from './bigint'
 
 const _abi = [
   {
@@ -118,18 +124,14 @@ const _abi = [
 export const fetchOrders = async (
   chainId: CHAIN_IDS,
   orderIds: bigint[],
-): Promise<
-  {
-    open: bigint
-    claimable: bigint
-    orderId: bigint
-    unit: bigint
-    tick: bigint
-    owner: `0x${string}`
-    baseCurrency: Currency
-    quoteCurrency: Currency
-  }[]
-> => {
+): Promise<OpenOrder[]> => {
+  if (cachedSubgraph[chainId]) {
+    return fetchOpenOrders(
+      chainId,
+      orderIds.map((orderId) => orderId.toString()),
+    )
+  }
+
   const result = await cachedPublicClients[chainId]!.multicall({
     contracts: [
       ...orderIds.map((orderId) => ({
@@ -176,15 +178,52 @@ export const fetchOrders = async (
       quote: `0x${string}`
       unit: bigint
     }
+    const cancelable = applyPercent(
+      unit * order.open,
+      100 +
+        (Number(MAKER_DEFAULT_POLICY.rate) * 100) /
+          Number(MAKER_DEFAULT_POLICY.RATE_PRECISION),
+      6,
+    )
+    const claimable = quoteToBase(
+      fromOrderId(orderId).tick,
+      unit * order.claimable,
+      false,
+    )
+    const isBid = isAddressEqual(
+      quote,
+      getMarketId(chainId, [base, quote]).quoteTokenAddress,
+    )
     return {
-      open: order.open,
-      claimable: order.claimable,
-      orderId,
-      owner,
-      unit,
-      tick: fromOrderId(orderId).tick,
-      baseCurrency: currencyMap[getAddress(base)],
-      quoteCurrency: currencyMap[getAddress(quote)],
+      id: orderId.toString(),
+      user: owner,
+      isBid,
+      inputCurrency: currencyMap[getAddress(quote)],
+      outputCurrency: currencyMap[getAddress(base)],
+      cancelable: {
+        currency: currencyMap[getAddress(quote)],
+        value: formatUnits(cancelable, currencyMap[getAddress(quote)].decimals),
+      },
+      claimable: {
+        currency: currencyMap[getAddress(base)],
+        value: formatUnits(claimable, currencyMap[getAddress(base)].decimals),
+      },
+      // don't care about these fields
+      txHash: '' as `0x${string}`,
+      createdAt: 0,
+      price: 0,
+      amount: {
+        currency: currencyMap[zeroAddress],
+        value: '0',
+      },
+      filled: {
+        currency: currencyMap[zeroAddress],
+        value: '0',
+      },
+      claimed: {
+        currency: currencyMap[zeroAddress],
+        value: '0',
+      },
     }
   })
 }
