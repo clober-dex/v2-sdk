@@ -13,7 +13,7 @@ import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { cachedSubgraph } from '../constants/subgraph'
 
 const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
-  return cachedSubgraph[chainId].get<{
+  return cachedSubgraph[chainId]!.get<{
     data: {
       openOrder: OpenOrderDto | null
     }
@@ -30,7 +30,7 @@ const getOpenOrdersByUserAddress = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ) => {
-  return cachedSubgraph[chainId].get<{
+  return cachedSubgraph[chainId]!.get<{
     data: {
       openOrders: OpenOrderDto[]
     }
