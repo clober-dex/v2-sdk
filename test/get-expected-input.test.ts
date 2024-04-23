@@ -31,6 +31,7 @@ const isTakeResultEqual = async (
     token1: outputToken,
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -73,6 +74,7 @@ const isTakeResultEqual = async (
     options: {
       limitPrice,
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -183,6 +185,9 @@ test('get expected input in not open book', async () => {
     inputToken: '0x0e12A07A610056067063cB208882fD5a032B1505',
     outputToken: '0x0000000000000000000000000000000000000000',
     amountOut: '0.1',
+    options: {
+      useSubgraph: false,
+    },
   })
   expect(takenAmount).toBe('0')
   expect(spentAmount).toBe('0')

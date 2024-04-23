@@ -77,6 +77,7 @@ test('claim order', async () => {
     amount: '100000',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   const { transaction: takeTx } = await limitOrder({
@@ -89,6 +90,7 @@ test('claim order', async () => {
     options: {
       erc20PermitParam: erc20PermitParam!,
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -120,6 +122,7 @@ test('claim order', async () => {
     walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   if (hash) {
@@ -196,6 +199,7 @@ test('claim orders', async () => {
     price: '3250.01',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   await walletClient.sendTransaction({
@@ -209,7 +213,7 @@ test('claim orders', async () => {
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '5000000',
-    options: { rpcUrl: publicClient.transport.url! },
+    options: { rpcUrl: publicClient.transport.url!, useSubgraph: false },
   })
   const { transaction: takeTx2 } = await limitOrder({
     chainId: cloberTestChain.id,
@@ -221,6 +225,7 @@ test('claim orders', async () => {
     options: {
       erc20PermitParam: erc20PermitParam!,
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   await walletClient.sendTransaction({
@@ -246,6 +251,7 @@ test('claim orders', async () => {
     walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   if (hash) {
@@ -328,6 +334,7 @@ test('cancel order', async () => {
     walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   if (hash) {
@@ -382,6 +389,7 @@ test('cancel orders', async () => {
     walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   if (hash) {

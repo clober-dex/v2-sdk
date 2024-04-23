@@ -57,6 +57,7 @@ test('make bid order', async () => {
     amount: '1',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   const {
@@ -73,6 +74,7 @@ test('make bid order', async () => {
       erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
+      useSubgraph: false,
     },
   })
 
@@ -88,6 +90,7 @@ test('make bid order', async () => {
       token1: '0x0000000000000000000000000000000000000000',
       options: {
         rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
       },
     }),
   ])
@@ -112,6 +115,7 @@ test('make bid order', async () => {
       token1: '0x0000000000000000000000000000000000000000',
       options: {
         rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
       },
     }),
   ])
@@ -147,6 +151,7 @@ test('make ask order', async () => {
     options: {
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
+      useSubgraph: false,
     },
   })
 
@@ -160,6 +165,7 @@ test('make ask order', async () => {
       token1: '0x0000000000000000000000000000000000000000',
       options: {
         rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
       },
     }),
   ])
@@ -182,6 +188,7 @@ test('make ask order', async () => {
       token1: '0x0000000000000000000000000000000000000000',
       options: {
         rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
       },
     }),
   ])
@@ -221,6 +228,7 @@ test('limit bid order', async () => {
         token1: '0x0000000000000000000000000000000000000000',
         options: {
           rpcUrl: publicClient.transport.url!,
+          useSubgraph: false,
         },
       }),
     ],
@@ -232,6 +240,7 @@ test('limit bid order', async () => {
     amount: '100000',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   const {
@@ -247,6 +256,7 @@ test('limit bid order', async () => {
     options: {
       erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -273,6 +283,7 @@ test('limit bid order', async () => {
       token1: '0x0000000000000000000000000000000000000000',
       options: {
         rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
       },
     }),
   ])
@@ -321,6 +332,7 @@ test('limit ask order', async () => {
     price: '3450.01',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -340,6 +352,7 @@ test('limit ask order', async () => {
         token1: '0x0000000000000000000000000000000000000000',
         options: {
           rpcUrl: publicClient.transport.url!,
+          useSubgraph: false,
         },
       }),
     ],
@@ -368,6 +381,7 @@ test('limit ask order', async () => {
       token1: '0x0000000000000000000000000000000000000000',
       options: {
         rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
       },
     }),
   ])

@@ -34,6 +34,7 @@ test('try open market', async () => {
     outputToken: '0x0000000000000000000000000000000000000000',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   await walletClient.sendTransaction({
@@ -47,6 +48,7 @@ test('try open market', async () => {
     token1: '0x0000000000000000000000000000000000000000',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   expect(market1.askBookOpen).toEqual(true)
@@ -58,6 +60,7 @@ test('try open market', async () => {
     outputToken: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   await walletClient.sendTransaction({
@@ -71,6 +74,7 @@ test('try open market', async () => {
     token1: '0x0000000000000000000000000000000000000000',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   expect(market2.askBookOpen).toEqual(true)
@@ -87,6 +91,7 @@ test('try already open market', async () => {
     outputToken: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   expect(transaction).toBeUndefined()
