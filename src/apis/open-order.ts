@@ -19,7 +19,7 @@ const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
     }
   }>(
     'getOpenOrder',
-    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
+    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
     {
       orderId,
     },
@@ -36,7 +36,7 @@ const getOpenOrdersByUserAddress = async (
     }
   }>(
     'getOpenOrdersByUserAddress',
-    'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }) { id book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
+    'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
     {
       userAddress: userAddress.toLowerCase(),
     },
@@ -121,6 +121,7 @@ const toOpenOrder = (
     : quoteToBase(tick, unit * (rawAmount - rawFilledAmount), false)
   return {
     id: openOrder.id,
+    user: getAddress(openOrder.user),
     isBid,
     inputCurrency,
     outputCurrency,
