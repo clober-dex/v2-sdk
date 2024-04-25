@@ -109,6 +109,8 @@ export const openMarket = decorator(
  * @param {erc20PermitParam} [options.erc20PermitParam] The permit signature for token approval.
  * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
+ * @param {number} [options.gasLimit] The gas limit to use for the transaction.
+ * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
  * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyFlow, take: CurrencyFlow } }>}
  * Promise resolving to the transaction object representing the limit order with the result of the order.
  * @example
@@ -314,6 +316,8 @@ export const limitOrder = decorator(
  * @param {Object} [options] Optional parameters for the market order.
  * @param {erc20PermitParam} [options.erc20PermitParam] The permit signature for token approval.
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
+ * @param {number} [options.gasLimit] The gas limit to use for the transaction.
+ * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
  * @param {number} [options.slippage] The maximum slippage percentage allowed for the order.
  * if the slippage is not provided, unlimited slippage is allowed.
  * @returns {Promise<{ transaction: Transaction, result: { spent: CurrencyFlow, taken: CurrencyFlow } }>}
@@ -529,6 +533,8 @@ export const marketOrder = decorator(
  * @param {string} id An ID representing the open order to be claimed.
  * @param {Object} [options] Optional parameters for claiming orders.
  * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
+ * @param {number} [options.gasLimit] The gas limit to use for the transaction.
+ * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the claim action with the result of the order.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -579,6 +585,8 @@ export const claimOrder = decorator(
  * @param {string[]} ids An array of IDs representing the open orders to be claimed.
  * @param {Object} [options] Optional parameters for claiming orders.
  * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
+ * @param {number} [options.gasLimit] The gas limit to use for the transaction.
+ * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow[] }>}
  * Promise resolving to the transaction object representing the claim action with the result of the orders.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -688,6 +696,8 @@ export const claimOrders = decorator(
  * @param {string} id An ID representing the open order to be canceled
  * @param {Object} [options] Optional parameters for canceling orders.
  * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
+ * @param {number} [options.gasLimit] The gas limit to use for the transaction.
+ * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the cancel action with the result of the order.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -738,6 +748,8 @@ export const cancelOrder = decorator(
  * @param {string[]} ids An array of IDs representing the open orders to be canceled.
  * @param {Object} [options] Optional parameters for canceling orders.
  * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
+ * @param {number} [options.gasLimit] The gas limit to use for the transaction.
+ * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow[] }>
  * Promise resolving to the transaction object representing the cancel action with the result of the orders.
  * @throws {Error} Throws an error if no open orders are found for the specified user.

@@ -20,6 +20,7 @@ import { getMarketId } from './utils/market'
  * @param options
  * @param options.n - number of depth levels to fetch
  * @param options.rpcUrl - RPC URL of the blockchain
+ * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
  * @returns A market {@link Market}
  *
  * @example
@@ -73,6 +74,7 @@ export const getMarket = decorator(
  * @param options
  * @param options.limitPrice The maximum limit price to spend.
  * @param options.rpcUrl The RPC URL of the blockchain.
+ * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
  * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
  * import { getExpectedOutput } from '@clober/v2-sdk'
@@ -144,6 +146,7 @@ export const getExpectedOutput = decorator(
  * @param options
  * @param options.limitPrice The maximum limit price to take.
  * @param options.rpcUrl The RPC URL of the blockchain.
+ * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
  * @returns A Promise resolving to an object containing the taken amount, spent amount and result of the calculation.
  * @example
  * import { getExpectedInput } from '@clober/v2-sdk'
@@ -212,6 +215,7 @@ export const getExpectedInput = decorator(
  * @param {string} id The ID of the open order.
  * @param options
  * @param options.rpcUrl The RPC URL of the blockchain.
+ * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
  * @returns {Promise<OpenOrder>} Promise resolving to the open order object, or undefined if not found.
  * @example
  * import { getOpenOrder } from '@clober/v2-sdk'
@@ -241,6 +245,7 @@ export const getOpenOrder = decorator(
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param options
  * @param options.rpcUrl The RPC URL of the blockchain.
+ * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
  * @returns {Promise<OpenOrder[]>} Promise resolving to an array of open orders.
  * @example
  * import { getOpenOrders } from '@clober/v2-sdk'
