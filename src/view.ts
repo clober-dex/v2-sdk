@@ -5,7 +5,7 @@ import { CHAIN_IDS } from './constants/chain'
 import type { ChartLog, DefaultOptions, Market } from './type'
 import { parsePrice } from './utils/prices'
 import { MAX_PRICE } from './constants/price'
-import { fetchOpenOrder, fetchOpenOrders } from './apis/open-order'
+import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
 import { type OpenOrder } from './model/open-order'
 import { decorator } from './utils/decorator'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
@@ -259,7 +259,7 @@ export const getOpenOrders = decorator(
     userAddress: `0x${string}`
     options?: DefaultOptions
   }): Promise<OpenOrder[]> => {
-    return fetchOpenOrders(chainId, userAddress)
+    return fetchOpenOrdersByUserAddress(chainId, userAddress)
   },
 )
 

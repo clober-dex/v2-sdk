@@ -2,6 +2,7 @@ import type { Currency } from './currency'
 
 export type OpenOrderDto = {
   id: string
+  user: string
   book: {
     id: string
     base: {
@@ -29,6 +30,7 @@ export type OpenOrderDto = {
 
 export type OpenOrder = {
   id: string
+  user: `0x${string}`
   isBid: boolean
   inputCurrency: Currency
   outputCurrency: Currency

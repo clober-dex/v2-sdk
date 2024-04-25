@@ -12,6 +12,27 @@ import { cachedPublicClients } from '../constants/client'
 import { BOOK_VIEWER_ABI } from '../abis/core/book-viewer-abi'
 import { fetchIsOpened } from '../utils/open'
 import { fetchCurrency } from '../utils/currency'
+import { cachedSubgraph } from '../constants/subgraph'
+
+const fetchBook = async (chainId: CHAIN_IDS, bookId: string) => {
+  return cachedSubgraph[chainId]!.get<{
+    data: {
+      book: {
+        depths: {
+          tick: string
+          price: string
+          rawAmount: string
+        }[]
+      } | null
+    }
+  }>(
+    'getBook',
+    'query getBook($bookId: ID!) { book(id: $bookId){ depths { tick rawAmount } } }',
+    {
+      bookId,
+    },
+  )
+}
 
 const getBook = async (
   chainId: CHAIN_IDS,
@@ -21,6 +42,27 @@ const getBook = async (
 ): Promise<Book> => {
   const unit = await calculateUnit(chainId, quoteCurrency)
   const bookId = toBookId(quoteCurrency.address, baseCurrency.address, unit)
+  if (cachedSubgraph[chainId]) {
+    const {
+      data: { book },
+    } = await fetchBook(chainId, bookId.toString())
+    new Book({
+      id: bookId,
+      base: baseCurrency,
+      quote: quoteCurrency,
+      unit,
+      depths: book
+        ? book.depths.map(
+            ({ tick, rawAmount }: { tick: string; rawAmount: string }) => ({
+              tick: BigInt(tick),
+              rawAmount: BigInt(rawAmount),
+            }),
+          )
+        : [],
+      isOpened: book !== null,
+    })
+  }
+
   const [depths, isOpened] = await Promise.all([
     cachedPublicClients[chainId].readContract({
       address: CONTRACT_ADDRESSES[arbitrumSepolia.id]!.BookViewer,

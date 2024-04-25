@@ -27,7 +27,6 @@ import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { decorator } from './utils/decorator'
 import { fetchOrders } from './utils/order'
-import { quoteToBase } from './utils/decimals'
 import { applyPercent } from './utils/bigint'
 
 /**
@@ -628,10 +627,14 @@ export const claimOrders = decorator(
       )
     ).filter(
       (order) =>
-        isAddressEqual(order.owner, userAddress) && order.claimable > 0n,
+        isAddressEqual(order.user, userAddress) &&
+        order.claimable.value !== '0',
     )
     const tokensToSettle = orders
-      .map((order) => [order.baseCurrency.address, order.quoteCurrency.address])
+      .map((order) => [
+        order.inputCurrency.address,
+        order.outputCurrency.address,
+      ])
       .flat()
       .filter(
         (address, index, self) =>
@@ -649,8 +652,8 @@ export const claimOrders = decorator(
           abi: CONTROLLER_ABI,
           functionName: 'claim',
           args: [
-            orders.map(({ orderId }) => ({
-              id: orderId,
+            orders.map(({ id }) => ({
+              id,
               hookData: zeroHash,
             })),
             tokensToSettle,
@@ -660,30 +663,18 @@ export const claimOrders = decorator(
         },
         options?.gasLimit,
       ),
-      result: orders
-        .map((order) => {
-          const amount = quoteToBase(
-            order.tick,
-            order.unit * order.claimable,
-            false,
-          )
-          return {
-            currency: order.baseCurrency,
-            amount: formatUnits(amount, order.baseCurrency.decimals),
-          }
-        })
-        .reduce((acc, { currency, amount }) => {
-          const index = acc.findIndex((c) =>
-            isAddressEqual(c.currency.address, currency.address),
-          )
-          if (index === -1) {
-            return [...acc, { currency, amount, direction: 'out' }]
-          }
-          acc[index].amount = (
-            Number(acc[index].amount) + Number(amount)
-          ).toString()
-          return acc
-        }, [] as CurrencyFlow[]),
+      result: orders.reduce((acc, { claimable: { currency, value } }) => {
+        const index = acc.findIndex((c) =>
+          isAddressEqual(c.currency.address, currency.address),
+        )
+        if (index === -1) {
+          return [...acc, { currency, amount: value, direction: 'out' }]
+        }
+        acc[index].amount = (
+          Number(acc[index].amount) + Number(value)
+        ).toString()
+        return acc
+      }, [] as CurrencyFlow[]),
     }
   },
 )
@@ -794,10 +785,15 @@ export const cancelOrders = decorator(
         ids.map((id) => BigInt(id)),
       )
     ).filter(
-      (order) => isAddressEqual(order.owner, userAddress) && order.open > 0n,
+      (order) =>
+        isAddressEqual(order.user, userAddress) &&
+        order.cancelable.value !== '0',
     )
     const tokensToSettle = orders
-      .map((order) => [order.baseCurrency.address, order.quoteCurrency.address])
+      .map((order) => [
+        order.inputCurrency.address,
+        order.outputCurrency.address,
+      ])
       .flat()
       .filter(
         (address, index, self) =>
@@ -815,8 +811,8 @@ export const cancelOrders = decorator(
           abi: CONTROLLER_ABI,
           functionName: 'cancel',
           args: [
-            orders.map(({ orderId }) => ({
-              id: orderId,
+            orders.map(({ id }) => ({
+              id,
               leftQuoteAmount: 0n,
               hookData: zeroHash,
             })),
@@ -827,32 +823,18 @@ export const cancelOrders = decorator(
         },
         options?.gasLimit,
       ),
-      result: orders
-        .map((order) => {
-          const amount = applyPercent(
-            order.unit * order.open,
-            100 +
-              (Number(MAKER_DEFAULT_POLICY.rate) * 100) /
-                Number(MAKER_DEFAULT_POLICY.RATE_PRECISION),
-            6,
-          )
-          return {
-            currency: order.quoteCurrency,
-            amount: formatUnits(amount, order.quoteCurrency.decimals),
-          }
-        })
-        .reduce((acc, { currency, amount }) => {
-          const index = acc.findIndex((c) =>
-            isAddressEqual(c.currency.address, currency.address),
-          )
-          if (index === -1) {
-            return [...acc, { currency, amount, direction: 'out' }]
-          }
-          acc[index].amount = (
-            Number(acc[index].amount) + Number(amount)
-          ).toString()
-          return acc
-        }, [] as CurrencyFlow[]),
+      result: orders.reduce((acc, { cancelable: { currency, value } }) => {
+        const index = acc.findIndex((c) =>
+          isAddressEqual(c.currency.address, currency.address),
+        )
+        if (index === -1) {
+          return [...acc, { currency, amount: value, direction: 'out' }]
+        }
+        acc[index].amount = (
+          Number(acc[index].amount) + Number(value)
+        ).toString()
+        return acc
+      }, [] as CurrencyFlow[]),
     }
   },
 )

@@ -10,49 +10,60 @@ import type { OpenOrder, OpenOrderDto } from '../model/open-order'
 import { fetchCurrency } from '../utils/currency'
 import { applyPercent } from '../utils/bigint'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
-
-import { fetchSubgraph } from './subgraph'
+import { cachedSubgraph } from '../constants/subgraph'
 
 const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
-  return fetchSubgraph<{
+  return cachedSubgraph[chainId]!.get<{
     data: {
       openOrder: OpenOrderDto | null
     }
   }>(
-    chainId,
     'getOpenOrder',
-    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
+    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
     {
       orderId,
     },
   )
 }
 
-const getOpenOrders = async (
-  chainId: CHAIN_IDS,
-  userAddress: `0x${string}`,
-) => {
-  return fetchSubgraph<{
+const getOpenOrders = async (chainId: CHAIN_IDS, orderIds: string[]) => {
+  return cachedSubgraph[chainId]!.get<{
     data: {
       openOrders: OpenOrderDto[]
     }
   }>(
-    chainId,
     'getOpenOrders',
-    'query getOpenOrders($userAddress: String!) { openOrders(where: { user: $userAddress }) { id book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
+    'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
+    {
+      orderIds,
+    },
+  )
+}
+
+const getOpenOrdersByUserAddress = async (
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+) => {
+  return cachedSubgraph[chainId]!.get<{
+    data: {
+      openOrders: OpenOrderDto[]
+    }
+  }>(
+    'getOpenOrdersByUserAddress',
+    'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
     {
       userAddress: userAddress.toLowerCase(),
     },
   )
 }
 
-export async function fetchOpenOrders(
+export async function fetchOpenOrdersByUserAddress(
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
-  } = await getOpenOrders(chainId, userAddress)
+  } = await getOpenOrdersByUserAddress(chainId, userAddress)
   const currencies = await Promise.all(
     openOrders
       .map((openOrder) => [
@@ -86,6 +97,31 @@ export async function fetchOpenOrder(
     fetchCurrency(chainId, getAddress(openOrder.book.quote.id)),
   ])
   return toOpenOrder(chainId, currencies, openOrder)
+}
+
+export async function fetchOpenOrders(
+  chainId: CHAIN_IDS,
+  ids: string[],
+): Promise<OpenOrder[]> {
+  const {
+    data: { openOrders },
+  } = await getOpenOrders(chainId, ids)
+  const currencies = await Promise.all(
+    openOrders
+      .map((openOrder) => [
+        getAddress(openOrder.book.base.id),
+        getAddress(openOrder.book.quote.id),
+      ])
+      .flat()
+      .filter(
+        (address, index, self) =>
+          self.findIndex((c) => isAddressEqual(c, address)) === index,
+      )
+      .map((address) => fetchCurrency(chainId, address)),
+  )
+  return openOrders.map((openOrder) =>
+    toOpenOrder(chainId, currencies, openOrder),
+  )
 }
 
 const toOpenOrder = (
@@ -124,6 +160,7 @@ const toOpenOrder = (
     : quoteToBase(tick, unit * (rawAmount - rawFilledAmount), false)
   return {
     id: openOrder.id,
+    user: getAddress(openOrder.user),
     isBid,
     inputCurrency,
     outputCurrency,

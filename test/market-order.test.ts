@@ -40,6 +40,7 @@ test('market order in not open market', async () => {
         amountIn: '10',
         options: {
           rpcUrl: publicClient.transport.url!,
+          useSubgraph: false,
         },
       }).catch((e) => e.message)
     ).includes('Open the market before placing a market order.'),
@@ -57,6 +58,7 @@ test('spend with token', async () => {
     amount: '1000000',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   const { transaction, result } = await marketOrder({
@@ -68,6 +70,7 @@ test('spend with token', async () => {
     options: {
       erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -103,6 +106,7 @@ test('spend with token', async () => {
       token1: '0x0000000000000000000000000000000000000000',
       options: {
         rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
       },
     }),
   ])
@@ -144,6 +148,7 @@ test('spend with eth', async () => {
     amountIn: '1.001',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -179,6 +184,7 @@ test('spend with eth', async () => {
       token1: '0x0000000000000000000000000000000000000000',
       options: {
         rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
       },
     }),
   ])
@@ -211,6 +217,7 @@ test('take with token', async () => {
     amount: '1000000',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
   const { transaction, result } = await marketOrder({
@@ -222,6 +229,7 @@ test('take with token', async () => {
     options: {
       erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -257,6 +265,7 @@ test('take with token', async () => {
       token1: '0x0000000000000000000000000000000000000000',
       options: {
         rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
       },
     }),
   ])
@@ -298,6 +307,7 @@ test('take with eth', async () => {
     amountOut: '1005',
     options: {
       rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
     },
   })
 
@@ -333,6 +343,7 @@ test('take with eth', async () => {
       token1: '0x0000000000000000000000000000000000000000',
       options: {
         rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
       },
     }),
   ])
@@ -367,6 +378,7 @@ test('revert market order', async () => {
         outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
         options: {
           rpcUrl: publicClient.transport.url!,
+          useSubgraph: false,
         },
       }).catch((e) => e.message)
     ).includes('Either amountIn or amountOut must be provided'),
@@ -383,6 +395,7 @@ test('revert market order', async () => {
         amountOut: '1',
         options: {
           rpcUrl: publicClient.transport.url!,
+          useSubgraph: false,
         },
       }).catch((e) => e.message)
     ).includes('Only one of amountIn or amountOut can be provided'),

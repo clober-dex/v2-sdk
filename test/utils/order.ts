@@ -1,16 +1,10 @@
-import { formatUnits, getAddress, isAddressEqual, zeroAddress } from 'viem'
+import { getAddress } from 'viem'
 
-import { CHAIN_IDS, OpenOrder } from '../index'
-import { cachedPublicClients } from '../constants/client'
-import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { cachedSubgraph } from '../constants/subgraph'
-import { fetchOpenOrders } from '../apis/open-order'
-import { MAKER_DEFAULT_POLICY } from '../constants/fee'
-
-import { fetchCurrencyMap } from './currency'
-import { quoteToBase } from './decimals'
-import { getMarketId } from './market'
-import { applyPercent } from './bigint'
+import { CHAIN_IDS, Currency } from '../../src'
+import { cachedPublicClients } from '../../src/constants/client'
+import { CONTRACT_ADDRESSES } from '../../src/constants/addresses'
+import { fetchCurrencyMap } from '../../src/utils/currency'
+import { fromOrderId } from '../../src/utils/order'
 
 const _abi = [
   {
@@ -124,14 +118,18 @@ const _abi = [
 export const fetchOrders = async (
   chainId: CHAIN_IDS,
   orderIds: bigint[],
-): Promise<OpenOrder[]> => {
-  if (cachedSubgraph[chainId]) {
-    return fetchOpenOrders(
-      chainId,
-      orderIds.map((orderId) => orderId.toString()),
-    )
-  }
-
+): Promise<
+  {
+    open: bigint
+    claimable: bigint
+    orderId: bigint
+    unit: bigint
+    tick: bigint
+    owner: `0x${string}`
+    baseCurrency: Currency
+    quoteCurrency: Currency
+  }[]
+> => {
   const result = await cachedPublicClients[chainId]!.multicall({
     contracts: [
       ...orderIds.map((orderId) => ({
@@ -178,67 +176,15 @@ export const fetchOrders = async (
       quote: `0x${string}`
       unit: bigint
     }
-    const cancelable = applyPercent(
-      unit * order.open,
-      100 +
-        (Number(MAKER_DEFAULT_POLICY.rate) * 100) /
-          Number(MAKER_DEFAULT_POLICY.RATE_PRECISION),
-      6,
-    )
-    const claimable = quoteToBase(
-      fromOrderId(orderId).tick,
-      unit * order.claimable,
-      false,
-    )
-    const isBid = isAddressEqual(
-      quote,
-      getMarketId(chainId, [base, quote]).quoteTokenAddress,
-    )
     return {
-      id: orderId.toString(),
-      user: owner,
-      isBid,
-      inputCurrency: currencyMap[getAddress(quote)],
-      outputCurrency: currencyMap[getAddress(base)],
-      cancelable: {
-        currency: currencyMap[getAddress(quote)],
-        value: formatUnits(cancelable, currencyMap[getAddress(quote)].decimals),
-      },
-      claimable: {
-        currency: currencyMap[getAddress(base)],
-        value: formatUnits(claimable, currencyMap[getAddress(base)].decimals),
-      },
-      // don't care about these fields
-      txHash: '' as `0x${string}`,
-      createdAt: 0,
-      price: 0,
-      amount: {
-        currency: currencyMap[zeroAddress],
-        value: '0',
-      },
-      filled: {
-        currency: currencyMap[zeroAddress],
-        value: '0',
-      },
-      claimed: {
-        currency: currencyMap[zeroAddress],
-        value: '0',
-      },
+      open: order.open,
+      claimable: order.claimable,
+      orderId,
+      owner,
+      unit,
+      tick: fromOrderId(orderId).tick,
+      baseCurrency: currencyMap[getAddress(base)],
+      quoteCurrency: currencyMap[getAddress(quote)],
     }
   })
-}
-
-export const fromOrderId = (
-  orderId: bigint,
-): {
-  bookId: bigint
-  tick: bigint
-  index: bigint
-} => {
-  const tick = (orderId >> 40n) & (2n ** 24n - 1n)
-  return {
-    bookId: orderId >> 64n,
-    tick: tick & (2n ** 23n) ? -(2n ** 24n - tick) : tick,
-    index: orderId & (2n ** 40n - 1n),
-  }
 }

@@ -46,6 +46,7 @@ export type ERC20PermitParam = {
 export type DefaultOptions = {
   rpcUrl?: string
   gasLimit?: bigint
+  useSubgraph?: boolean
 }
 
 export type CurrencyFlow = {

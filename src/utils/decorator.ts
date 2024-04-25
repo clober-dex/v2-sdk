@@ -1,5 +1,6 @@
 import { CHAIN_IDS, type DefaultOptions } from '../type'
 import { buildPublicClient } from '../constants/client'
+import { buildSubgraph } from '../constants/subgraph'
 
 export function decorator<
   Args extends {
@@ -14,6 +15,7 @@ export function decorator<
       options?: DefaultOptions
     }
     buildPublicClient(chainId, options?.rpcUrl)
+    buildSubgraph(chainId, options?.useSubgraph)
     return fn(args)
   }
 }
