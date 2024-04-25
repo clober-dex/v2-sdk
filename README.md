@@ -4,8 +4,6 @@ The Clober V2 SDK provides abstractions to assist you with interacting with the 
 
 It makes uses of the Core SDK to gain access to abstractions that are common amongst the Clober SDKs. 
 
-With the SDK, you can manipulate data that has been queried from the EVM using libraries that assist with needs such as data modeling, protection from rounding errors, and compile time enforced typing.
-
 To begin, we recommend looking at our Guides which include [runnable examples](https://github.com/clober-dex/v2-sdk/tree/main/examples) and walkthroughs of core usages. These guides will help you better understand how to use the SDK and integrate it into your application.
 
 
