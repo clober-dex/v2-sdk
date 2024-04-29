@@ -14,4 +14,14 @@ export const CONTRACT_ADDRESSES: {
     BookManager: getAddress('0x4a4eaF7382821da4Fb85e8A8d515f5555383d58A'),
     BookViewer: getAddress('0xA7603C4c895a533E66c30EA76cC6F6A6A0c5cbFe'),
   },
+  [CHAIN_IDS.BASE]: {
+    Controller: getAddress('0x4ed2804b5409298290654D665619c7b092297dB2'),
+    BookManager: getAddress('0x59fAD5b95e755034572702991ABBA937Cc90254a'),
+    BookViewer: getAddress('0x0e7fc8F067470424589Cc25DceEd0dA9a1a8E72A'),
+  },
+  [CHAIN_IDS.BERACHAIN_TESTNET]: {
+    Controller: getAddress('0x2EF0F04fbA5bCa42cC9569f4f2E3A4D11f182600'),
+    BookManager: getAddress('0x982c57388101D012846aDC4997E9b073F3bC16BD'),
+    BookViewer: getAddress('0x16CF06ECB016e449c57b94B8368f2d45D5cf343D'),
+  },
 }
