@@ -1,5 +1,3 @@
-import { arbitrumSepolia } from 'viem/chains'
-
 import { CHAIN_IDS } from '../constants/chain'
 import { Market } from '../model/market'
 import { Book } from '../model/book'
@@ -65,7 +63,7 @@ const getBook = async (
 
   const [depths, isOpened] = await Promise.all([
     cachedPublicClients[chainId].readContract({
-      address: CONTRACT_ADDRESSES[arbitrumSepolia.id]!.BookViewer,
+      address: CONTRACT_ADDRESSES[chainId]!.BookViewer,
       abi: BOOK_VIEWER_ABI,
       functionName: 'getLiquidity',
       args: [bookId, Number(2n ** 19n - 1n), BigInt(n)],
