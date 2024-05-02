@@ -111,7 +111,7 @@ export const openMarket = decorator(
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
  * @param {number} [options.gasLimit] The gas limit to use for the transaction.
  * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
- * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyFlow, take: CurrencyFlow } }>}
+ * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyFlow, take: CurrencyFlow, spent: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the limit order with the result of the order.
  * @example
  * import { signERC20Permit, limitOrder } from '@clober/v2-sdk'
@@ -171,6 +171,7 @@ export const limitOrder = decorator(
     result: {
       make: CurrencyFlow
       taken: CurrencyFlow
+      spent: CurrencyFlow
     }
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
@@ -201,7 +202,7 @@ export const limitOrder = decorator(
       (address) => !isAddressEqual(address, zeroAddress),
     )
     const quoteAmount = parseUnits(amount, inputCurrency.decimals)
-    const [unit, { spentAmount, bookId }] = await Promise.all([
+    const [unit, { takenAmount, spentAmount, bookId }] = await Promise.all([
       calculateUnit(chainId, inputCurrency),
       getExpectedOutput({
         chainId,
@@ -247,6 +248,11 @@ export const limitOrder = decorator(
             currency: inputCurrency,
             direction: 'in',
           },
+          spent: {
+            amount: '0',
+            currency: inputCurrency,
+            direction: 'out',
+          },
           taken: {
             amount: '0',
             currency: outputCurrency,
@@ -287,12 +293,20 @@ export const limitOrder = decorator(
         ),
         result: {
           make: {
-            amount: formatUnits(quoteAmount, inputCurrency.decimals),
+            amount: formatUnits(
+              quoteAmount - parseUnits(spentAmount, inputCurrency.decimals),
+              inputCurrency.decimals,
+            ),
             currency: inputCurrency,
             direction: 'in',
           },
-          taken: {
+          spent: {
             amount: spentAmount,
+            currency: inputCurrency,
+            direction: 'out',
+          },
+          taken: {
+            amount: takenAmount,
             currency: outputCurrency,
             direction: 'out',
           },
