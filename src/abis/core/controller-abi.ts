@@ -74,11 +74,6 @@ export const CONTROLLER_ABI = [
   },
   {
     inputs: [],
-    name: 'InvalidMarket',
-    type: 'error',
-  },
-  {
-    inputs: [],
     name: 'InvalidPrice',
     type: 'error',
   },
@@ -732,7 +727,7 @@ export const CONTROLLER_ABI = [
               },
               {
                 internalType: 'uint64',
-                name: 'unit',
+                name: 'unitSize',
                 type: 'uint64',
               },
               {

@@ -3,7 +3,7 @@ import { Market } from '../model/market'
 import { Book } from '../model/book'
 import { getMarketId } from '../utils/market'
 import { toBookId } from '../utils/book-id'
-import { calculateUnit } from '../utils/unit'
+import { calculateUnitSize } from '../utils/unit-size'
 import type { Currency } from '../model/currency'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { cachedPublicClients } from '../constants/client'
@@ -19,13 +19,13 @@ const fetchBook = async (chainId: CHAIN_IDS, bookId: string) => {
         depths: {
           tick: string
           price: string
-          rawAmount: string
+          unitAmount: string
         }[]
       } | null
     }
   }>(
     'getBook',
-    'query getBook($bookId: ID!) { book(id: $bookId){ depths { tick rawAmount } } }',
+    'query getBook($bookId: ID!) { book(id: $bookId){ depths { tick unitAmount } } }',
     {
       bookId,
     },
@@ -38,8 +38,8 @@ const getBook = async (
   baseCurrency: Currency,
   n: number,
 ): Promise<Book> => {
-  const unit = await calculateUnit(chainId, quoteCurrency)
-  const bookId = toBookId(quoteCurrency.address, baseCurrency.address, unit)
+  const unitSize = await calculateUnitSize(chainId, quoteCurrency)
+  const bookId = toBookId(quoteCurrency.address, baseCurrency.address, unitSize)
   if (cachedSubgraph[chainId]) {
     const {
       data: { book },
@@ -48,12 +48,12 @@ const getBook = async (
       id: bookId,
       base: baseCurrency,
       quote: quoteCurrency,
-      unit,
+      unitSize,
       depths: book
         ? book.depths.map(
-            ({ tick, rawAmount }: { tick: string; rawAmount: string }) => ({
+            ({ tick, unitAmount }: { tick: string; unitAmount: string }) => ({
               tick: BigInt(tick),
-              rawAmount: BigInt(rawAmount),
+              unitAmount: BigInt(unitAmount),
             }),
           )
         : [],
@@ -75,10 +75,10 @@ const getBook = async (
     id: bookId,
     base: baseCurrency,
     quote: quoteCurrency,
-    unit,
+    unitSize,
     depths: depths.map(({ tick, depth }: { tick: number; depth: bigint }) => ({
       tick: BigInt(tick),
-      rawAmount: depth,
+      unitAmount: depth,
     })),
     isOpened,
   })

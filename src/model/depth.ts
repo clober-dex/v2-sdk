@@ -1,6 +1,6 @@
 export type RawDepth = {
   tick: bigint
-  rawAmount: bigint
+  unitAmount: bigint
 }
 
 export type Depth = {

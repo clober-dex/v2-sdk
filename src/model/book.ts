@@ -31,7 +31,7 @@ export type BookDto = {
 export class Book {
   id: bigint
   base: Currency
-  unit: bigint
+  unitSize: bigint
   quote: Currency
   depths: RawDepth[]
   isOpened: boolean
@@ -40,20 +40,20 @@ export class Book {
     id,
     base,
     quote,
-    unit,
+    unitSize,
     depths,
     isOpened,
   }: {
     id: bigint
     base: Currency
     quote: Currency
-    unit: bigint
+    unitSize: bigint
     depths: RawDepth[]
     isOpened: boolean
   }) {
     this.id = id
     this.base = base
-    this.unit = unit
+    this.unitSize = unitSize
     this.quote = quote
     this.depths = depths
     this.isOpened = isOpened
@@ -90,16 +90,16 @@ export class Book {
             true,
           )
         : amountOut - takenQuoteAmount
-      maxAmount = divide(maxAmount, this.unit, true)
+      maxAmount = divide(maxAmount, this.unitSize, true)
 
       if (maxAmount === 0n) {
         break
       }
       const currentDepth = this.depths.find((depth) => depth.tick === tick)!
       let quoteAmount =
-        (currentDepth.rawAmount > maxAmount
+        (currentDepth.unitAmount > maxAmount
           ? maxAmount
-          : currentDepth.rawAmount) * this.unit
+          : currentDepth.unitAmount) * this.unitSize
       let baseAmount = quoteToBase(tick, quoteAmount, true)
       if (TAKER_DEFAULT_POLICY.usesQuote) {
         quoteAmount =
@@ -157,16 +157,16 @@ export class Book {
             amountIn - spentBaseAmount,
             false,
           )
-      maxAmount = baseToQuote(tick, maxAmount, false) / this.unit
+      maxAmount = baseToQuote(tick, maxAmount, false) / this.unitSize
 
       if (maxAmount === 0n) {
         break
       }
       const currentDepth = this.depths.find((depth) => depth.tick === tick)!
       let quoteAmount =
-        (currentDepth.rawAmount > maxAmount
+        (currentDepth.unitAmount > maxAmount
           ? maxAmount
-          : currentDepth.rawAmount) * this.unit
+          : currentDepth.unitAmount) * this.unitSize
       let baseAmount = quoteToBase(tick, quoteAmount, true)
       if (TAKER_DEFAULT_POLICY.usesQuote) {
         quoteAmount =

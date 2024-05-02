@@ -17,15 +17,15 @@ export type OpenOrderDto = {
       symbol: string
       decimals: string
     }
-    unit: string
+    unitSize: string
   }
   tick: string
   txHash: string
   createdAt: string
-  rawAmount: string
-  rawFilledAmount: string
-  rawClaimedAmount: string
-  rawClaimableAmount: string
+  unitAmount: string
+  unitFilledAmount: string
+  unitClaimedAmount: string
+  unitClaimableAmount: string
 }
 
 export type OpenOrder = {
