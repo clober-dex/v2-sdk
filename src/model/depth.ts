@@ -1,4 +1,4 @@
-export type RawDepth = {
+export type DepthDto = {
   tick: bigint
   unitAmount: bigint
 }

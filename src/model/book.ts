@@ -4,36 +4,14 @@ import { divide } from '../utils/math'
 import { baseToQuote, quoteToBase } from '../utils/decimals'
 
 import type { Currency } from './currency'
-import type { RawDepth } from './depth'
-
-export type BookDto = {
-  id: string
-  base: {
-    id: string
-    name: string
-    symbol: string
-    decimals: string
-  }
-  quote: {
-    id: string
-    name: string
-    symbol: string
-    decimals: string
-  }
-  unit: string
-  depths: {
-    tick: string
-    price: string
-    rawAmount: string
-  }[]
-}
+import type { DepthDto } from './depth'
 
 export class Book {
   id: bigint
   base: Currency
   unitSize: bigint
   quote: Currency
-  depths: RawDepth[]
+  depths: DepthDto[]
   isOpened: boolean
 
   constructor({
@@ -48,7 +26,7 @@ export class Book {
     base: Currency
     quote: Currency
     unitSize: bigint
-    depths: RawDepth[]
+    depths: DepthDto[]
     isOpened: boolean
   }) {
     this.id = id
