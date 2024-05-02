@@ -2,9 +2,9 @@ import { expect, test, afterEach } from 'vitest'
 import { getMarket, openMarket } from '@clober/v2-sdk'
 
 import { buildPublicClient } from '../src/constants/client'
+import { cloberTestChain } from '../src/constants/test-chain'
 
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
-import { cloberTestChain } from './utils/test-chain'
 import { createProxyClients } from './utils/utils'
 
 const clients = createProxyClients(

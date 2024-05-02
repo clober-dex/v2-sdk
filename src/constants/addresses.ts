@@ -9,10 +9,15 @@ export const CONTRACT_ADDRESSES: {
     BookViewer: `0x${string}`
   }
 } = {
-  [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
+  [CHAIN_IDS.CLOBER_TESTNET]: {
     Controller: getAddress('0xfAe4A04fa491DC21F77796394532a1B62d8331BF'),
     BookManager: getAddress('0x4a4eaF7382821da4Fb85e8A8d515f5555383d58A'),
     BookViewer: getAddress('0xA7603C4c895a533E66c30EA76cC6F6A6A0c5cbFe'),
+  },
+  [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
+    Controller: getAddress('0x3e15fee68C06A0Cd3aF5430A665a9dd502C8544e'),
+    BookManager: getAddress('0x4a4eaF7382821da4Fb85e8A8d515f5555383d58A'),
+    BookViewer: getAddress('0x46f4661D64BCb4dE9AD5a2fAd7b49EBfC6c27caE'),
   },
   [CHAIN_IDS.BASE]: {
     Controller: getAddress('0x4ed2804b5409298290654D665619c7b092297dB2'),
@@ -23,5 +28,10 @@ export const CONTRACT_ADDRESSES: {
     Controller: getAddress('0x2EF0F04fbA5bCa42cC9569f4f2E3A4D11f182600'),
     BookManager: getAddress('0x982c57388101D012846aDC4997E9b073F3bC16BD'),
     BookViewer: getAddress('0x16CF06ECB016e449c57b94B8368f2d45D5cf343D'),
+  },
+  [CHAIN_IDS.ZKSYNC_SEPOLIA]: {
+    Controller: getAddress('0xBc3F57AB4046a5C47997e0791C2D664aA3fa0574'),
+    BookManager: getAddress('0xd95424eEDC5a9Da8378d762B0620FDD9ae457AE2'),
+    BookViewer: getAddress('0x4E52Bb3Ce586C33adbf6DB24d32277b75A25ae0e'),
   },
 }

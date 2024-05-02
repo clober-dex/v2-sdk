@@ -4,9 +4,9 @@ import { getAddress } from 'viem'
 import { getMarket, getQuoteToken } from '@clober/v2-sdk'
 
 import { buildPublicClient } from '../src/constants/client'
+import { cloberTestChain } from '../src/constants/test-chain'
 
 import { createProxyClients } from './utils/utils'
-import { cloberTestChain } from './utils/test-chain'
 
 const clients = createProxyClients(
   Array.from({ length: 4 }, () => Math.floor(new Date().getTime())).map(
