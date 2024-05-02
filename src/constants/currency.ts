@@ -5,6 +5,7 @@ import { CHAIN_IDS } from './chain'
 export const WETH_ADDRESSES: {
   [chain in CHAIN_IDS]: `0x${string}`[]
 } = {
+  [CHAIN_IDS.CLOBER_TESTNET]: [zeroAddress],
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: [zeroAddress],
   [CHAIN_IDS.BASE]: ['0x4200000000000000000000000000000000000006'],
   [CHAIN_IDS.BERACHAIN_TESTNET]: [
@@ -16,6 +17,9 @@ export const WETH_ADDRESSES: {
 export const STABLE_COIN_ADDRESSES: {
   [chain in CHAIN_IDS]: `0x${string}`[]
 } = {
+  [CHAIN_IDS.CLOBER_TESTNET]: [
+    '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0', // Mock USDT
+  ],
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: [
     '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0', // Mock USDT
   ],
