@@ -3,8 +3,8 @@ import { getMarket, marketOrder, signERC20Permit } from '@clober/v2-sdk'
 import { getAddress } from 'viem'
 
 import { buildPublicClient } from '../src/constants/client'
+import { cloberTestChain } from '../src/constants/test-chain'
 
-import { cloberTestChain } from './utils/test-chain'
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
 import { createProxyClients } from './utils/utils'
 import { fetchTokenBalance } from './utils/currency'

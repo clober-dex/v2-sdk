@@ -4,11 +4,11 @@ import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
 
 import { buildPublicClient } from '../src/constants/client'
+import { cloberTestChain } from '../src/constants/test-chain'
 
 import { fetchTokenBalance } from './utils/currency'
 import { getSize } from './utils/depth'
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
-import { cloberTestChain } from './utils/test-chain'
 import { createProxyClients } from './utils/utils'
 
 const clients = createProxyClients(

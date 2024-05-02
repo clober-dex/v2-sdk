@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 import { privateKeyToAccount } from 'viem/accounts'
 import { createPublicClient, createWalletClient, http } from 'viem'
 
-import { cloberTestChain } from './test-chain'
+import { cloberTestChain } from '../../src/constants/test-chain'
 
 dotenv.config()
 

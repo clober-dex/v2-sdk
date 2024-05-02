@@ -1,7 +1,7 @@
 import { startProxy } from '@viem/anvil'
 import * as dotenv from 'dotenv'
 
-import { cloberTestChain } from '../utils/test-chain'
+import { cloberTestChain } from '../../src/constants/test-chain'
 import { DEV_MNEMONIC_SEED, FORK_BLOCK_NUMBER } from '../utils/constants'
 
 dotenv.config()

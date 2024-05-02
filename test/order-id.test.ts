@@ -4,9 +4,9 @@ import { arbitrumSepolia } from 'viem/chains'
 import { getOpenOrders } from '@clober/v2-sdk'
 
 import { fromOrderId } from '../src/utils/order'
+import { cloberTestChain } from '../src/constants/test-chain'
 
 import { FORK_URL } from './utils/constants'
-import { cloberTestChain } from './utils/test-chain'
 
 const _abi = [
   {

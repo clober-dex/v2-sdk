@@ -1,6 +1,5 @@
 import { expect, test } from 'vitest'
 import { getExpectedInput, getMarket } from '@clober/v2-sdk'
-import { arbitrumSepolia } from 'viem/chains'
 import {
   formatUnits,
   isAddressEqual,
@@ -14,9 +13,9 @@ import { invertPrice } from '../src/utils/tick'
 import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
 import { BOOK_VIEWER_ABI } from '../src/abis/core/book-viewer-abi'
 import { buildPublicClient } from '../src/constants/client'
+import { cloberTestChain } from '../src/constants/test-chain'
 
 import { createProxyClients } from './utils/utils'
-import { cloberTestChain } from './utils/test-chain'
 
 const isTakeResultEqual = async (
   publicClient: PublicClient,
@@ -26,7 +25,7 @@ const isTakeResultEqual = async (
   limitPrice: string,
 ) => {
   const market = await getMarket({
-    chainId: arbitrumSepolia.id,
+    chainId: cloberTestChain.id,
     token0: inputToken,
     token1: outputToken,
     options: {
@@ -38,7 +37,7 @@ const isTakeResultEqual = async (
   const isBid = isAddressEqual(market.quote.address, inputToken)
   const outputCurrency = isBid ? market.base : market.quote
   const [takenQuoteAmount, spentBaseAmount] = await publicClient.readContract({
-    address: CONTRACT_ADDRESSES[arbitrumSepolia.id]!.BookViewer,
+    address: CONTRACT_ADDRESSES[cloberTestChain.id]!.BookViewer,
     abi: BOOK_VIEWER_ABI,
     functionName: 'getExpectedInput',
     args: [
@@ -181,12 +180,13 @@ test('get expected input in not open book', async () => {
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const { takenAmount, spentAmount } = await getExpectedInput({
-    chainId: arbitrumSepolia.id,
+    chainId: cloberTestChain.id,
     inputToken: '0x0e12A07A610056067063cB208882fD5a032B1505',
     outputToken: '0x0000000000000000000000000000000000000000',
     amountOut: '0.1',
     options: {
       useSubgraph: false,
+      rpcUrl: publicClient.transport.url!,
     },
   })
   expect(takenAmount).toBe('0')
