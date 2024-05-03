@@ -30,6 +30,7 @@ test('try open market', async () => {
 
   const transaction1 = await openMarket({
     chainId: cloberTestChain.id,
+    userAddress: account.address,
     inputToken: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
     outputToken: '0x0000000000000000000000000000000000000000',
     options: {
@@ -56,6 +57,7 @@ test('try open market', async () => {
 
   const transaction2 = await openMarket({
     chainId: cloberTestChain.id,
+    userAddress: account.address,
     inputToken: '0x0000000000000000000000000000000000000000',
     outputToken: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
     options: {
@@ -87,6 +89,7 @@ test('try already open market', async () => {
 
   const transaction = await openMarket({
     chainId: cloberTestChain.id,
+    userAddress: account.address,
     inputToken: '0x0000000000000000000000000000000000000000',
     outputToken: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
     options: {

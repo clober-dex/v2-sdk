@@ -33,6 +33,7 @@ import { applyPercent } from './utils/bigint'
  * Build a transaction to open a market.
  *
  * @param chainId The chain ID of the blockchain.
+ * @param userAddress The address of the user.
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
  * @param options
@@ -43,6 +44,7 @@ import { applyPercent } from './utils/bigint'
  *
  * const transaction = await openMarket({
  *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69',
  *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   outputToken: '0x0000000000000000000000000000000000000000'
  * })
@@ -50,11 +52,13 @@ import { applyPercent } from './utils/bigint'
 export const openMarket = decorator(
   async ({
     chainId,
+    userAddress,
     inputToken,
     outputToken,
     options,
   }: {
     chainId: CHAIN_IDS
+    userAddress: `0x${string}`
     inputToken: `0x${string}`
     outputToken: `0x${string}`
     options?: DefaultOptions
@@ -69,7 +73,9 @@ export const openMarket = decorator(
       return buildTransaction(
         chainId,
         {
+          chain: CHAIN_MAP[chainId],
           address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          account: userAddress,
           abi: CONTROLLER_ABI,
           functionName: 'open',
           args: [
