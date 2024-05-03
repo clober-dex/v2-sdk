@@ -5,13 +5,13 @@ import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../constants/fee'
 export const toBookId = (
   quote: `0x${string}`,
   base: `0x${string}`,
-  unit: bigint,
+  unitSize: bigint,
 ) => {
   const value = keccak256(
     encodeAbiParameters(
       [
         { name: 'base', type: 'address' },
-        { name: 'unit', type: 'uint64' },
+        { name: 'unitSize', type: 'uint64' },
         { name: 'quote', type: 'address' },
         { name: 'makerPolicy', type: 'uint24' },
         { name: 'hooks', type: 'address' },
@@ -19,7 +19,7 @@ export const toBookId = (
       ],
       [
         base,
-        unit,
+        unitSize,
         quote,
         Number(MAKER_DEFAULT_POLICY.value),
         zeroAddress,

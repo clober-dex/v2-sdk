@@ -6,120 +6,12 @@ import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { cachedSubgraph } from '../constants/subgraph'
 import { fetchOpenOrders } from '../apis/open-order'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
+import { BOOK_MANAGER_ABI } from '../abis/core/book-manager-abi'
 
 import { fetchCurrencyMap } from './currency'
 import { quoteToBase } from './decimals'
 import { getMarketId } from './market'
 import { applyPercent } from './bigint'
-
-const _abi = [
-  {
-    inputs: [
-      {
-        internalType: 'OrderId',
-        name: 'id',
-        type: 'uint256',
-      },
-    ],
-    name: 'getOrder',
-    outputs: [
-      {
-        components: [
-          {
-            internalType: 'address',
-            name: 'provider',
-            type: 'address',
-          },
-          {
-            internalType: 'uint64',
-            name: 'open',
-            type: 'uint64',
-          },
-          {
-            internalType: 'uint64',
-            name: 'claimable',
-            type: 'uint64',
-          },
-        ],
-        internalType: 'struct IBookManager.OrderInfo',
-        name: '',
-        type: 'tuple',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
-    name: 'ownerOf',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'BookId',
-        name: 'id',
-        type: 'uint192',
-      },
-    ],
-    name: 'getBookKey',
-    outputs: [
-      {
-        components: [
-          {
-            internalType: 'Currency',
-            name: 'base',
-            type: 'address',
-          },
-          {
-            internalType: 'uint64',
-            name: 'unit',
-            type: 'uint64',
-          },
-          {
-            internalType: 'Currency',
-            name: 'quote',
-            type: 'address',
-          },
-          {
-            internalType: 'FeePolicy',
-            name: 'makerPolicy',
-            type: 'uint24',
-          },
-          {
-            internalType: 'contract IHooks',
-            name: 'hooks',
-            type: 'address',
-          },
-          {
-            internalType: 'FeePolicy',
-            name: 'takerPolicy',
-            type: 'uint24',
-          },
-        ],
-        internalType: 'struct IBookManager.BookKey',
-        name: '',
-        type: 'tuple',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-] as const
 
 export const fetchOrders = async (
   chainId: CHAIN_IDS,
@@ -136,19 +28,19 @@ export const fetchOrders = async (
     contracts: [
       ...orderIds.map((orderId) => ({
         address: CONTRACT_ADDRESSES[chainId]!.BookManager,
-        abi: _abi,
+        abi: BOOK_MANAGER_ABI,
         functionName: 'getOrder',
         args: [orderId],
       })),
       ...orderIds.map((orderId) => ({
         address: CONTRACT_ADDRESSES[chainId]!.BookManager,
-        abi: _abi,
+        abi: BOOK_MANAGER_ABI,
         functionName: 'ownerOf',
         args: [orderId],
       })),
       ...orderIds.map((orderId) => ({
         address: CONTRACT_ADDRESSES[chainId]!.BookManager,
-        abi: _abi,
+        abi: BOOK_MANAGER_ABI,
         functionName: 'getBookKey',
         args: [fromOrderId(orderId).bookId],
       })),
@@ -172,14 +64,14 @@ export const fetchOrders = async (
       claimable: bigint
     }
     const owner = result[index + orderIds.length].result as `0x${string}`
-    const { base, quote, unit } = result[index + orderIds.length * 2]
+    const { base, quote, unitSize } = result[index + orderIds.length * 2]
       .result as {
       base: `0x${string}`
       quote: `0x${string}`
-      unit: bigint
+      unitSize: bigint
     }
     const cancelable = applyPercent(
-      unit * order.open,
+      unitSize * order.open,
       100 +
         (Number(MAKER_DEFAULT_POLICY.rate) * 100) /
           Number(MAKER_DEFAULT_POLICY.RATE_PRECISION),
@@ -187,7 +79,7 @@ export const fetchOrders = async (
     )
     const claimable = quoteToBase(
       fromOrderId(orderId).tick,
-      unit * order.claimable,
+      unitSize * order.claimable,
       false,
     )
     const isBid = isAddressEqual(

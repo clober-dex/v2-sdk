@@ -22,25 +22,29 @@ const _abi = [
 
 const buildCurrencyCacheKey = (chainId: CHAIN_IDS, address: `0x${string}`) =>
   `${chainId}:${address}`
-const unitCache = new Map<string, bigint>()
+const unitSizeCache = new Map<string, bigint>()
 const getUnitFromCache = (
   chainId: CHAIN_IDS,
   address: `0x${string}`,
-): bigint | undefined => unitCache.get(buildCurrencyCacheKey(chainId, address))
-const setUnitToCache = (
+): bigint | undefined =>
+  unitSizeCache.get(buildCurrencyCacheKey(chainId, address))
+const setUnitSizeToCache = (
   chainId: CHAIN_IDS,
   address: `0x${string}`,
-  unit: bigint,
-) => unitCache.set(buildCurrencyCacheKey(chainId, address), unit)
+  unitSize: bigint,
+) => unitSizeCache.set(buildCurrencyCacheKey(chainId, address), unitSize)
 
-export const calculateUnit = async (chainId: CHAIN_IDS, quote: Currency) => {
+export const calculateUnitSize = async (
+  chainId: CHAIN_IDS,
+  quote: Currency,
+) => {
   const cachedUnit = getUnitFromCache(chainId, quote.address)
   if (cachedUnit !== undefined) {
     return cachedUnit
   }
-  const unit = await calculateUnitInner(chainId, quote)
-  setUnitToCache(chainId, quote.address, unit)
-  return unit
+  const unitSize = await calculateUnitInner(chainId, quote)
+  setUnitSizeToCache(chainId, quote.address, unitSize)
+  return unitSize
 }
 
 const calculateUnitInner = async (chainId: CHAIN_IDS, quote: Currency) => {

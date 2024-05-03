@@ -58,7 +58,7 @@ export class Market {
           ),
           baseAmount: quoteToBase(
             depth.tick,
-            depth.rawAmount * bidBook.unit,
+            depth.unitAmount * bidBook.unitSize,
             false,
           ),
         }) as Depth,
@@ -72,7 +72,7 @@ export class Market {
         this.quote.decimals,
         this.base.decimals,
       )
-      const baseAmount = depth.rawAmount * askBook.unit
+      const baseAmount = depth.unitAmount * askBook.unitSize
       return {
         price: readablePrice,
         baseAmount,

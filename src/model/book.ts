@@ -4,56 +4,34 @@ import { divide } from '../utils/math'
 import { baseToQuote, quoteToBase } from '../utils/decimals'
 
 import type { Currency } from './currency'
-import type { RawDepth } from './depth'
-
-export type BookDto = {
-  id: string
-  base: {
-    id: string
-    name: string
-    symbol: string
-    decimals: string
-  }
-  quote: {
-    id: string
-    name: string
-    symbol: string
-    decimals: string
-  }
-  unit: string
-  depths: {
-    tick: string
-    price: string
-    rawAmount: string
-  }[]
-}
+import type { DepthDto } from './depth'
 
 export class Book {
   id: bigint
   base: Currency
-  unit: bigint
+  unitSize: bigint
   quote: Currency
-  depths: RawDepth[]
+  depths: DepthDto[]
   isOpened: boolean
 
   constructor({
     id,
     base,
     quote,
-    unit,
+    unitSize,
     depths,
     isOpened,
   }: {
     id: bigint
     base: Currency
     quote: Currency
-    unit: bigint
-    depths: RawDepth[]
+    unitSize: bigint
+    depths: DepthDto[]
     isOpened: boolean
   }) {
     this.id = id
     this.base = base
-    this.unit = unit
+    this.unitSize = unitSize
     this.quote = quote
     this.depths = depths
     this.isOpened = isOpened
@@ -90,16 +68,16 @@ export class Book {
             true,
           )
         : amountOut - takenQuoteAmount
-      maxAmount = divide(maxAmount, this.unit, true)
+      maxAmount = divide(maxAmount, this.unitSize, true)
 
       if (maxAmount === 0n) {
         break
       }
       const currentDepth = this.depths.find((depth) => depth.tick === tick)!
       let quoteAmount =
-        (currentDepth.rawAmount > maxAmount
+        (currentDepth.unitAmount > maxAmount
           ? maxAmount
-          : currentDepth.rawAmount) * this.unit
+          : currentDepth.unitAmount) * this.unitSize
       let baseAmount = quoteToBase(tick, quoteAmount, true)
       if (TAKER_DEFAULT_POLICY.usesQuote) {
         quoteAmount =
@@ -157,16 +135,16 @@ export class Book {
             amountIn - spentBaseAmount,
             false,
           )
-      maxAmount = baseToQuote(tick, maxAmount, false) / this.unit
+      maxAmount = baseToQuote(tick, maxAmount, false) / this.unitSize
 
       if (maxAmount === 0n) {
         break
       }
       const currentDepth = this.depths.find((depth) => depth.tick === tick)!
       let quoteAmount =
-        (currentDepth.rawAmount > maxAmount
+        (currentDepth.unitAmount > maxAmount
           ? maxAmount
-          : currentDepth.rawAmount) * this.unit
+          : currentDepth.unitAmount) * this.unitSize
       let baseAmount = quoteToBase(tick, quoteAmount, true)
       if (TAKER_DEFAULT_POLICY.usesQuote) {
         quoteAmount =

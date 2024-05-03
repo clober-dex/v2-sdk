@@ -19,7 +19,7 @@ const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
     }
   }>(
     'getOpenOrder',
-    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
+    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount } }',
     {
       orderId,
     },
@@ -33,7 +33,7 @@ const getOpenOrders = async (chainId: CHAIN_IDS, orderIds: string[]) => {
     }
   }>(
     'getOpenOrders',
-    'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
+    'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount } }',
     {
       orderIds,
     },
@@ -50,7 +50,7 @@ const getOpenOrdersByUserAddress = async (
     }
   }>(
     'getOpenOrdersByUserAddress',
-    'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unit } tick txHash createdAt rawAmount rawFilledAmount rawClaimedAmount rawClaimableAmount } }',
+    'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount } }',
     {
       userAddress: userAddress.toLowerCase(),
     },
@@ -143,21 +143,21 @@ const toOpenOrder = (
   const quote = isBid ? inputCurrency : outputCurrency
   const base = isBid ? outputCurrency : inputCurrency
   const tick = BigInt(openOrder.tick)
-  const rawAmount = BigInt(openOrder.rawAmount)
-  const rawFilledAmount = BigInt(openOrder.rawFilledAmount)
-  const unit = BigInt(openOrder.book.unit)
-  const quoteAmount = unit * rawAmount
-  const rawClaimedAmount = BigInt(openOrder.rawClaimedAmount)
-  const rawClaimableAmount = BigInt(openOrder.rawClaimableAmount)
+  const unitAmount = BigInt(openOrder.unitAmount)
+  const unitFilledAmount = BigInt(openOrder.unitFilledAmount)
+  const unitSize = BigInt(openOrder.book.unitSize)
+  const quoteAmount = unitSize * unitAmount
+  const unitClaimedAmount = BigInt(openOrder.unitClaimedAmount)
+  const unitClaimableAmount = BigInt(openOrder.unitClaimableAmount)
   const amount = isBid ? quoteToBase(tick, quoteAmount, false) : quoteAmount
   const filled = isBid
-    ? quoteToBase(tick, unit * rawFilledAmount, false)
-    : unit * rawFilledAmount
-  const claimed = quoteToBase(tick, unit * rawClaimedAmount, false)
-  const claimable = quoteToBase(tick, unit * rawClaimableAmount, false)
+    ? quoteToBase(tick, unitSize * unitFilledAmount, false)
+    : unitSize * unitFilledAmount
+  const claimed = quoteToBase(tick, unitSize * unitClaimedAmount, false)
+  const claimable = quoteToBase(tick, unitSize * unitClaimableAmount, false)
   const cancelable = isBid
-    ? unit * (rawAmount - rawFilledAmount)
-    : quoteToBase(tick, unit * (rawAmount - rawFilledAmount), false)
+    ? unitSize * (unitAmount - unitFilledAmount)
+    : quoteToBase(tick, unitSize * (unitAmount - unitFilledAmount), false)
   return {
     id: openOrder.id,
     user: getAddress(openOrder.user),

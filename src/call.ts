@@ -13,7 +13,7 @@ import type {
   ERC20PermitParam,
   Transaction,
 } from './type'
-import { calculateUnit } from './utils/unit'
+import { calculateUnitSize } from './utils/unit-size'
 import { CONTROLLER_ABI } from './abis/core/controller-abi'
 import { getDeadlineTimestampInSeconds } from './utils/time'
 import { buildTransaction } from './utils/build-transaction'
@@ -62,7 +62,7 @@ export const openMarket = decorator(
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
     if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
-      const unit = await calculateUnit(
+      const unitSize = await calculateUnitSize(
         chainId,
         isBid ? market.quote : market.base,
       )
@@ -77,7 +77,7 @@ export const openMarket = decorator(
               {
                 key: {
                   base: outputToken,
-                  unit,
+                  unitSize,
                   quote: inputToken,
                   makerPolicy: MAKER_DEFAULT_POLICY.value,
                   hooks: zeroAddress,
@@ -202,8 +202,8 @@ export const limitOrder = decorator(
       (address) => !isAddressEqual(address, zeroAddress),
     )
     const quoteAmount = parseUnits(amount, inputCurrency.decimals)
-    const [unit, { takenAmount, spentAmount, bookId }] = await Promise.all([
-      calculateUnit(chainId, inputCurrency),
+    const [unitSize, { takenAmount, spentAmount, bookId }] = await Promise.all([
+      calculateUnitSize(chainId, inputCurrency),
       getExpectedOutput({
         chainId,
         inputToken,
@@ -217,7 +217,7 @@ export const limitOrder = decorator(
     ])
     const isETH = isAddressEqual(inputToken, zeroAddress)
     const makeParam = {
-      id: toBookId(inputToken, outputToken, unit),
+      id: toBookId(inputToken, outputToken, unitSize),
       tick: Number(tick),
       quoteAmount,
       hookData: zeroHash,
