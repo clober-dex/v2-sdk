@@ -16,7 +16,7 @@ export const CONTRACT_ADDRESSES: {
   },
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
     Controller: getAddress('0x3e15fee68C06A0Cd3aF5430A665a9dd502C8544e'),
-    BookManager: getAddress('0x4a4eaF7382821da4Fb85e8A8d515f5555383d58A'),
+    BookManager: getAddress('0x3a90fbD5DbE4C82018A4Ac28406A50917dB91def'),
     BookViewer: getAddress('0x46f4661D64BCb4dE9AD5a2fAd7b49EBfC6c27caE'),
   },
   [CHAIN_IDS.BASE]: {
