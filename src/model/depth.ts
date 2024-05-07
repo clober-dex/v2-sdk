@@ -4,6 +4,6 @@ export type DepthDto = {
 }
 
 export type Depth = {
-  price: number
+  price: string
   baseAmount: bigint
 }

@@ -36,7 +36,7 @@ export type OpenOrder = {
   outputCurrency: Currency
   txHash: `0x${string}`
   createdAt: number
-  price: number
+  price: string
   amount: { currency: Currency; value: string }
   filled: { currency: Currency; value: string }
   claimed: { currency: Currency; value: string }
