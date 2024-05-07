@@ -19,7 +19,7 @@ const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
     }
   }>(
     'getOpenOrder',
-    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount } }',
+    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {
       orderId,
     },
@@ -33,7 +33,7 @@ const getOpenOrders = async (chainId: CHAIN_IDS, orderIds: string[]) => {
     }
   }>(
     'getOpenOrders',
-    'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount } }',
+    'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {
       orderIds,
     },
@@ -171,6 +171,8 @@ const toOpenOrder = (
       quote.decimals,
       base.decimals,
     ),
+    tick: Number(tick),
+    orderIndex: openOrder.orderIndex,
     amount: { currency: base, value: formatUnits(amount, base.decimals) },
     filled: { currency: base, value: formatUnits(filled, base.decimals) },
     claimed: {
