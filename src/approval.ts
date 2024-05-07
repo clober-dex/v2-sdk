@@ -88,7 +88,7 @@ export const setApprovalOfOpenOrdersForAll = decorator(
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {WalletClient} walletClient The wallet client.
  * @param {`0x${string}`} token The ERC20 token address.
- * @param {string} amount The amount of tokens to permit.
+ * @param {string | undefined} amount The amount to approve. If not provided, the maximum amount is approved.
  * @param options
  * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns {Promise<`0x${string}` | undefined>} Promise resolving to the transaction hash. If the account is already approved, the promise resolves to `undefined`.
@@ -118,7 +118,7 @@ export const approveERC20 = decorator(
     chainId: CHAIN_IDS
     walletClient: WalletClient
     token: `0x${string}`
-    amount: string
+    amount?: string
     options?: DefaultOptions
   }): Promise<`0x${string}` | undefined> => {
     if (!walletClient.account) {
@@ -133,7 +133,10 @@ export const approveERC20 = decorator(
         CONTRACT_ADDRESSES[chainId]!.Controller,
       ),
     ])
-    if (allowance >= parseUnits(amount, currency.decimals)) {
+    const value = amount
+      ? parseUnits(amount, currency.decimals)
+      : 2n ** 256n - 1n
+    if (allowance >= value) {
       return undefined
     }
     return walletClient.writeContract({
@@ -167,10 +170,7 @@ export const approveERC20 = decorator(
         },
       ] as const,
       functionName: 'approve',
-      args: [
-        CONTRACT_ADDRESSES[chainId]!.Controller,
-        parseUnits(amount, currency.decimals),
-      ],
+      args: [CONTRACT_ADDRESSES[chainId]!.Controller, value],
     })
   },
 )
