@@ -122,8 +122,10 @@ test('make bid order', async () => {
 
   expect(beforeBalance - afterBalance).toEqual(1000000n)
   expect(
-    getSize(afterMarket.bids, 0, 0.01) - getSize(beforeMarket.bids, 0, 0.01),
-  ).toEqual(100039694430551600000)
+    (
+      getSize(afterMarket.bids, 0, 0.01) - getSize(beforeMarket.bids, 0, 0.01)
+    ).toString(),
+  ).toEqual('100.03969443055159')
   expect(make.amount).toEqual('1')
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
@@ -199,9 +201,11 @@ test('make ask order', async () => {
 
   expect(Number(beforeBalance - afterBalance)).greaterThan(150000000000000000)
   expect(
-    getSize(afterMarket.asks, 8000, 8001) -
-      getSize(beforeMarket.asks, 8000, 8001),
-  ).toEqual(150045000000000000)
+    (
+      getSize(afterMarket.asks, 8000, 8001) -
+      getSize(beforeMarket.asks, 8000, 8001)
+    ).toString(),
+  ).toEqual('0.150045')
   expect(make.amount).toEqual('0.15')
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
@@ -301,9 +305,11 @@ test('limit bid order', async () => {
     100000000000000000,
   )
   expect(
-    getSize(afterMarket.bids, 3504, 3505) -
-      getSize(beforeMarket.bids, 3504, 3505),
-  ).toEqual(28440764694968336000)
+    (
+      getSize(afterMarket.bids, 3504, 3505) -
+      getSize(beforeMarket.bids, 3504, 3505)
+    ).toString(),
+  ).toEqual('28.440764694968333')
   expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length - 1)
   expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length + 1)
   expect(make.amount).toEqual('99649.86826')
@@ -400,9 +406,11 @@ test('limit ask order', async () => {
   )
   expect(afterUSDCBalance - beforeUSDCBalance).toEqual(3467570270n)
   expect(
-    getSize(afterMarket.asks, 3450, 3451) -
-      getSize(beforeMarket.asks, 3450, 3451),
-  ).toEqual(1008553000000000000)
+    (
+      getSize(afterMarket.asks, 3450, 3451) -
+      getSize(beforeMarket.asks, 3450, 3451)
+    ).toString(),
+  ).toEqual('1.008553')
   expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length - 1)
   expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length + 1)
   expect(make.amount).toEqual('1.008250484573137286')
