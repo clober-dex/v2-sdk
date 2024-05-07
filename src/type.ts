@@ -12,6 +12,14 @@ export type Depth = {
   baseAmount: string
 }
 
+export type Book = {
+  id: string
+  base: Currency
+  unitSize: string
+  quote: Currency
+  isOpened: boolean
+}
+
 export type Market = {
   chainId: CHAIN_IDS
   quote: Currency
@@ -19,9 +27,9 @@ export type Market = {
   makerFee: number
   takerFee: number
   bids: Depth[]
-  bidBookOpen: boolean
+  bidBook: Book
   asks: Depth[]
-  askBookOpen: boolean
+  askBook: Book
 }
 
 export type Transaction = {
