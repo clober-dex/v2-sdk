@@ -2,12 +2,15 @@ import type { Account } from 'viem'
 
 import { CHAIN_IDS } from './constants/chain'
 import type { Currency } from './model/currency'
-import type { Depth } from './model/depth'
 
 export { CHAIN_IDS } from './constants/chain'
 export type { Currency } from './model/currency'
-export type { Depth } from './model/depth'
 export type { OpenOrder } from './model/open-order'
+
+export type Depth = {
+  price: string
+  baseAmount: string
+}
 
 export type Market = {
   chainId: CHAIN_IDS
