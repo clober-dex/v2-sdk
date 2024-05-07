@@ -93,7 +93,7 @@ export const setApprovalOfOpenOrdersForAll = decorator(
  * @param options.rpcUrl The RPC URL of the blockchain.
  * @returns {Promise<`0x${string}` | undefined>} Promise resolving to the transaction hash. If the account is already approved, the promise resolves to `undefined`.
  * @example
- * import { approve20 } from '@clober/v2-sdk'
+ * import { approveERC20 } from '@clober/v2-sdk'
  *
  * const walletClient = createWalletClient({
  *   chain: arbitrumSepolia,
@@ -101,14 +101,14 @@ export const setApprovalOfOpenOrdersForAll = decorator(
  *   transport: http(),
  * })
  *
- * const hash = await approve20({
+ * const hash = await approveERC20({
  *   chainId: 421614,
  *   walletClient
  *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   amount: '1000.123', // approve 1000.123 USDC
  * })
  */
-export const approve20 = decorator(
+export const approveERC20 = decorator(
   async ({
     chainId,
     walletClient,
