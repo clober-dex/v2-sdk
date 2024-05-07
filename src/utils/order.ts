@@ -104,6 +104,8 @@ export const fetchOrders = async (
       txHash: '' as `0x${string}`,
       createdAt: 0,
       price: '0',
+      tick: 0,
+      orderIndex: '0',
       amount: {
         currency: currencyMap[zeroAddress],
         value: '0',
