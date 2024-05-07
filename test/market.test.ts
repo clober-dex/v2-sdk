@@ -86,7 +86,8 @@ test('fetch empty market', async () => {
       useSubgraph: false,
     },
   })
-  expect(market.bidBookOpen).toEqual(true)
+  expect(market.bidBookOpen).toEqual(false)
+  expect(market.askBookOpen).toEqual(false)
 })
 
 // @dev: this test will be fail when the market is open
