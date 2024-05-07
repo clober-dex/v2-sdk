@@ -6,12 +6,12 @@ export const formatPrice = (
   price: bigint,
   quoteDecimals: number,
   baseDecimals: number,
-): number => {
+): string => {
   return new BigNumber(price.toString())
     .div(new BigNumber(2).pow(PRICE_PRECISION.toString()))
     .times(new BigNumber(10).pow(baseDecimals))
     .div(new BigNumber(10).pow(quoteDecimals))
-    .toNumber()
+    .toString()
 }
 
 export const parsePrice = (

@@ -57,12 +57,12 @@ export const getMarket = decorator(
       makerFee: market.makerFee,
       takerFee: market.takerFee,
       bids: market.bids.map(({ price, baseAmount }) => ({
-        price: price.toString(),
+        price,
         baseAmount: formatUnits(baseAmount, market.base.decimals),
       })),
       bidBookOpen: market.bidBookOpen,
       asks: market.asks.map(({ price, baseAmount }) => ({
-        price: price.toString(),
+        price,
         baseAmount: formatUnits(baseAmount, market.base.decimals),
       })),
       askBookOpen: market.askBookOpen,
