@@ -26,6 +26,7 @@ export type OpenOrderDto = {
   unitFilledAmount: string
   unitClaimedAmount: string
   unitClaimableAmount: string
+  orderIndex: string
 }
 
 export type OpenOrder = {
@@ -37,6 +38,8 @@ export type OpenOrder = {
   txHash: `0x${string}`
   createdAt: number
   price: string
+  tick: number
+  orderIndex: string
   amount: { currency: Currency; value: string }
   filled: { currency: Currency; value: string }
   claimed: { currency: Currency; value: string }

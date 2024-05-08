@@ -61,12 +61,24 @@ export const getMarket = decorator(
         price,
         baseAmount: formatUnits(baseAmount, market.base.decimals),
       })),
-      bidBookOpen: market.bidBookOpen,
+      bidBook: {
+        id: market.bidBook.id.toString(),
+        base: market.bidBook.base,
+        unitSize: market.bidBook.unitSize.toString(),
+        quote: market.bidBook.quote,
+        isOpened: market.bidBook.isOpened,
+      },
       asks: market.asks.map(({ price, baseAmount }) => ({
         price,
         baseAmount: formatUnits(baseAmount, market.base.decimals),
       })),
-      askBookOpen: market.askBookOpen,
+      askBook: {
+        id: market.askBook.id.toString(),
+        base: market.askBook.base,
+        unitSize: market.askBook.unitSize.toString(),
+        quote: market.askBook.quote,
+        isOpened: market.askBook.isOpened,
+      },
     }
   },
 )

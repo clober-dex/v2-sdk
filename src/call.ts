@@ -65,7 +65,10 @@ export const openMarket = decorator(
   }): Promise<Transaction | undefined> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
-    if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
+    if (
+      (isBid && !market.bidBook.isOpened) ||
+      (!isBid && !market.askBook.isOpened)
+    ) {
       const unitSize = await calculateUnitSize(
         chainId,
         isBid ? market.quote : market.base,
@@ -185,7 +188,10 @@ export const limitOrder = decorator(
     const [inputCurrency, outputCurrency] = isBid
       ? [market.quote, market.base]
       : [market.base, market.quote]
-    if ((isBid && !market.bidBookOpen) || (!isBid && !market.askBookOpen)) {
+    if (
+      (isBid && !market.bidBook.isOpened) ||
+      (!isBid && !market.askBook.isOpened)
+    ) {
       throw new Error(`
        Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
@@ -402,8 +408,8 @@ export const marketOrder = decorator(
       ? [market.base, market.quote]
       : [market.quote, market.base]
     if (
-      (isTakingBid && !market.bidBookOpen) ||
-      (!isTakingBid && !market.askBookOpen)
+      (isTakingBid && !market.bidBook.isOpened) ||
+      (!isTakingBid && !market.askBook.isOpened)
     ) {
       throw new Error(`
        Open the market before placing a market order.

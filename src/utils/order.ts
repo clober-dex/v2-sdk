@@ -1,6 +1,6 @@
 import { formatUnits, getAddress, isAddressEqual, zeroAddress } from 'viem'
 
-import { CHAIN_IDS, OpenOrder } from '../index'
+import { CHAIN_IDS, type OpenOrder } from '../index'
 import { cachedPublicClients } from '../constants/client'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { cachedSubgraph } from '../constants/subgraph'
@@ -104,6 +104,8 @@ export const fetchOrders = async (
       txHash: '' as `0x${string}`,
       createdAt: 0,
       price: '0',
+      tick: 0,
+      orderIndex: '0',
       amount: {
         currency: currencyMap[zeroAddress],
         value: '0',
