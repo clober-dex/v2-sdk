@@ -184,23 +184,31 @@ const checkFrom = async (policy: FeePolicy) => {
 test('check encode function', async () => {
   await encode(true, 0)
   await encode(true, 1)
-  await encode(true, Number(MAKER_DEFAULT_POLICY.rate))
-  await encode(true, Number(TAKER_DEFAULT_POLICY.rate))
+  await encode(true, Number(MAKER_DEFAULT_POLICY[arbitrumSepolia.id].rate))
+  await encode(true, Number(TAKER_DEFAULT_POLICY[arbitrumSepolia.id].rate))
   await encode(true, 500000)
   await encode(true, -500000)
   await encode(false, 0)
   await encode(false, 1)
   await encode(false, 500000)
   await encode(false, -500000)
-  await encode(false, Number(MAKER_DEFAULT_POLICY.rate))
-  await encode(false, Number(TAKER_DEFAULT_POLICY.rate))
+  await encode(false, Number(MAKER_DEFAULT_POLICY[arbitrumSepolia.id].rate))
+  await encode(false, Number(TAKER_DEFAULT_POLICY[arbitrumSepolia.id].rate))
 })
 
 test('check calculateFee function', async () => {
   await checkCalculateFee(new FeePolicy(true, 0n), 1000000n, false)
   await checkCalculateFee(new FeePolicy(true, 1n), 1000000n, false)
-  await checkCalculateFee(MAKER_DEFAULT_POLICY, 1000000n, false)
-  await checkCalculateFee(TAKER_DEFAULT_POLICY, 1000000n, false)
+  await checkCalculateFee(
+    MAKER_DEFAULT_POLICY[arbitrumSepolia.id],
+    1000000n,
+    false,
+  )
+  await checkCalculateFee(
+    TAKER_DEFAULT_POLICY[arbitrumSepolia.id],
+    1000000n,
+    false,
+  )
   await checkCalculateFee(new FeePolicy(true, 500000n), 1000000n, false)
   await checkCalculateFee(new FeePolicy(true, -500000n), 1000000n, false)
 })
@@ -208,8 +216,16 @@ test('check calculateFee function', async () => {
 test('check calculateOriginalAmount function', async () => {
   await checkCalculateOriginalAmount(new FeePolicy(true, 0n), 1000000n, false)
   await checkCalculateOriginalAmount(new FeePolicy(true, 1n), 1000000n, false)
-  await checkCalculateOriginalAmount(MAKER_DEFAULT_POLICY, 1000000n, false)
-  await checkCalculateOriginalAmount(TAKER_DEFAULT_POLICY, 1000000n, false)
+  await checkCalculateOriginalAmount(
+    MAKER_DEFAULT_POLICY[arbitrumSepolia.id],
+    1000000n,
+    false,
+  )
+  await checkCalculateOriginalAmount(
+    TAKER_DEFAULT_POLICY[arbitrumSepolia.id],
+    1000000n,
+    false,
+  )
   await checkCalculateOriginalAmount(
     new FeePolicy(true, 500000n),
     1000000n,
@@ -225,11 +241,11 @@ test('check calculateOriginalAmount function', async () => {
 test('check static object', async () => {
   checkFrom(new FeePolicy(true, 0n))
   checkFrom(new FeePolicy(true, 1n))
-  checkFrom(MAKER_DEFAULT_POLICY)
-  checkFrom(TAKER_DEFAULT_POLICY)
+  checkFrom(MAKER_DEFAULT_POLICY[arbitrumSepolia.id])
+  checkFrom(TAKER_DEFAULT_POLICY[arbitrumSepolia.id])
 
   checkFrom(new FeePolicy(false, 0n))
   checkFrom(new FeePolicy(false, 1n))
-  checkFrom(MAKER_DEFAULT_POLICY)
-  checkFrom(TAKER_DEFAULT_POLICY)
+  checkFrom(MAKER_DEFAULT_POLICY[arbitrumSepolia.id])
+  checkFrom(TAKER_DEFAULT_POLICY[arbitrumSepolia.id])
 })

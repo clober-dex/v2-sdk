@@ -39,12 +39,18 @@ const getBook = async (
   n: number,
 ): Promise<Book> => {
   const unitSize = await calculateUnitSize(chainId, quoteCurrency)
-  const bookId = toBookId(quoteCurrency.address, baseCurrency.address, unitSize)
+  const bookId = toBookId(
+    chainId,
+    quoteCurrency.address,
+    baseCurrency.address,
+    unitSize,
+  )
   if (cachedSubgraph[chainId]) {
     const {
       data: { book },
     } = await fetchBook(chainId, bookId.toString())
     new Book({
+      chainId,
       id: bookId,
       base: baseCurrency,
       quote: quoteCurrency,
@@ -72,6 +78,7 @@ const getBook = async (
   ])
 
   return new Book({
+    chainId,
     id: bookId,
     base: baseCurrency,
     quote: quoteCurrency,

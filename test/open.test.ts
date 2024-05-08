@@ -52,8 +52,8 @@ test('try open market', async () => {
       useSubgraph: false,
     },
   })
-  expect(market1.askBookOpen).toEqual(true)
-  expect(market1.bidBookOpen).toEqual(false)
+  expect(market1.askBook.isOpened).toEqual(true)
+  expect(market1.bidBook.isOpened).toEqual(false)
 
   const transaction2 = await openMarket({
     chainId: cloberTestChain.id,
@@ -79,8 +79,8 @@ test('try open market', async () => {
       useSubgraph: false,
     },
   })
-  expect(market2.askBookOpen).toEqual(true)
-  expect(market2.bidBookOpen).toEqual(true)
+  expect(market2.askBook.isOpened).toEqual(true)
+  expect(market2.bidBook.isOpened).toEqual(true)
 })
 
 test('try already open market', async () => {

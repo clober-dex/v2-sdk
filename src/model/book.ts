@@ -2,11 +2,13 @@ import { toPrice } from '../utils/tick'
 import { TAKER_DEFAULT_POLICY } from '../constants/fee'
 import { divide } from '../utils/math'
 import { baseToQuote, quoteToBase } from '../utils/decimals'
+import { CHAIN_IDS } from '../constants/chain'
 
 import type { Currency } from './currency'
 import type { DepthDto } from './depth'
 
 export class Book {
+  chainId: CHAIN_IDS
   id: bigint
   base: Currency
   unitSize: bigint
@@ -15,6 +17,7 @@ export class Book {
   isOpened: boolean
 
   constructor({
+    chainId,
     id,
     base,
     quote,
@@ -22,6 +25,7 @@ export class Book {
     depths,
     isOpened,
   }: {
+    chainId: CHAIN_IDS
     id: bigint
     base: Currency
     quote: Currency
@@ -29,6 +33,7 @@ export class Book {
     depths: DepthDto[]
     isOpened: boolean
   }) {
+    this.chainId = chainId
     this.id = id
     this.base = base
     this.unitSize = unitSize
@@ -62,8 +67,8 @@ export class Book {
       if (limitPrice > toPrice(tick)) {
         break
       }
-      let maxAmount = TAKER_DEFAULT_POLICY.usesQuote
-        ? TAKER_DEFAULT_POLICY.calculateOriginalAmount(
+      let maxAmount = TAKER_DEFAULT_POLICY[this.chainId].usesQuote
+        ? TAKER_DEFAULT_POLICY[this.chainId].calculateOriginalAmount(
             amountOut - takenQuoteAmount,
             true,
           )
@@ -79,12 +84,14 @@ export class Book {
           ? maxAmount
           : currentDepth.unitAmount) * this.unitSize
       let baseAmount = quoteToBase(tick, quoteAmount, true)
-      if (TAKER_DEFAULT_POLICY.usesQuote) {
+      if (TAKER_DEFAULT_POLICY[this.chainId].usesQuote) {
         quoteAmount =
-          quoteAmount - TAKER_DEFAULT_POLICY.calculateFee(quoteAmount, false)
+          quoteAmount -
+          TAKER_DEFAULT_POLICY[this.chainId].calculateFee(quoteAmount, false)
       } else {
         baseAmount =
-          baseAmount + TAKER_DEFAULT_POLICY.calculateFee(baseAmount, false)
+          baseAmount +
+          TAKER_DEFAULT_POLICY[this.chainId].calculateFee(baseAmount, false)
       }
       if (quoteAmount === 0n) {
         break
@@ -129,9 +136,9 @@ export class Book {
       if (limitPrice > toPrice(tick)) {
         break
       }
-      let maxAmount = TAKER_DEFAULT_POLICY.usesQuote
+      let maxAmount = TAKER_DEFAULT_POLICY[this.chainId].usesQuote
         ? amountIn - spentBaseAmount
-        : TAKER_DEFAULT_POLICY.calculateOriginalAmount(
+        : TAKER_DEFAULT_POLICY[this.chainId].calculateOriginalAmount(
             amountIn - spentBaseAmount,
             false,
           )
@@ -146,12 +153,14 @@ export class Book {
           ? maxAmount
           : currentDepth.unitAmount) * this.unitSize
       let baseAmount = quoteToBase(tick, quoteAmount, true)
-      if (TAKER_DEFAULT_POLICY.usesQuote) {
+      if (TAKER_DEFAULT_POLICY[this.chainId].usesQuote) {
         quoteAmount =
-          quoteAmount - TAKER_DEFAULT_POLICY.calculateFee(quoteAmount, false)
+          quoteAmount -
+          TAKER_DEFAULT_POLICY[this.chainId].calculateFee(quoteAmount, false)
       } else {
         baseAmount =
-          baseAmount + TAKER_DEFAULT_POLICY.calculateFee(baseAmount, false)
+          baseAmount +
+          TAKER_DEFAULT_POLICY[this.chainId].calculateFee(baseAmount, false)
       }
       if (baseAmount === 0n) {
         break

@@ -88,9 +88,9 @@ export const openMarket = decorator(
                   base: outputToken,
                   unitSize,
                   quote: inputToken,
-                  makerPolicy: MAKER_DEFAULT_POLICY.value,
+                  makerPolicy: MAKER_DEFAULT_POLICY[chainId].value,
                   hooks: zeroAddress,
-                  takerPolicy: TAKER_DEFAULT_POLICY.value,
+                  takerPolicy: TAKER_DEFAULT_POLICY[chainId].value,
                 },
                 hookData: zeroHash,
               },
@@ -229,7 +229,7 @@ export const limitOrder = decorator(
     ])
     const isETH = isAddressEqual(inputToken, zeroAddress)
     const makeParam = {
-      id: toBookId(inputToken, outputToken, unitSize),
+      id: toBookId(chainId, inputToken, outputToken, unitSize),
       tick: Number(tick),
       quoteAmount,
       hookData: zeroHash,
