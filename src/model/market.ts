@@ -19,11 +19,9 @@ export class Market {
   quote: Currency
   base: Currency
   bids: Depth[]
-  bidBookOpen: boolean
   asks: Depth[]
-  askBookOpen: boolean
-  private bidBook: Book
-  private askBook: Book
+  bidBook: Book
+  askBook: Book
 
   constructor({
     chainId,
@@ -63,7 +61,6 @@ export class Market {
           ),
         }) as Depth,
     )
-    this.bidBookOpen = bidBook.isOpened
 
     this.asks = askBook.depths.map((depth) => {
       const price = invertPrice(toPrice(depth.tick))
@@ -78,7 +75,6 @@ export class Market {
         baseAmount,
       } as Depth
     })
-    this.askBookOpen = askBook.isOpened
 
     this.bidBook = bidBook
     this.askBook = askBook

@@ -1,6 +1,6 @@
 import { formatUnits, getAddress, isAddressEqual, zeroAddress } from 'viem'
 
-import { CHAIN_IDS, OpenOrder } from '../index'
+import { CHAIN_IDS, type OpenOrder } from '../index'
 import { cachedPublicClients } from '../constants/client'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { cachedSubgraph } from '../constants/subgraph'
