@@ -21,7 +21,7 @@ import { fetchTokenBalance } from './utils/currency'
 import { fetchOrders } from './utils/order'
 
 const clients = createProxyClients(
-  Array.from({ length: 7 }, () => Math.floor(new Date().getTime())).map(
+  Array.from({ length: 9 }, () => Math.floor(new Date().getTime())).map(
     (id) => id,
   ),
 )
@@ -66,7 +66,7 @@ test('get undefined open orders', async () => {
   ).toEqual('Open order not found: 200')
 })
 
-test('claim order', async () => {
+test('claim ask order', async () => {
   const { publicClient, walletClient } = clients[2] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
@@ -165,6 +165,100 @@ test('claim order', async () => {
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
   expect(result.amount).toEqual('350.131739')
+})
+
+test('claim bid order', async () => {
+  const { publicClient, walletClient } = clients[6] as any
+  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
+
+  await publicClient.waitForTransactionReceipt({
+    hash: await walletClient.sendTransaction({
+      account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+      to: account.address,
+      value: 2000000000000000000n,
+    }),
+  })
+
+  const { transaction: takeTx } = await limitOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    inputToken: '0x0000000000000000000000000000000000000000',
+    amount: '2',
+    price: '3005.01',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+
+  expect(
+    (
+      await fetchOrders(cloberTestChain.id, [
+        46223845323662364279893361453861711542636620039907198451770260500482770337792n,
+      ])
+    ).map((order) => order.claimable),
+  ).toEqual([0n])
+
+  await walletClient.sendTransaction({
+    ...takeTx!,
+    account,
+    gasPrice: takeTx!.gasPrice! * 2n,
+  })
+
+  expect(
+    (
+      await fetchOrders(cloberTestChain.id, [
+        46223845323662364279893361453861711542636620039907198451770260500482770337792n,
+      ])
+    ).map((order) => order.claimable),
+  ).toEqual([3471041312n])
+
+  // be sure to approve before claim
+  const hash = await setApprovalOfOpenOrdersForAll({
+    chainId: cloberTestChain.id,
+    walletClient,
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+  if (hash) {
+    await publicClient.waitForTransactionReceipt({ hash })
+  }
+
+  const beforeBalance = await publicClient.getBalance({
+    address: account.address,
+  })
+  const { transaction, result } = await claimOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    id: '46223845323662364279893361453861711542636620039907198451770260500482770337792',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+
+  await walletClient.sendTransaction({ ...transaction, account })
+
+  const afterBalance = await publicClient.getBalance({
+    address: account.address,
+  })
+
+  expect(
+    (
+      await fetchOrders(cloberTestChain.id, [
+        46223845323662364279893361453861711542636620039907198451770260500482770337792n,
+      ])
+    ).map((order) => order.claimable),
+  ).toEqual([0n])
+  expect(afterBalance - beforeBalance).toEqual(991598600472718589n)
+  expect(result.direction).toEqual('out')
+  expect(result.currency.address).toEqual(
+    '0x0000000000000000000000000000000000000000',
+  )
+  expect(result.amount).toEqual('0.991749515426862713')
 })
 
 test('claim orders', async () => {
@@ -324,7 +418,7 @@ test('claim orders', async () => {
   )
 })
 
-test('cancel order', async () => {
+test('cancel ask order', async () => {
   const { publicClient, walletClient } = clients[4] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
@@ -353,7 +447,25 @@ test('cancel order', async () => {
       useSubgraph: false,
     },
   })
+
+  expect(
+    (
+      await fetchOrders(cloberTestChain.id, [
+        50784203244917507140848199044778666621202412111794785971205812514094254653440n,
+      ])
+    ).map((order) => order.open),
+  ).toEqual([100030n])
+
   await walletClient.sendTransaction({ ...transaction, account })
+
+  expect(
+    (
+      await fetchOrders(cloberTestChain.id, [
+        50784203244917507140848199044778666621202412111794785971205812514094254653440n,
+      ])
+    ).map((order) => order.open),
+  ).toEqual([0n])
+
   const afterBalance = await publicClient.getBalance({
     address: account.address,
   })
@@ -365,6 +477,71 @@ test('cancel order', async () => {
   )
   expect(Number(result.amount)).lessThan(0.1)
 })
+
+test('cancel bid order', async () => {
+  const { publicClient, walletClient } = clients[7] as any
+  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
+
+  // be sure to approve before claim
+  const hash = await setApprovalOfOpenOrdersForAll({
+    chainId: cloberTestChain.id,
+    walletClient,
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+  if (hash) {
+    await publicClient.waitForTransactionReceipt({ hash })
+  }
+
+  const beforeBalance = await fetchTokenBalance(
+    cloberTestChain.id,
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    account.address,
+  )
+  const { transaction, result } = await cancelOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    id: '46223845323662364279893361453861711542636620039907198451770260500482770337792',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+
+  expect(
+    (
+      await fetchOrders(cloberTestChain.id, [
+        46223845323662364279893361453861711542636620039907198451770260500482770337792n,
+      ])
+    ).map((order) => order.open),
+  ).toEqual([3471041312n])
+
+  await walletClient.sendTransaction({ ...transaction, account })
+
+  expect(
+    (
+      await fetchOrders(cloberTestChain.id, [
+        46223845323662364279893361453861711542636620039907198451770260500482770337792n,
+      ])
+    ).map((order) => order.open),
+  ).toEqual([0n])
+
+  const afterBalance = await fetchTokenBalance(
+    cloberTestChain.id,
+    '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    account.address,
+  )
+
+  expect(Number(afterBalance - beforeBalance)).toEqual(3469999999)
+  expect(result.direction).toEqual('out')
+  expect(result.currency.address).toEqual(
+    getAddress('0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'),
+  )
+  expect(result.amount).toEqual('3469.999999')
+})
+
 test('cancel orders', async () => {
   const { publicClient, walletClient } = clients[5] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
