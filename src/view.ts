@@ -2,8 +2,8 @@ import { formatUnits, getAddress, isAddressEqual, parseUnits } from 'viem'
 
 import { fetchMarket } from './apis/market'
 import { CHAIN_IDS } from './constants/chain'
-import type { ChartLog, DefaultOptions, Market } from './type'
-import { parsePrice } from './utils/prices'
+import type { ChartLog, Currency, DefaultOptions, Market } from './type'
+import { formatPrice, parsePrice } from './utils/prices'
 import { MAX_PRICE } from './constants/price'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
 import { type OpenOrder } from './model/open-order'
@@ -11,6 +11,7 @@ import { decorator } from './utils/decorator'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
 import { CHART_LOG_INTERVALS } from './type'
 import { getMarketId } from './utils/market'
+import { fromPrice, invertPrice, toPrice } from './utils/tick'
 
 /**
  * Get market information by chain id and token addresses
@@ -60,12 +61,24 @@ export const getMarket = decorator(
         price,
         baseAmount: formatUnits(baseAmount, market.base.decimals),
       })),
-      bidBookOpen: market.bidBookOpen,
+      bidBook: {
+        id: market.bidBook.id.toString(),
+        base: market.bidBook.base,
+        unitSize: market.bidBook.unitSize.toString(),
+        quote: market.bidBook.quote,
+        isOpened: market.bidBook.isOpened,
+      },
       asks: market.asks.map(({ price, baseAmount }) => ({
         price,
         baseAmount: formatUnits(baseAmount, market.base.decimals),
       })),
-      askBookOpen: market.askBookOpen,
+      askBook: {
+        id: market.askBook.id.toString(),
+        base: market.askBook.base,
+        unitSize: market.askBook.unitSize.toString(),
+        quote: market.askBook.quote,
+        isOpened: market.askBook.isOpened,
+      },
     }
   },
 )
@@ -376,4 +389,92 @@ export const getQuoteToken = ({
   token1: `0x${string}`
 }): `0x${string}` => {
   return getAddress(getMarketId(chainId, [token0, token1]).quoteTokenAddress)
+}
+
+/**
+ * Get the tick for a given price.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {Currency} inputCurrency The input currency.
+ * @param {Currency} outputCurrency The output currency.
+ * @param {string} price The price at which the order should be executed.
+ * @returns {Promise<bigint>} Promise resolving to the tick value.
+ * @example
+ * import { getTick } from '@clober/v2-sdk'
+ *
+ * const tick = await getTick({
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *   inputToken: '0x0000000000000000000000000000000000000000',
+ *   outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   price: '4000.01', // price at 4000.01 (ETH/USDC)
+ * })
+ */
+export const getTick = ({
+  chainId,
+  inputCurrency,
+  outputCurrency,
+  price,
+}: {
+  chainId: CHAIN_IDS
+  inputCurrency: Currency
+  outputCurrency: Currency
+  price: string
+}): bigint => {
+  const quoteTokenAddress = getQuoteToken({
+    chainId,
+    token0: inputCurrency.address,
+    token1: outputCurrency.address,
+  })
+  const isBid = isAddressEqual(inputCurrency.address, quoteTokenAddress)
+  const rawPrice = parsePrice(
+    Number(price),
+    isBid ? inputCurrency.decimals : outputCurrency.decimals,
+    isBid ? outputCurrency.decimals : inputCurrency.decimals,
+  )
+  return isBid ? fromPrice(rawPrice) + 1n : fromPrice(invertPrice(rawPrice))
+}
+
+/**
+ * Get the price for a given tick.
+ *
+ * @param {CHAIN_IDS} chainId The chain ID.
+ * @param {Currency} inputCurrency The input currency.
+ * @param {Currency} outputCurrency The output currency.
+ * @param {string} tick The tick value.
+ * @returns {Promise<string>} Promise resolving to the price value.
+ * @example
+ * import { getPrice } from '@clober/v2-sdk'
+ *
+ * const price = await getPrice({
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69
+ *   inputToken: '0x0000000000000000000000000000000000000000',
+ *   outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   tick: 1234n,
+ * })
+ */
+export const getPrice = ({
+  chainId,
+  inputCurrency,
+  outputCurrency,
+  tick,
+}: {
+  chainId: CHAIN_IDS
+  inputCurrency: Currency
+  outputCurrency: Currency
+  tick: bigint
+}): string => {
+  const quoteTokenAddress = getQuoteToken({
+    chainId,
+    token0: inputCurrency.address,
+    token1: outputCurrency.address,
+  })
+  const isBid = isAddressEqual(inputCurrency.address, quoteTokenAddress)
+  const rawPrice = isBid ? toPrice(tick) : invertPrice(toPrice(tick))
+  return formatPrice(
+    rawPrice,
+    isBid ? inputCurrency.decimals : outputCurrency.decimals,
+    isBid ? outputCurrency.decimals : inputCurrency.decimals,
+  )
 }

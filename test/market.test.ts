@@ -70,8 +70,8 @@ test('fetch open market', async () => {
   expect(market.base.name).toEqual('Ethereum')
   expect(market.base.decimals).toEqual(18)
 
-  expect(market.bidBookOpen).toEqual(true)
-  expect(market.askBookOpen).toEqual(true)
+  expect(market.bidBook.isOpened).toEqual(true)
+  expect(market.askBook.isOpened).toEqual(true)
 })
 
 test('fetch empty market', async () => {
@@ -86,8 +86,8 @@ test('fetch empty market', async () => {
       useSubgraph: false,
     },
   })
-  expect(market.bidBookOpen).toEqual(false)
-  expect(market.askBookOpen).toEqual(false)
+  expect(market.bidBook.isOpened).toEqual(false)
+  expect(market.askBook.isOpened).toEqual(false)
 })
 
 // @dev: this test will be fail when the market is open
@@ -103,8 +103,8 @@ test('fetch not open market', async () => {
       useSubgraph: false,
     },
   })
-  expect(market.bidBookOpen).toEqual(false)
-  expect(market.askBookOpen).toEqual(false)
+  expect(market.bidBook.isOpened).toEqual(false)
+  expect(market.askBook.isOpened).toEqual(false)
 })
 
 test('fetch invalid market', async () => {

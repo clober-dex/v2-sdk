@@ -19,7 +19,7 @@ const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
     }
   }>(
     'getOpenOrder',
-    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount } }',
+    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {
       orderId,
     },
@@ -33,7 +33,7 @@ const getOpenOrders = async (chainId: CHAIN_IDS, orderIds: string[]) => {
     }
   }>(
     'getOpenOrders',
-    'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount } }',
+    'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {
       orderIds,
     },
@@ -146,18 +146,21 @@ const toOpenOrder = (
   const unitAmount = BigInt(openOrder.unitAmount)
   const unitFilledAmount = BigInt(openOrder.unitFilledAmount)
   const unitSize = BigInt(openOrder.book.unitSize)
-  const quoteAmount = unitSize * unitAmount
   const unitClaimedAmount = BigInt(openOrder.unitClaimedAmount)
   const unitClaimableAmount = BigInt(openOrder.unitClaimableAmount)
-  const amount = isBid ? quoteToBase(tick, quoteAmount, false) : quoteAmount
+
+  // base amount type
+  const amount = isBid
+    ? quoteToBase(tick, unitSize * unitAmount, false)
+    : unitSize * unitAmount
   const filled = isBid
     ? quoteToBase(tick, unitSize * unitFilledAmount, false)
     : unitSize * unitFilledAmount
-  const claimed = quoteToBase(tick, unitSize * unitClaimedAmount, false)
-  const claimable = quoteToBase(tick, unitSize * unitClaimableAmount, false)
-  const cancelable = isBid
-    ? unitSize * (unitAmount - unitFilledAmount)
-    : quoteToBase(tick, unitSize * (unitAmount - unitFilledAmount), false)
+
+  // each currency amount type
+  const claimed = unitSize * unitClaimedAmount
+  const claimable = unitSize * unitClaimableAmount
+  const cancelable = unitSize * (unitAmount - unitFilledAmount) // same current open amount
   return {
     id: openOrder.id,
     user: getAddress(openOrder.user),
@@ -171,6 +174,8 @@ const toOpenOrder = (
       quote.decimals,
       base.decimals,
     ),
+    tick: Number(tick),
+    orderIndex: openOrder.orderIndex,
     amount: { currency: base, value: formatUnits(amount, base.decimals) },
     filled: { currency: base, value: formatUnits(filled, base.decimals) },
     claimed: {
