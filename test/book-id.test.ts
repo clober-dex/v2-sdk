@@ -76,9 +76,9 @@ test('check toBookId function', async () => {
     base: '0x0000000000000000000000000000000000000000' as `0x${string}`,
     unit: 10n ** 12n,
     quote: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8' as `0x${string}`,
-    makerPolicy: Number(MAKER_DEFAULT_POLICY.value),
+    makerPolicy: Number(MAKER_DEFAULT_POLICY[arbitrumSepolia.id].value),
     hooks: '0x0000000000000000000000000000000000000000' as `0x${string}`,
-    takerPolicy: Number(TAKER_DEFAULT_POLICY.value),
+    takerPolicy: Number(TAKER_DEFAULT_POLICY[arbitrumSepolia.id].value),
   }
   expect(
     await publicClient.readContract({
@@ -87,15 +87,22 @@ test('check toBookId function', async () => {
       functionName: 'toId',
       args: [bidBookKey],
     }),
-  ).toBe(toBookId(bidBookKey.quote, bidBookKey.base, bidBookKey.unit))
+  ).toBe(
+    toBookId(
+      arbitrumSepolia.id,
+      bidBookKey.quote,
+      bidBookKey.base,
+      bidBookKey.unit,
+    ),
+  )
 
   const askBookKey = {
     base: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8' as `0x${string}`,
     unit: 10n ** 1n,
     quote: '0x0000000000000000000000000000000000000000' as `0x${string}`,
-    makerPolicy: Number(MAKER_DEFAULT_POLICY.value),
+    makerPolicy: Number(MAKER_DEFAULT_POLICY[arbitrumSepolia.id].value),
     hooks: '0x0000000000000000000000000000000000000000' as `0x${string}`,
-    takerPolicy: Number(TAKER_DEFAULT_POLICY.value),
+    takerPolicy: Number(TAKER_DEFAULT_POLICY[arbitrumSepolia.id].value),
   }
   expect(
     await publicClient.readContract({
@@ -104,5 +111,12 @@ test('check toBookId function', async () => {
       functionName: 'toId',
       args: [askBookKey],
     }),
-  ).toBe(toBookId(askBookKey.quote, askBookKey.base, askBookKey.unit))
+  ).toBe(
+    toBookId(
+      arbitrumSepolia.id,
+      askBookKey.quote,
+      askBookKey.base,
+      askBookKey.unit,
+    ),
+  )
 })

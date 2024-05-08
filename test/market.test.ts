@@ -45,10 +45,11 @@ test('fetch open market', async () => {
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const market = await getMarket({
-    chainId: arbitrumSepolia.id,
+    chainId: cloberTestChain.id,
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0x0000000000000000000000000000000000000000',
     options: {
+      rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
     },
   })

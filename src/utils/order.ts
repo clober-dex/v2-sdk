@@ -73,8 +73,8 @@ export const fetchOrders = async (
     const cancelable = applyPercent(
       unitSize * order.open,
       100 +
-        (Number(MAKER_DEFAULT_POLICY.rate) * 100) /
-          Number(MAKER_DEFAULT_POLICY.RATE_PRECISION),
+        (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) /
+          Number(MAKER_DEFAULT_POLICY[chainId].RATE_PRECISION),
       6,
     )
     const claimable = quoteToBase(

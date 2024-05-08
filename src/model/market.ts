@@ -12,8 +12,8 @@ import type { Currency } from './currency'
 import type { Depth } from './depth'
 
 export class Market {
-  readonly makerFee = (Number(MAKER_DEFAULT_POLICY.rate) * 100) / 1e6
-  readonly takerFee = (Number(TAKER_DEFAULT_POLICY.rate) * 100) / 1e6
+  makerFee: number
+  takerFee: number
 
   id: string
   quote: Currency
@@ -45,6 +45,9 @@ export class Market {
     this.base = tokens.find((token) =>
       isAddressEqual(token.address, baseTokenAddress!),
     )!
+
+    this.makerFee = (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) / 1e6
+    this.takerFee = (Number(TAKER_DEFAULT_POLICY[chainId].rate) * 100) / 1e6
 
     this.bids = bidBook.depths.map(
       (depth) =>
