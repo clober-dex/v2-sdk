@@ -1,10 +1,7 @@
 import { expect, test } from 'vitest'
-import { createPublicClient, getAddress, http, zeroAddress } from 'viem'
+import { createPublicClient, getAddress, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
-import { Currency, getPrice, getTick } from '@clober/v2-sdk'
-
-import { fromPrice, toPrice } from '../src/utils/tick'
-import { baseToQuote, quoteToBase } from '../src/utils/decimals'
+import { fromPrice, toPrice, baseToQuote, quoteToBase } from '@clober/v2-sdk'
 
 import { FORK_URL } from './utils/constants'
 
@@ -146,100 +143,6 @@ test('index to price', async () => {
     toPrice(BigInt(priceIndex)),
   )
   expect(expectedPrices).toEqual(actualPrices)
-})
-
-test('get tick in bid & get price in bid', async () => {
-  const args = {
-    chainId: arbitrumSepolia.id,
-    inputCurrency: {
-      address: '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0',
-      name: 'USD Coin',
-      symbol: 'USDC',
-      decimals: 6,
-    } as Currency,
-    outputCurrency: {
-      address: zeroAddress,
-      name: 'Ethereum',
-      symbol: 'ETH',
-      decimals: 18,
-    } as Currency,
-  }
-  const tick1 = getTick({
-    ...args,
-    price: '9999',
-  })
-  const tick2 = getTick({
-    ...args,
-    price: '10000',
-  })
-  const tick3 = getTick({
-    ...args,
-    price: '10001',
-  })
-  expect(tick2 + 1n).toEqual(tick3)
-
-  const price1 = getPrice({
-    ...args,
-    tick: tick1,
-  })
-  const price2 = getPrice({
-    ...args,
-    tick: tick2,
-  })
-  const price3 = getPrice({
-    ...args,
-    tick: tick3,
-  })
-  expect(price1).toEqual('9999.01772376')
-  expect(price2).toEqual('10000.01762553')
-  expect(price3).toEqual('10001.01762729')
-})
-
-test('get tick in ask & get price in ask', async () => {
-  const args = {
-    chainId: arbitrumSepolia.id,
-    outputCurrency: {
-      address: '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0',
-      name: 'USD Coin',
-      symbol: 'USDC',
-      decimals: 6,
-    } as Currency,
-    inputCurrency: {
-      address: zeroAddress,
-      name: 'Ethereum',
-      symbol: 'ETH',
-      decimals: 18,
-    } as Currency,
-  }
-  const tick1 = getTick({
-    ...args,
-    price: '9999',
-  })
-  const tick2 = getTick({
-    ...args,
-    price: '10000',
-  })
-  const tick3 = getTick({
-    ...args,
-    price: '10001',
-  })
-  expect(tick2 - 1n).toEqual(tick3)
-
-  const price1 = getPrice({
-    ...args,
-    tick: tick1,
-  })
-  const price2 = getPrice({
-    ...args,
-    tick: tick2,
-  })
-  const price3 = getPrice({
-    ...args,
-    tick: tick3,
-  })
-  expect(price1).toEqual('9999.01772376')
-  expect(price2).toEqual('10000.01762553')
-  expect(price3).toEqual('10001.01762729')
 })
 
 test('price to index', async () => {
