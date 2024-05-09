@@ -1,6 +1,6 @@
 {
   "name": "@clober/v2-sdk",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "🛠 An SDK for building applications on top of Clober V2",
   "files": [
     "dist"
