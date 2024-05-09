@@ -263,7 +263,7 @@ export const limitOrder = decorator(
           spent: {
             amount: '0',
             currency: inputCurrency,
-            direction: 'out',
+            direction: 'in',
           },
           taken: {
             amount: '0',
@@ -315,7 +315,7 @@ export const limitOrder = decorator(
           spent: {
             amount: spentAmount,
             currency: inputCurrency,
-            direction: 'out',
+            direction: 'in',
           },
           taken: {
             amount: takenAmount,
