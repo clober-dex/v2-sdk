@@ -11,6 +11,8 @@ const SUBGRAPH_URL: {
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-base/api',
   [CHAIN_IDS.BERACHAIN_TESTNET]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph/v1.3.2/gn',
+  [CHAIN_IDS.ZKSYNC]:
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-zksync-era/v1.4.0/gn',
   [CHAIN_IDS.ZKSYNC_SEPOLIA]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-zksync-era-sepolia/v1.4.0/gn',
 }
