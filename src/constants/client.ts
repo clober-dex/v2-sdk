@@ -1,4 +1,4 @@
-import { type PublicClient, createPublicClient, http } from 'viem'
+import { createPublicClient, http, type PublicClient } from 'viem'
 import { eip712WalletActions } from 'viem/zksync'
 
 import { CHAIN_IDS, CHAIN_MAP } from './chain'
@@ -10,7 +10,7 @@ export const buildPublicClient = (chainId: CHAIN_IDS, rpcUrl?: string) => {
     transport: rpcUrl ? http(rpcUrl) : http(),
   })
 
-  if (chainId === CHAIN_IDS.ZKSYNC_SEPOLIA) {
+  if (chainId === CHAIN_IDS.ZKSYNC_SEPOLIA || chainId === CHAIN_IDS.ZKSYNC) {
     cachedPublicClients[chainId] = cachedPublicClients[chainId]!.extend(
       eip712WalletActions(),
     )
