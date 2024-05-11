@@ -29,6 +29,11 @@ export const CONTRACT_ADDRESSES: {
     BookManager: getAddress('0xA7e0051561D5b955F1014939FB54F71C7F4AEdF1'),
     BookViewer: getAddress('0xc0d74f9C1c27BC5EC195066863F4de7Ee1152998'),
   },
+  [CHAIN_IDS.ZKSYNC]: {
+    Controller: getAddress('0x46D949cb444feF1a1BF63767F513f5091de6b5f5'),
+    BookManager: getAddress('0x5961268BFd6b057c3ffA4709eDb920bD97011B13'),
+    BookViewer: getAddress('0x7D206e3A8B785Dce75Bc755772Bd9eacdC77F5A9'),
+  },
   [CHAIN_IDS.ZKSYNC_SEPOLIA]: {
     Controller: getAddress('0x6d29603bFd8989B7A8F4E8751d34afC4fDa4e001'),
     BookManager: getAddress('0x419DD5a4e74f96e57C1F8B8B46ae6855395A9de7'),
