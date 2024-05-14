@@ -20,9 +20,9 @@ export const CONTRACT_ADDRESSES: {
     BookViewer: getAddress('0x46f4661D64BCb4dE9AD5a2fAd7b49EBfC6c27caE'),
   },
   [CHAIN_IDS.BASE]: {
-    Controller: getAddress('0x4ed2804b5409298290654D665619c7b092297dB2'),
-    BookManager: getAddress('0x59fAD5b95e755034572702991ABBA937Cc90254a'),
-    BookViewer: getAddress('0x0e7fc8F067470424589Cc25DceEd0dA9a1a8E72A'),
+    Controller: getAddress('0x014780652eE8Cb9A8D227757307aAE4656a794F5'),
+    BookManager: getAddress('0xc47e4f2D113A51ABf0DaCEf6687FE0dBA70D09E6'),
+    BookViewer: getAddress('0x06731177b4FA6dF2B14a714736828E373e3ae03b'),
   },
   [CHAIN_IDS.BERACHAIN_TESTNET]: {
     Controller: getAddress('0x1Aa68597c14F3f950E2683fA7a975fc9CdAcC484'),
