@@ -15,14 +15,14 @@ export const CONTRACT_ADDRESSES: {
     BookViewer: getAddress('0xA7603C4c895a533E66c30EA76cC6F6A6A0c5cbFe'),
   },
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
-    Controller: getAddress('0x3e15fee68C06A0Cd3aF5430A665a9dd502C8544e'),
-    BookManager: getAddress('0x3a90fbD5DbE4C82018A4Ac28406A50917dB91def'),
-    BookViewer: getAddress('0x46f4661D64BCb4dE9AD5a2fAd7b49EBfC6c27caE'),
+    Controller: getAddress('0x91101543D3Bd3e919dAd034Bf978ef9d87290993'),
+    BookManager: getAddress('0xC528b9ED5d56d1D0d3C18A2342954CE1069138a4'),
+    BookViewer: getAddress('0x73c524e103C94Bf2743659d739586395B1A9e1BE'),
   },
   [CHAIN_IDS.BASE]: {
-    Controller: getAddress('0x4ed2804b5409298290654D665619c7b092297dB2'),
-    BookManager: getAddress('0x59fAD5b95e755034572702991ABBA937Cc90254a'),
-    BookViewer: getAddress('0x0e7fc8F067470424589Cc25DceEd0dA9a1a8E72A'),
+    Controller: getAddress('0xA694fDd88E7FEE1f5EBF878153B68ADb2ce6EbbF'),
+    BookManager: getAddress('0x382CCccbD3b142D7DA063bF68cd0c89634767F76'),
+    BookViewer: getAddress('0xcAf89a60D0911AeB8C2b997B5eF9b2017a19Be0d'),
   },
   [CHAIN_IDS.BERACHAIN_TESTNET]: {
     Controller: getAddress('0x1Aa68597c14F3f950E2683fA7a975fc9CdAcC484'),
