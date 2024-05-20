@@ -5,7 +5,7 @@ import { getMarketId } from '../utils/market'
 import type { Currency } from '../model/currency'
 import { baseToQuote, quoteToBase } from '../utils/decimals'
 import { formatPrice } from '../utils/prices'
-import { invertPrice, toPrice } from '../utils/tick'
+import { fromPrice, invertPrice, toPrice } from '../utils/tick'
 import type { OpenOrder, OpenOrderDto } from '../model/open-order'
 import { fetchCurrency } from '../utils/currency'
 import { applyPercent } from '../utils/bigint'
@@ -158,12 +158,13 @@ const toOpenOrder = (
     : unitSize * unitFilledAmount
 
   // each currency amount type
+  const invertedTick = fromPrice(invertPrice(toPrice(tick)))
   const claimed = isBid
     ? quoteToBase(tick, unitSize * unitClaimedAmount, false)
-    : baseToQuote(tick, unitSize * unitClaimedAmount, false)
+    : baseToQuote(invertedTick, unitSize * unitClaimedAmount, false)
   const claimable = isBid
     ? quoteToBase(tick, unitSize * unitClaimableAmount, false)
-    : baseToQuote(tick, unitSize * unitClaimableAmount, false)
+    : baseToQuote(invertedTick, unitSize * unitClaimableAmount, false)
 
   const cancelable = unitSize * (unitAmount - unitFilledAmount) // same current open amount
   return {
