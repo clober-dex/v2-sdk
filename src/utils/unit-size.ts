@@ -3,6 +3,7 @@ import { isAddressEqual, zeroAddress } from 'viem'
 import { type Currency } from '../model/currency'
 import { CHAIN_IDS } from '../constants/chain'
 import { cachedPublicClients } from '../constants/client'
+import { WETH_ADDRESSES } from '../constants/currency'
 
 const _abi = [
   {
@@ -48,7 +49,10 @@ export const calculateUnitSize = async (
 }
 
 const calculateUnitInner = async (chainId: CHAIN_IDS, quote: Currency) => {
-  if (isAddressEqual(quote.address, zeroAddress)) {
+  if (
+    isAddressEqual(quote.address, zeroAddress) ||
+    WETH_ADDRESSES[chainId].includes(quote.address)
+  ) {
     return 10n ** 12n
   }
   const totalSupply = await cachedPublicClients[chainId].readContract({
