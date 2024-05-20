@@ -3,7 +3,7 @@ import { formatUnits, getAddress, isAddressEqual } from 'viem'
 import { CHAIN_IDS } from '../constants/chain'
 import { getMarketId } from '../utils/market'
 import type { Currency } from '../model/currency'
-import { quoteToBase } from '../utils/decimals'
+import { baseToQuote, quoteToBase } from '../utils/decimals'
 import { formatPrice } from '../utils/prices'
 import { invertPrice, toPrice } from '../utils/tick'
 import type { OpenOrder, OpenOrderDto } from '../model/open-order'
@@ -158,8 +158,13 @@ const toOpenOrder = (
     : unitSize * unitFilledAmount
 
   // each currency amount type
-  const claimed = unitSize * unitClaimedAmount
-  const claimable = unitSize * unitClaimableAmount
+  const claimed = isBid
+    ? quoteToBase(tick, unitSize * unitClaimedAmount, false)
+    : baseToQuote(tick, unitSize * unitClaimedAmount, false)
+  const claimable = isBid
+    ? quoteToBase(tick, unitSize * unitClaimableAmount, false)
+    : baseToQuote(tick, unitSize * unitClaimableAmount, false)
+
   const cancelable = unitSize * (unitAmount - unitFilledAmount) // same current open amount
   return {
     id: openOrder.id,
