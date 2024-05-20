@@ -21,7 +21,7 @@ import { CONTRACT_ADDRESSES } from './constants/addresses'
  * @example
  * import { getContractAddresses } from '@clober/v2-sdk'
  *
- * const market = await getContractAddresses({
+ * const addresses = await getContractAddresses({
  *   chainId: 421614,
  * })
  */
