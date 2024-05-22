@@ -2,6 +2,10 @@ import BigNumber from 'bignumber.js'
 
 import { PRICE_PRECISION } from '../constants/price'
 
+BigNumber.config({
+  DECIMAL_PLACES: 100,
+})
+
 export const formatPrice = (
   price: bigint,
   quoteDecimals: number,

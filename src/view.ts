@@ -2,9 +2,9 @@ import { formatUnits, getAddress, isAddressEqual, parseUnits } from 'viem'
 
 import { fetchMarket } from './apis/market'
 import { CHAIN_IDS } from './constants/chain'
-import type { ChartLog, DefaultOptions, Market } from './type'
+import type { ChartLog, Currency, DefaultOptions, Market } from './type'
 import { CHART_LOG_INTERVALS } from './type'
-import { parsePrice } from './utils/prices'
+import { formatPrice, parsePrice } from './utils/prices'
 import { MAX_PRICE } from './constants/price'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
 import { type OpenOrder } from './model/open-order'
@@ -12,6 +12,7 @@ import { decorator } from './utils/decorator'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
 import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
+import { fromPrice, invertPrice, toPrice } from './utils/tick'
 
 /**
  * Get contract addresses by chain id
@@ -98,6 +99,104 @@ export const getMarket = decorator(
     }
   },
 )
+
+/**
+ * Calculates and returns the neighboring price ticks and their corresponding prices for a given input price.
+ *
+ * @param {CHAIN_IDS} chainId - chain id from {@link CHAIN_IDS}
+ * @param {string} price - The input price to calculate the neighborhood for, as a string.
+ * @param {Currency} currency0 - token0 currency {@link Currency}.
+ * @param {Currency} currency1 - token1 currency {@link Currency}.
+ *
+ * @returns {Object} An object containing the normal and inverted price neighborhoods. Each neighborhood includes:
+ *   - up: The tick and price for one tick above the current price.
+ *   - now: The tick and price for the current price.
+ *   - down: The tick and price for one tick below the current price.
+ */
+export const getPriceNeighborhood = ({
+  chainId,
+  price,
+  currency0,
+  currency1,
+}: {
+  chainId: CHAIN_IDS
+  price: string
+  currency0: Currency
+  currency1: Currency
+}) => {
+  const quoteTokenAddress = getQuoteToken({
+    chainId,
+    token0: currency0.address,
+    token1: currency1.address,
+  })
+  const quoteCurrency = isAddressEqual(quoteTokenAddress, currency0.address)
+    ? currency0
+    : currency1
+  const baseCurrency = isAddressEqual(quoteTokenAddress, currency0.address)
+    ? currency1
+    : currency0
+  const rawPrice = parsePrice(
+    Number(price),
+    quoteCurrency.decimals,
+    baseCurrency.decimals,
+  )
+  const bidBookTick = fromPrice(rawPrice)
+  const askBookTick = fromPrice(invertPrice(rawPrice))
+  return {
+    normal: {
+      up: {
+        tick: bidBookTick + 1n,
+        price: formatPrice(
+          toPrice(bidBookTick + 1n),
+          quoteCurrency.decimals,
+          baseCurrency.decimals,
+        ),
+      },
+      now: {
+        tick: bidBookTick,
+        price: formatPrice(
+          toPrice(bidBookTick),
+          quoteCurrency.decimals,
+          baseCurrency.decimals,
+        ),
+      },
+      down: {
+        tick: bidBookTick - 1n,
+        price: formatPrice(
+          toPrice(bidBookTick - 1n),
+          quoteCurrency.decimals,
+          baseCurrency.decimals,
+        ),
+      },
+    },
+    inverted: {
+      up: {
+        tick: askBookTick + 1n,
+        price: formatPrice(
+          toPrice(askBookTick + 1n),
+          baseCurrency.decimals,
+          quoteCurrency.decimals,
+        ),
+      },
+      now: {
+        tick: askBookTick,
+        price: formatPrice(
+          toPrice(askBookTick),
+          baseCurrency.decimals,
+          quoteCurrency.decimals,
+        ),
+      },
+      down: {
+        tick: askBookTick - 1n,
+        price: formatPrice(
+          toPrice(askBookTick - 1n),
+          baseCurrency.decimals,
+          quoteCurrency.decimals,
+        ),
+      },
+    },
+  }
+}
 
 /**
  * Calculates the expected output for a given input amount, based on the provided market data.
