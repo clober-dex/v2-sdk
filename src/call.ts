@@ -21,7 +21,7 @@ import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
 import { fetchMarket } from './apis/market'
 import { parsePrice } from './utils/prices'
-import { fromPrice, invertPrice } from './utils/tick'
+import { fromPrice, invertPrice, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
@@ -174,6 +174,8 @@ export const limitOrder = decorator(
     options?: {
       erc20PermitParam?: ERC20PermitParam
       postOnly?: boolean
+      makeTick?: bigint
+      takeLimitTick?: bigint
     } & DefaultOptions
   }): Promise<{
     transaction: Transaction
@@ -209,7 +211,6 @@ export const limitOrder = decorator(
       market.quote.decimals,
       market.base.decimals,
     )
-    const tick = isBid ? fromPrice(rawPrice) : fromPrice(invertPrice(rawPrice))
     const tokensToSettle = [inputToken, outputToken].filter(
       (address) => !isAddressEqual(address, zeroAddress),
     )
@@ -230,7 +231,11 @@ export const limitOrder = decorator(
     const isETH = isAddressEqual(inputToken, zeroAddress)
     const makeParam = {
       id: toBookId(chainId, inputToken, outputToken, unitSize),
-      tick: Number(tick),
+      tick: options?.makeTick
+        ? Number(options.makeTick)
+        : Number(
+            isBid ? fromPrice(rawPrice) : fromPrice(invertPrice(rawPrice)),
+          ),
       quoteAmount,
       hookData: zeroHash,
     }
@@ -288,7 +293,11 @@ export const limitOrder = decorator(
                 {
                   takeBookId: bookId,
                   makeBookId: makeParam.id,
-                  limitPrice: isBid ? invertPrice(rawPrice) : rawPrice,
+                  limitPrice: options?.takeLimitTick
+                    ? toPrice(options.takeLimitTick)
+                    : isBid
+                      ? invertPrice(rawPrice)
+                      : rawPrice,
                   tick: makeParam.tick,
                   quoteAmount,
                   takeHookData: zeroHash,
