@@ -9,6 +9,7 @@ export type { OpenOrder } from './model/open-order'
 
 export type Depth = {
   price: string
+  tick: number
   baseAmount: string
 }
 
