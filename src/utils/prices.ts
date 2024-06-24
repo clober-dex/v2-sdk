@@ -1,6 +1,9 @@
 import BigNumber from 'bignumber.js'
 
 import { PRICE_PRECISION } from '../constants/price'
+import { Currency } from '../model/currency'
+
+import { invertPrice, toPrice } from './tick'
 
 BigNumber.config({
   DECIMAL_PLACES: 100,
@@ -30,4 +33,32 @@ export const parsePrice = (
   return BigInt(
     value.isInteger() ? value.toFixed() : value.integerValue().toFixed(),
   )
+}
+
+export const getMarketPrice = ({
+  marketQuoteCurrency,
+  marketBaseCurrency,
+  bidTick,
+  askTick,
+}: {
+  marketQuoteCurrency: Currency
+  marketBaseCurrency: Currency
+  bidTick?: bigint
+  askTick?: bigint
+}): string => {
+  if (bidTick) {
+    return formatPrice(
+      toPrice(bidTick),
+      marketQuoteCurrency.decimals,
+      marketBaseCurrency.decimals,
+    )
+  } else if (askTick) {
+    return formatPrice(
+      invertPrice(toPrice(askTick)),
+      marketQuoteCurrency.decimals,
+      marketBaseCurrency.decimals,
+    )
+  } else {
+    throw new Error('Either bidTick or askTick must be provided')
+  }
 }
