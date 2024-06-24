@@ -5,5 +5,6 @@ export type DepthDto = {
 
 export type Depth = {
   price: string
+  tick: bigint
   baseAmount: bigint
 }
