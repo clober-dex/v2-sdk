@@ -130,6 +130,10 @@ test('make bid order', async () => {
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
+  // < 0.01
+  expect(make.price).toEqual(
+    '0.009999030941607050990746193040618222487776224627342713802136131562292575836181640625',
+  )
   expect(spent.amount).toEqual('0')
   expect(spent.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
@@ -208,6 +212,10 @@ test('make ask order', async () => {
   expect(make.amount).toEqual('0.15')
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
+  )
+  // > 8000.01
+  expect(make.price).toEqual(
+    '8000.451757732723635233094461605044112111358015938800125610441682511009275913238525390625',
   )
   expect(spent.amount).toEqual('0')
   expect(spent.currency.address).toEqual(
@@ -314,6 +322,10 @@ test('limit bid order', async () => {
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
+  // < 3505.01
+  expect(make.price).toEqual(
+    '3504.820396359985449335426035683864538325025216047858833690042956732213497161865234375',
+  )
   expect(taken.amount).toEqual('0.09992997')
   expect(taken.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
@@ -413,6 +425,10 @@ test('limit ask order', async () => {
   expect(make.amount).toEqual('1.008250484573137286')
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
+  )
+  // > 3450.01
+  expect(make.price).toEqual(
+    '3450.227124271769577844054659965152775127523467578460891758140860474668443202972412109375',
   )
   expect(taken.amount).toEqual('3467.57027')
   expect(taken.currency.address).toEqual(

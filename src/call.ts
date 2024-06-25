@@ -20,7 +20,7 @@ import { buildTransaction } from './utils/build-transaction'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
 import { fetchMarket } from './apis/market'
-import { parsePrice } from './utils/prices'
+import { formatPrice, parsePrice } from './utils/prices'
 import { fromPrice, invertPrice, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
@@ -180,7 +180,7 @@ export const limitOrder = decorator(
   }): Promise<{
     transaction: Transaction
     result: {
-      make: CurrencyFlow
+      make: CurrencyFlow & { price: string }
       taken: CurrencyFlow
       spent: CurrencyFlow
     }
@@ -264,6 +264,13 @@ export const limitOrder = decorator(
             amount: formatUnits(quoteAmount, inputCurrency.decimals),
             currency: inputCurrency,
             direction: 'in',
+            price: formatPrice(
+              isBid
+                ? toPrice(BigInt(makeParam.tick))
+                : invertPrice(toPrice(BigInt(makeParam.tick))),
+              market.quote.decimals,
+              market.base.decimals,
+            ),
           },
           spent: {
             amount: '0',
@@ -320,6 +327,13 @@ export const limitOrder = decorator(
             ),
             currency: inputCurrency,
             direction: 'in',
+            price: formatPrice(
+              isBid
+                ? toPrice(BigInt(makeParam.tick))
+                : invertPrice(toPrice(BigInt(makeParam.tick))),
+              market.quote.decimals,
+              market.base.decimals,
+            ),
           },
           spent: {
             amount: spentAmount,
