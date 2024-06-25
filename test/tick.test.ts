@@ -239,6 +239,19 @@ test('base to quote', async () => {
   expect(expected).toEqual(actual)
 })
 
+test('check duplicate prices', () => {
+  const map: {
+    [key: string]: number
+  } = {}
+  for (let i = MIN_TICK; i < MAX_TICK; i += 1) {
+    const price = toPrice(BigInt(i))
+    if (map[price.toString()] !== undefined) {
+      throw new Error(`Duplicate price ${price.toString()}`)
+    }
+    map[price.toString()] = i
+  }
+})
+
 const checkNeighborhoodTicksAndPrices = (depth: {
   normal: {
     up: { tick: bigint; price: string }
