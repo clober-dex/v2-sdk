@@ -234,7 +234,7 @@ export const limitOrder = decorator(
       tick: options?.makeTick
         ? Number(options.makeTick)
         : Number(
-            isBid ? fromPrice(rawPrice) : fromPrice(invertPrice(rawPrice)),
+            isBid ? fromPrice(rawPrice) : fromPrice(invertPrice(rawPrice)) - 1n,
           ),
       quoteAmount,
       hookData: zeroHash,
