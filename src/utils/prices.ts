@@ -3,12 +3,13 @@ import BigNumber from 'bignumber.js'
 import { PRICE_PRECISION } from '../constants/price'
 import { Currency } from '../model/currency'
 
-import { invertPrice, toPrice } from './tick'
+import { fromPrice, invertPrice, toPrice } from './tick'
 
 BigNumber.config({
   DECIMAL_PLACES: 100,
 })
 
+// @dev: Use this function only for display purposes not logic
 export const formatPrice = (
   price: bigint,
   quoteDecimals: number,
@@ -30,9 +31,11 @@ export const parsePrice = (
     .times(new BigNumber(2).pow(PRICE_PRECISION.toString()))
     .times(new BigNumber(10).pow(quoteDecimals))
     .div(new BigNumber(10).pow(baseDecimals))
-  return BigInt(
+  const rawPrice = BigInt(
     value.isInteger() ? value.toFixed() : value.integerValue().toFixed(),
   )
+  const tick = fromPrice(rawPrice)
+  return toPrice(tick)
 }
 
 export const getMarketPrice = ({
