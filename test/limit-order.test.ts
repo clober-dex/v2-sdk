@@ -330,6 +330,11 @@ test('limit bid order', async () => {
   expect(taken.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
+  expect(taken.events.length).toEqual(1)
+  expect(spent.events.length).toEqual(1)
+  expect(taken.events[0].price).toEqual(spent.events[0].price)
+  expect(taken.events[0].amount).toEqual('0.09992997')
+  expect(spent.events[0].amount).toEqual('350.13174')
   expect(Number(make.amount) + Number(spent.amount)).toEqual(100000)
 })
 
@@ -434,5 +439,10 @@ test('limit ask order', async () => {
   expect(taken.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
+  expect(taken.events.length).toEqual(1)
+  expect(spent.events.length).toEqual(1)
+  expect(taken.events[0].price).toEqual(spent.events[0].price)
+  expect(taken.events[0].amount).toEqual('3467.57027')
+  expect(spent.events[0].amount).toEqual('0.991749515426862714')
   expect(Number(make.amount) + Number(spent.amount)).toEqual(2)
 })

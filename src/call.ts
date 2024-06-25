@@ -181,8 +181,8 @@ export const limitOrder = decorator(
     transaction: Transaction
     result: {
       make: CurrencyFlow & { price: string }
-      taken: CurrencyFlow
-      spent: CurrencyFlow
+      taken: CurrencyFlow & { events: { price: string; amount: string }[] }
+      spent: CurrencyFlow & { events: { price: string; amount: string }[] }
     }
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
@@ -215,19 +215,20 @@ export const limitOrder = decorator(
       (address) => !isAddressEqual(address, zeroAddress),
     )
     const quoteAmount = parseUnits(amount, inputCurrency.decimals)
-    const [unitSize, { takenAmount, spentAmount, bookId }] = await Promise.all([
-      calculateUnitSize(chainId, inputCurrency),
-      getExpectedOutput({
-        chainId,
-        inputToken,
-        outputToken,
-        amountIn: amount,
-        options: {
-          ...options,
-          limitPrice: price,
-        },
-      }),
-    ])
+    const [unitSize, { takenAmount, spentAmount, bookId, events }] =
+      await Promise.all([
+        calculateUnitSize(chainId, inputCurrency),
+        getExpectedOutput({
+          chainId,
+          inputToken,
+          outputToken,
+          amountIn: amount,
+          options: {
+            ...options,
+            limitPrice: price,
+          },
+        }),
+      ])
     const isETH = isAddressEqual(inputToken, zeroAddress)
     const makeParam = {
       id: toBookId(chainId, inputToken, outputToken, unitSize),
@@ -276,11 +277,13 @@ export const limitOrder = decorator(
             amount: '0',
             currency: inputCurrency,
             direction: 'in',
+            events: [],
           },
           taken: {
             amount: '0',
             currency: outputCurrency,
             direction: 'out',
+            events: [],
           },
         },
       }
@@ -339,11 +342,19 @@ export const limitOrder = decorator(
             amount: spentAmount,
             currency: inputCurrency,
             direction: 'in',
+            events: events.map(({ price, spentAmount }) => ({
+              price,
+              amount: spentAmount,
+            })),
           },
           taken: {
             amount: takenAmount,
             currency: outputCurrency,
             direction: 'out',
+            events: events.map(({ price, takenAmount }) => ({
+              price,
+              amount: takenAmount,
+            })),
           },
         },
       }
@@ -415,8 +426,18 @@ export const marketOrder = decorator(
   }): Promise<{
     transaction: Transaction
     result: {
-      taken: CurrencyFlow
-      spent: CurrencyFlow
+      taken: CurrencyFlow & {
+        events: {
+          price: string
+          amount: string
+        }[]
+      }
+      spent: CurrencyFlow & {
+        events: {
+          price: string
+          amount: string
+        }[]
+      }
     }
   }> => {
     if (!amountIn && !amountOut) {
@@ -451,16 +472,17 @@ export const marketOrder = decorator(
     const isETH = isAddressEqual(inputToken, zeroAddress)
 
     if (amountIn && !amountOut) {
-      const { bookId, takenAmount, spentAmount } = await getExpectedOutput({
-        chainId,
-        inputToken,
-        outputToken,
-        amountIn,
-        options: {
-          ...options,
-          // don't need to check limit price for market order
-        },
-      })
+      const { bookId, takenAmount, spentAmount, events } =
+        await getExpectedOutput({
+          chainId,
+          inputToken,
+          outputToken,
+          amountIn,
+          options: {
+            ...options,
+            // don't need to check limit price for market order
+          },
+        })
       const baseAmount = parseUnits(amountIn, inputCurrency.decimals)
       return {
         transaction: await buildTransaction(
@@ -499,25 +521,34 @@ export const marketOrder = decorator(
             amount: spentAmount,
             currency: inputCurrency,
             direction: 'in',
+            events: events.map(({ price, spentAmount }) => ({
+              price,
+              amount: spentAmount,
+            })),
           },
           taken: {
             amount: takenAmount,
             currency: outputCurrency,
             direction: 'out',
+            events: events.map(({ price, takenAmount }) => ({
+              price,
+              amount: takenAmount,
+            })),
           },
         },
       }
     } else if (!amountIn && amountOut) {
-      const { bookId, spentAmount, takenAmount } = await getExpectedInput({
-        chainId,
-        inputToken,
-        outputToken,
-        amountOut,
-        options: {
-          ...options,
-          // don't need to check limit price for market order
-        },
-      })
+      const { bookId, spentAmount, takenAmount, events } =
+        await getExpectedInput({
+          chainId,
+          inputToken,
+          outputToken,
+          amountOut,
+          options: {
+            ...options,
+            // don't need to check limit price for market order
+          },
+        })
       const quoteAmount = parseUnits(amountOut, outputCurrency.decimals)
       const baseAmount = parseUnits(spentAmount, inputCurrency.decimals)
       const maxBaseAmount =
@@ -559,11 +590,19 @@ export const marketOrder = decorator(
             amount: spentAmount,
             currency: inputCurrency,
             direction: 'in',
+            events: events.map(({ price, spentAmount }) => ({
+              price,
+              amount: spentAmount,
+            })),
           },
           taken: {
             amount: takenAmount,
             currency: outputCurrency,
             direction: 'out',
+            events: events.map(({ price, takenAmount }) => ({
+              price,
+              amount: takenAmount,
+            })),
           },
         },
       }
