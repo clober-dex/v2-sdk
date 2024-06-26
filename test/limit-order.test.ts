@@ -122,10 +122,10 @@ test('make bid order', async () => {
 
   expect(beforeBalance - afterBalance).toEqual(1000000n)
   expect(
-    getSize(afterMarket.bids, 0, 0.01)
-      .minus(getSize(beforeMarket.bids, 0, 0.01))
+    getSize(afterMarket.bids, 0.01, 0.011)
+      .minus(getSize(beforeMarket.bids, 0.01, 0.011))
       .toString(),
-  ).toEqual('100.039694430551598028')
+  ).toEqual('100.029691461405417093')
   expect(make.amount).toEqual('1')
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
@@ -304,10 +304,10 @@ test('limit bid order', async () => {
     100000000000000000,
   )
   expect(
-    getSize(afterMarket.bids, 3504, 3505)
-      .minus(getSize(beforeMarket.bids, 3504, 3505))
+    getSize(afterMarket.bids, 3505, 3506)
+      .minus(getSize(beforeMarket.bids, 3505, 3506))
       .toString(),
-  ).toEqual('28.440764694968334845')
+  ).toEqual('28.437920902878047041')
   expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length - 1)
   expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length + 1)
   expect(make.amount).toEqual('99649.86826')

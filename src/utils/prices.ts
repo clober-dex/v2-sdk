@@ -35,7 +35,11 @@ export const parsePrice = (
     value.isInteger() ? value.toFixed() : value.integerValue().toFixed(),
   )
   const tick = fromPrice(rawPrice)
-  return toPrice(tick)
+  const flooredPrice = toPrice(tick)
+  if (rawPrice === flooredPrice) {
+    return toPrice(tick)
+  }
+  return toPrice(tick + 1n)
 }
 
 export const getMarketPrice = ({
