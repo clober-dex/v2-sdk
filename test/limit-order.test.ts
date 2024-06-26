@@ -135,9 +135,9 @@ test('make bid order', async () => {
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  // < 0.01
+  // > 0.01
   expect(make.price).toEqual(
-    '0.009999030941607050990746193040618222487776224627342713802136131562292575836181640625',
+    '0.0100000308447012157335509249431491091294164907932184860328561626374721527099609375',
   )
   expect(spent.amount).toEqual('0')
   expect(spent.currency.address).toEqual(
@@ -322,8 +322,8 @@ test('make ask order', async () => {
 
   expect(Number(beforeBalance - afterBalance)).greaterThan(150000000000000000)
   expect(
-    getSize(afterMarket.asks, 8000, 8001)
-      .minus(getSize(beforeMarket.asks, 8000, 8001))
+    getSize(afterMarket.asks, 8000.01, 8001)
+      .minus(getSize(beforeMarket.asks, 8000.01, 8001))
       .toString(),
   ).toEqual('0.150045')
   expect(make.amount).toEqual('0.15')
@@ -388,7 +388,7 @@ test('limit bid order', async () => {
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0x0000000000000000000000000000000000000000',
     amount: '100000',
-    price: '3505.01',
+    price: '3500.2673',
     options: {
       erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
@@ -429,19 +429,19 @@ test('limit bid order', async () => {
     100000000000000000,
   )
   expect(
-    getSize(afterMarket.bids, 3505, 3506)
-      .minus(getSize(beforeMarket.bids, 3505, 3506))
+    getSize(afterMarket.bids, 3500, 3501)
+      .minus(getSize(beforeMarket.bids, 3500, 3501))
       .toString(),
-  ).toEqual('28.437920902878047041')
+  ).toEqual('28.477759881004348339')
   expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length - 1)
   expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length + 1)
   expect(make.amount).toEqual('99649.86826')
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  // < 3505.01
+  // > 3500.2673
   expect(make.price).toEqual(
-    '3504.820396359985449335426035683864538325025216047858833690042956732213497161865234375',
+    '3500.267317637222535996264245812378979334965009052871298678155653760768473148345947265625',
   )
   expect(taken.amount).toEqual('0.09992997')
   expect(taken.currency.address).toEqual(
@@ -476,7 +476,7 @@ test('limit ask order', async () => {
     inputToken: '0x0000000000000000000000000000000000000000',
     outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '2',
-    price: '3450.01',
+    price: '3499.9173',
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
@@ -538,8 +538,8 @@ test('limit ask order', async () => {
   )
   expect(afterUSDCBalance - beforeUSDCBalance).toEqual(3467570270n)
   expect(
-    getSize(afterMarket.asks, 3450, 3451)
-      .minus(getSize(beforeMarket.asks, 3450, 3451))
+    getSize(afterMarket.asks, 3499.9173, 3500)
+      .minus(getSize(beforeMarket.asks, 3499.9173, 3500))
       .toString(),
   ).toEqual('1.008553')
   expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length - 1)
@@ -548,9 +548,9 @@ test('limit ask order', async () => {
   expect(make.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
-  // > 3450.01
+  // > 3499.9173
   expect(make.price).toEqual(
-    '3450.227124271769577844054659965152775127523467578460891758140860474668443202972412109375',
+    '3499.9173259046320727910702559314660111379154984467820810323246405459940433502197265625',
   )
   expect(taken.amount).toEqual('3467.57027')
   expect(taken.currency.address).toEqual(
