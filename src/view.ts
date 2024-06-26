@@ -239,6 +239,7 @@ export const getExpectedOutput = decorator(
     takenAmount: string
     spentAmount: string
     bookId: bigint
+    events: { price: string; takenAmount: string; spentAmount: string }[]
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -253,7 +254,7 @@ export const getExpectedOutput = decorator(
           ? MAX_PRICE
           : 0n
     const inputCurrency = isBid ? market.quote : market.base
-    const { takenQuoteAmount, spentBaseAmount, bookId } = market.spend({
+    const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.spend({
       spentBase: !isBid,
       limitPrice: rawLimitPrice,
       amountIn: parseUnits(amountIn, inputCurrency.decimals),
@@ -268,6 +269,21 @@ export const getExpectedOutput = decorator(
         isBid ? market.quote.decimals : market.base.decimals,
       ),
       bookId,
+      events: events.map(({ tick, takenQuoteAmount, spentBaseAmount }) => ({
+        price: formatPrice(
+          isBid ? invertPrice(toPrice(BigInt(tick))) : toPrice(BigInt(tick)),
+          market.quote.decimals,
+          market.base.decimals,
+        ),
+        takenAmount: formatUnits(
+          takenQuoteAmount,
+          isBid ? market.base.decimals : market.quote.decimals,
+        ),
+        spentAmount: formatUnits(
+          spentBaseAmount,
+          isBid ? market.quote.decimals : market.base.decimals,
+        ),
+      })),
     }
   },
 )
@@ -311,6 +327,7 @@ export const getExpectedInput = decorator(
     takenAmount: string
     spentAmount: string
     bookId: bigint
+    events: { price: string; takenAmount: string; spentAmount: string }[]
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -325,7 +342,7 @@ export const getExpectedInput = decorator(
           ? MAX_PRICE
           : 0n
     const outputCurrency = isBid ? market.base : market.quote
-    const { takenQuoteAmount, spentBaseAmount, bookId } = market.take({
+    const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.take({
       takeQuote: !isBid,
       limitPrice: rawLimitPrice,
       amountOut: parseUnits(amountOut, outputCurrency.decimals),
@@ -340,6 +357,21 @@ export const getExpectedInput = decorator(
         isBid ? market.quote.decimals : market.base.decimals,
       ),
       bookId,
+      events: events.map(({ tick, takenQuoteAmount, spentBaseAmount }) => ({
+        price: formatPrice(
+          isBid ? invertPrice(toPrice(BigInt(tick))) : toPrice(BigInt(tick)),
+          market.quote.decimals,
+          market.base.decimals,
+        ),
+        takenAmount: formatUnits(
+          takenQuoteAmount,
+          isBid ? market.base.decimals : market.quote.decimals,
+        ),
+        spentAmount: formatUnits(
+          spentBaseAmount,
+          isBid ? market.quote.decimals : market.base.decimals,
+        ),
+      })),
     }
   },
 )

@@ -49,12 +49,18 @@ export class Book {
     limitPrice: bigint
     amountOut: bigint
   }) => {
+    const events: {
+      tick: bigint
+      takenQuoteAmount: bigint
+      spentBaseAmount: bigint
+    }[] = []
     let takenQuoteAmount = 0n
     let spentBaseAmount = 0n
     if (this.depths.length === 0) {
       return {
         takenQuoteAmount,
         spentBaseAmount,
+        events,
       }
     }
 
@@ -96,7 +102,11 @@ export class Book {
       if (quoteAmount === 0n) {
         break
       }
-
+      events.push({
+        tick,
+        takenQuoteAmount: quoteAmount,
+        spentBaseAmount: baseAmount,
+      })
       takenQuoteAmount += quoteAmount
       spentBaseAmount += baseAmount
       if (amountOut <= takenQuoteAmount) {
@@ -108,6 +118,7 @@ export class Book {
     return {
       takenQuoteAmount,
       spentBaseAmount,
+      events,
     }
   }
 
@@ -118,12 +129,18 @@ export class Book {
     limitPrice: bigint
     amountIn: bigint
   }) => {
+    const events: {
+      tick: bigint
+      takenQuoteAmount: bigint
+      spentBaseAmount: bigint
+    }[] = []
     let takenQuoteAmount = 0n
     let spentBaseAmount = 0n
     if (this.depths.length === 0) {
       return {
         takenQuoteAmount,
         spentBaseAmount,
+        events,
       }
     }
 
@@ -165,7 +182,11 @@ export class Book {
       if (baseAmount === 0n) {
         break
       }
-
+      events.push({
+        tick,
+        takenQuoteAmount: quoteAmount,
+        spentBaseAmount: baseAmount,
+      })
       takenQuoteAmount += quoteAmount
       spentBaseAmount += baseAmount
       index++
@@ -174,6 +195,7 @@ export class Book {
     return {
       takenQuoteAmount,
       spentBaseAmount,
+      events,
     }
   }
 }
