@@ -119,6 +119,8 @@ export const openMarket = decorator(
  * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
  * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
  * @param {number} [options.gasLimit] The gas limit to use for the transaction.
+ * @param {bigint} [options.makeTick] The tick for the make order.
+ * @param {bigint} [options.takeLimitTick] The tick for the take order.
  * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
  * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyFlow, take: CurrencyFlow, spent: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the limit order with the result of the order.
