@@ -26,7 +26,10 @@ export const parsePrice = (
   price: number,
   quoteDecimals: number,
   baseDecimals: number,
-): bigint => {
+): {
+  roundingDownPrice: bigint
+  roundingUpPrice: bigint
+} => {
   const value = new BigNumber(price)
     .times(new BigNumber(2).pow(PRICE_PRECISION.toString()))
     .times(new BigNumber(10).pow(quoteDecimals))
@@ -37,9 +40,12 @@ export const parsePrice = (
   const tick = fromPrice(rawPrice)
   const flooredPrice = toPrice(tick)
   if (rawPrice === flooredPrice) {
-    return toPrice(tick)
+    return { roundingDownPrice: toPrice(tick), roundingUpPrice: toPrice(tick) }
   }
-  return toPrice(tick + 1n)
+  return {
+    roundingDownPrice: toPrice(tick),
+    roundingUpPrice: toPrice(tick + 1n),
+  }
 }
 
 export const getMarketPrice = ({

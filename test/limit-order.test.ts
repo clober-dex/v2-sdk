@@ -127,17 +127,17 @@ test('make bid order', async () => {
 
   expect(beforeBalance - afterBalance).toEqual(1000000n)
   expect(
-    getSize(afterMarket.bids, 0.01, 0.011)
-      .minus(getSize(beforeMarket.bids, 0.01, 0.011))
+    getSize(afterMarket.bids, 0.009, 0.01)
+      .minus(getSize(beforeMarket.bids, 0.009, 0.01))
       .toString(),
-  ).toEqual('100.029691461405417093')
+  ).toEqual('100.039694430551598028')
   expect(make.amount).toEqual('1')
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
   )
-  // > 0.01
+  // < 0.01
   expect(make.price).toEqual(
-    '0.0100000308447012157335509249431491091294164907932184860328561626374721527099609375',
+    '0.009999030941607050990746193040618222487776224627342713802136131562292575836181640625',
   )
   expect(spent.amount).toEqual('0')
   expect(spent.currency.address).toEqual(
@@ -388,7 +388,7 @@ test('limit bid order', async () => {
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0x0000000000000000000000000000000000000000',
     amount: '100000',
-    price: '3500.2673',
+    price: '3500.3',
     options: {
       erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,

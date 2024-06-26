@@ -137,13 +137,13 @@ export const getPriceNeighborhood = ({
   const baseCurrency = isAddressEqual(quoteTokenAddress, currency0.address)
     ? currency1
     : currency0
-  const rawPrice = parsePrice(
+  const { roundingDownPrice, roundingUpPrice } = parsePrice(
     Number(price),
     quoteCurrency.decimals,
     baseCurrency.decimals,
   )
-  const bidBookTick = fromPrice(rawPrice)
-  const askBookTick = fromPrice(invertPrice(rawPrice))
+  const bidBookTick = fromPrice(roundingDownPrice)
+  const askBookTick = fromPrice(invertPrice(roundingUpPrice))
   return {
     normal: {
       up: {
@@ -243,7 +243,7 @@ export const getExpectedOutput = decorator(
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
-    const rawLimitPrice =
+    const { roundingDownPrice, roundingUpPrice } =
       options && options.limitPrice
         ? parsePrice(
             Number(options.limitPrice),
@@ -251,12 +251,13 @@ export const getExpectedOutput = decorator(
             market.base.decimals,
           )
         : isBid
-          ? MAX_PRICE
-          : 0n
+          ? { roundingDownPrice: MAX_PRICE, roundingUpPrice: MAX_PRICE }
+          : { roundingDownPrice: 0n, roundingUpPrice: 0n }
     const inputCurrency = isBid ? market.quote : market.base
+    const isTakingBidSide = !isBid
     const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.spend({
-      spentBase: !isBid,
-      limitPrice: rawLimitPrice,
+      spentBase: isTakingBidSide,
+      limitPrice: isTakingBidSide ? roundingUpPrice : roundingDownPrice,
       amountIn: parseUnits(amountIn, inputCurrency.decimals),
     })
     return {
@@ -331,7 +332,7 @@ export const getExpectedInput = decorator(
   }> => {
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
-    const rawLimitPrice =
+    const { roundingDownPrice, roundingUpPrice } =
       options && options.limitPrice
         ? parsePrice(
             Number(options.limitPrice),
@@ -339,12 +340,13 @@ export const getExpectedInput = decorator(
             market.base.decimals,
           )
         : isBid
-          ? MAX_PRICE
-          : 0n
+          ? { roundingDownPrice: MAX_PRICE, roundingUpPrice: MAX_PRICE }
+          : { roundingDownPrice: 0n, roundingUpPrice: 0n }
     const outputCurrency = isBid ? market.base : market.quote
+    const isTakingBidSide = !isBid
     const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.take({
-      takeQuote: !isBid,
-      limitPrice: rawLimitPrice,
+      takeQuote: isTakingBidSide,
+      limitPrice: isTakingBidSide ? roundingUpPrice : roundingDownPrice,
       amountOut: parseUnits(amountOut, outputCurrency.decimals),
     })
     return {

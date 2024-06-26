@@ -51,13 +51,13 @@ const isSpendResultEqual = async (
                 Number(limitPrice),
                 market.quote.decimals,
                 market.base.decimals,
-              ),
+              ).roundingDownPrice,
             )
           : parsePrice(
               Number(limitPrice),
               market.quote.decimals,
               market.base.decimals,
-            ),
+            ).roundingUpPrice,
         baseAmount: parseUnits(amountIn, inputCurrency.decimals),
         minQuoteAmount: 0n,
         hookData: zeroHash,

@@ -208,7 +208,7 @@ export const limitOrder = decorator(
     `)
     }
 
-    const rawPrice = parsePrice(
+    const { roundingDownPrice, roundingUpPrice } = parsePrice(
       Number(price),
       market.quote.decimals,
       market.base.decimals,
@@ -237,7 +237,9 @@ export const limitOrder = decorator(
       tick: options?.makeTick
         ? Number(options.makeTick)
         : Number(
-            isBid ? fromPrice(rawPrice) : fromPrice(invertPrice(rawPrice)),
+            isBid
+              ? fromPrice(roundingDownPrice)
+              : fromPrice(invertPrice(roundingUpPrice)),
           ),
       quoteAmount,
       hookData: zeroHash,
@@ -308,8 +310,8 @@ export const limitOrder = decorator(
                   limitPrice: options?.takeLimitTick
                     ? toPrice(options.takeLimitTick)
                     : isBid
-                      ? invertPrice(rawPrice)
-                      : rawPrice,
+                      ? invertPrice(roundingDownPrice)
+                      : roundingUpPrice,
                   tick: makeParam.tick,
                   quoteAmount,
                   takeHookData: zeroHash,
