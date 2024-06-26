@@ -453,6 +453,8 @@ export const marketOrder = decorator(
     options?: {
       erc20PermitParam?: ERC20PermitParam
       slippage?: number
+      roundingDownTakenBid?: boolean
+      roundingUpTakenAsk?: boolean
     } & DefaultOptions
   }): Promise<{
     transaction: Transaction
