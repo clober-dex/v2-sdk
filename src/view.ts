@@ -234,13 +234,21 @@ export const getExpectedOutput = decorator(
     inputToken: `0x${string}`
     outputToken: `0x${string}`
     amountIn: string
-    options?: { limitPrice?: string } & DefaultOptions
+    options?: {
+      limitPrice?: string
+      roundingDownTakenBid?: boolean
+      roundingUpTakenAsk?: boolean
+    } & DefaultOptions
   }): Promise<{
     takenAmount: string
     spentAmount: string
     bookId: bigint
     events: { price: string; takenAmount: string; spentAmount: string }[]
   }> => {
+    const [roundingDownTakenBid, roundingUpTakenAsk] = [
+      options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
+      options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
+    ]
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
     const { roundingDownPrice, roundingUpPrice } =
@@ -257,7 +265,13 @@ export const getExpectedOutput = decorator(
     const isTakingBidSide = !isBid
     const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.spend({
       spentBase: isTakingBidSide,
-      limitPrice: isTakingBidSide ? roundingUpPrice : roundingDownPrice,
+      limitPrice: isTakingBidSide
+        ? roundingDownTakenBid
+          ? roundingDownPrice
+          : roundingUpPrice
+        : roundingUpTakenAsk
+          ? roundingUpPrice
+          : roundingDownPrice,
       amountIn: parseUnits(amountIn, inputCurrency.decimals),
     })
     return {
@@ -323,13 +337,21 @@ export const getExpectedInput = decorator(
     inputToken: `0x${string}`
     outputToken: `0x${string}`
     amountOut: string
-    options?: { limitPrice?: string } & DefaultOptions
+    options?: {
+      limitPrice?: string
+      roundingDownTakenBid?: boolean
+      roundingUpTakenAsk?: boolean
+    } & DefaultOptions
   }): Promise<{
     takenAmount: string
     spentAmount: string
     bookId: bigint
     events: { price: string; takenAmount: string; spentAmount: string }[]
   }> => {
+    const [roundingDownTakenBid, roundingUpTakenAsk] = [
+      options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
+      options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
+    ]
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
     const { roundingDownPrice, roundingUpPrice } =
@@ -346,7 +368,13 @@ export const getExpectedInput = decorator(
     const isTakingBidSide = !isBid
     const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.take({
       takeQuote: isTakingBidSide,
-      limitPrice: isTakingBidSide ? roundingUpPrice : roundingDownPrice,
+      limitPrice: isTakingBidSide
+        ? roundingDownTakenBid
+          ? roundingDownPrice
+          : roundingUpPrice
+        : roundingUpTakenAsk
+          ? roundingUpPrice
+          : roundingDownPrice,
       amountOut: parseUnits(amountOut, outputCurrency.decimals),
     })
     return {

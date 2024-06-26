@@ -455,6 +455,119 @@ test('limit bid order', async () => {
   expect(Number(make.amount) + Number(spent.amount)).toEqual(100000)
 })
 
+test('limit bid order with rounding up', async () => {
+  const { publicClient, walletClient } = clients[3] as any
+  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
+
+  const [beforeUSDCBalance, beforeETHBalance, beforeMarket] = await Promise.all(
+    [
+      fetchTokenBalance(
+        cloberTestChain.id,
+        '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+        account.address,
+      ),
+      publicClient.getBalance({
+        address: account.address,
+      }),
+      getMarket({
+        chainId: cloberTestChain.id,
+        token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+        token1: '0x0000000000000000000000000000000000000000',
+        options: {
+          rpcUrl: publicClient.transport.url!,
+          useSubgraph: false,
+        },
+      }),
+    ],
+  )
+  const erc20PermitParams = await signERC20Permit({
+    chainId: cloberTestChain.id,
+    walletClient,
+    token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    amount: '100000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+  const {
+    transaction,
+    result: { make, taken, spent },
+  } = await limitOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    outputToken: '0x0000000000000000000000000000000000000000',
+    amount: '100000',
+    price: '3500.2673',
+    options: {
+      erc20PermitParam: erc20PermitParams!,
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      roundingUpMakeBid: true,
+      roundingUpTakenAsk: true,
+    },
+  })
+
+  const hash = await walletClient.sendTransaction({
+    ...transaction!,
+    account,
+    gasPrice: transaction!.gasPrice! * 2n,
+  })
+  const receipt = await publicClient.waitForTransactionReceipt({ hash })
+  expect(receipt.status).toEqual('success')
+
+  const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
+    fetchTokenBalance(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      account.address,
+    ),
+    publicClient.getBalance({
+      address: account.address,
+    }),
+    getMarket({
+      chainId: cloberTestChain.id,
+      token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      token1: '0x0000000000000000000000000000000000000000',
+      options: {
+        rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
+      },
+    }),
+  ])
+
+  expect(beforeUSDCBalance - afterUSDCBalance).toEqual(100000000000n)
+  expect(Number(afterETHBalance - beforeETHBalance)).lessThan(
+    100000000000000000,
+  )
+  expect(
+    getSize(afterMarket.bids, 3500, 3501)
+      .minus(getSize(beforeMarket.bids, 3500, 3501))
+      .toString(),
+  ).toEqual('28.477759881004348339')
+  expect(afterMarket.asks.length).toEqual(beforeMarket.asks.length - 1)
+  expect(afterMarket.bids.length).toEqual(beforeMarket.bids.length + 1)
+  expect(make.amount).toEqual('99649.86826')
+  expect(make.currency.address).toEqual(
+    getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
+  // > 3500.2673
+  expect(make.price).toEqual(
+    '3500.267317637222535996264245812378979334965009052871298678155653760768473148345947265625',
+  )
+  expect(taken.amount).toEqual('0.09992997')
+  expect(taken.currency.address).toEqual(
+    '0x0000000000000000000000000000000000000000',
+  )
+  expect(taken.events.length).toEqual(1)
+  expect(spent.events.length).toEqual(1)
+  expect(taken.events[0].price).toEqual(spent.events[0].price)
+  expect(taken.events[0].amount).toEqual('0.09992997')
+  expect(spent.events[0].amount).toEqual('350.13174')
+  expect(Number(make.amount) + Number(spent.amount)).toEqual(100000)
+})
+
 test('limit ask order', async () => {
   const { publicClient, walletClient } = clients[4] as any
   buildPublicClient(cloberTestChain.id, publicClient.transport.url!)

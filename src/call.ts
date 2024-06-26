@@ -178,6 +178,10 @@ export const limitOrder = decorator(
       postOnly?: boolean
       makeTick?: bigint
       takeLimitTick?: bigint
+      roundingUpMakeBid?: boolean
+      roundingDownMakeAsk?: boolean
+      roundingDownTakenBid?: boolean
+      roundingUpTakenAsk?: boolean
     } & DefaultOptions
   }): Promise<{
     transaction: Transaction
@@ -187,6 +191,17 @@ export const limitOrder = decorator(
       spent: CurrencyFlow & { events: { price: string; amount: string }[] }
     }
   }> => {
+    const [
+      roundingUpMakeBid,
+      roundingDownMakeAsk,
+      roundingDownTakenBid,
+      roundingUpTakenAsk,
+    ] = [
+      options?.roundingUpMakeBid ? options.roundingUpMakeBid : false,
+      options?.roundingDownMakeAsk ? options.roundingDownMakeAsk : false,
+      options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
+      options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
+    ]
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
     const [inputCurrency, outputCurrency] = isBid
@@ -238,8 +253,14 @@ export const limitOrder = decorator(
         ? Number(options.makeTick)
         : Number(
             isBid
-              ? fromPrice(roundingDownPrice)
-              : fromPrice(invertPrice(roundingUpPrice)),
+              ? fromPrice(
+                  roundingUpMakeBid ? roundingUpPrice : roundingDownPrice,
+                )
+              : fromPrice(
+                  invertPrice(
+                    roundingDownMakeAsk ? roundingDownPrice : roundingUpPrice,
+                  ),
+                ),
           ),
       quoteAmount,
       hookData: zeroHash,
@@ -310,8 +331,14 @@ export const limitOrder = decorator(
                   limitPrice: options?.takeLimitTick
                     ? toPrice(options.takeLimitTick)
                     : isBid
-                      ? invertPrice(roundingDownPrice)
-                      : roundingUpPrice,
+                      ? invertPrice(
+                          roundingUpTakenAsk
+                            ? roundingUpPrice
+                            : roundingDownPrice,
+                        )
+                      : roundingDownTakenBid
+                        ? roundingDownPrice
+                        : roundingUpPrice,
                   tick: makeParam.tick,
                   quoteAmount,
                   takeHookData: zeroHash,
