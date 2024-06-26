@@ -1,5 +1,10 @@
 import { expect, test, afterEach } from 'vitest'
-import { getMarket, limitOrder, signERC20Permit } from '@clober/v2-sdk'
+import {
+  getMarket,
+  limitOrder,
+  openMarket,
+  signERC20Permit,
+} from '@clober/v2-sdk'
 import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
 
@@ -137,6 +142,118 @@ test('make bid order', async () => {
   expect(taken.amount).toEqual('0')
   expect(taken.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
+  )
+})
+
+test('make bid order at $1', async () => {
+  const { publicClient, walletClient } = clients[1] as any
+  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
+
+  const tx = await openMarket({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    outputToken: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+  const openHash = await walletClient.sendTransaction({
+    ...tx!,
+    account,
+    gasPrice: tx!.gasPrice! * 2n,
+  })
+  const r = await publicClient.waitForTransactionReceipt({ hash: openHash })
+  expect(r.status).toEqual('success')
+
+  const erc20PermitParams = await signERC20Permit({
+    chainId: cloberTestChain.id,
+    walletClient,
+    token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    amount: '1',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+  const {
+    transaction,
+    result: { make, taken, spent },
+  } = await limitOrder({
+    chainId: cloberTestChain.id,
+    userAddress: account.address,
+    inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    outputToken: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
+    amount: '1',
+    price: '1',
+    options: {
+      erc20PermitParam: erc20PermitParams!,
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  })
+
+  const [beforeBalance, beforeMarket] = await Promise.all([
+    fetchTokenBalance(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      account.address,
+    ),
+    getMarket({
+      chainId: cloberTestChain.id,
+      token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      token1: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
+      options: {
+        rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
+      },
+    }),
+  ])
+
+  const hash = await walletClient.sendTransaction({
+    ...transaction!,
+    account,
+    gasPrice: transaction!.gasPrice! * 2n,
+  })
+  const receipt = await publicClient.waitForTransactionReceipt({ hash })
+  expect(receipt.status).toEqual('success')
+
+  const [afterBalance, afterMarket] = await Promise.all([
+    fetchTokenBalance(
+      cloberTestChain.id,
+      '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      account.address,
+    ),
+    getMarket({
+      chainId: cloberTestChain.id,
+      token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      token1: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
+      options: {
+        rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
+      },
+    }),
+  ])
+
+  expect(beforeBalance - afterBalance).toEqual(1000000n)
+  expect(
+    getSize(afterMarket.bids, 1, 1)
+      .minus(getSize(beforeMarket.bids, 1, 1))
+      .toString(),
+  ).toEqual('1.0003')
+  expect(make.amount).toEqual('1')
+  expect(make.currency.address).toEqual(
+    getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
+  expect(spent.amount).toEqual('0')
+  expect(spent.currency.address).toEqual(
+    getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
+  )
+  expect(taken.amount).toEqual('0')
+  expect(taken.currency.address).toEqual(
+    '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
   )
 })
 
