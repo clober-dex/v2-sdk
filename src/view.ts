@@ -11,7 +11,7 @@ import { decorator } from './utils/decorator'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
 import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
-import { invertTick, toPrice } from './utils/tick'
+import { invertPrice, invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 
 /**
@@ -146,9 +146,27 @@ export const getPriceNeighborhood = ({
   const askBookTick = invertTick(roundingUpTick)
   return {
     normal: {
+      nextUp: {
+        tick: bidBookTick + 2n,
+        price: formatPrice(
+          toPrice(bidBookTick + 2n),
+          quoteCurrency.decimals,
+          baseCurrency.decimals,
+        ),
+        marketPrice: formatPrice(
+          toPrice(bidBookTick + 2n),
+          quoteCurrency.decimals,
+          baseCurrency.decimals,
+        ),
+      },
       up: {
         tick: bidBookTick + 1n,
         price: formatPrice(
+          toPrice(bidBookTick + 1n),
+          quoteCurrency.decimals,
+          baseCurrency.decimals,
+        ),
+        marketPrice: formatPrice(
           toPrice(bidBookTick + 1n),
           quoteCurrency.decimals,
           baseCurrency.decimals,
@@ -161,6 +179,11 @@ export const getPriceNeighborhood = ({
           quoteCurrency.decimals,
           baseCurrency.decimals,
         ),
+        marketPrice: formatPrice(
+          toPrice(bidBookTick),
+          quoteCurrency.decimals,
+          baseCurrency.decimals,
+        ),
       },
       down: {
         tick: bidBookTick - 1n,
@@ -169,13 +192,49 @@ export const getPriceNeighborhood = ({
           quoteCurrency.decimals,
           baseCurrency.decimals,
         ),
+        marketPrice: formatPrice(
+          toPrice(bidBookTick - 1n),
+          quoteCurrency.decimals,
+          baseCurrency.decimals,
+        ),
+      },
+      nextDown: {
+        tick: bidBookTick - 2n,
+        price: formatPrice(
+          toPrice(bidBookTick - 2n),
+          quoteCurrency.decimals,
+          baseCurrency.decimals,
+        ),
+        marketPrice: formatPrice(
+          toPrice(bidBookTick - 2n),
+          quoteCurrency.decimals,
+          baseCurrency.decimals,
+        ),
       },
     },
     inverted: {
+      nextUp: {
+        tick: askBookTick + 2n,
+        price: formatPrice(
+          toPrice(askBookTick + 2n),
+          baseCurrency.decimals,
+          quoteCurrency.decimals,
+        ),
+        marketPrice: formatPrice(
+          toPrice(invertPrice(askBookTick + 2n)),
+          baseCurrency.decimals,
+          quoteCurrency.decimals,
+        ),
+      },
       up: {
         tick: askBookTick + 1n,
         price: formatPrice(
           toPrice(askBookTick + 1n),
+          baseCurrency.decimals,
+          quoteCurrency.decimals,
+        ),
+        marketPrice: formatPrice(
+          toPrice(invertPrice(askBookTick + 1n)),
           baseCurrency.decimals,
           quoteCurrency.decimals,
         ),
@@ -187,11 +246,34 @@ export const getPriceNeighborhood = ({
           baseCurrency.decimals,
           quoteCurrency.decimals,
         ),
+        marketPrice: formatPrice(
+          toPrice(invertPrice(askBookTick)),
+          baseCurrency.decimals,
+          quoteCurrency.decimals,
+        ),
       },
       down: {
         tick: askBookTick - 1n,
         price: formatPrice(
           toPrice(askBookTick - 1n),
+          baseCurrency.decimals,
+          quoteCurrency.decimals,
+        ),
+        marketPrice: formatPrice(
+          toPrice(invertPrice(askBookTick - 1n)),
+          baseCurrency.decimals,
+          quoteCurrency.decimals,
+        ),
+      },
+      nextDown: {
+        tick: askBookTick - 2n,
+        price: formatPrice(
+          toPrice(askBookTick - 2n),
+          baseCurrency.decimals,
+          quoteCurrency.decimals,
+        ),
+        marketPrice: formatPrice(
+          toPrice(invertPrice(askBookTick - 2n)),
           baseCurrency.decimals,
           quoteCurrency.decimals,
         ),
