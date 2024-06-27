@@ -1,8 +1,8 @@
-import { toPrice } from '../utils/tick'
 import { TAKER_DEFAULT_POLICY } from '../constants/fee'
 import { divide } from '../utils/math'
 import { baseToQuote, quoteToBase } from '../utils/decimals'
 import { CHAIN_IDS } from '../constants/chain'
+import { MIN_TICK } from '../constants/tick'
 
 import type { Currency } from './currency'
 import type { DepthDto } from './depth'
@@ -43,18 +43,24 @@ export class Book {
   }
 
   take = ({
-    limitPrice,
+    limitTick,
     amountOut, // quote
   }: {
-    limitPrice: bigint
+    limitTick: bigint
     amountOut: bigint
   }) => {
+    const events: {
+      tick: bigint
+      takenQuoteAmount: bigint
+      spentBaseAmount: bigint
+    }[] = []
     let takenQuoteAmount = 0n
     let spentBaseAmount = 0n
     if (this.depths.length === 0) {
       return {
         takenQuoteAmount,
         spentBaseAmount,
+        events,
       }
     }
 
@@ -63,8 +69,8 @@ export class Book {
       .map((depth) => depth.tick)
     let index = 0
     let tick = ticks[index]!
-    while (tick > -8388608n) {
-      if (limitPrice > toPrice(tick)) {
+    while (tick >= MIN_TICK) {
+      if (limitTick > tick) {
         break
       }
       let maxAmount = TAKER_DEFAULT_POLICY[this.chainId].usesQuote
@@ -96,7 +102,11 @@ export class Book {
       if (quoteAmount === 0n) {
         break
       }
-
+      events.push({
+        tick,
+        takenQuoteAmount: quoteAmount,
+        spentBaseAmount: baseAmount,
+      })
       takenQuoteAmount += quoteAmount
       spentBaseAmount += baseAmount
       if (amountOut <= takenQuoteAmount) {
@@ -108,22 +118,29 @@ export class Book {
     return {
       takenQuoteAmount,
       spentBaseAmount,
+      events,
     }
   }
 
   spend = ({
-    limitPrice,
+    limitTick,
     amountIn, // base
   }: {
-    limitPrice: bigint
+    limitTick: bigint
     amountIn: bigint
   }) => {
+    const events: {
+      tick: bigint
+      takenQuoteAmount: bigint
+      spentBaseAmount: bigint
+    }[] = []
     let takenQuoteAmount = 0n
     let spentBaseAmount = 0n
     if (this.depths.length === 0) {
       return {
         takenQuoteAmount,
         spentBaseAmount,
+        events,
       }
     }
 
@@ -132,8 +149,8 @@ export class Book {
       .map((depth) => depth.tick)
     let index = 0
     let tick = ticks[index]!
-    while (spentBaseAmount <= amountIn && tick > -8388608n) {
-      if (limitPrice > toPrice(tick)) {
+    while (spentBaseAmount <= amountIn && tick >= MIN_TICK) {
+      if (limitTick > tick) {
         break
       }
       let maxAmount = TAKER_DEFAULT_POLICY[this.chainId].usesQuote
@@ -165,7 +182,11 @@ export class Book {
       if (baseAmount === 0n) {
         break
       }
-
+      events.push({
+        tick,
+        takenQuoteAmount: quoteAmount,
+        spentBaseAmount: baseAmount,
+      })
       takenQuoteAmount += quoteAmount
       spentBaseAmount += baseAmount
       index++
@@ -174,6 +195,7 @@ export class Book {
     return {
       takenQuoteAmount,
       spentBaseAmount,
+      events,
     }
   }
 }

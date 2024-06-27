@@ -2,7 +2,7 @@ import { isAddressEqual } from 'viem'
 
 import { getMarketId } from '../utils/market'
 import { CHAIN_IDS } from '../constants/chain'
-import { invertPrice, toPrice } from '../utils/tick'
+import { invertTick, toPrice } from '../utils/tick'
 import { formatPrice } from '../utils/prices'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../constants/fee'
 import { quoteToBase } from '../utils/decimals'
@@ -67,7 +67,7 @@ export class Market {
     )
 
     this.asks = askBook.depths.map((depth) => {
-      const price = invertPrice(toPrice(depth.tick))
+      const price = toPrice(invertTick(depth.tick))
       const readablePrice = formatPrice(
         price,
         this.quote.decimals,
@@ -87,18 +87,18 @@ export class Market {
 
   take = ({
     takeQuote,
-    limitPrice,
+    limitTick,
     amountOut, // quote if takeQuote, base otherwise
   }: {
     takeQuote: boolean
-    limitPrice: bigint
+    limitTick: bigint
     amountOut: bigint
   }) => {
     if (takeQuote) {
       return {
         bookId: this.bidBook.id,
         ...this.bidBook.take({
-          limitPrice,
+          limitTick,
           amountOut,
         }),
       }
@@ -106,7 +106,7 @@ export class Market {
       return {
         bookId: this.askBook.id,
         ...this.askBook.take({
-          limitPrice: invertPrice(limitPrice),
+          limitTick: invertTick(limitTick),
           amountOut,
         }),
       }
@@ -115,18 +115,18 @@ export class Market {
 
   spend = ({
     spentBase,
-    limitPrice,
+    limitTick,
     amountIn, // base if spentBase, quote otherwise
   }: {
     spentBase: boolean
-    limitPrice: bigint
+    limitTick: bigint
     amountIn: bigint
   }) => {
     if (spentBase) {
       return {
         bookId: this.bidBook.id,
         ...this.bidBook.spend({
-          limitPrice,
+          limitTick,
           amountIn,
         }),
       }
@@ -134,7 +134,7 @@ export class Market {
       return {
         bookId: this.askBook.id,
         ...this.askBook.spend({
-          limitPrice: invertPrice(limitPrice),
+          limitTick: invertTick(limitTick),
           amountIn,
         }),
       }

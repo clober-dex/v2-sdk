@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { getExpectedInput, getMarket } from '@clober/v2-sdk'
+import { getExpectedInput, getMarket, toPrice } from '@clober/v2-sdk'
 import {
   formatUnits,
   isAddressEqual,
@@ -9,7 +9,7 @@ import {
 } from 'viem'
 
 import { parsePrice } from '../src/utils/prices'
-import { invertPrice } from '../src/utils/tick'
+import { invertTick } from '../src/utils/tick'
 import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
 import { BOOK_VIEWER_ABI } from '../src/abis/core/book-viewer-abi'
 import { buildPublicClient } from '../src/constants/client'
@@ -45,19 +45,21 @@ const isTakeResultEqual = async (
         id: isBid
           ? 2753017174304248252793812478093441832431186343406437115611n
           : 2505799676027433010421416925405481572661563164234992034276n,
-        limitPrice: isBid
-          ? invertPrice(
-              parsePrice(
+        limitPrice: toPrice(
+          isBid
+            ? invertTick(
+                parsePrice(
+                  Number(limitPrice),
+                  market.quote.decimals,
+                  market.base.decimals,
+                ).roundingDownTick,
+              )
+            : parsePrice(
                 Number(limitPrice),
                 market.quote.decimals,
                 market.base.decimals,
-              ),
-            )
-          : parsePrice(
-              Number(limitPrice),
-              market.quote.decimals,
-              market.base.decimals,
-            ),
+              ).roundingUpTick,
+        ),
         quoteAmount: parseUnits(amountOut, outputCurrency.decimals),
         maxBaseAmount: 0n,
         hookData: zeroHash,

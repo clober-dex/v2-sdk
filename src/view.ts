@@ -5,14 +5,14 @@ import { CHAIN_IDS } from './constants/chain'
 import type { ChartLog, Currency, DefaultOptions, Market } from './type'
 import { CHART_LOG_INTERVALS } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
-import { MAX_PRICE } from './constants/price'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
 import { type OpenOrder } from './model/open-order'
 import { decorator } from './utils/decorator'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
 import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
-import { fromPrice, invertPrice, toPrice } from './utils/tick'
+import { invertTick, toPrice } from './utils/tick'
+import { MAX_TICK, MIN_TICK } from './constants/tick'
 
 /**
  * Get contract addresses by chain id
@@ -137,13 +137,13 @@ export const getPriceNeighborhood = ({
   const baseCurrency = isAddressEqual(quoteTokenAddress, currency0.address)
     ? currency1
     : currency0
-  const rawPrice = parsePrice(
+  const { roundingDownTick, roundingUpTick } = parsePrice(
     Number(price),
     quoteCurrency.decimals,
     baseCurrency.decimals,
   )
-  const bidBookTick = fromPrice(rawPrice)
-  const askBookTick = fromPrice(invertPrice(rawPrice))
+  const bidBookTick = roundingDownTick
+  const askBookTick = invertTick(roundingUpTick)
   return {
     normal: {
       up: {
@@ -234,15 +234,24 @@ export const getExpectedOutput = decorator(
     inputToken: `0x${string}`
     outputToken: `0x${string}`
     amountIn: string
-    options?: { limitPrice?: string } & DefaultOptions
+    options?: {
+      limitPrice?: string
+      roundingDownTakenBid?: boolean
+      roundingUpTakenAsk?: boolean
+    } & DefaultOptions
   }): Promise<{
     takenAmount: string
     spentAmount: string
     bookId: bigint
+    events: { price: string; takenAmount: string; spentAmount: string }[]
   }> => {
+    const [roundingDownTakenBid, roundingUpTakenAsk] = [
+      options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
+      options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
+    ]
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
-    const rawLimitPrice =
+    const { roundingDownTick, roundingUpTick } =
       options && options.limitPrice
         ? parsePrice(
             Number(options.limitPrice),
@@ -250,12 +259,25 @@ export const getExpectedOutput = decorator(
             market.base.decimals,
           )
         : isBid
-          ? MAX_PRICE
-          : 0n
+          ? {
+              roundingDownTick: MAX_TICK,
+              roundingUpTick: MAX_TICK,
+            }
+          : {
+              roundingDownTick: MIN_TICK,
+              roundingUpTick: MIN_TICK,
+            }
     const inputCurrency = isBid ? market.quote : market.base
-    const { takenQuoteAmount, spentBaseAmount, bookId } = market.spend({
-      spentBase: !isBid,
-      limitPrice: rawLimitPrice,
+    const isTakingBidSide = !isBid
+    const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.spend({
+      spentBase: isTakingBidSide,
+      limitTick: isTakingBidSide
+        ? roundingDownTakenBid
+          ? roundingDownTick
+          : roundingUpTick
+        : roundingUpTakenAsk
+          ? roundingUpTick
+          : roundingDownTick,
       amountIn: parseUnits(amountIn, inputCurrency.decimals),
     })
     return {
@@ -268,6 +290,21 @@ export const getExpectedOutput = decorator(
         isBid ? market.quote.decimals : market.base.decimals,
       ),
       bookId,
+      events: events.map(({ tick, takenQuoteAmount, spentBaseAmount }) => ({
+        price: formatPrice(
+          toPrice(isBid ? invertTick(BigInt(tick)) : BigInt(tick)),
+          market.quote.decimals,
+          market.base.decimals,
+        ),
+        takenAmount: formatUnits(
+          takenQuoteAmount,
+          isBid ? market.base.decimals : market.quote.decimals,
+        ),
+        spentAmount: formatUnits(
+          spentBaseAmount,
+          isBid ? market.quote.decimals : market.base.decimals,
+        ),
+      })),
     }
   },
 )
@@ -306,15 +343,24 @@ export const getExpectedInput = decorator(
     inputToken: `0x${string}`
     outputToken: `0x${string}`
     amountOut: string
-    options?: { limitPrice?: string } & DefaultOptions
+    options?: {
+      limitPrice?: string
+      roundingDownTakenBid?: boolean
+      roundingUpTakenAsk?: boolean
+    } & DefaultOptions
   }): Promise<{
     takenAmount: string
     spentAmount: string
     bookId: bigint
+    events: { price: string; takenAmount: string; spentAmount: string }[]
   }> => {
+    const [roundingDownTakenBid, roundingUpTakenAsk] = [
+      options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
+      options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
+    ]
     const market = await fetchMarket(chainId, [inputToken, outputToken])
     const isBid = isAddressEqual(market.quote.address, inputToken)
-    const rawLimitPrice =
+    const { roundingDownTick, roundingUpTick } =
       options && options.limitPrice
         ? parsePrice(
             Number(options.limitPrice),
@@ -322,12 +368,19 @@ export const getExpectedInput = decorator(
             market.base.decimals,
           )
         : isBid
-          ? MAX_PRICE
-          : 0n
+          ? { roundingDownTick: MAX_TICK, roundingUpTick: MAX_TICK }
+          : { roundingDownTick: MIN_TICK, roundingUpTick: MIN_TICK }
     const outputCurrency = isBid ? market.base : market.quote
-    const { takenQuoteAmount, spentBaseAmount, bookId } = market.take({
-      takeQuote: !isBid,
-      limitPrice: rawLimitPrice,
+    const isTakingBidSide = !isBid
+    const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.take({
+      takeQuote: isTakingBidSide,
+      limitTick: isTakingBidSide
+        ? roundingDownTakenBid
+          ? roundingDownTick
+          : roundingUpTick
+        : roundingUpTakenAsk
+          ? roundingUpTick
+          : roundingDownTick,
       amountOut: parseUnits(amountOut, outputCurrency.decimals),
     })
     return {
@@ -340,6 +393,21 @@ export const getExpectedInput = decorator(
         isBid ? market.quote.decimals : market.base.decimals,
       ),
       bookId,
+      events: events.map(({ tick, takenQuoteAmount, spentBaseAmount }) => ({
+        price: formatPrice(
+          toPrice(isBid ? invertTick(BigInt(tick)) : BigInt(tick)),
+          market.quote.decimals,
+          market.base.decimals,
+        ),
+        takenAmount: formatUnits(
+          takenQuoteAmount,
+          isBid ? market.base.decimals : market.quote.decimals,
+        ),
+        spentAmount: formatUnits(
+          spentBaseAmount,
+          isBid ? market.quote.decimals : market.base.decimals,
+        ),
+      })),
     }
   },
 )
