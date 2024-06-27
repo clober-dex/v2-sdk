@@ -11,7 +11,7 @@ import { decorator } from './utils/decorator'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
 import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
-import { invertPrice, invertTick, toPrice } from './utils/tick'
+import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 
 /**
@@ -221,7 +221,7 @@ export const getPriceNeighborhood = ({
           quoteCurrency.decimals,
         ),
         marketPrice: formatPrice(
-          toPrice(invertPrice(askBookTick + 2n)),
+          toPrice(invertTick(askBookTick + 2n)),
           baseCurrency.decimals,
           quoteCurrency.decimals,
         ),
@@ -234,7 +234,7 @@ export const getPriceNeighborhood = ({
           quoteCurrency.decimals,
         ),
         marketPrice: formatPrice(
-          toPrice(invertPrice(askBookTick + 1n)),
+          toPrice(invertTick(askBookTick + 1n)),
           baseCurrency.decimals,
           quoteCurrency.decimals,
         ),
@@ -247,7 +247,7 @@ export const getPriceNeighborhood = ({
           quoteCurrency.decimals,
         ),
         marketPrice: formatPrice(
-          toPrice(invertPrice(askBookTick)),
+          toPrice(invertTick(askBookTick)),
           baseCurrency.decimals,
           quoteCurrency.decimals,
         ),
@@ -260,7 +260,7 @@ export const getPriceNeighborhood = ({
           quoteCurrency.decimals,
         ),
         marketPrice: formatPrice(
-          toPrice(invertPrice(askBookTick - 1n)),
+          toPrice(invertTick(askBookTick - 1n)),
           baseCurrency.decimals,
           quoteCurrency.decimals,
         ),
@@ -273,7 +273,7 @@ export const getPriceNeighborhood = ({
           quoteCurrency.decimals,
         ),
         marketPrice: formatPrice(
-          toPrice(invertPrice(askBookTick - 2n)),
+          toPrice(invertTick(askBookTick - 2n)),
           baseCurrency.decimals,
           quoteCurrency.decimals,
         ),
