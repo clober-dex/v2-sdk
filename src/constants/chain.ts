@@ -4,7 +4,6 @@ import {
   berachainTestnet,
   type Chain,
   zkSync,
-  zkSyncSepoliaTestnet,
 } from 'viem/chains'
 
 import { cloberTestChain } from './test-chain'
@@ -15,7 +14,6 @@ export enum CHAIN_IDS {
   BASE = base.id,
   BERACHAIN_TESTNET = berachainTestnet.id,
   ZKSYNC = zkSync.id,
-  ZKSYNC_SEPOLIA = zkSyncSepoliaTestnet.id,
 }
 
 export const CHAIN_MAP: {
@@ -34,5 +32,4 @@ export const CHAIN_MAP: {
     },
   },
   [CHAIN_IDS.ZKSYNC]: zkSync,
-  [CHAIN_IDS.ZKSYNC_SEPOLIA]: zkSyncSepoliaTestnet,
 }

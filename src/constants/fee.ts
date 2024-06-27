@@ -10,7 +10,6 @@ export const MAKER_DEFAULT_POLICY: {
   [CHAIN_IDS.BASE]: new FeePolicy(true, 0n), // 0%,
   [CHAIN_IDS.BERACHAIN_TESTNET]: new FeePolicy(true, 0n), // 0%,
   [CHAIN_IDS.ZKSYNC]: new FeePolicy(true, 0n), // 0%,
-  [CHAIN_IDS.ZKSYNC_SEPOLIA]: new FeePolicy(true, 0n), // 0%,
 }
 
 export const TAKER_DEFAULT_POLICY: {
@@ -21,5 +20,4 @@ export const TAKER_DEFAULT_POLICY: {
   [CHAIN_IDS.BASE]: new FeePolicy(true, 100n), // 0.01%
   [CHAIN_IDS.BERACHAIN_TESTNET]: new FeePolicy(true, 100n), // 0.01%
   [CHAIN_IDS.ZKSYNC]: new FeePolicy(true, 100n), // 0.01%
-  [CHAIN_IDS.ZKSYNC_SEPOLIA]: new FeePolicy(true, 100n), // 0.01%
 }

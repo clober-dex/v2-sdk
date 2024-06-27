@@ -13,8 +13,6 @@ const SUBGRAPH_URL: {
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph/v1.3.2/gn',
   [CHAIN_IDS.ZKSYNC]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-zksync-era/v1.4.2/gn',
-  [CHAIN_IDS.ZKSYNC_SEPOLIA]:
-    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-zksync-era-sepolia/v1.4.1/gn',
 }
 
 class Subgraph {

@@ -10,7 +10,7 @@ export const buildPublicClient = (chainId: CHAIN_IDS, rpcUrl?: string) => {
     transport: rpcUrl ? http(rpcUrl) : http(),
   })
 
-  if (chainId === CHAIN_IDS.ZKSYNC_SEPOLIA || chainId === CHAIN_IDS.ZKSYNC) {
+  if (chainId === CHAIN_IDS.ZKSYNC) {
     cachedPublicClients[chainId] = cachedPublicClients[chainId]!.extend(
       eip712WalletActions(),
     )
