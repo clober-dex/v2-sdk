@@ -1,4 +1,5 @@
-import { PRICE_PRECISION } from '../constants/price'
+import { MAX_PRICE, MIN_PRICE, PRICE_PRECISION } from '../constants/price'
+import { MAX_TICK, MIN_TICK } from '../constants/tick'
 
 import { lnWad } from './math'
 
@@ -22,11 +23,18 @@ const _R16 = 0x5d6af8dedb81196699c329n
 const _R17 = 0x2216e584f5fa1ea92604n
 const _R18 = 0x48a170391f7dc42n
 
+export const invertTick = (tick: bigint): bigint => {
+  return -tick
+}
+
 export const invertPrice = (price: bigint): bigint => {
   return price ? (1n << (PRICE_PRECISION * 2n)) / price : 0n
 }
 
 export const fromPrice = (price: bigint): bigint => {
+  if (price > MAX_PRICE || price < MIN_PRICE) {
+    throw new Error('price is out of range')
+  }
   const tick = (lnWad(price) * 42951820407860n) / 2n ** 128n
   if (toPrice(tick) > price) {
     return tick - 1n
@@ -35,6 +43,9 @@ export const fromPrice = (price: bigint): bigint => {
 }
 
 export const toPrice = (tick: bigint): bigint => {
+  if (tick > MAX_TICK || tick < MIN_TICK) {
+    throw new Error('tick is out of range')
+  }
   const absTick = tick < 0n ? -tick : tick
   let price = 0n
   if ((absTick & 0x1n) !== 0n) {

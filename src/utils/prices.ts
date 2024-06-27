@@ -1,9 +1,10 @@
 import BigNumber from 'bignumber.js'
 
-import { PRICE_PRECISION } from '../constants/price'
+import { MAX_PRICE, MIN_PRICE, PRICE_PRECISION } from '../constants/price'
 import { Currency } from '../model/currency'
 
-import { fromPrice, invertPrice, toPrice } from './tick'
+import { fromPrice, invertTick, toPrice } from './tick'
+import { max, min } from './bigint'
 
 BigNumber.config({
   DECIMAL_PLACES: 100,
@@ -23,28 +24,32 @@ export const formatPrice = (
 }
 
 export const parsePrice = (
-  price: number,
+  humanReadablePrice: number,
   quoteDecimals: number,
   baseDecimals: number,
 ): {
-  roundingDownPrice: bigint
-  roundingUpPrice: bigint
+  roundingDownTick: bigint
+  roundingUpTick: bigint
 } => {
-  const value = new BigNumber(price)
+  const value = new BigNumber(humanReadablePrice)
     .times(new BigNumber(2).pow(PRICE_PRECISION.toString()))
     .times(new BigNumber(10).pow(quoteDecimals))
     .div(new BigNumber(10).pow(baseDecimals))
   const rawPrice = BigInt(
     value.isInteger() ? value.toFixed() : value.integerValue().toFixed(),
   )
-  const tick = fromPrice(rawPrice)
+  const cutOffRawPrice = max(MIN_PRICE, min(rawPrice, MAX_PRICE))
+  const tick = fromPrice(cutOffRawPrice)
   const flooredPrice = toPrice(tick)
   if (rawPrice === flooredPrice) {
-    return { roundingDownPrice: toPrice(tick), roundingUpPrice: toPrice(tick) }
+    return {
+      roundingDownTick: tick,
+      roundingUpTick: tick,
+    }
   }
   return {
-    roundingDownPrice: toPrice(tick),
-    roundingUpPrice: toPrice(tick + 1n),
+    roundingDownTick: tick,
+    roundingUpTick: tick + 1n,
   }
 }
 
@@ -67,7 +72,7 @@ export const getMarketPrice = ({
     )
   } else if (askTick) {
     return formatPrice(
-      invertPrice(toPrice(askTick)),
+      toPrice(invertTick(askTick)),
       marketQuoteCurrency.decimals,
       marketBaseCurrency.decimals,
     )

@@ -1,3 +1,8 @@
+export const max = (...args: bigint[]) =>
+  args.reduce((m, e) => (e > m ? e : m), 0n)
+export const min = (...args: bigint[]) =>
+  args.reduce((m, e) => (e < m ? e : m), 2n ** 256n - 1n)
+
 export const applyPercent = (
   amount: bigint,
   percent: number,

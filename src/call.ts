@@ -21,7 +21,7 @@ import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
 import { fetchMarket } from './apis/market'
 import { formatPrice, parsePrice } from './utils/prices'
-import { fromPrice, invertPrice, toPrice } from './utils/tick'
+import { invertTick, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
@@ -223,7 +223,7 @@ export const limitOrder = decorator(
     `)
     }
 
-    const { roundingDownPrice, roundingUpPrice } = parsePrice(
+    const { roundingDownTick, roundingUpTick } = parsePrice(
       Number(price),
       market.quote.decimals,
       market.base.decimals,
@@ -253,13 +253,11 @@ export const limitOrder = decorator(
         ? Number(options.makeTick)
         : Number(
             isBid
-              ? fromPrice(
-                  roundingUpMakeBid ? roundingUpPrice : roundingDownPrice,
-                )
-              : fromPrice(
-                  invertPrice(
-                    roundingDownMakeAsk ? roundingDownPrice : roundingUpPrice,
-                  ),
+              ? roundingUpMakeBid
+                ? roundingUpTick
+                : roundingDownTick
+              : invertTick(
+                  roundingDownMakeAsk ? roundingDownTick : roundingUpTick,
                 ),
           ),
       quoteAmount,
@@ -293,7 +291,7 @@ export const limitOrder = decorator(
             price: formatPrice(
               isBid
                 ? toPrice(BigInt(makeParam.tick))
-                : invertPrice(toPrice(BigInt(makeParam.tick))),
+                : toPrice(invertTick(BigInt(makeParam.tick))),
               market.quote.decimals,
               market.base.decimals,
             ),
@@ -330,15 +328,17 @@ export const limitOrder = decorator(
                   makeBookId: makeParam.id,
                   limitPrice: options?.takeLimitTick
                     ? toPrice(options.takeLimitTick)
-                    : isBid
-                      ? invertPrice(
-                          roundingUpTakenAsk
-                            ? roundingUpPrice
-                            : roundingDownPrice,
-                        )
-                      : roundingDownTakenBid
-                        ? roundingDownPrice
-                        : roundingUpPrice,
+                    : toPrice(
+                        isBid
+                          ? invertTick(
+                              roundingUpTakenAsk
+                                ? roundingUpTick
+                                : roundingDownTick,
+                            )
+                          : roundingDownTakenBid
+                            ? roundingDownTick
+                            : roundingUpTick,
+                      ),
                   tick: makeParam.tick,
                   quoteAmount,
                   takeHookData: zeroHash,
@@ -364,7 +364,7 @@ export const limitOrder = decorator(
             price: formatPrice(
               isBid
                 ? toPrice(BigInt(makeParam.tick))
-                : invertPrice(toPrice(BigInt(makeParam.tick))),
+                : toPrice(invertTick(BigInt(makeParam.tick))),
               market.quote.decimals,
               market.base.decimals,
             ),

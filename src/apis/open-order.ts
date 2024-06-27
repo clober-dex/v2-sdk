@@ -5,7 +5,7 @@ import { getMarketId } from '../utils/market'
 import type { Currency } from '../model/currency'
 import { baseToQuote, quoteToBase } from '../utils/decimals'
 import { formatPrice } from '../utils/prices'
-import { fromPrice, invertPrice, toPrice } from '../utils/tick'
+import { invertTick, toPrice } from '../utils/tick'
 import type { OpenOrder, OpenOrderDto } from '../model/open-order'
 import { fetchCurrency } from '../utils/currency'
 import { applyPercent } from '../utils/bigint'
@@ -158,7 +158,7 @@ const toOpenOrder = (
     : unitSize * unitFilledAmount
 
   // each currency amount type
-  const invertedTick = fromPrice(invertPrice(toPrice(tick)))
+  const invertedTick = invertTick(tick)
   const claimed = isBid
     ? quoteToBase(tick, unitSize * unitClaimedAmount, false)
     : baseToQuote(invertedTick, unitSize * unitClaimedAmount, false)
@@ -176,7 +176,7 @@ const toOpenOrder = (
     txHash: openOrder.txHash as `0x${string}`,
     createdAt: Number(openOrder.createdAt),
     price: formatPrice(
-      isBid ? toPrice(tick) : invertPrice(toPrice(tick)),
+      toPrice(isBid ? tick : invertTick(tick)),
       quote.decimals,
       base.decimals,
     ),
