@@ -11,7 +11,7 @@ import { decorator } from './utils/decorator'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
 import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
-import { invertTick, toPrice } from './utils/tick'
+import { invertTick } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 
 /**
@@ -148,135 +148,55 @@ export const getPriceNeighborhood = ({
     normal: {
       nextUp: {
         tick: bidBookTick + 2n,
-        price: formatPrice(
-          toPrice(bidBookTick + 2n),
-          quoteCurrency.decimals,
-          baseCurrency.decimals,
-        ),
-        marketPrice: formatPrice(
-          toPrice(bidBookTick + 2n),
-          quoteCurrency.decimals,
-          baseCurrency.decimals,
-        ),
+        price: formatPrice(bidBookTick + 2n),
+        marketPrice: formatPrice(bidBookTick + 2n),
       },
       up: {
         tick: bidBookTick + 1n,
-        price: formatPrice(
-          toPrice(bidBookTick + 1n),
-          quoteCurrency.decimals,
-          baseCurrency.decimals,
-        ),
-        marketPrice: formatPrice(
-          toPrice(bidBookTick + 1n),
-          quoteCurrency.decimals,
-          baseCurrency.decimals,
-        ),
+        price: formatPrice(bidBookTick + 1n),
+        marketPrice: formatPrice(bidBookTick + 1n),
       },
       now: {
         tick: bidBookTick,
-        price: formatPrice(
-          toPrice(bidBookTick),
-          quoteCurrency.decimals,
-          baseCurrency.decimals,
-        ),
-        marketPrice: formatPrice(
-          toPrice(bidBookTick),
-          quoteCurrency.decimals,
-          baseCurrency.decimals,
-        ),
+        price: formatPrice(bidBookTick),
+        marketPrice: formatPrice(bidBookTick),
       },
       down: {
         tick: bidBookTick - 1n,
-        price: formatPrice(
-          toPrice(bidBookTick - 1n),
-          quoteCurrency.decimals,
-          baseCurrency.decimals,
-        ),
-        marketPrice: formatPrice(
-          toPrice(bidBookTick - 1n),
-          quoteCurrency.decimals,
-          baseCurrency.decimals,
-        ),
+        price: formatPrice(bidBookTick - 1n),
+        marketPrice: formatPrice(bidBookTick - 1n),
       },
       nextDown: {
         tick: bidBookTick - 2n,
-        price: formatPrice(
-          toPrice(bidBookTick - 2n),
-          quoteCurrency.decimals,
-          baseCurrency.decimals,
-        ),
-        marketPrice: formatPrice(
-          toPrice(bidBookTick - 2n),
-          quoteCurrency.decimals,
-          baseCurrency.decimals,
-        ),
+        price: formatPrice(bidBookTick - 2n),
+        marketPrice: formatPrice(bidBookTick - 2n),
       },
     },
     inverted: {
       nextUp: {
         tick: askBookTick + 2n,
-        price: formatPrice(
-          toPrice(askBookTick + 2n),
-          baseCurrency.decimals,
-          quoteCurrency.decimals,
-        ),
-        marketPrice: formatPrice(
-          toPrice(invertTick(askBookTick + 2n)),
-          baseCurrency.decimals,
-          quoteCurrency.decimals,
-        ),
+        price: formatPrice(askBookTick + 2n),
+        marketPrice: formatPrice(invertTick(askBookTick + 2n)),
       },
       up: {
         tick: askBookTick + 1n,
-        price: formatPrice(
-          toPrice(askBookTick + 1n),
-          baseCurrency.decimals,
-          quoteCurrency.decimals,
-        ),
-        marketPrice: formatPrice(
-          toPrice(invertTick(askBookTick + 1n)),
-          baseCurrency.decimals,
-          quoteCurrency.decimals,
-        ),
+        price: formatPrice(askBookTick + 1n),
+        marketPrice: formatPrice(invertTick(askBookTick + 1n)),
       },
       now: {
         tick: askBookTick,
-        price: formatPrice(
-          toPrice(askBookTick),
-          baseCurrency.decimals,
-          quoteCurrency.decimals,
-        ),
-        marketPrice: formatPrice(
-          toPrice(invertTick(askBookTick)),
-          baseCurrency.decimals,
-          quoteCurrency.decimals,
-        ),
+        price: formatPrice(askBookTick),
+        marketPrice: formatPrice(invertTick(askBookTick)),
       },
       down: {
         tick: askBookTick - 1n,
-        price: formatPrice(
-          toPrice(askBookTick - 1n),
-          baseCurrency.decimals,
-          quoteCurrency.decimals,
-        ),
-        marketPrice: formatPrice(
-          toPrice(invertTick(askBookTick - 1n)),
-          baseCurrency.decimals,
-          quoteCurrency.decimals,
-        ),
+        price: formatPrice(askBookTick - 1n),
+        marketPrice: formatPrice(invertTick(askBookTick - 1n)),
       },
       nextDown: {
         tick: askBookTick - 2n,
-        price: formatPrice(
-          toPrice(askBookTick - 2n),
-          baseCurrency.decimals,
-          quoteCurrency.decimals,
-        ),
-        marketPrice: formatPrice(
-          toPrice(invertTick(askBookTick - 2n)),
-          baseCurrency.decimals,
-          quoteCurrency.decimals,
-        ),
+        price: formatPrice(askBookTick - 2n),
+        marketPrice: formatPrice(invertTick(askBookTick - 2n)),
       },
     },
   }
@@ -373,11 +293,7 @@ export const getExpectedOutput = decorator(
       ),
       bookId,
       events: events.map(({ tick, takenQuoteAmount, spentBaseAmount }) => ({
-        price: formatPrice(
-          toPrice(isBid ? invertTick(BigInt(tick)) : BigInt(tick)),
-          market.quote.decimals,
-          market.base.decimals,
-        ),
+        price: formatPrice(isBid ? invertTick(BigInt(tick)) : BigInt(tick)),
         takenAmount: formatUnits(
           takenQuoteAmount,
           isBid ? market.base.decimals : market.quote.decimals,
@@ -476,11 +392,7 @@ export const getExpectedInput = decorator(
       ),
       bookId,
       events: events.map(({ tick, takenQuoteAmount, spentBaseAmount }) => ({
-        price: formatPrice(
-          toPrice(isBid ? invertTick(BigInt(tick)) : BigInt(tick)),
-          market.quote.decimals,
-          market.base.decimals,
-        ),
+        price: formatPrice(isBid ? invertTick(BigInt(tick)) : BigInt(tick)),
         takenAmount: formatUnits(
           takenQuoteAmount,
           isBid ? market.base.decimals : market.quote.decimals,

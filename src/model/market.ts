@@ -2,7 +2,7 @@ import { isAddressEqual } from 'viem'
 
 import { getMarketId } from '../utils/market'
 import { CHAIN_IDS } from '../constants/chain'
-import { invertTick, toPrice } from '../utils/tick'
+import { invertTick } from '../utils/tick'
 import { formatPrice } from '../utils/prices'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../constants/fee'
 import { quoteToBase } from '../utils/decimals'
@@ -52,11 +52,7 @@ export class Market {
     this.bids = bidBook.depths.map(
       (depth) =>
         ({
-          price: formatPrice(
-            toPrice(depth.tick),
-            this.quote.decimals,
-            this.base.decimals,
-          ),
+          price: formatPrice(depth.tick),
           tick: depth.tick,
           baseAmount: quoteToBase(
             depth.tick,
@@ -67,12 +63,7 @@ export class Market {
     )
 
     this.asks = askBook.depths.map((depth) => {
-      const price = toPrice(invertTick(depth.tick))
-      const readablePrice = formatPrice(
-        price,
-        this.quote.decimals,
-        this.base.decimals,
-      )
+      const readablePrice = formatPrice(invertTick(depth.tick))
       const baseAmount = depth.unitAmount * askBook.unitSize
       return {
         price: readablePrice,

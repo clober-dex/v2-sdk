@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js'
 
 import { MAX_PRICE, MIN_PRICE, PRICE_PRECISION } from '../constants/price'
-import { Currency } from '../model/currency'
 
 import { fromPrice, invertTick, toPrice } from './tick'
 import { max, min } from './bigint'
@@ -11,16 +10,8 @@ BigNumber.config({
 })
 
 // @dev: Use this function only for display purposes not logic
-export const formatPrice = (
-  price: bigint,
-  quoteDecimals: number,
-  baseDecimals: number,
-): string => {
-  return new BigNumber(price.toString())
-    .div(new BigNumber(2).pow(PRICE_PRECISION.toString()))
-    .times(new BigNumber(10).pow(baseDecimals))
-    .div(new BigNumber(10).pow(quoteDecimals))
-    .toString()
+export const formatPrice = (tick: bigint): string => {
+  return new BigNumber('1.0001').pow(Number(tick)).toFixed()
 }
 
 export const parsePrice = (
@@ -54,28 +45,16 @@ export const parsePrice = (
 }
 
 export const getMarketPrice = ({
-  marketQuoteCurrency,
-  marketBaseCurrency,
   bidTick,
   askTick,
 }: {
-  marketQuoteCurrency: Currency
-  marketBaseCurrency: Currency
   bidTick?: bigint
   askTick?: bigint
 }): string => {
   if (bidTick) {
-    return formatPrice(
-      toPrice(bidTick),
-      marketQuoteCurrency.decimals,
-      marketBaseCurrency.decimals,
-    )
+    return formatPrice(bidTick)
   } else if (askTick) {
-    return formatPrice(
-      toPrice(invertTick(askTick)),
-      marketQuoteCurrency.decimals,
-      marketBaseCurrency.decimals,
-    )
+    return formatPrice(invertTick(askTick))
   } else {
     throw new Error('Either bidTick or askTick must be provided')
   }

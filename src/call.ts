@@ -290,10 +290,8 @@ export const limitOrder = decorator(
             direction: 'in',
             price: formatPrice(
               isBid
-                ? toPrice(BigInt(makeParam.tick))
-                : toPrice(invertTick(BigInt(makeParam.tick))),
-              market.quote.decimals,
-              market.base.decimals,
+                ? BigInt(makeParam.tick)
+                : invertTick(BigInt(makeParam.tick)),
             ),
           },
           spent: {
@@ -363,10 +361,8 @@ export const limitOrder = decorator(
             direction: 'in',
             price: formatPrice(
               isBid
-                ? toPrice(BigInt(makeParam.tick))
-                : toPrice(invertTick(BigInt(makeParam.tick))),
-              market.quote.decimals,
-              market.base.decimals,
+                ? BigInt(makeParam.tick)
+                : invertTick(BigInt(makeParam.tick)),
             ),
           },
           spent: {
