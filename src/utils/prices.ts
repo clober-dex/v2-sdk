@@ -20,7 +20,7 @@ export const formatPrice = (
     .div(new BigNumber(2).pow(PRICE_PRECISION.toString()))
     .times(new BigNumber(10).pow(baseDecimals))
     .div(new BigNumber(10).pow(quoteDecimals))
-    .toString()
+    .toFixed()
 }
 
 export const parsePrice = (
@@ -64,13 +64,13 @@ export const getMarketPrice = ({
   bidTick?: bigint
   askTick?: bigint
 }): string => {
-  if (bidTick) {
+  if (bidTick !== undefined) {
     return formatPrice(
       toPrice(bidTick),
       marketQuoteCurrency.decimals,
       marketBaseCurrency.decimals,
     )
-  } else if (askTick) {
+  } else if (askTick !== undefined) {
     return formatPrice(
       toPrice(invertTick(askTick)),
       marketQuoteCurrency.decimals,
