@@ -7,6 +7,7 @@ import {
   baseToQuote,
   quoteToBase,
   getPriceNeighborhood,
+  getMarketPrice,
 } from '@clober/v2-sdk'
 
 import { FORK_URL } from './utils/constants'
@@ -250,6 +251,101 @@ test('check duplicate prices', () => {
     }
     map[price.toString()] = i
   }
+})
+
+test('check get market price function', () => {
+  expect(
+    getMarketPrice({
+      marketQuoteCurrency: {
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6,
+        address: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      },
+      marketBaseCurrency: {
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6,
+        address: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      },
+      bidTick: 0n,
+    }),
+  ).toBe('1')
+
+  expect(
+    getMarketPrice({
+      marketQuoteCurrency: {
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6,
+        address: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      },
+      marketBaseCurrency: {
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18,
+        address: '0x0000000000000000000000000000000000000000',
+      },
+      bidTick: -188010n,
+    }),
+  ).toBe(
+    '6842.86035160742006027458864603889967777325203067417813684869543067179620265960693359375',
+  )
+
+  expect(
+    getMarketPrice({
+      marketQuoteCurrency: {
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6,
+        address: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      },
+      marketBaseCurrency: {
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6,
+        address: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      },
+      askTick: 0n,
+    }),
+  ).toBe('1')
+
+  expect(
+    getMarketPrice({
+      marketQuoteCurrency: {
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6,
+        address: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      },
+      marketBaseCurrency: {
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18,
+        address: '0x0000000000000000000000000000000000000000',
+      },
+      askTick: 188010n,
+    }),
+  ).toBe(
+    '6842.86035160742006027458864603889967777325203067417813684869543067179620265960693359375',
+  )
+
+  expect(() =>
+    getMarketPrice({
+      marketQuoteCurrency: {
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6,
+        address: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+      },
+      marketBaseCurrency: {
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18,
+        address: '0x0000000000000000000000000000000000000000',
+      },
+    }),
+  ).toThrowError()
 })
 
 const checkNeighborhoodTicksAndPrices = (depth: {
