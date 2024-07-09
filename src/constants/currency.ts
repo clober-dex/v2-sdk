@@ -16,6 +16,8 @@ export const WETH_ADDRESSES: {
   [CHAIN_IDS.ZKSYNC]: ['0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91'],
 }
 
+// @dev: https://defillama.com/stablecoin
+// order by total circulating supply (over $40M)
 export const STABLE_COIN_ADDRESSES: {
   [chain in CHAIN_IDS]: `0x${string}`[]
 } = {
@@ -27,6 +29,9 @@ export const STABLE_COIN_ADDRESSES: {
   ],
   [CHAIN_IDS.BASE]: [
     '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC
+    '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA', // USDbC
+    '0x4621b7A9c75199271F773Ebd9A499dbd165c3191', // DOLA
+    '0xB79DD08EA68A908A97220C76d19A6aA9cBDE4376', // USD+
   ],
   [CHAIN_IDS.BERACHAIN_TESTNET]: [
     '0x7EeCA4205fF31f947EdBd49195a7A88E6A91161B', // HONEY
