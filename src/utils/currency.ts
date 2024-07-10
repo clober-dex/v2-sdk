@@ -1,8 +1,7 @@
-import { getAddress, isAddressEqual, zeroAddress } from 'viem'
+import { getAddress, isAddressEqual, PublicClient, zeroAddress } from 'viem'
 
 import type { Currency } from '../model/currency'
 import { CHAIN_IDS } from '../constants/chain'
-import { cachedPublicClients } from '../constants/client'
 
 const _abi = [
   {
@@ -61,6 +60,7 @@ const setCurrencyToCache = (
 ) => currencyCache.set(buildCurrencyCacheKey(chainId, address), currency)
 
 export const fetchCurrency = async (
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   address: `0x${string}`,
 ): Promise<Currency> => {
@@ -69,12 +69,13 @@ export const fetchCurrency = async (
     return cachedCurrency
   }
 
-  const currency = await fetchCurrencyInner(chainId, address)
+  const currency = await fetchCurrencyInner(publicClient, address)
   setCurrencyToCache(chainId, address, currency)
   return currency
 }
 
 export const fetchCurrencyMap = async (
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   addresses: `0x${string}`[],
 ): Promise<{
@@ -91,7 +92,7 @@ export const fetchCurrencyMap = async (
       !cachedCurrencies.some((currency) => currency.address === address),
   )
   const uncachedCurrencies = await fetchCurrencyMapInner(
-    chainId,
+    publicClient,
     uncachedAddresses,
   )
   for (const currency of Object.values(uncachedCurrencies)) {
@@ -119,7 +120,7 @@ export const fetchCurrencyMap = async (
 }
 
 const fetchCurrencyInner = async (
-  chainId: CHAIN_IDS,
+  publicClient: PublicClient,
   address: `0x${string}`,
 ): Promise<Currency> => {
   if (isAddressEqual(address, zeroAddress)) {
@@ -132,7 +133,7 @@ const fetchCurrencyInner = async (
   }
 
   const [{ result: name }, { result: symbol }, { result: decimals }] =
-    await cachedPublicClients[chainId].multicall({
+    await publicClient.multicall({
       contracts: [
         {
           address,
@@ -160,7 +161,7 @@ const fetchCurrencyInner = async (
 }
 
 const fetchCurrencyMapInner = async (
-  chainId: CHAIN_IDS,
+  publicClient: PublicClient,
   addresses: `0x${string}`[],
 ): Promise<{
   [address: `0x${string}`]: Currency
@@ -173,7 +174,7 @@ const fetchCurrencyMapInner = async (
     return {}
   }
 
-  const result = await cachedPublicClients[chainId]!.multicall({
+  const result = await publicClient.multicall({
     contracts: [
       ...addresses.map((address) => ({
         address,

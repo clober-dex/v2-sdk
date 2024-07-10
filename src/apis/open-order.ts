@@ -1,4 +1,4 @@
-import { formatUnits, getAddress, isAddressEqual } from 'viem'
+import { formatUnits, getAddress, isAddressEqual, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
 import { getMarketId } from '../utils/market'
@@ -58,6 +58,7 @@ const getOpenOrdersByUserAddress = async (
 }
 
 export async function fetchOpenOrdersByUserAddress(
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ): Promise<OpenOrder[]> {
@@ -75,7 +76,7 @@ export async function fetchOpenOrdersByUserAddress(
         (address, index, self) =>
           self.findIndex((c) => isAddressEqual(c, address)) === index,
       )
-      .map((address) => fetchCurrency(chainId, address)),
+      .map((address) => fetchCurrency(publicClient, chainId, address)),
   )
   return openOrders.map((openOrder) =>
     toOpenOrder(chainId, currencies, openOrder),
@@ -83,6 +84,7 @@ export async function fetchOpenOrdersByUserAddress(
 }
 
 export async function fetchOpenOrder(
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   id: string,
 ): Promise<OpenOrder> {
@@ -93,13 +95,14 @@ export async function fetchOpenOrder(
     throw new Error(`Open order not found: ${id}`)
   }
   const currencies = await Promise.all([
-    fetchCurrency(chainId, getAddress(openOrder.book.base.id)),
-    fetchCurrency(chainId, getAddress(openOrder.book.quote.id)),
+    fetchCurrency(publicClient, chainId, getAddress(openOrder.book.base.id)),
+    fetchCurrency(publicClient, chainId, getAddress(openOrder.book.quote.id)),
   ])
   return toOpenOrder(chainId, currencies, openOrder)
 }
 
 export async function fetchOpenOrders(
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   ids: string[],
 ): Promise<OpenOrder[]> {
@@ -117,7 +120,7 @@ export async function fetchOpenOrders(
         (address, index, self) =>
           self.findIndex((c) => isAddressEqual(c, address)) === index,
       )
-      .map((address) => fetchCurrency(chainId, address)),
+      .map((address) => fetchCurrency(publicClient, chainId, address)),
   )
   return openOrders.map((openOrder) =>
     toOpenOrder(chainId, currencies, openOrder),

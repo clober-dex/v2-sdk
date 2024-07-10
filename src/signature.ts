@@ -1,11 +1,17 @@
-import { hexToSignature, parseUnits, verifyTypedData, WalletClient } from 'viem'
+import {
+  createPublicClient,
+  hexToSignature,
+  http,
+  parseUnits,
+  verifyTypedData,
+  WalletClient,
+} from 'viem'
 
-import { CHAIN_IDS } from './constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { getDeadlineTimestampInSeconds } from './utils/time'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchCurrency } from './utils/currency'
 import { DefaultOptions, ERC20PermitParam } from './type'
-import { cachedPublicClients } from './constants/client'
 import { decorator } from './utils/decorator'
 
 const _abi = [
@@ -89,6 +95,7 @@ export const signERC20Permit = decorator(
     walletClient,
     token,
     amount,
+    options,
   }: {
     chainId: CHAIN_IDS
     walletClient: WalletClient
@@ -99,12 +106,16 @@ export const signERC20Permit = decorator(
     if (!walletClient.account) {
       throw new Error('Account is not found')
     }
-    const currency = await fetchCurrency(chainId, token)
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    const currency = await fetchCurrency(publicClient, chainId, token)
     const spender = CONTRACT_ADDRESSES[chainId]!.Controller
     const value = parseUnits(amount, currency.decimals)
     const owner = walletClient.account.address
     const [{ result: nonce }, { result: version }, { result: name }] =
-      await cachedPublicClients[chainId].multicall({
+      await publicClient.multicall({
         allowFailure: true,
         contracts: [
           {

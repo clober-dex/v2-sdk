@@ -1,5 +1,4 @@
-import { cachedPublicClients } from '../constants/client'
-import { CHAIN_IDS } from '../constants/chain'
+import { PublicClient } from 'viem'
 
 const _abi = [
   {
@@ -29,12 +28,12 @@ const _abi = [
 ] as const
 
 export async function fetchAllowance(
-  chainId: CHAIN_IDS,
+  publicClient: PublicClient,
   token: `0x${string}`,
   userAddress: `0x${string}`,
   spenderAddress: `0x${string}`,
 ): Promise<bigint> {
-  return cachedPublicClients[chainId].readContract({
+  return publicClient.readContract({
     address: token,
     abi: _abi,
     functionName: 'allowance',

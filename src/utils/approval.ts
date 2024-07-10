@@ -1,6 +1,7 @@
+import { PublicClient } from 'viem'
+
 import { CHAIN_IDS } from '../constants/chain'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { cachedPublicClients } from '../constants/client'
 
 const _abi = [
   {
@@ -30,10 +31,11 @@ const _abi = [
 ] as const
 
 export async function fetchIsApprovedForAll(
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   owner: `0x${string}`,
 ): Promise<boolean> {
-  return cachedPublicClients[chainId].readContract({
+  return publicClient.readContract({
     address: CONTRACT_ADDRESSES[chainId]!.BookManager,
     abi: _abi,
     functionName: 'isApprovedForAll',

@@ -8,7 +8,6 @@ import {
 import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
 
-import { buildPublicClient } from '../src/constants/client'
 import { cloberTestChain } from '../src/constants/test-chain'
 
 import { fetchTokenBalance } from './utils/currency'
@@ -34,9 +33,6 @@ afterEach(async () => {
 })
 
 test('limit order in not open market', async () => {
-  const { publicClient } = clients[0] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
-
   expect(
     (
       await limitOrder({
@@ -53,7 +49,6 @@ test('limit order in not open market', async () => {
 
 test('make bid order', async () => {
   const { publicClient, walletClient } = clients[1] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const erc20PermitParams = await signERC20Permit({
     chainId: cloberTestChain.id,
@@ -85,6 +80,7 @@ test('make bid order', async () => {
 
   const [beforeBalance, beforeMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -110,6 +106,7 @@ test('make bid order', async () => {
 
   const [afterBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -151,7 +148,6 @@ test('make bid order', async () => {
 
 test('make bid order at $1', async () => {
   const { publicClient, walletClient } = clients[1] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const tx = await openMarket({
     chainId: cloberTestChain.id,
@@ -201,6 +197,7 @@ test('make bid order at $1', async () => {
 
   const [beforeBalance, beforeMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -226,6 +223,7 @@ test('make bid order at $1', async () => {
 
   const [afterBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -263,7 +261,6 @@ test('make bid order at $1', async () => {
 
 test('make ask order', async () => {
   const { publicClient, walletClient } = clients[2] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const {
     transaction,
@@ -346,11 +343,11 @@ test('make ask order', async () => {
 
 test('limit bid order', async () => {
   const { publicClient, walletClient } = clients[3] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const [beforeUSDCBalance, beforeETHBalance, beforeMarket] = await Promise.all(
     [
       fetchTokenBalance(
+        publicClient,
         cloberTestChain.id,
         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
         account.address,
@@ -406,6 +403,7 @@ test('limit bid order', async () => {
 
   const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -457,11 +455,11 @@ test('limit bid order', async () => {
 
 test('limit bid order with rounding up', async () => {
   const { publicClient, walletClient } = clients[3] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const [beforeUSDCBalance, beforeETHBalance, beforeMarket] = await Promise.all(
     [
       fetchTokenBalance(
+        publicClient,
         cloberTestChain.id,
         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
         account.address,
@@ -519,6 +517,7 @@ test('limit bid order with rounding up', async () => {
 
   const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -570,7 +569,6 @@ test('limit bid order with rounding up', async () => {
 
 test('limit ask order', async () => {
   const { publicClient, walletClient } = clients[4] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   await publicClient.waitForTransactionReceipt({
     hash: await walletClient.sendTransaction({
@@ -599,6 +597,7 @@ test('limit ask order', async () => {
   const [beforeUSDCBalance, beforeETHBalance, beforeMarket] = await Promise.all(
     [
       fetchTokenBalance(
+        publicClient,
         cloberTestChain.id,
         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
         account.address,
@@ -628,6 +627,7 @@ test('limit ask order', async () => {
 
   const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,

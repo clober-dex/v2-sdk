@@ -1,7 +1,6 @@
-import { getAddress } from 'viem'
+import { getAddress, PublicClient } from 'viem'
 
 import { CHAIN_IDS, Currency } from '../../src'
-import { cachedPublicClients } from '../../src/constants/client'
 import { CONTRACT_ADDRESSES } from '../../src/constants/addresses'
 import { fetchCurrencyMap } from '../../src/utils/currency'
 import { fromOrderId } from '../../src/utils/order'
@@ -116,6 +115,7 @@ const _abi = [
 ] as const
 
 export const fetchOrders = async (
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   orderIds: bigint[],
 ): Promise<
@@ -130,7 +130,7 @@ export const fetchOrders = async (
     quoteCurrency: Currency
   }[]
 > => {
-  const result = await cachedPublicClients[chainId]!.multicall({
+  const result = await publicClient.multicall({
     contracts: [
       ...orderIds.map((orderId) => ({
         address: CONTRACT_ADDRESSES[chainId]!.BookManager,
@@ -161,7 +161,7 @@ export const fetchOrders = async (
       return [base, quote]
     })
     .flat()
-  const currencyMap = await fetchCurrencyMap(chainId, addresses)
+  const currencyMap = await fetchCurrencyMap(publicClient, chainId, addresses)
 
   return orderIds.map((orderId, index) => {
     const order = result[index].result as {

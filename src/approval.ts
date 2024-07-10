@@ -1,4 +1,4 @@
-import { parseUnits, WalletClient } from 'viem'
+import { createPublicClient, http, parseUnits, WalletClient } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
@@ -36,6 +36,7 @@ export const setApprovalOfOpenOrdersForAll = decorator(
   async ({
     chainId,
     walletClient,
+    options,
   }: {
     chainId: CHAIN_IDS
     walletClient: WalletClient
@@ -44,7 +45,12 @@ export const setApprovalOfOpenOrdersForAll = decorator(
     if (!walletClient.account) {
       throw new Error('Account is not found')
     }
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
     const isApprovedForAll = await fetchIsApprovedForAll(
+      publicClient,
       chainId,
       walletClient.account.address,
     )
@@ -114,6 +120,7 @@ export const approveERC20 = decorator(
     walletClient,
     token,
     amount,
+    options,
   }: {
     chainId: CHAIN_IDS
     walletClient: WalletClient
@@ -124,10 +131,14 @@ export const approveERC20 = decorator(
     if (!walletClient.account) {
       throw new Error('Account is not found')
     }
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
     const [currency, allowance] = await Promise.all([
-      fetchCurrency(chainId, token),
+      fetchCurrency(publicClient, chainId, token),
       fetchAllowance(
-        chainId,
+        publicClient,
         token,
         walletClient.account.address,
         CONTRACT_ADDRESSES[chainId]!.Controller,

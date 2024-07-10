@@ -1,7 +1,14 @@
-import { formatUnits, getAddress, isAddressEqual, parseUnits } from 'viem'
+import {
+  createPublicClient,
+  formatUnits,
+  getAddress,
+  http,
+  isAddressEqual,
+  parseUnits,
+} from 'viem'
 
 import { fetchMarket } from './apis/market'
-import { CHAIN_IDS } from './constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type { ChartLog, Currency, DefaultOptions, Market } from './type'
 import { CHART_LOG_INTERVALS } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
@@ -67,7 +74,16 @@ export const getMarket = decorator(
     if (isAddressEqual(token0, token1)) {
       throw new Error('Token0 and token1 must be different')
     }
-    const market = await fetchMarket(chainId, [token0, token1], options?.n)
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    const market = await fetchMarket(
+      publicClient,
+      chainId,
+      [token0, token1],
+      options?.n,
+    )
     return {
       chainId,
       quote: market.quote,
@@ -331,7 +347,14 @@ export const getExpectedOutput = decorator(
       options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
       options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
     ]
-    const market = await fetchMarket(chainId, [inputToken, outputToken])
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    const market = await fetchMarket(publicClient, chainId, [
+      inputToken,
+      outputToken,
+    ])
     const isBid = isAddressEqual(market.quote.address, inputToken)
     const { roundingDownTick, roundingUpTick } =
       options && options.limitPrice
@@ -440,7 +463,14 @@ export const getExpectedInput = decorator(
       options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
       options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
     ]
-    const market = await fetchMarket(chainId, [inputToken, outputToken])
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    const market = await fetchMarket(publicClient, chainId, [
+      inputToken,
+      outputToken,
+    ])
     const isBid = isAddressEqual(market.quote.address, inputToken)
     const { roundingDownTick, roundingUpTick } =
       options && options.limitPrice
@@ -515,12 +545,17 @@ export const getOpenOrder = decorator(
   async ({
     chainId,
     id,
+    options,
   }: {
     chainId: CHAIN_IDS
     id: string
     options?: DefaultOptions
   }): Promise<OpenOrder> => {
-    return fetchOpenOrder(chainId, id)
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    return fetchOpenOrder(publicClient, chainId, id)
   },
 )
 
@@ -545,12 +580,17 @@ export const getOpenOrders = decorator(
   async ({
     chainId,
     userAddress,
+    options,
   }: {
     chainId: CHAIN_IDS
     userAddress: `0x${string}`
     options?: DefaultOptions
   }): Promise<OpenOrder[]> => {
-    return fetchOpenOrdersByUserAddress(chainId, userAddress)
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    return fetchOpenOrdersByUserAddress(publicClient, chainId, userAddress)
   },
 )
 

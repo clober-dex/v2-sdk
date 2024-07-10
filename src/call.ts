@@ -1,5 +1,7 @@
 import {
+  createPublicClient,
   formatUnits,
+  http,
   isAddressEqual,
   parseUnits,
   zeroAddress,
@@ -63,18 +65,26 @@ export const openMarket = decorator(
     outputToken: `0x${string}`
     options?: DefaultOptions
   }): Promise<Transaction | undefined> => {
-    const market = await fetchMarket(chainId, [inputToken, outputToken])
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    const market = await fetchMarket(publicClient, chainId, [
+      inputToken,
+      outputToken,
+    ])
     const isBid = isAddressEqual(market.quote.address, inputToken)
     if (
       (isBid && !market.bidBook.isOpened) ||
       (!isBid && !market.askBook.isOpened)
     ) {
       const unitSize = await calculateUnitSize(
+        publicClient,
         chainId,
         isBid ? market.quote : market.base,
       )
       return buildTransaction(
-        chainId,
+        publicClient,
         {
           chain: CHAIN_MAP[chainId],
           address: CONTRACT_ADDRESSES[chainId]!.Controller,
@@ -202,7 +212,14 @@ export const limitOrder = decorator(
       options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
       options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
     ]
-    const market = await fetchMarket(chainId, [inputToken, outputToken])
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    const market = await fetchMarket(publicClient, chainId, [
+      inputToken,
+      outputToken,
+    ])
     const isBid = isAddressEqual(market.quote.address, inputToken)
     const [inputCurrency, outputCurrency] = isBid
       ? [market.quote, market.base]
@@ -234,7 +251,7 @@ export const limitOrder = decorator(
     const quoteAmount = parseUnits(amount, inputCurrency.decimals)
     const [unitSize, { takenAmount, spentAmount, bookId, events }] =
       await Promise.all([
-        calculateUnitSize(chainId, inputCurrency),
+        calculateUnitSize(publicClient, chainId, inputCurrency),
         getExpectedOutput({
           chainId,
           inputToken,
@@ -266,7 +283,7 @@ export const limitOrder = decorator(
     if (options?.postOnly === true || spentAmount === '0') {
       return {
         transaction: await buildTransaction(
-          chainId,
+          publicClient,
           {
             chain: CHAIN_MAP[chainId],
             account: userAddress,
@@ -314,7 +331,7 @@ export const limitOrder = decorator(
       // take and make
       return {
         transaction: await buildTransaction(
-          chainId,
+          publicClient,
           {
             chain: CHAIN_MAP[chainId],
             account: userAddress,
@@ -478,8 +495,14 @@ export const marketOrder = decorator(
     } else if (amountIn && amountOut) {
       throw new Error('Only one of amountIn or amountOut can be provided')
     }
-
-    const market = await fetchMarket(chainId, [inputToken, outputToken])
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    const market = await fetchMarket(publicClient, chainId, [
+      inputToken,
+      outputToken,
+    ])
     const isTakingBid = isAddressEqual(market.base.address, inputToken)
     const [inputCurrency, outputCurrency] = isTakingBid
       ? [market.base, market.quote]
@@ -519,7 +542,7 @@ export const marketOrder = decorator(
       const baseAmount = parseUnits(amountIn, inputCurrency.decimals)
       return {
         transaction: await buildTransaction(
-          chainId,
+          publicClient,
           {
             chain: CHAIN_MAP[chainId],
             account: userAddress,
@@ -593,7 +616,7 @@ export const marketOrder = decorator(
             : 2n ** 256n - 1n)
       return {
         transaction: await buildTransaction(
-          chainId,
+          publicClient,
           {
             chain: CHAIN_MAP[chainId],
             account: userAddress,
@@ -736,7 +759,15 @@ export const claimOrders = decorator(
     ids: string[]
     options?: DefaultOptions
   }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
-    const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    const isApprovedForAll = await fetchIsApprovedForAll(
+      publicClient,
+      chainId,
+      userAddress,
+    )
     if (!isApprovedForAll) {
       throw new Error(`
        Set ApprovalForAll before calling this function.
@@ -751,6 +782,7 @@ export const claimOrders = decorator(
 
     const orders = (
       await fetchOrders(
+        publicClient,
         chainId,
         ids.map((id) => BigInt(id)),
       )
@@ -773,7 +805,7 @@ export const claimOrders = decorator(
 
     return {
       transaction: await buildTransaction(
-        chainId,
+        publicClient,
         {
           chain: CHAIN_MAP[chainId],
           account: userAddress,
@@ -899,7 +931,15 @@ export const cancelOrders = decorator(
     ids: string[]
     options?: DefaultOptions
   }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
-    const isApprovedForAll = await fetchIsApprovedForAll(chainId, userAddress)
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    const isApprovedForAll = await fetchIsApprovedForAll(
+      publicClient,
+      chainId,
+      userAddress,
+    )
     if (!isApprovedForAll) {
       throw new Error(`
        Set ApprovalForAll before calling this function.
@@ -914,6 +954,7 @@ export const cancelOrders = decorator(
 
     const orders = (
       await fetchOrders(
+        publicClient,
         chainId,
         ids.map((id) => BigInt(id)),
       )
@@ -936,7 +977,7 @@ export const cancelOrders = decorator(
 
     return {
       transaction: await buildTransaction(
-        chainId,
+        publicClient,
         {
           chain: CHAIN_MAP[chainId],
           account: userAddress,
