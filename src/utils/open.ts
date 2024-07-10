@@ -46,6 +46,8 @@ export async function fetchIsOpened(chainId: CHAIN_IDS, bookId: bigint) {
     functionName: 'isOpened',
     args: [bookId],
   })
-  setIsOpenedToCache(chainId, bookId, isOpened)
+  if (isOpened) {
+    setIsOpenedToCache(chainId, bookId, isOpened)
+  }
   return isOpened
 }
