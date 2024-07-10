@@ -16,6 +16,12 @@ export function decorator<
     }
     buildPublicClient(chainId, options?.rpcUrl)
     buildSubgraph(chainId, options?.useSubgraph)
-    return fn(args)
+
+    const results = await fn(args)
+    // clean cache for next call
+    buildPublicClient(chainId)
+    buildSubgraph(chainId)
+
+    return results
   }
 }
