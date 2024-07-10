@@ -8,7 +8,6 @@ import {
 
 import { CHAIN_IDS, type OpenOrder } from '../index'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { cachedSubgraph } from '../constants/subgraph'
 import { fetchOpenOrders } from '../apis/open-order'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { BOOK_MANAGER_ABI } from '../abis/core/book-manager-abi'
@@ -22,8 +21,9 @@ export const fetchOrders = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   orderIds: bigint[],
+  useSubgraph: boolean,
 ): Promise<OpenOrder[]> => {
-  if (cachedSubgraph[chainId]) {
+  if (useSubgraph) {
     return fetchOpenOrders(
       publicClient,
       chainId,

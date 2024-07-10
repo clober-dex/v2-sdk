@@ -12,7 +12,6 @@ import { getDeadlineTimestampInSeconds } from './utils/time'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchCurrency } from './utils/currency'
 import { DefaultOptions, ERC20PermitParam } from './type'
-import { decorator } from './utils/decorator'
 
 const _abi = [
   {
@@ -89,111 +88,109 @@ const _abi = [
  *   amount: '1000.123', // spend 1000.123 USDC
  * })
  */
-export const signERC20Permit = decorator(
-  async ({
-    chainId,
-    walletClient,
-    token,
-    amount,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    walletClient: WalletClient
-    token: `0x${string}`
-    amount: string
-    options?: DefaultOptions
-  }): Promise<ERC20PermitParam | undefined> => {
-    if (!walletClient.account) {
-      throw new Error('Account is not found')
-    }
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+export const signERC20Permit = async ({
+  chainId,
+  walletClient,
+  token,
+  amount,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  walletClient: WalletClient
+  token: `0x${string}`
+  amount: string
+  options?: DefaultOptions
+}): Promise<ERC20PermitParam | undefined> => {
+  if (!walletClient.account) {
+    throw new Error('Account is not found')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const currency = await fetchCurrency(publicClient, chainId, token)
+  const spender = CONTRACT_ADDRESSES[chainId]!.Controller
+  const value = parseUnits(amount, currency.decimals)
+  const owner = walletClient.account.address
+  const [{ result: nonce }, { result: version }, { result: name }] =
+    await publicClient.multicall({
+      allowFailure: true,
+      contracts: [
+        {
+          address: token,
+          abi: _abi,
+          functionName: 'nonces',
+          args: [owner],
+        },
+        {
+          address: token,
+          abi: _abi,
+          functionName: 'version',
+        },
+        {
+          address: token,
+          abi: _abi,
+          functionName: 'name',
+        },
+      ],
     })
-    const currency = await fetchCurrency(publicClient, chainId, token)
-    const spender = CONTRACT_ADDRESSES[chainId]!.Controller
-    const value = parseUnits(amount, currency.decimals)
-    const owner = walletClient.account.address
-    const [{ result: nonce }, { result: version }, { result: name }] =
-      await publicClient.multicall({
-        allowFailure: true,
-        contracts: [
-          {
-            address: token,
-            abi: _abi,
-            functionName: 'nonces',
-            args: [owner],
-          },
-          {
-            address: token,
-            abi: _abi,
-            functionName: 'version',
-          },
-          {
-            address: token,
-            abi: _abi,
-            functionName: 'name',
-          },
-        ],
-      })
 
-    if (nonce === undefined || !name) {
-      return undefined
-    }
-    const deadline = getDeadlineTimestampInSeconds()
-    const data = {
-      domain: {
-        name: name,
-        version: (version || '1').toString(),
-        chainId: BigInt(chainId),
-        verifyingContract: currency.address,
-      },
-      message: {
-        owner,
-        spender,
-        value,
-        nonce,
-        deadline,
-      },
-      primaryType: 'Permit',
-      types: {
-        Permit: [
-          { name: 'owner', type: 'address' },
-          { name: 'spender', type: 'address' },
-          { name: 'value', type: 'uint256' },
-          { name: 'nonce', type: 'uint256' },
-          { name: 'deadline', type: 'uint256' },
-        ],
-        EIP712Domain: [
-          { name: 'name', type: 'string' },
-          { name: 'version', type: 'string' },
-          { name: 'chainId', type: 'uint256' },
-          { name: 'verifyingContract', type: 'address' },
-        ],
-      },
-    } as const
-    const signature = await walletClient.signTypedData({
-      ...data,
-      account: walletClient.account,
-    })
-    const valid = await verifyTypedData({
-      ...data,
-      signature,
-      address: owner,
-    })
-    if (!valid) {
-      throw new Error('Invalid signature')
-    }
-    const { v, s, r } = hexToSignature(signature)
-    return {
-      token,
-      permitAmount: value,
-      signature: {
-        v: Number(v),
-        s,
-        r,
-        deadline,
-      },
-    }
-  },
-)
+  if (nonce === undefined || !name) {
+    return undefined
+  }
+  const deadline = getDeadlineTimestampInSeconds()
+  const data = {
+    domain: {
+      name: name,
+      version: (version || '1').toString(),
+      chainId: BigInt(chainId),
+      verifyingContract: currency.address,
+    },
+    message: {
+      owner,
+      spender,
+      value,
+      nonce,
+      deadline,
+    },
+    primaryType: 'Permit',
+    types: {
+      Permit: [
+        { name: 'owner', type: 'address' },
+        { name: 'spender', type: 'address' },
+        { name: 'value', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+        { name: 'deadline', type: 'uint256' },
+      ],
+      EIP712Domain: [
+        { name: 'name', type: 'string' },
+        { name: 'version', type: 'string' },
+        { name: 'chainId', type: 'uint256' },
+        { name: 'verifyingContract', type: 'address' },
+      ],
+    },
+  } as const
+  const signature = await walletClient.signTypedData({
+    ...data,
+    account: walletClient.account,
+  })
+  const valid = await verifyTypedData({
+    ...data,
+    signature,
+    address: owner,
+  })
+  if (!valid) {
+    throw new Error('Invalid signature')
+  }
+  const { v, s, r } = hexToSignature(signature)
+  return {
+    token,
+    permitAmount: value,
+    signature: {
+      v: Number(v),
+      s,
+      r,
+      deadline,
+    },
+  }
+}

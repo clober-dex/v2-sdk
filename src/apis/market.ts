@@ -11,10 +11,10 @@ import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { BOOK_VIEWER_ABI } from '../abis/core/book-viewer-abi'
 import { fetchIsOpened } from '../utils/open'
 import { fetchCurrency } from '../utils/currency'
-import { cachedSubgraph } from '../constants/subgraph'
+import { Subgraph } from '../constants/subgraph'
 
 const fetchBook = async (chainId: CHAIN_IDS, bookId: string) => {
-  return cachedSubgraph[chainId]!.get<{
+  return Subgraph.get<{
     data: {
       book: {
         depths: {
@@ -25,6 +25,7 @@ const fetchBook = async (chainId: CHAIN_IDS, bookId: string) => {
       } | null
     }
   }>(
+    chainId,
     'getBook',
     'query getBook($bookId: ID!) { book(id: $bookId){ depths { tick unitAmount } } }',
     {
@@ -38,6 +39,7 @@ const getBook = async (
   chainId: CHAIN_IDS,
   quoteCurrency: Currency,
   baseCurrency: Currency,
+  useSubgraph: boolean,
   n: number,
 ): Promise<Book> => {
   const unitSize = await calculateUnitSize(publicClient, chainId, quoteCurrency)
@@ -47,7 +49,7 @@ const getBook = async (
     baseCurrency.address,
     unitSize,
   )
-  if (cachedSubgraph[chainId]) {
+  if (useSubgraph) {
     const {
       data: { book },
     } = await fetchBook(chainId, bookId.toString())
@@ -97,6 +99,7 @@ export async function fetchMarket(
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   tokenAddresses: `0x${string}`[],
+  useSubgraph: boolean,
   n = 100,
 ): Promise<Market> {
   if (tokenAddresses.length !== 2) {
@@ -113,8 +116,8 @@ export async function fetchMarket(
     fetchCurrency(publicClient, chainId, baseTokenAddress),
   ])
   const [bidBook, askBook] = await Promise.all([
-    getBook(publicClient, chainId, quoteCurrency, baseCurrency, n),
-    getBook(publicClient, chainId, baseCurrency, quoteCurrency, n),
+    getBook(publicClient, chainId, quoteCurrency, baseCurrency, useSubgraph, n),
+    getBook(publicClient, chainId, baseCurrency, quoteCurrency, useSubgraph, n),
   ])
 
   return new Market({

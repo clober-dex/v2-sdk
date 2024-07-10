@@ -10,14 +10,15 @@ import type { OpenOrder, OpenOrderDto } from '../model/open-order'
 import { fetchCurrency } from '../utils/currency'
 import { applyPercent } from '../utils/bigint'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
-import { cachedSubgraph } from '../constants/subgraph'
+import { Subgraph } from '../constants/subgraph'
 
 const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
-  return cachedSubgraph[chainId]!.get<{
+  return Subgraph.get<{
     data: {
       openOrder: OpenOrderDto | null
     }
   }>(
+    chainId,
     'getOpenOrder',
     'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {
@@ -27,11 +28,12 @@ const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
 }
 
 const getOpenOrders = async (chainId: CHAIN_IDS, orderIds: string[]) => {
-  return cachedSubgraph[chainId]!.get<{
+  return Subgraph.get<{
     data: {
       openOrders: OpenOrderDto[]
     }
   }>(
+    chainId,
     'getOpenOrders',
     'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {
@@ -44,11 +46,12 @@ const getOpenOrdersByUserAddress = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ) => {
-  return cachedSubgraph[chainId]!.get<{
+  return Subgraph.get<{
     data: {
       openOrders: OpenOrderDto[]
     }
   }>(
+    chainId,
     'getOpenOrdersByUserAddress',
     'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {

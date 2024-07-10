@@ -27,7 +27,6 @@ import { invertTick, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
-import { decorator } from './utils/decorator'
 import { fetchOrders } from './utils/order'
 import { applyPercent } from './utils/bigint'
 
@@ -51,69 +50,69 @@ import { applyPercent } from './utils/bigint'
  *   outputToken: '0x0000000000000000000000000000000000000000'
  * })
  */
-export const openMarket = decorator(
-  async ({
+export const openMarket = async ({
+  chainId,
+  userAddress,
+  inputToken,
+  outputToken,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  inputToken: `0x${string}`
+  outputToken: `0x${string}`
+  options?: DefaultOptions
+}): Promise<Transaction | undefined> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const market = await fetchMarket(
+    publicClient,
     chainId,
-    userAddress,
-    inputToken,
-    outputToken,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    userAddress: `0x${string}`
-    inputToken: `0x${string}`
-    outputToken: `0x${string}`
-    options?: DefaultOptions
-  }): Promise<Transaction | undefined> => {
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    const market = await fetchMarket(publicClient, chainId, [
-      inputToken,
-      outputToken,
-    ])
-    const isBid = isAddressEqual(market.quote.address, inputToken)
-    if (
-      (isBid && !market.bidBook.isOpened) ||
-      (!isBid && !market.askBook.isOpened)
-    ) {
-      const unitSize = await calculateUnitSize(
-        publicClient,
-        chainId,
-        isBid ? market.quote : market.base,
-      )
-      return buildTransaction(
-        publicClient,
-        {
-          chain: CHAIN_MAP[chainId],
-          address: CONTRACT_ADDRESSES[chainId]!.Controller,
-          account: userAddress,
-          abi: CONTROLLER_ABI,
-          functionName: 'open',
-          args: [
-            [
-              {
-                key: {
-                  base: outputToken,
-                  unitSize,
-                  quote: inputToken,
-                  makerPolicy: MAKER_DEFAULT_POLICY[chainId].value,
-                  hooks: zeroAddress,
-                  takerPolicy: TAKER_DEFAULT_POLICY[chainId].value,
-                },
-                hookData: zeroHash,
+    [inputToken, outputToken],
+    !!(options && options.useSubgraph),
+  )
+  const isBid = isAddressEqual(market.quote.address, inputToken)
+  if (
+    (isBid && !market.bidBook.isOpened) ||
+    (!isBid && !market.askBook.isOpened)
+  ) {
+    const unitSize = await calculateUnitSize(
+      publicClient,
+      chainId,
+      isBid ? market.quote : market.base,
+    )
+    return buildTransaction(
+      publicClient,
+      {
+        chain: CHAIN_MAP[chainId],
+        address: CONTRACT_ADDRESSES[chainId]!.Controller,
+        account: userAddress,
+        abi: CONTROLLER_ABI,
+        functionName: 'open',
+        args: [
+          [
+            {
+              key: {
+                base: outputToken,
+                unitSize,
+                quote: inputToken,
+                makerPolicy: MAKER_DEFAULT_POLICY[chainId].value,
+                hooks: zeroAddress,
+                takerPolicy: TAKER_DEFAULT_POLICY[chainId].value,
               },
-            ],
-            getDeadlineTimestampInSeconds(),
+              hookData: zeroHash,
+            },
           ],
-        },
-        options?.gasLimit,
-      )
-    }
-    return undefined
-  },
-)
+          getDeadlineTimestampInSeconds(),
+        ],
+      },
+      options?.gasLimit,
+    )
+  }
+  return undefined
+}
 
 /**
  * Places a limit order on the specified chain for trading tokens.
@@ -167,68 +166,69 @@ export const openMarket = decorator(
  *   price: '4000.01', // price at 4000.01 (ETH/USDC)
  * })
  */
-export const limitOrder = decorator(
-  async ({
+export const limitOrder = async ({
+  chainId,
+  userAddress,
+  inputToken,
+  outputToken,
+  amount,
+  price,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  inputToken: `0x${string}`
+  outputToken: `0x${string}`
+  amount: string
+  price: string
+  options?: {
+    erc20PermitParam?: ERC20PermitParam
+    postOnly?: boolean
+    makeTick?: bigint
+    takeLimitTick?: bigint
+    roundingUpMakeBid?: boolean
+    roundingDownMakeAsk?: boolean
+    roundingDownTakenBid?: boolean
+    roundingUpTakenAsk?: boolean
+  } & DefaultOptions
+}): Promise<{
+  transaction: Transaction
+  result: {
+    make: CurrencyFlow & { price: string }
+    taken: CurrencyFlow & { events: { price: string; amount: string }[] }
+    spent: CurrencyFlow & { events: { price: string; amount: string }[] }
+  }
+}> => {
+  const [
+    roundingUpMakeBid,
+    roundingDownMakeAsk,
+    roundingDownTakenBid,
+    roundingUpTakenAsk,
+  ] = [
+    options?.roundingUpMakeBid ? options.roundingUpMakeBid : false,
+    options?.roundingDownMakeAsk ? options.roundingDownMakeAsk : false,
+    options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
+    options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
+  ]
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const market = await fetchMarket(
+    publicClient,
     chainId,
-    userAddress,
-    inputToken,
-    outputToken,
-    amount,
-    price,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    userAddress: `0x${string}`
-    inputToken: `0x${string}`
-    outputToken: `0x${string}`
-    amount: string
-    price: string
-    options?: {
-      erc20PermitParam?: ERC20PermitParam
-      postOnly?: boolean
-      makeTick?: bigint
-      takeLimitTick?: bigint
-      roundingUpMakeBid?: boolean
-      roundingDownMakeAsk?: boolean
-      roundingDownTakenBid?: boolean
-      roundingUpTakenAsk?: boolean
-    } & DefaultOptions
-  }): Promise<{
-    transaction: Transaction
-    result: {
-      make: CurrencyFlow & { price: string }
-      taken: CurrencyFlow & { events: { price: string; amount: string }[] }
-      spent: CurrencyFlow & { events: { price: string; amount: string }[] }
-    }
-  }> => {
-    const [
-      roundingUpMakeBid,
-      roundingDownMakeAsk,
-      roundingDownTakenBid,
-      roundingUpTakenAsk,
-    ] = [
-      options?.roundingUpMakeBid ? options.roundingUpMakeBid : false,
-      options?.roundingDownMakeAsk ? options.roundingDownMakeAsk : false,
-      options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
-      options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
-    ]
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    const market = await fetchMarket(publicClient, chainId, [
-      inputToken,
-      outputToken,
-    ])
-    const isBid = isAddressEqual(market.quote.address, inputToken)
-    const [inputCurrency, outputCurrency] = isBid
-      ? [market.quote, market.base]
-      : [market.base, market.quote]
-    if (
-      (isBid && !market.bidBook.isOpened) ||
-      (!isBid && !market.askBook.isOpened)
-    ) {
-      throw new Error(`
+    [inputToken, outputToken],
+    !!(options && options.useSubgraph),
+  )
+  const isBid = isAddressEqual(market.quote.address, inputToken)
+  const [inputCurrency, outputCurrency] = isBid
+    ? [market.quote, market.base]
+    : [market.base, market.quote]
+  if (
+    (isBid && !market.bidBook.isOpened) ||
+    (!isBid && !market.askBook.isOpened)
+  ) {
+    throw new Error(`
        Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
 
@@ -238,177 +238,176 @@ export const limitOrder = decorator(
             outputToken: '${outputToken}',
        })
     `)
-    }
+  }
 
-    const { roundingDownTick, roundingUpTick } = parsePrice(
-      Number(price),
-      market.quote.decimals,
-      market.base.decimals,
-    )
-    const tokensToSettle = [inputToken, outputToken].filter(
-      (address) => !isAddressEqual(address, zeroAddress),
-    )
-    const quoteAmount = parseUnits(amount, inputCurrency.decimals)
-    const [unitSize, { takenAmount, spentAmount, bookId, events }] =
-      await Promise.all([
-        calculateUnitSize(publicClient, chainId, inputCurrency),
-        getExpectedOutput({
-          chainId,
-          inputToken,
-          outputToken,
-          amountIn: amount,
-          options: {
-            ...options,
-            limitPrice: price,
-          },
-        }),
-      ])
-    const isETH = isAddressEqual(inputToken, zeroAddress)
-    const makeParam = {
-      id: toBookId(chainId, inputToken, outputToken, unitSize),
-      tick: options?.makeTick
-        ? Number(options.makeTick)
-        : Number(
+  const { roundingDownTick, roundingUpTick } = parsePrice(
+    Number(price),
+    market.quote.decimals,
+    market.base.decimals,
+  )
+  const tokensToSettle = [inputToken, outputToken].filter(
+    (address) => !isAddressEqual(address, zeroAddress),
+  )
+  const quoteAmount = parseUnits(amount, inputCurrency.decimals)
+  const [unitSize, { takenAmount, spentAmount, bookId, events }] =
+    await Promise.all([
+      calculateUnitSize(publicClient, chainId, inputCurrency),
+      getExpectedOutput({
+        chainId,
+        inputToken,
+        outputToken,
+        amountIn: amount,
+        options: {
+          ...options,
+          limitPrice: price,
+        },
+      }),
+    ])
+  const isETH = isAddressEqual(inputToken, zeroAddress)
+  const makeParam = {
+    id: toBookId(chainId, inputToken, outputToken, unitSize),
+    tick: options?.makeTick
+      ? Number(options.makeTick)
+      : Number(
+          isBid
+            ? roundingUpMakeBid
+              ? roundingUpTick
+              : roundingDownTick
+            : invertTick(
+                roundingDownMakeAsk ? roundingDownTick : roundingUpTick,
+              ),
+        ),
+    quoteAmount,
+    hookData: zeroHash,
+  }
+  if (options?.postOnly === true || spentAmount === '0') {
+    return {
+      transaction: await buildTransaction(
+        publicClient,
+        {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'make',
+          args: [
+            [makeParam],
+            tokensToSettle,
+            options?.erc20PermitParam ? [options.erc20PermitParam] : [],
+            getDeadlineTimestampInSeconds(),
+          ],
+          value: isETH ? quoteAmount : 0n,
+        },
+        options?.gasLimit,
+      ),
+      result: {
+        make: {
+          amount: formatUnits(quoteAmount, inputCurrency.decimals),
+          currency: inputCurrency,
+          direction: 'in',
+          price: formatPrice(
             isBid
-              ? roundingUpMakeBid
-                ? roundingUpTick
-                : roundingDownTick
-              : invertTick(
-                  roundingDownMakeAsk ? roundingDownTick : roundingUpTick,
-                ),
+              ? toPrice(BigInt(makeParam.tick))
+              : toPrice(invertTick(BigInt(makeParam.tick))),
+            market.quote.decimals,
+            market.base.decimals,
           ),
-      quoteAmount,
-      hookData: zeroHash,
-    }
-    if (options?.postOnly === true || spentAmount === '0') {
-      return {
-        transaction: await buildTransaction(
-          publicClient,
-          {
-            chain: CHAIN_MAP[chainId],
-            account: userAddress,
-            address: CONTRACT_ADDRESSES[chainId]!.Controller,
-            abi: CONTROLLER_ABI,
-            functionName: 'make',
-            args: [
-              [makeParam],
-              tokensToSettle,
-              options?.erc20PermitParam ? [options.erc20PermitParam] : [],
-              getDeadlineTimestampInSeconds(),
-            ],
-            value: isETH ? quoteAmount : 0n,
-          },
-          options?.gasLimit,
-        ),
-        result: {
-          make: {
-            amount: formatUnits(quoteAmount, inputCurrency.decimals),
-            currency: inputCurrency,
-            direction: 'in',
-            price: formatPrice(
-              isBid
-                ? toPrice(BigInt(makeParam.tick))
-                : toPrice(invertTick(BigInt(makeParam.tick))),
-              market.quote.decimals,
-              market.base.decimals,
-            ),
-          },
-          spent: {
-            amount: '0',
-            currency: inputCurrency,
-            direction: 'in',
-            events: [],
-          },
-          taken: {
-            amount: '0',
-            currency: outputCurrency,
-            direction: 'out',
-            events: [],
-          },
         },
-      }
-    } else {
-      // take and make
-      return {
-        transaction: await buildTransaction(
-          publicClient,
-          {
-            chain: CHAIN_MAP[chainId],
-            account: userAddress,
-            address: CONTRACT_ADDRESSES[chainId]!.Controller,
-            abi: CONTROLLER_ABI,
-            functionName: 'limit',
-            args: [
-              [
-                {
-                  takeBookId: bookId,
-                  makeBookId: makeParam.id,
-                  limitPrice: options?.takeLimitTick
-                    ? toPrice(options.takeLimitTick)
-                    : toPrice(
-                        isBid
-                          ? invertTick(
-                              roundingUpTakenAsk
-                                ? roundingUpTick
-                                : roundingDownTick,
-                            )
-                          : roundingDownTakenBid
-                            ? roundingDownTick
-                            : roundingUpTick,
-                      ),
-                  tick: makeParam.tick,
-                  quoteAmount,
-                  takeHookData: zeroHash,
-                  makeHookData: makeParam.hookData,
-                },
-              ],
-              tokensToSettle,
-              options?.erc20PermitParam ? [options.erc20PermitParam] : [],
-              getDeadlineTimestampInSeconds(),
+        spent: {
+          amount: '0',
+          currency: inputCurrency,
+          direction: 'in',
+          events: [],
+        },
+        taken: {
+          amount: '0',
+          currency: outputCurrency,
+          direction: 'out',
+          events: [],
+        },
+      },
+    }
+  } else {
+    // take and make
+    return {
+      transaction: await buildTransaction(
+        publicClient,
+        {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'limit',
+          args: [
+            [
+              {
+                takeBookId: bookId,
+                makeBookId: makeParam.id,
+                limitPrice: options?.takeLimitTick
+                  ? toPrice(options.takeLimitTick)
+                  : toPrice(
+                      isBid
+                        ? invertTick(
+                            roundingUpTakenAsk
+                              ? roundingUpTick
+                              : roundingDownTick,
+                          )
+                        : roundingDownTakenBid
+                          ? roundingDownTick
+                          : roundingUpTick,
+                    ),
+                tick: makeParam.tick,
+                quoteAmount,
+                takeHookData: zeroHash,
+                makeHookData: makeParam.hookData,
+              },
             ],
-            value: isETH ? quoteAmount : 0n,
-          },
-          options?.gasLimit,
-        ),
-        result: {
-          make: {
-            amount: formatUnits(
-              quoteAmount - parseUnits(spentAmount, inputCurrency.decimals),
-              inputCurrency.decimals,
-            ),
-            currency: inputCurrency,
-            direction: 'in',
-            price: formatPrice(
-              isBid
-                ? toPrice(BigInt(makeParam.tick))
-                : toPrice(invertTick(BigInt(makeParam.tick))),
-              market.quote.decimals,
-              market.base.decimals,
-            ),
-          },
-          spent: {
+            tokensToSettle,
+            options?.erc20PermitParam ? [options.erc20PermitParam] : [],
+            getDeadlineTimestampInSeconds(),
+          ],
+          value: isETH ? quoteAmount : 0n,
+        },
+        options?.gasLimit,
+      ),
+      result: {
+        make: {
+          amount: formatUnits(
+            quoteAmount - parseUnits(spentAmount, inputCurrency.decimals),
+            inputCurrency.decimals,
+          ),
+          currency: inputCurrency,
+          direction: 'in',
+          price: formatPrice(
+            isBid
+              ? toPrice(BigInt(makeParam.tick))
+              : toPrice(invertTick(BigInt(makeParam.tick))),
+            market.quote.decimals,
+            market.base.decimals,
+          ),
+        },
+        spent: {
+          amount: spentAmount,
+          currency: inputCurrency,
+          direction: 'in',
+          events: events.map(({ price, spentAmount }) => ({
+            price,
             amount: spentAmount,
-            currency: inputCurrency,
-            direction: 'in',
-            events: events.map(({ price, spentAmount }) => ({
-              price,
-              amount: spentAmount,
-            })),
-          },
-          taken: {
-            amount: takenAmount,
-            currency: outputCurrency,
-            direction: 'out',
-            events: events.map(({ price, takenAmount }) => ({
-              price,
-              amount: takenAmount,
-            })),
-          },
+          })),
         },
-      }
+        taken: {
+          amount: takenAmount,
+          currency: outputCurrency,
+          direction: 'out',
+          events: events.map(({ price, takenAmount }) => ({
+            price,
+            amount: takenAmount,
+          })),
+        },
+      },
     }
-  },
-)
+  }
+}
 
 /**
  * Executes a market order on the specified chain for trading tokens.
@@ -451,67 +450,68 @@ export const limitOrder = decorator(
  * })
  *
  */
-export const marketOrder = decorator(
-  async ({
+export const marketOrder = async ({
+  chainId,
+  userAddress,
+  inputToken,
+  outputToken,
+  amountIn,
+  amountOut,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  inputToken: `0x${string}`
+  outputToken: `0x${string}`
+  amountIn?: string
+  amountOut?: string
+  options?: {
+    erc20PermitParam?: ERC20PermitParam
+    slippage?: number
+    roundingDownTakenBid?: boolean
+    roundingUpTakenAsk?: boolean
+  } & DefaultOptions
+}): Promise<{
+  transaction: Transaction
+  result: {
+    taken: CurrencyFlow & {
+      events: {
+        price: string
+        amount: string
+      }[]
+    }
+    spent: CurrencyFlow & {
+      events: {
+        price: string
+        amount: string
+      }[]
+    }
+  }
+}> => {
+  if (!amountIn && !amountOut) {
+    throw new Error('Either amountIn or amountOut must be provided')
+  } else if (amountIn && amountOut) {
+    throw new Error('Only one of amountIn or amountOut can be provided')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const market = await fetchMarket(
+    publicClient,
     chainId,
-    userAddress,
-    inputToken,
-    outputToken,
-    amountIn,
-    amountOut,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    userAddress: `0x${string}`
-    inputToken: `0x${string}`
-    outputToken: `0x${string}`
-    amountIn?: string
-    amountOut?: string
-    options?: {
-      erc20PermitParam?: ERC20PermitParam
-      slippage?: number
-      roundingDownTakenBid?: boolean
-      roundingUpTakenAsk?: boolean
-    } & DefaultOptions
-  }): Promise<{
-    transaction: Transaction
-    result: {
-      taken: CurrencyFlow & {
-        events: {
-          price: string
-          amount: string
-        }[]
-      }
-      spent: CurrencyFlow & {
-        events: {
-          price: string
-          amount: string
-        }[]
-      }
-    }
-  }> => {
-    if (!amountIn && !amountOut) {
-      throw new Error('Either amountIn or amountOut must be provided')
-    } else if (amountIn && amountOut) {
-      throw new Error('Only one of amountIn or amountOut can be provided')
-    }
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    const market = await fetchMarket(publicClient, chainId, [
-      inputToken,
-      outputToken,
-    ])
-    const isTakingBid = isAddressEqual(market.base.address, inputToken)
-    const [inputCurrency, outputCurrency] = isTakingBid
-      ? [market.base, market.quote]
-      : [market.quote, market.base]
-    if (
-      (isTakingBid && !market.bidBook.isOpened) ||
-      (!isTakingBid && !market.askBook.isOpened)
-    ) {
-      throw new Error(`
+    [inputToken, outputToken],
+    !!(options && options.useSubgraph),
+  )
+  const isTakingBid = isAddressEqual(market.base.address, inputToken)
+  const [inputCurrency, outputCurrency] = isTakingBid
+    ? [market.base, market.quote]
+    : [market.quote, market.base]
+  if (
+    (isTakingBid && !market.bidBook.isOpened) ||
+    (!isTakingBid && !market.askBook.isOpened)
+  ) {
+    throw new Error(`
        Open the market before placing a market order.
        import { openMarket } from '@clober/v2-sdk'
 
@@ -521,152 +521,152 @@ export const marketOrder = decorator(
            '${outputToken}',
        )
     `)
-    }
-    const tokensToSettle = [inputToken, outputToken].filter(
-      (address) => !isAddressEqual(address, zeroAddress),
-    )
-    const isETH = isAddressEqual(inputToken, zeroAddress)
+  }
+  const tokensToSettle = [inputToken, outputToken].filter(
+    (address) => !isAddressEqual(address, zeroAddress),
+  )
+  const isETH = isAddressEqual(inputToken, zeroAddress)
 
-    if (amountIn && !amountOut) {
-      const { bookId, takenAmount, spentAmount, events } =
-        await getExpectedOutput({
-          chainId,
-          inputToken,
-          outputToken,
-          amountIn,
-          options: {
-            ...options,
-            // don't need to check limit price for market order
-          },
-        })
-      const baseAmount = parseUnits(amountIn, inputCurrency.decimals)
-      return {
-        transaction: await buildTransaction(
-          publicClient,
-          {
-            chain: CHAIN_MAP[chainId],
-            account: userAddress,
-            address: CONTRACT_ADDRESSES[chainId]!.Controller,
-            abi: CONTROLLER_ABI,
-            functionName: 'spend',
-            args: [
-              [
-                {
-                  id: bookId,
-                  limitPrice: 0n,
-                  baseAmount,
-                  minQuoteAmount: options?.slippage
-                    ? applyPercent(
-                        parseUnits(takenAmount, outputCurrency.decimals),
-                        100 - options.slippage,
-                      )
-                    : 0n,
-                  hookData: zeroHash,
-                },
-              ],
-              tokensToSettle,
-              options?.erc20PermitParam ? [options.erc20PermitParam] : [],
-              getDeadlineTimestampInSeconds(),
-            ],
-            value: isETH ? baseAmount : 0n,
-          },
-          options?.gasLimit,
-        ),
-        result: {
-          spent: {
-            amount: spentAmount,
-            currency: inputCurrency,
-            direction: 'in',
-            events: events.map(({ price, spentAmount }) => ({
-              price,
-              amount: spentAmount,
-            })),
-          },
-          taken: {
-            amount: takenAmount,
-            currency: outputCurrency,
-            direction: 'out',
-            events: events.map(({ price, takenAmount }) => ({
-              price,
-              amount: takenAmount,
-            })),
-          },
+  if (amountIn && !amountOut) {
+    const { bookId, takenAmount, spentAmount, events } =
+      await getExpectedOutput({
+        chainId,
+        inputToken,
+        outputToken,
+        amountIn,
+        options: {
+          ...options,
+          // don't need to check limit price for market order
         },
-      }
-    } else if (!amountIn && amountOut) {
-      const { bookId, spentAmount, takenAmount, events } =
-        await getExpectedInput({
-          chainId,
-          inputToken,
-          outputToken,
-          amountOut,
-          options: {
-            ...options,
-            // don't need to check limit price for market order
-          },
-        })
-      const quoteAmount = parseUnits(amountOut, outputCurrency.decimals)
-      const baseAmount = parseUnits(spentAmount, inputCurrency.decimals)
-      const maxBaseAmount =
-        options?.erc20PermitParam?.permitAmount ??
-        (options?.slippage
-          ? applyPercent(baseAmount, 100 + options.slippage)
-          : isETH
-            ? baseAmount
-            : 2n ** 256n - 1n)
-      return {
-        transaction: await buildTransaction(
-          publicClient,
-          {
-            chain: CHAIN_MAP[chainId],
-            account: userAddress,
-            address: CONTRACT_ADDRESSES[chainId]!.Controller,
-            abi: CONTROLLER_ABI,
-            functionName: 'take',
-            args: [
-              [
-                {
-                  id: bookId,
-                  limitPrice: 0n,
-                  quoteAmount,
-                  maxBaseAmount,
-                  hookData: zeroHash,
-                },
-              ],
-              tokensToSettle,
-              options?.erc20PermitParam ? [options.erc20PermitParam] : [],
-              getDeadlineTimestampInSeconds(),
+      })
+    const baseAmount = parseUnits(amountIn, inputCurrency.decimals)
+    return {
+      transaction: await buildTransaction(
+        publicClient,
+        {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'spend',
+          args: [
+            [
+              {
+                id: bookId,
+                limitPrice: 0n,
+                baseAmount,
+                minQuoteAmount: options?.slippage
+                  ? applyPercent(
+                      parseUnits(takenAmount, outputCurrency.decimals),
+                      100 - options.slippage,
+                    )
+                  : 0n,
+                hookData: zeroHash,
+              },
             ],
-            value: isETH ? maxBaseAmount : 0n,
-          },
-          options?.gasLimit,
-        ),
-        result: {
-          spent: {
-            amount: spentAmount,
-            currency: inputCurrency,
-            direction: 'in',
-            events: events.map(({ price, spentAmount }) => ({
-              price,
-              amount: spentAmount,
-            })),
-          },
-          taken: {
-            amount: takenAmount,
-            currency: outputCurrency,
-            direction: 'out',
-            events: events.map(({ price, takenAmount }) => ({
-              price,
-              amount: takenAmount,
-            })),
-          },
+            tokensToSettle,
+            options?.erc20PermitParam ? [options.erc20PermitParam] : [],
+            getDeadlineTimestampInSeconds(),
+          ],
+          value: isETH ? baseAmount : 0n,
         },
-      }
-    } else {
-      throw new Error('Either amountIn or amountOut must be provided')
+        options?.gasLimit,
+      ),
+      result: {
+        spent: {
+          amount: spentAmount,
+          currency: inputCurrency,
+          direction: 'in',
+          events: events.map(({ price, spentAmount }) => ({
+            price,
+            amount: spentAmount,
+          })),
+        },
+        taken: {
+          amount: takenAmount,
+          currency: outputCurrency,
+          direction: 'out',
+          events: events.map(({ price, takenAmount }) => ({
+            price,
+            amount: takenAmount,
+          })),
+        },
+      },
     }
-  },
-)
+  } else if (!amountIn && amountOut) {
+    const { bookId, spentAmount, takenAmount, events } = await getExpectedInput(
+      {
+        chainId,
+        inputToken,
+        outputToken,
+        amountOut,
+        options: {
+          ...options,
+          // don't need to check limit price for market order
+        },
+      },
+    )
+    const quoteAmount = parseUnits(amountOut, outputCurrency.decimals)
+    const baseAmount = parseUnits(spentAmount, inputCurrency.decimals)
+    const maxBaseAmount =
+      options?.erc20PermitParam?.permitAmount ??
+      (options?.slippage
+        ? applyPercent(baseAmount, 100 + options.slippage)
+        : isETH
+          ? baseAmount
+          : 2n ** 256n - 1n)
+    return {
+      transaction: await buildTransaction(
+        publicClient,
+        {
+          chain: CHAIN_MAP[chainId],
+          account: userAddress,
+          address: CONTRACT_ADDRESSES[chainId]!.Controller,
+          abi: CONTROLLER_ABI,
+          functionName: 'take',
+          args: [
+            [
+              {
+                id: bookId,
+                limitPrice: 0n,
+                quoteAmount,
+                maxBaseAmount,
+                hookData: zeroHash,
+              },
+            ],
+            tokensToSettle,
+            options?.erc20PermitParam ? [options.erc20PermitParam] : [],
+            getDeadlineTimestampInSeconds(),
+          ],
+          value: isETH ? maxBaseAmount : 0n,
+        },
+        options?.gasLimit,
+      ),
+      result: {
+        spent: {
+          amount: spentAmount,
+          currency: inputCurrency,
+          direction: 'in',
+          events: events.map(({ price, spentAmount }) => ({
+            price,
+            amount: spentAmount,
+          })),
+        },
+        taken: {
+          amount: takenAmount,
+          currency: outputCurrency,
+          direction: 'out',
+          events: events.map(({ price, takenAmount }) => ({
+            price,
+            amount: takenAmount,
+          })),
+        },
+      },
+    }
+  } else {
+    throw new Error('Either amountIn or amountOut must be provided')
+  }
+}
 
 /**
  * Claims specified open order for settlement.
@@ -695,30 +695,28 @@ export const marketOrder = decorator(
  *    id: openOrders.map((order) => order.id)
  * })
  */
-export const claimOrder = decorator(
-  async ({
+export const claimOrder = async ({
+  chainId,
+  userAddress,
+  id,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  id: string
+  options?: DefaultOptions
+}): Promise<{ transaction: Transaction; result: CurrencyFlow }> => {
+  const { transaction, result } = await claimOrders({
     chainId,
     userAddress,
-    id,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    userAddress: `0x${string}`
-    id: string
-    options?: DefaultOptions
-  }): Promise<{ transaction: Transaction; result: CurrencyFlow }> => {
-    const { transaction, result } = await claimOrders({
-      chainId,
-      userAddress,
-      ids: [id],
-      options: { ...options },
-    })
-    return {
-      transaction,
-      result: result[0],
-    }
-  },
-)
+    ids: [id],
+    options: { ...options },
+  })
+  return {
+    transaction,
+    result: result[0],
+  }
+}
 
 /**
  * Claims specified open orders for settlement.
@@ -747,29 +745,28 @@ export const claimOrder = decorator(
  *    ids: openOrders.map((order) => order.id)
  * )
  */
-export const claimOrders = decorator(
-  async ({
+export const claimOrders = async ({
+  chainId,
+  userAddress,
+  ids,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  ids: string[]
+  options?: DefaultOptions
+}): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const isApprovedForAll = await fetchIsApprovedForAll(
+    publicClient,
     chainId,
     userAddress,
-    ids,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    userAddress: `0x${string}`
-    ids: string[]
-    options?: DefaultOptions
-  }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    const isApprovedForAll = await fetchIsApprovedForAll(
-      publicClient,
-      chainId,
-      userAddress,
-    )
-    if (!isApprovedForAll) {
-      throw new Error(`
+  )
+  if (!isApprovedForAll) {
+    throw new Error(`
        Set ApprovalForAll before calling this function.
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
@@ -778,67 +775,61 @@ export const claimOrders = decorator(
             walletClient, // use viem
        })
     `)
-    }
+  }
 
-    const orders = (
-      await fetchOrders(
-        publicClient,
-        chainId,
-        ids.map((id) => BigInt(id)),
-      )
-    ).filter(
-      (order) =>
-        isAddressEqual(order.user, userAddress) &&
-        order.claimable.value !== '0',
+  const orders = (
+    await fetchOrders(
+      publicClient,
+      chainId,
+      ids.map((id) => BigInt(id)),
+      !!(options && options.useSubgraph),
     )
-    const tokensToSettle = orders
-      .map((order) => [
-        order.inputCurrency.address,
-        order.outputCurrency.address,
-      ])
-      .flat()
-      .filter(
-        (address, index, self) =>
-          self.findIndex((c) => isAddressEqual(c, address)) === index,
-      )
-      .filter((address) => !isAddressEqual(address, zeroAddress))
+  ).filter(
+    (order) =>
+      isAddressEqual(order.user, userAddress) && order.claimable.value !== '0',
+  )
+  const tokensToSettle = orders
+    .map((order) => [order.inputCurrency.address, order.outputCurrency.address])
+    .flat()
+    .filter(
+      (address, index, self) =>
+        self.findIndex((c) => isAddressEqual(c, address)) === index,
+    )
+    .filter((address) => !isAddressEqual(address, zeroAddress))
 
-    return {
-      transaction: await buildTransaction(
-        publicClient,
-        {
-          chain: CHAIN_MAP[chainId],
-          account: userAddress,
-          address: CONTRACT_ADDRESSES[chainId]!.Controller,
-          abi: CONTROLLER_ABI,
-          functionName: 'claim',
-          args: [
-            orders.map(({ id }) => ({
-              id,
-              hookData: zeroHash,
-            })),
-            tokensToSettle,
-            [],
-            getDeadlineTimestampInSeconds(),
-          ],
-        },
-        options?.gasLimit,
-      ),
-      result: orders.reduce((acc, { claimable: { currency, value } }) => {
-        const index = acc.findIndex((c) =>
-          isAddressEqual(c.currency.address, currency.address),
-        )
-        if (index === -1) {
-          return [...acc, { currency, amount: value, direction: 'out' }]
-        }
-        acc[index].amount = (
-          Number(acc[index].amount) + Number(value)
-        ).toString()
-        return acc
-      }, [] as CurrencyFlow[]),
-    }
-  },
-)
+  return {
+    transaction: await buildTransaction(
+      publicClient,
+      {
+        chain: CHAIN_MAP[chainId],
+        account: userAddress,
+        address: CONTRACT_ADDRESSES[chainId]!.Controller,
+        abi: CONTROLLER_ABI,
+        functionName: 'claim',
+        args: [
+          orders.map(({ id }) => ({
+            id,
+            hookData: zeroHash,
+          })),
+          tokensToSettle,
+          [],
+          getDeadlineTimestampInSeconds(),
+        ],
+      },
+      options?.gasLimit,
+    ),
+    result: orders.reduce((acc, { claimable: { currency, value } }) => {
+      const index = acc.findIndex((c) =>
+        isAddressEqual(c.currency.address, currency.address),
+      )
+      if (index === -1) {
+        return [...acc, { currency, amount: value, direction: 'out' }]
+      }
+      acc[index].amount = (Number(acc[index].amount) + Number(value)).toString()
+      return acc
+    }, [] as CurrencyFlow[]),
+  }
+}
 
 /**
  * Cancels specified open order if the order is not fully filled.
@@ -867,30 +858,28 @@ export const claimOrders = decorator(
  *    id: openOrders.map((order) => order.id)
  * })
  */
-export const cancelOrder = decorator(
-  async ({
+export const cancelOrder = async ({
+  chainId,
+  userAddress,
+  id,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  id: string
+  options?: DefaultOptions
+}): Promise<{ transaction: Transaction; result: CurrencyFlow }> => {
+  const { transaction, result } = await cancelOrders({
     chainId,
     userAddress,
-    id,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    userAddress: `0x${string}`
-    id: string
-    options?: DefaultOptions
-  }): Promise<{ transaction: Transaction; result: CurrencyFlow }> => {
-    const { transaction, result } = await cancelOrders({
-      chainId,
-      userAddress,
-      ids: [id],
-      options: { ...options },
-    })
-    return {
-      transaction,
-      result: result[0],
-    }
-  },
-)
+    ids: [id],
+    options: { ...options },
+  })
+  return {
+    transaction,
+    result: result[0],
+  }
+}
 
 /**
  * Cancels specified open orders if orders are not fully filled.
@@ -919,29 +908,28 @@ export const cancelOrder = decorator(
  *    ids: openOrders.map((order) => order.id)
  * })
  */
-export const cancelOrders = decorator(
-  async ({
+export const cancelOrders = async ({
+  chainId,
+  userAddress,
+  ids,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  ids: string[]
+  options?: DefaultOptions
+}): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const isApprovedForAll = await fetchIsApprovedForAll(
+    publicClient,
     chainId,
     userAddress,
-    ids,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    userAddress: `0x${string}`
-    ids: string[]
-    options?: DefaultOptions
-  }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    const isApprovedForAll = await fetchIsApprovedForAll(
-      publicClient,
-      chainId,
-      userAddress,
-    )
-    if (!isApprovedForAll) {
-      throw new Error(`
+  )
+  if (!isApprovedForAll) {
+    throw new Error(`
        Set ApprovalForAll before calling this function.
        import { setApprovalOfOpenOrdersForAll } from '@clober/v2-sdk'
 
@@ -950,65 +938,59 @@ export const cancelOrders = decorator(
             walletClient, // use viem
        })
     `)
-    }
+  }
 
-    const orders = (
-      await fetchOrders(
-        publicClient,
-        chainId,
-        ids.map((id) => BigInt(id)),
-      )
-    ).filter(
-      (order) =>
-        isAddressEqual(order.user, userAddress) &&
-        order.cancelable.value !== '0',
+  const orders = (
+    await fetchOrders(
+      publicClient,
+      chainId,
+      ids.map((id) => BigInt(id)),
+      !!(options && options.useSubgraph),
     )
-    const tokensToSettle = orders
-      .map((order) => [
-        order.inputCurrency.address,
-        order.outputCurrency.address,
-      ])
-      .flat()
-      .filter(
-        (address, index, self) =>
-          self.findIndex((c) => isAddressEqual(c, address)) === index,
-      )
-      .filter((address) => !isAddressEqual(address, zeroAddress))
+  ).filter(
+    (order) =>
+      isAddressEqual(order.user, userAddress) && order.cancelable.value !== '0',
+  )
+  const tokensToSettle = orders
+    .map((order) => [order.inputCurrency.address, order.outputCurrency.address])
+    .flat()
+    .filter(
+      (address, index, self) =>
+        self.findIndex((c) => isAddressEqual(c, address)) === index,
+    )
+    .filter((address) => !isAddressEqual(address, zeroAddress))
 
-    return {
-      transaction: await buildTransaction(
-        publicClient,
-        {
-          chain: CHAIN_MAP[chainId],
-          account: userAddress,
-          address: CONTRACT_ADDRESSES[chainId]!.Controller,
-          abi: CONTROLLER_ABI,
-          functionName: 'cancel',
-          args: [
-            orders.map(({ id }) => ({
-              id,
-              leftQuoteAmount: 0n,
-              hookData: zeroHash,
-            })),
-            tokensToSettle,
-            [],
-            getDeadlineTimestampInSeconds(),
-          ],
-        },
-        options?.gasLimit,
-      ),
-      result: orders.reduce((acc, { cancelable: { currency, value } }) => {
-        const index = acc.findIndex((c) =>
-          isAddressEqual(c.currency.address, currency.address),
-        )
-        if (index === -1) {
-          return [...acc, { currency, amount: value, direction: 'out' }]
-        }
-        acc[index].amount = (
-          Number(acc[index].amount) + Number(value)
-        ).toString()
-        return acc
-      }, [] as CurrencyFlow[]),
-    }
-  },
-)
+  return {
+    transaction: await buildTransaction(
+      publicClient,
+      {
+        chain: CHAIN_MAP[chainId],
+        account: userAddress,
+        address: CONTRACT_ADDRESSES[chainId]!.Controller,
+        abi: CONTROLLER_ABI,
+        functionName: 'cancel',
+        args: [
+          orders.map(({ id }) => ({
+            id,
+            leftQuoteAmount: 0n,
+            hookData: zeroHash,
+          })),
+          tokensToSettle,
+          [],
+          getDeadlineTimestampInSeconds(),
+        ],
+      },
+      options?.gasLimit,
+    ),
+    result: orders.reduce((acc, { cancelable: { currency, value } }) => {
+      const index = acc.findIndex((c) =>
+        isAddressEqual(c.currency.address, currency.address),
+      )
+      if (index === -1) {
+        return [...acc, { currency, amount: value, direction: 'out' }]
+      }
+      acc[index].amount = (Number(acc[index].amount) + Number(value)).toString()
+      return acc
+    }, [] as CurrencyFlow[]),
+  }
+}

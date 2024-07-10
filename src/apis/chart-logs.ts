@@ -1,7 +1,7 @@
 import { CHAIN_IDS } from '../constants/chain'
 import { CHART_LOG_INTERVALS, ChartLog } from '../type'
 import { ChartLogDto } from '../model/chart-log'
-import { cachedSubgraph } from '../constants/subgraph'
+import { Subgraph } from '../constants/subgraph'
 
 const CHART_LOG_INTERVAL_TIMESTAMP: {
   [key in CHART_LOG_INTERVALS]: number
@@ -39,11 +39,12 @@ const getChartLogs = async ({
   from: number
   to: number
 }) => {
-  return cachedSubgraph[chainId]!.get<{
+  return Subgraph.get<{
     data: {
       chartLogs: ChartLogDto[]
     }
   }>(
+    chainId,
     'getChartLogs',
     'query getChartLogs($first: Int!, $skip: Int!, $marketCode: String!, $intervalType: String!, $from: BigInt!, $to: BigInt!) { chartLogs( first: $first, skip: $skip, orderBy: timestamp, orderDirection: desc where: { marketCode: $marketCode, intervalType: $intervalType, timestamp_gte: $from, timestamp_lte: $to, }) { timestamp open high low close baseVolume } }',
     {
@@ -64,11 +65,12 @@ const getLatestChartLog = async ({
   chainId: CHAIN_IDS
   marketCode: string
 }) => {
-  return cachedSubgraph[chainId]!.get<{
+  return Subgraph.get<{
     data: {
       chartLogs: ChartLogDto[]
     }
   }>(
+    chainId,
     'getLatestChartLog',
     'query getLatestChartLog($marketCode: String!) { chartLogs( first: 1, orderBy: timestamp, orderDirection: desc where: { marketCode: $marketCode, }) { timestamp open high low close baseVolume } }',
     {

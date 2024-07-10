@@ -14,7 +14,6 @@ import { CHART_LOG_INTERVALS } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
 import { type OpenOrder } from './model/open-order'
-import { decorator } from './utils/decorator'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
 import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
@@ -57,66 +56,65 @@ export const getContractAddresses = ({ chainId }: { chainId: CHAIN_IDS }) => {
  *   token1: '0x0000000000000000000000000000000000000000',
  * })
  */
-export const getMarket = decorator(
-  async ({
+export const getMarket = async ({
+  chainId,
+  token0,
+  token1,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  token0: `0x${string}`
+  token1: `0x${string}`
+  options?: {
+    n?: number
+  } & DefaultOptions
+}): Promise<Market> => {
+  if (isAddressEqual(token0, token1)) {
+    throw new Error('Token0 and token1 must be different')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const market = await fetchMarket(
+    publicClient,
     chainId,
-    token0,
-    token1,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    token0: `0x${string}`
-    token1: `0x${string}`
-    options?: {
-      n?: number
-    } & DefaultOptions
-  }): Promise<Market> => {
-    if (isAddressEqual(token0, token1)) {
-      throw new Error('Token0 and token1 must be different')
-    }
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    const market = await fetchMarket(
-      publicClient,
-      chainId,
-      [token0, token1],
-      options?.n,
-    )
-    return {
-      chainId,
-      quote: market.quote,
-      base: market.base,
-      makerFee: market.makerFee,
-      takerFee: market.takerFee,
-      bids: market.bids.map(({ price, tick, baseAmount }) => ({
-        price,
-        tick: Number(tick),
-        baseAmount: formatUnits(baseAmount, market.base.decimals),
-      })),
-      bidBook: {
-        id: market.bidBook.id.toString(),
-        base: market.bidBook.base,
-        unitSize: market.bidBook.unitSize.toString(),
-        quote: market.bidBook.quote,
-        isOpened: market.bidBook.isOpened,
-      },
-      asks: market.asks.map(({ price, tick, baseAmount }) => ({
-        price,
-        tick: Number(tick),
-        baseAmount: formatUnits(baseAmount, market.base.decimals),
-      })),
-      askBook: {
-        id: market.askBook.id.toString(),
-        base: market.askBook.base,
-        unitSize: market.askBook.unitSize.toString(),
-        quote: market.askBook.quote,
-        isOpened: market.askBook.isOpened,
-      },
-    }
-  },
-)
+    [token0, token1],
+    !!(options && options.useSubgraph),
+    options?.n,
+  )
+  return {
+    chainId,
+    quote: market.quote,
+    base: market.base,
+    makerFee: market.makerFee,
+    takerFee: market.takerFee,
+    bids: market.bids.map(({ price, tick, baseAmount }) => ({
+      price,
+      tick: Number(tick),
+      baseAmount: formatUnits(baseAmount, market.base.decimals),
+    })),
+    bidBook: {
+      id: market.bidBook.id.toString(),
+      base: market.bidBook.base,
+      unitSize: market.bidBook.unitSize.toString(),
+      quote: market.bidBook.quote,
+      isOpened: market.bidBook.isOpened,
+    },
+    asks: market.asks.map(({ price, tick, baseAmount }) => ({
+      price,
+      tick: Number(tick),
+      baseAmount: formatUnits(baseAmount, market.base.decimals),
+    })),
+    askBook: {
+      id: market.askBook.id.toString(),
+      base: market.askBook.base,
+      unitSize: market.askBook.unitSize.toString(),
+      quote: market.askBook.quote,
+      isOpened: market.askBook.isOpened,
+    },
+  }
+}
 
 /**
  * Calculates and returns the neighboring price ticks and their corresponding prices for a given input price.
@@ -320,72 +318,88 @@ export const getPriceNeighborhood = ({
  *   amountIn: '1000.123', // spend 1000.123 USDC
  * })
  */
-export const getExpectedOutput = decorator(
-  async ({
+export const getExpectedOutput = async ({
+  chainId,
+  inputToken,
+  outputToken,
+  amountIn,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  inputToken: `0x${string}`
+  outputToken: `0x${string}`
+  amountIn: string
+  options?: {
+    limitPrice?: string
+    roundingDownTakenBid?: boolean
+    roundingUpTakenAsk?: boolean
+  } & DefaultOptions
+}): Promise<{
+  takenAmount: string
+  spentAmount: string
+  bookId: bigint
+  events: { price: string; takenAmount: string; spentAmount: string }[]
+}> => {
+  const [roundingDownTakenBid, roundingUpTakenAsk] = [
+    options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
+    options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
+  ]
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const market = await fetchMarket(
+    publicClient,
     chainId,
-    inputToken,
-    outputToken,
-    amountIn,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    inputToken: `0x${string}`
-    outputToken: `0x${string}`
-    amountIn: string
-    options?: {
-      limitPrice?: string
-      roundingDownTakenBid?: boolean
-      roundingUpTakenAsk?: boolean
-    } & DefaultOptions
-  }): Promise<{
-    takenAmount: string
-    spentAmount: string
-    bookId: bigint
-    events: { price: string; takenAmount: string; spentAmount: string }[]
-  }> => {
-    const [roundingDownTakenBid, roundingUpTakenAsk] = [
-      options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
-      options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
-    ]
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    const market = await fetchMarket(publicClient, chainId, [
-      inputToken,
-      outputToken,
-    ])
-    const isBid = isAddressEqual(market.quote.address, inputToken)
-    const { roundingDownTick, roundingUpTick } =
-      options && options.limitPrice
-        ? parsePrice(
-            Number(options.limitPrice),
-            market.quote.decimals,
-            market.base.decimals,
-          )
-        : isBid
-          ? {
-              roundingDownTick: MAX_TICK,
-              roundingUpTick: MAX_TICK,
-            }
-          : {
-              roundingDownTick: MIN_TICK,
-              roundingUpTick: MIN_TICK,
-            }
-    const inputCurrency = isBid ? market.quote : market.base
-    const isTakingBidSide = !isBid
-    const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.spend({
-      spentBase: isTakingBidSide,
-      limitTick: isTakingBidSide
-        ? roundingDownTakenBid
-          ? roundingDownTick
-          : roundingUpTick
-        : roundingUpTakenAsk
-          ? roundingUpTick
-          : roundingDownTick,
-      amountIn: parseUnits(amountIn, inputCurrency.decimals),
-    })
-    return {
+    [inputToken, outputToken],
+    !!(options && options.useSubgraph),
+  )
+  const isBid = isAddressEqual(market.quote.address, inputToken)
+  const { roundingDownTick, roundingUpTick } =
+    options && options.limitPrice
+      ? parsePrice(
+          Number(options.limitPrice),
+          market.quote.decimals,
+          market.base.decimals,
+        )
+      : isBid
+        ? {
+            roundingDownTick: MAX_TICK,
+            roundingUpTick: MAX_TICK,
+          }
+        : {
+            roundingDownTick: MIN_TICK,
+            roundingUpTick: MIN_TICK,
+          }
+  const inputCurrency = isBid ? market.quote : market.base
+  const isTakingBidSide = !isBid
+  const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.spend({
+    spentBase: isTakingBidSide,
+    limitTick: isTakingBidSide
+      ? roundingDownTakenBid
+        ? roundingDownTick
+        : roundingUpTick
+      : roundingUpTakenAsk
+        ? roundingUpTick
+        : roundingDownTick,
+    amountIn: parseUnits(amountIn, inputCurrency.decimals),
+  })
+  return {
+    takenAmount: formatUnits(
+      takenQuoteAmount,
+      isBid ? market.base.decimals : market.quote.decimals,
+    ),
+    spentAmount: formatUnits(
+      spentBaseAmount,
+      isBid ? market.quote.decimals : market.base.decimals,
+    ),
+    bookId,
+    events: events.map(({ tick, takenQuoteAmount, spentBaseAmount }) => ({
+      price: formatPrice(
+        toPrice(isBid ? invertTick(BigInt(tick)) : BigInt(tick)),
+        market.quote.decimals,
+        market.base.decimals,
+      ),
       takenAmount: formatUnits(
         takenQuoteAmount,
         isBid ? market.base.decimals : market.quote.decimals,
@@ -394,25 +408,9 @@ export const getExpectedOutput = decorator(
         spentBaseAmount,
         isBid ? market.quote.decimals : market.base.decimals,
       ),
-      bookId,
-      events: events.map(({ tick, takenQuoteAmount, spentBaseAmount }) => ({
-        price: formatPrice(
-          toPrice(isBid ? invertTick(BigInt(tick)) : BigInt(tick)),
-          market.quote.decimals,
-          market.base.decimals,
-        ),
-        takenAmount: formatUnits(
-          takenQuoteAmount,
-          isBid ? market.base.decimals : market.quote.decimals,
-        ),
-        spentAmount: formatUnits(
-          spentBaseAmount,
-          isBid ? market.quote.decimals : market.base.decimals,
-        ),
-      })),
-    }
-  },
-)
+    })),
+  }
+}
 
 /**
  * Calculates the expected input for a given output amount, based on the provided market data.
@@ -436,66 +434,82 @@ export const getExpectedOutput = decorator(
  *   amountOut: '0.1', // take 0.1 ETH
  * })
  */
-export const getExpectedInput = decorator(
-  async ({
+export const getExpectedInput = async ({
+  chainId,
+  inputToken,
+  outputToken,
+  amountOut,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  inputToken: `0x${string}`
+  outputToken: `0x${string}`
+  amountOut: string
+  options?: {
+    limitPrice?: string
+    roundingDownTakenBid?: boolean
+    roundingUpTakenAsk?: boolean
+  } & DefaultOptions
+}): Promise<{
+  takenAmount: string
+  spentAmount: string
+  bookId: bigint
+  events: { price: string; takenAmount: string; spentAmount: string }[]
+}> => {
+  const [roundingDownTakenBid, roundingUpTakenAsk] = [
+    options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
+    options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
+  ]
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const market = await fetchMarket(
+    publicClient,
     chainId,
-    inputToken,
-    outputToken,
-    amountOut,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    inputToken: `0x${string}`
-    outputToken: `0x${string}`
-    amountOut: string
-    options?: {
-      limitPrice?: string
-      roundingDownTakenBid?: boolean
-      roundingUpTakenAsk?: boolean
-    } & DefaultOptions
-  }): Promise<{
-    takenAmount: string
-    spentAmount: string
-    bookId: bigint
-    events: { price: string; takenAmount: string; spentAmount: string }[]
-  }> => {
-    const [roundingDownTakenBid, roundingUpTakenAsk] = [
-      options?.roundingDownTakenBid ? options.roundingDownTakenBid : false,
-      options?.roundingUpTakenAsk ? options.roundingUpTakenAsk : false,
-    ]
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    const market = await fetchMarket(publicClient, chainId, [
-      inputToken,
-      outputToken,
-    ])
-    const isBid = isAddressEqual(market.quote.address, inputToken)
-    const { roundingDownTick, roundingUpTick } =
-      options && options.limitPrice
-        ? parsePrice(
-            Number(options.limitPrice),
-            market.quote.decimals,
-            market.base.decimals,
-          )
-        : isBid
-          ? { roundingDownTick: MAX_TICK, roundingUpTick: MAX_TICK }
-          : { roundingDownTick: MIN_TICK, roundingUpTick: MIN_TICK }
-    const outputCurrency = isBid ? market.base : market.quote
-    const isTakingBidSide = !isBid
-    const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.take({
-      takeQuote: isTakingBidSide,
-      limitTick: isTakingBidSide
-        ? roundingDownTakenBid
-          ? roundingDownTick
-          : roundingUpTick
-        : roundingUpTakenAsk
-          ? roundingUpTick
-          : roundingDownTick,
-      amountOut: parseUnits(amountOut, outputCurrency.decimals),
-    })
-    return {
+    [inputToken, outputToken],
+    !!(options && options.useSubgraph),
+  )
+  const isBid = isAddressEqual(market.quote.address, inputToken)
+  const { roundingDownTick, roundingUpTick } =
+    options && options.limitPrice
+      ? parsePrice(
+          Number(options.limitPrice),
+          market.quote.decimals,
+          market.base.decimals,
+        )
+      : isBid
+        ? { roundingDownTick: MAX_TICK, roundingUpTick: MAX_TICK }
+        : { roundingDownTick: MIN_TICK, roundingUpTick: MIN_TICK }
+  const outputCurrency = isBid ? market.base : market.quote
+  const isTakingBidSide = !isBid
+  const { takenQuoteAmount, spentBaseAmount, bookId, events } = market.take({
+    takeQuote: isTakingBidSide,
+    limitTick: isTakingBidSide
+      ? roundingDownTakenBid
+        ? roundingDownTick
+        : roundingUpTick
+      : roundingUpTakenAsk
+        ? roundingUpTick
+        : roundingDownTick,
+    amountOut: parseUnits(amountOut, outputCurrency.decimals),
+  })
+  return {
+    takenAmount: formatUnits(
+      takenQuoteAmount,
+      isBid ? market.base.decimals : market.quote.decimals,
+    ),
+    spentAmount: formatUnits(
+      spentBaseAmount,
+      isBid ? market.quote.decimals : market.base.decimals,
+    ),
+    bookId,
+    events: events.map(({ tick, takenQuoteAmount, spentBaseAmount }) => ({
+      price: formatPrice(
+        toPrice(isBid ? invertTick(BigInt(tick)) : BigInt(tick)),
+        market.quote.decimals,
+        market.base.decimals,
+      ),
       takenAmount: formatUnits(
         takenQuoteAmount,
         isBid ? market.base.decimals : market.quote.decimals,
@@ -504,25 +518,9 @@ export const getExpectedInput = decorator(
         spentBaseAmount,
         isBid ? market.quote.decimals : market.base.decimals,
       ),
-      bookId,
-      events: events.map(({ tick, takenQuoteAmount, spentBaseAmount }) => ({
-        price: formatPrice(
-          toPrice(isBid ? invertTick(BigInt(tick)) : BigInt(tick)),
-          market.quote.decimals,
-          market.base.decimals,
-        ),
-        takenAmount: formatUnits(
-          takenQuoteAmount,
-          isBid ? market.base.decimals : market.quote.decimals,
-        ),
-        spentAmount: formatUnits(
-          spentBaseAmount,
-          isBid ? market.quote.decimals : market.base.decimals,
-        ),
-      })),
-    }
-  },
-)
+    })),
+  }
+}
 
 /**
  * Retrieves the open order with the specified ID on the given chain.
@@ -541,24 +539,21 @@ export const getExpectedInput = decorator(
  *   id: '46223845323662364279893361453861711542636620039907198451770258805035840307200'
  * })
  */
-export const getOpenOrder = decorator(
-  async ({
-    chainId,
-    id,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    id: string
-    options?: DefaultOptions
-  }): Promise<OpenOrder> => {
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    return fetchOpenOrder(publicClient, chainId, id)
-  },
-)
-
+export const getOpenOrder = async ({
+  chainId,
+  id,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  id: string
+  options?: DefaultOptions
+}): Promise<OpenOrder> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  return fetchOpenOrder(publicClient, chainId, id)
+}
 /**
  * Retrieves open orders for the specified user on the given chain.
  *
@@ -576,23 +571,21 @@ export const getOpenOrder = decorator(
  *   userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49'
  * })
  */
-export const getOpenOrders = decorator(
-  async ({
-    chainId,
-    userAddress,
-    options,
-  }: {
-    chainId: CHAIN_IDS
-    userAddress: `0x${string}`
-    options?: DefaultOptions
-  }): Promise<OpenOrder[]> => {
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    return fetchOpenOrdersByUserAddress(publicClient, chainId, userAddress)
-  },
-)
+export const getOpenOrders = async ({
+  chainId,
+  userAddress,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  options?: DefaultOptions
+}): Promise<OpenOrder[]> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  return fetchOpenOrdersByUserAddress(publicClient, chainId, userAddress)
+}
 
 /**
  * Retrieves the latest chart log for a specific market.
@@ -611,19 +604,17 @@ export const getOpenOrders = decorator(
  *   base: '0x0000000000000000000000000000000000000000',
  * })
  */
-export const getLatestChartLog = decorator(
-  async ({
-    chainId,
-    quote,
-    base,
-  }: {
-    chainId: CHAIN_IDS
-    quote: `0x${string}`
-    base: `0x${string}`
-  }): Promise<ChartLog> => {
-    return fetchLatestChartLog(chainId, `${base}/${quote}`)
-  },
-)
+export const getLatestChartLog = async ({
+  chainId,
+  quote,
+  base,
+}: {
+  chainId: CHAIN_IDS
+  quote: `0x${string}`
+  base: `0x${string}`
+}): Promise<ChartLog> => {
+  return fetchLatestChartLog(chainId, `${base}/${quote}`)
+}
 
 /**
  * Retrieves chart logs for a specific market within a specified time interval.
@@ -649,25 +640,23 @@ export const getLatestChartLog = decorator(
  * })
  */
 
-export const getChartLogs = decorator(
-  async ({
-    chainId,
-    quote,
-    base,
-    intervalType,
-    from,
-    to,
-  }: {
-    chainId: CHAIN_IDS
-    quote: `0x${string}`
-    base: `0x${string}`
-    intervalType: CHART_LOG_INTERVALS
-    from: number
-    to: number
-  }): Promise<ChartLog[]> => {
-    return fetchChartLogs(chainId, `${base}/${quote}`, intervalType, from, to)
-  },
-)
+export const getChartLogs = async ({
+  chainId,
+  quote,
+  base,
+  intervalType,
+  from,
+  to,
+}: {
+  chainId: CHAIN_IDS
+  quote: `0x${string}`
+  base: `0x${string}`
+  intervalType: CHART_LOG_INTERVALS
+  from: number
+  to: number
+}): Promise<ChartLog[]> => {
+  return fetchChartLogs(chainId, `${base}/${quote}`, intervalType, from, to)
+}
 
 /**
  * Retrieves the quote token address for a given chain and a pair of tokens.
