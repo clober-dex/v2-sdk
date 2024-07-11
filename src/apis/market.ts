@@ -13,7 +13,7 @@ import { fetchIsOpened } from '../utils/open'
 import { fetchCurrency } from '../utils/currency'
 import { Subgraph } from '../constants/subgraph'
 
-const fetchBook = async (chainId: CHAIN_IDS, bookId: string) => {
+const fetchBookFromSubgraph = async (chainId: CHAIN_IDS, bookId: string) => {
   return Subgraph.get<{
     data: {
       book: {
@@ -52,7 +52,7 @@ const getBook = async (
   if (useSubgraph) {
     const {
       data: { book },
-    } = await fetchBook(chainId, bookId.toString())
+    } = await fetchBookFromSubgraph(chainId, bookId.toString())
     new Book({
       chainId,
       id: bookId,

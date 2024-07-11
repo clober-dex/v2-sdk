@@ -12,7 +12,10 @@ import { applyPercent } from '../utils/bigint'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { Subgraph } from '../constants/subgraph'
 
-const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
+const getOpenOrderFromSubgraph = async (
+  chainId: CHAIN_IDS,
+  orderId: string,
+) => {
   return Subgraph.get<{
     data: {
       openOrder: OpenOrderDto | null
@@ -27,7 +30,10 @@ const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
   )
 }
 
-const getOpenOrders = async (chainId: CHAIN_IDS, orderIds: string[]) => {
+const getOpenOrdersFromSubgraph = async (
+  chainId: CHAIN_IDS,
+  orderIds: string[],
+) => {
   return Subgraph.get<{
     data: {
       openOrders: OpenOrderDto[]
@@ -42,7 +48,7 @@ const getOpenOrders = async (chainId: CHAIN_IDS, orderIds: string[]) => {
   )
 }
 
-const getOpenOrdersByUserAddress = async (
+const getOpenOrdersByUserAddressFromSubgraph = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ) => {
@@ -67,7 +73,7 @@ export async function fetchOpenOrdersByUserAddress(
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
-  } = await getOpenOrdersByUserAddress(chainId, userAddress)
+  } = await getOpenOrdersByUserAddressFromSubgraph(chainId, userAddress)
   const currencies = await Promise.all(
     openOrders
       .map((openOrder) => [
@@ -93,7 +99,7 @@ export async function fetchOpenOrder(
 ): Promise<OpenOrder> {
   const {
     data: { openOrder },
-  } = await getOpenOrder(chainId, id)
+  } = await getOpenOrderFromSubgraph(chainId, id)
   if (!openOrder) {
     throw new Error(`Open order not found: ${id}`)
   }
@@ -111,7 +117,7 @@ export async function fetchOpenOrders(
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
-  } = await getOpenOrders(chainId, ids)
+  } = await getOpenOrdersFromSubgraph(chainId, ids)
   const currencies = await Promise.all(
     openOrders
       .map((openOrder) => [

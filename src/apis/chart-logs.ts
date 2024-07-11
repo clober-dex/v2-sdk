@@ -22,7 +22,7 @@ const CHART_LOG_INTERVAL_TIMESTAMP: {
 
 const PAGE_SIZE = 1000
 
-const getChartLogs = async ({
+const getChartLogsFromSubgraph = async ({
   chainId,
   first,
   skip,
@@ -58,7 +58,7 @@ const getChartLogs = async ({
   )
 }
 
-const getLatestChartLog = async ({
+const getLatestChartLogFromSubgraph = async ({
   chainId,
   marketCode,
 }: {
@@ -85,7 +85,7 @@ export async function fetchLatestChartLog(
 ): Promise<ChartLog> {
   const {
     data: { chartLogs },
-  } = await getLatestChartLog({
+  } = await getLatestChartLogFromSubgraph({
     chainId,
     marketCode: marketCode.toLowerCase(),
   })
@@ -121,7 +121,7 @@ export async function fetchChartLogs(
   while (true) {
     const {
       data: { chartLogs },
-    } = await getChartLogs({
+    } = await getChartLogsFromSubgraph({
       chainId,
       first: PAGE_SIZE,
       skip,
@@ -152,7 +152,7 @@ export async function fetchChartLogs(
   )
   const {
     data: { chartLogs: chartLogsBeforeFrom },
-  } = await getChartLogs({
+  } = await getChartLogsFromSubgraph({
     chainId,
     first: 1,
     skip: 0,
