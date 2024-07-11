@@ -108,6 +108,37 @@ export async function fetchLatestChartLog(
       }
 }
 
+const buildChartCacheKey = (
+  chainId: CHAIN_IDS,
+  marketCode: string,
+  intervalType: CHART_LOG_INTERVALS,
+  from: number,
+  to: number,
+) => `${chainId}:${marketCode}:${intervalType}:${from}:${to}`
+const chartLogsCache = new Map<string, ChartLog[]>()
+const getChartLogsFromCache = (
+  chainId: CHAIN_IDS,
+  marketCode: string,
+  intervalType: CHART_LOG_INTERVALS,
+  from: number,
+  to: number,
+): ChartLog[] | undefined =>
+  chartLogsCache.get(
+    buildChartCacheKey(chainId, marketCode, intervalType, from, to),
+  )
+const setChartLogsToCache = (
+  chainId: CHAIN_IDS,
+  marketCode: string,
+  intervalType: CHART_LOG_INTERVALS,
+  from: number,
+  to: number,
+  chartLogs: ChartLog[],
+) =>
+  chartLogsCache.set(
+    buildChartCacheKey(chainId, marketCode, intervalType, from, to),
+    chartLogs,
+  )
+
 export async function fetchChartLogs(
   chainId: CHAIN_IDS,
   marketCode: string,
@@ -115,6 +146,16 @@ export async function fetchChartLogs(
   from: number,
   to: number,
 ): Promise<ChartLog[]> {
+  const cachedChartLogs = getChartLogsFromCache(
+    chainId,
+    marketCode,
+    intervalType,
+    from,
+    to,
+  )
+  if (cachedChartLogs !== undefined) {
+    return cachedChartLogs
+  }
   const chartLogsBetweenFromAndTo: ChartLog[] = []
   let skip = 0
   // eslint-disable-next-line no-constant-condition
@@ -220,6 +261,6 @@ export async function fetchChartLogs(
 
     timestampForAcc += intervalInNumber
   }
-
+  setChartLogsToCache(chainId, marketCode, intervalType, from, to, result)
   return result
 }
