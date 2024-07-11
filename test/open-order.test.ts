@@ -1,18 +1,17 @@
 import { afterEach, expect, test } from 'vitest'
 import {
-  getOpenOrders,
-  getOpenOrder,
-  claimOrders,
-  setApprovalOfOpenOrdersForAll,
-  signERC20Permit,
-  limitOrder,
-  claimOrder,
   cancelOrder,
   cancelOrders,
+  claimOrder,
+  claimOrders,
+  getOpenOrder,
+  getOpenOrders,
+  limitOrder,
+  setApprovalOfOpenOrdersForAll,
+  signERC20Permit,
 } from '@clober/v2-sdk'
 import { getAddress } from 'viem'
 
-import { buildPublicClient } from '../src/constants/client'
 import { cloberTestChain } from '../src/constants/test-chain'
 
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
@@ -39,7 +38,6 @@ afterEach(async () => {
 
 test('get open orders by user address', async () => {
   const { publicClient } = clients[0] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const openOrders = await getOpenOrders({
     chainId: cloberTestChain.id,
@@ -53,7 +51,6 @@ test('get open orders by user address', async () => {
 
 test('get undefined open orders', async () => {
   const { publicClient } = clients[1] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   expect(
     await getOpenOrder({
@@ -68,7 +65,6 @@ test('get undefined open orders', async () => {
 
 test('claim ask order', async () => {
   const { publicClient, walletClient } = clients[2] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const erc20PermitParam = await signERC20Permit({
     chainId: cloberTestChain.id,
@@ -96,7 +92,7 @@ test('claim ask order', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n,
       ])
     ).map((order) => order.claimable),
@@ -110,7 +106,7 @@ test('claim ask order', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n,
       ])
     ).map((order) => order.claimable),
@@ -130,6 +126,7 @@ test('claim ask order', async () => {
   }
 
   const beforeBalance = await fetchTokenBalance(
+    publicClient,
     cloberTestChain.id,
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     account.address,
@@ -147,6 +144,7 @@ test('claim ask order', async () => {
   await walletClient.sendTransaction({ ...transaction, account })
 
   const afterBalance = await fetchTokenBalance(
+    publicClient,
     cloberTestChain.id,
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     account.address,
@@ -154,7 +152,7 @@ test('claim ask order', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n,
       ])
     ).map((order) => order.claimable),
@@ -169,7 +167,6 @@ test('claim ask order', async () => {
 
 test('claim bid order', async () => {
   const { publicClient, walletClient } = clients[6] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   await publicClient.waitForTransactionReceipt({
     hash: await walletClient.sendTransaction({
@@ -194,7 +191,7 @@ test('claim bid order', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         46223845323662364279893361453861711542636620039907198451770260500482770337792n,
       ])
     ).map((order) => order.claimable),
@@ -208,7 +205,7 @@ test('claim bid order', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         46223845323662364279893361453861711542636620039907198451770260500482770337792n,
       ])
     ).map((order) => order.claimable),
@@ -248,7 +245,7 @@ test('claim bid order', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         46223845323662364279893361453861711542636620039907198451770260500482770337792n,
       ])
     ).map((order) => order.claimable),
@@ -263,7 +260,6 @@ test('claim bid order', async () => {
 
 test('claim orders', async () => {
   const { publicClient, walletClient } = clients[3] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   await publicClient.waitForTransactionReceipt({
     hash: await walletClient.sendTransaction({
@@ -275,7 +271,7 @@ test('claim orders', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n, // ask
         50784203244917507140848199044778666621202412111794785971205812483307929075712n, // ask
         46223845323662364279893361453861711542636620039907198451770260500482770337792n, // bid
@@ -330,7 +326,7 @@ test('claim orders', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n, // ask
         50784203244917507140848199044778666621202412111794785971205812483307929075712n, // ask
         46223845323662364279893361453861711542636620039907198451770260500482770337792n, // bid
@@ -354,6 +350,7 @@ test('claim orders', async () => {
 
   const [beforeUSDCBalance, beforeETHBalance] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -381,6 +378,7 @@ test('claim orders', async () => {
 
   const [afterUSDCBalance, afterETHBalance] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -392,7 +390,7 @@ test('claim orders', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n, // ask
         50784203244917507140848199044778666621202412111794785971205812483307929075712n, // ask
         46223845323662364279893361453861711542636620039907198451770260500482770337792n, // bid
@@ -420,7 +418,6 @@ test('claim orders', async () => {
 
 test('cancel ask order', async () => {
   const { publicClient, walletClient } = clients[4] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   // be sure to approve before claim
   const hash = await setApprovalOfOpenOrdersForAll({
@@ -450,7 +447,7 @@ test('cancel ask order', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n,
       ])
     ).map((order) => order.open),
@@ -460,7 +457,7 @@ test('cancel ask order', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         50784203244917507140848199044778666621202412111794785971205812514094254653440n,
       ])
     ).map((order) => order.open),
@@ -480,7 +477,6 @@ test('cancel ask order', async () => {
 
 test('cancel bid order', async () => {
   const { publicClient, walletClient } = clients[7] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   // be sure to approve before claim
   const hash = await setApprovalOfOpenOrdersForAll({
@@ -496,6 +492,7 @@ test('cancel bid order', async () => {
   }
 
   const beforeBalance = await fetchTokenBalance(
+    publicClient,
     cloberTestChain.id,
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     account.address,
@@ -512,7 +509,7 @@ test('cancel bid order', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         46223845323662364279893361453861711542636620039907198451770260500482770337792n,
       ])
     ).map((order) => order.open),
@@ -522,13 +519,14 @@ test('cancel bid order', async () => {
 
   expect(
     (
-      await fetchOrders(cloberTestChain.id, [
+      await fetchOrders(publicClient, cloberTestChain.id, [
         46223845323662364279893361453861711542636620039907198451770260500482770337792n,
       ])
     ).map((order) => order.open),
   ).toEqual([0n])
 
   const afterBalance = await fetchTokenBalance(
+    publicClient,
     cloberTestChain.id,
     '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     account.address,
@@ -544,7 +542,6 @@ test('cancel bid order', async () => {
 
 test('cancel orders', async () => {
   const { publicClient, walletClient } = clients[5] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const orderIds = [
     '46223845323662364279893361453861711542636620039907198451770259165675654217728',
@@ -552,6 +549,7 @@ test('cancel orders', async () => {
   ]
 
   const status = await fetchOrders(
+    publicClient,
     cloberTestChain.id,
     orderIds.map((id) => BigInt(id)),
   )
@@ -575,6 +573,7 @@ test('cancel orders', async () => {
 
   const [beforeUSDCBalance, beforeETHBalance] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -596,6 +595,7 @@ test('cancel orders', async () => {
 
   const [afterUSDCBalance, afterETHBalance] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,

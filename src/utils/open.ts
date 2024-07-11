@@ -1,5 +1,6 @@
+import { PublicClient } from 'viem'
+
 import { CHAIN_IDS } from '../constants/chain'
-import { cachedPublicClients } from '../constants/client'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 
 const _abi = [
@@ -35,12 +36,16 @@ const setIsOpenedToCache = (
   isOpened: boolean,
 ) => isOpenedCache.set(buildBookCacheKey(chainId, bookId), isOpened)
 
-export async function fetchIsOpened(chainId: CHAIN_IDS, bookId: bigint) {
+export async function fetchIsOpened(
+  publicClient: PublicClient,
+  chainId: CHAIN_IDS,
+  bookId: bigint,
+) {
   const cachedIsOpened = getIsOpenedFromCache(chainId, bookId)
   if (cachedIsOpened !== undefined) {
     return cachedIsOpened
   }
-  const isOpened = await cachedPublicClients[chainId].readContract({
+  const isOpened = await publicClient.readContract({
     address: CONTRACT_ADDRESSES[chainId]!.BookManager,
     abi: _abi,
     functionName: 'isOpened',

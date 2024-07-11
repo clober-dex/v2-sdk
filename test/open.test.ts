@@ -1,7 +1,6 @@
 import { expect, test, afterEach } from 'vitest'
 import { getMarket, openMarket } from '@clober/v2-sdk'
 
-import { buildPublicClient } from '../src/constants/client'
 import { cloberTestChain } from '../src/constants/test-chain'
 
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
@@ -26,7 +25,6 @@ afterEach(async () => {
 
 test('try open market', async () => {
   const { publicClient, walletClient } = clients[0] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const transaction1 = await openMarket({
     chainId: cloberTestChain.id,
@@ -85,7 +83,6 @@ test('try open market', async () => {
 
 test('try already open market', async () => {
   const { publicClient } = clients[1] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const transaction = await openMarket({
     chainId: cloberTestChain.id,

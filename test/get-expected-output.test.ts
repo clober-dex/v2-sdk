@@ -12,7 +12,6 @@ import { parsePrice } from '../src/utils/prices'
 import { invertTick } from '../src/utils/tick'
 import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
 import { BOOK_VIEWER_ABI } from '../src/abis/core/book-viewer-abi'
-import { buildPublicClient } from '../src/constants/client'
 import { cloberTestChain } from '../src/constants/test-chain'
 
 import { createProxyClients } from './utils/utils'
@@ -105,7 +104,6 @@ const clients = createProxyClients(
 
 test('get expected output ask', async () => {
   const { publicClient } = clients[1] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   await isSpendResultEqual(
     publicClient,
@@ -142,7 +140,6 @@ test('get expected output ask', async () => {
 
 test('get expected output bid', async () => {
   const { publicClient } = clients[1] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   await isSpendResultEqual(
     publicClient,
@@ -179,7 +176,6 @@ test('get expected output bid', async () => {
 
 test('get expected output in not open book', async () => {
   const { publicClient } = clients[2] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const { takenAmount, spentAmount } = await getExpectedOutput({
     chainId: cloberTestChain.id,

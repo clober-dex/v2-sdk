@@ -3,7 +3,6 @@ import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
 import { getMarket, getQuoteToken } from '@clober/v2-sdk'
 
-import { buildPublicClient } from '../src/constants/client'
 import { cloberTestChain } from '../src/constants/test-chain'
 
 import { createProxyClients } from './utils/utils'
@@ -42,7 +41,6 @@ test('get quote token', async () => {
 
 test('fetch open market', async () => {
   const { publicClient } = clients[0] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const market = await getMarket({
     chainId: cloberTestChain.id,
@@ -76,9 +74,6 @@ test('fetch open market', async () => {
 })
 
 test('fetch empty market', async () => {
-  const { publicClient } = clients[1] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
-
   const market = await getMarket({
     chainId: arbitrumSepolia.id,
     token0: '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
@@ -93,9 +88,6 @@ test('fetch empty market', async () => {
 
 // @dev: this test will be fail when the market is open
 test('fetch not open market', async () => {
-  const { publicClient } = clients[2] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
-
   const market = await getMarket({
     chainId: arbitrumSepolia.id,
     token0: '0x0e12A07A610056067063cB208882fD5a032B1505',
@@ -109,9 +101,6 @@ test('fetch not open market', async () => {
 })
 
 test('fetch invalid market', async () => {
-  const { publicClient } = clients[3] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
-
   expect(
     await getMarket({
       chainId: arbitrumSepolia.id,

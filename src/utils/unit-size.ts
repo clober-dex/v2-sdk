@@ -1,8 +1,7 @@
-import { isAddressEqual, zeroAddress } from 'viem'
+import { isAddressEqual, PublicClient, zeroAddress } from 'viem'
 
 import { type Currency } from '../model/currency'
 import { CHAIN_IDS } from '../constants/chain'
-import { cachedPublicClients } from '../constants/client'
 import { WETH_ADDRESSES } from '../constants/currency'
 
 const _abi = [
@@ -36,6 +35,7 @@ const setUnitSizeToCache = (
 ) => unitSizeCache.set(buildCurrencyCacheKey(chainId, address), unitSize)
 
 export const calculateUnitSize = async (
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   quote: Currency,
 ) => {
@@ -43,19 +43,23 @@ export const calculateUnitSize = async (
   if (cachedUnitSize !== undefined) {
     return cachedUnitSize
   }
-  const unitSize = await calculateUnitSizeInner(chainId, quote)
+  const unitSize = await calculateUnitSizeInner(publicClient, chainId, quote)
   setUnitSizeToCache(chainId, quote.address, unitSize)
   return unitSize
 }
 
-const calculateUnitSizeInner = async (chainId: CHAIN_IDS, quote: Currency) => {
+const calculateUnitSizeInner = async (
+  publicClient: PublicClient,
+  chainId: CHAIN_IDS,
+  quote: Currency,
+) => {
   if (
     isAddressEqual(quote.address, zeroAddress) ||
     WETH_ADDRESSES[chainId].includes(quote.address)
   ) {
     return 10n ** 12n
   }
-  const totalSupply = await cachedPublicClients[chainId].readContract({
+  const totalSupply = await publicClient.readContract({
     address: quote.address,
     abi: _abi,
     functionName: 'totalSupply',

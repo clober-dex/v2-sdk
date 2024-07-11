@@ -2,7 +2,6 @@ import { afterEach, expect, test } from 'vitest'
 import { getMarket, marketOrder, signERC20Permit } from '@clober/v2-sdk'
 import { getAddress } from 'viem'
 
-import { buildPublicClient } from '../src/constants/client'
 import { cloberTestChain } from '../src/constants/test-chain'
 
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
@@ -28,7 +27,6 @@ afterEach(async () => {
 
 test('market order in not open market', async () => {
   const { publicClient } = clients[0] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   expect(
     (
@@ -49,7 +47,6 @@ test('market order in not open market', async () => {
 
 test('spend with token', async () => {
   const { publicClient, walletClient } = clients[1] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const erc20PermitParams = await signERC20Permit({
     chainId: cloberTestChain.id,
@@ -76,6 +73,7 @@ test('spend with token', async () => {
 
   const [beforeUSDCBalance, beforeETHBalance] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -93,6 +91,7 @@ test('spend with token', async () => {
 
   const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -130,7 +129,6 @@ test('spend with token', async () => {
 
 test('spend with eth', async () => {
   const { publicClient, walletClient } = clients[2] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   await publicClient.waitForTransactionReceipt({
     hash: await walletClient.sendTransaction({
@@ -154,6 +152,7 @@ test('spend with eth', async () => {
 
   const [beforeUSDCBalance, beforeETHBalance] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -171,6 +170,7 @@ test('spend with eth', async () => {
 
   const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -208,7 +208,6 @@ test('spend with eth', async () => {
 
 test('take with token', async () => {
   const { publicClient, walletClient } = clients[3] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   const erc20PermitParams = await signERC20Permit({
     chainId: cloberTestChain.id,
@@ -235,6 +234,7 @@ test('take with token', async () => {
 
   const [beforeUSDCBalance, beforeETHBalance] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -252,6 +252,7 @@ test('take with token', async () => {
 
   const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -289,7 +290,6 @@ test('take with token', async () => {
 
 test('take with eth', async () => {
   const { publicClient, walletClient } = clients[3] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   await publicClient.waitForTransactionReceipt({
     hash: await walletClient.sendTransaction({
@@ -313,6 +313,7 @@ test('take with eth', async () => {
 
   const [beforeUSDCBalance, beforeETHBalance] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -330,6 +331,7 @@ test('take with eth', async () => {
 
   const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
+      publicClient,
       cloberTestChain.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
@@ -367,7 +369,6 @@ test('take with eth', async () => {
 
 test('revert market order', async () => {
   const { publicClient } = clients[4] as any
-  buildPublicClient(cloberTestChain.id, publicClient.transport.url!)
 
   expect(
     (

@@ -15,22 +15,17 @@ const SUBGRAPH_URL: {
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-zksync-era/v1.4.2/gn',
 }
 
-class Subgraph {
-  private subgraphURL: string
-
-  constructor(chainId: CHAIN_IDS) {
-    if (!SUBGRAPH_URL[chainId]) {
-      throw new Error('Unsupported chain for subgraph')
-    }
-    this.subgraphURL = SUBGRAPH_URL[chainId]
-  }
-
-  public async get<T>(
+export class Subgraph {
+  public static async get<T>(
+    chainId: CHAIN_IDS,
     operationName: string,
     query: string,
     variables: {},
   ): Promise<T> {
-    const response = await fetch(this.subgraphURL, {
+    if (!SUBGRAPH_URL[chainId]) {
+      throw new Error('Unsupported chain for subgraph')
+    }
+    const response = await fetch(SUBGRAPH_URL[chainId], {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -49,18 +44,5 @@ class Subgraph {
 
       throw new Error((errorResponse as any).message || 'Unknown Error')
     }
-  }
-}
-
-export const cachedSubgraph: Record<CHAIN_IDS, Subgraph | undefined> =
-  {} as const
-export const buildSubgraph = (
-  chainId: CHAIN_IDS,
-  useSubgraph: boolean = true,
-) => {
-  if (!useSubgraph) {
-    cachedSubgraph[chainId] = undefined
-  } else if (useSubgraph && SUBGRAPH_URL[chainId]) {
-    cachedSubgraph[chainId] = new Subgraph(chainId)
   }
 }

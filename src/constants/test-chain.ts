@@ -10,10 +10,10 @@ export const cloberTestChain: Chain = {
   },
   rpcUrls: {
     default: {
-      http: [''],
+      http: ['http://127.0.0.1'],
     },
     public: {
-      http: [''],
+      http: ['http://127.0.0.1'],
     },
   },
   contracts: {

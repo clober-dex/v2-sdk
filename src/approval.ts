@@ -1,9 +1,8 @@
-import { parseUnits, WalletClient } from 'viem'
+import { createPublicClient, http, parseUnits, WalletClient } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchIsApprovedForAll } from './utils/approval'
-import { decorator } from './utils/decorator'
 import type { DefaultOptions } from './type'
 import { fetchAllowance } from './utils/allowance'
 import { fetchCurrency } from './utils/currency'
@@ -32,54 +31,58 @@ import { fetchCurrency } from './utils/currency'
  *   walletClient
  * })
  */
-export const setApprovalOfOpenOrdersForAll = decorator(
-  async ({
+export const setApprovalOfOpenOrdersForAll = async ({
+  chainId,
+  walletClient,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  walletClient: WalletClient
+  options?: DefaultOptions
+}): Promise<`0x${string}` | undefined> => {
+  if (!walletClient.account) {
+    throw new Error('Account is not found')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const isApprovedForAll = await fetchIsApprovedForAll(
+    publicClient,
     chainId,
-    walletClient,
-  }: {
-    chainId: CHAIN_IDS
-    walletClient: WalletClient
-    options?: DefaultOptions
-  }): Promise<`0x${string}` | undefined> => {
-    if (!walletClient.account) {
-      throw new Error('Account is not found')
-    }
-    const isApprovedForAll = await fetchIsApprovedForAll(
-      chainId,
-      walletClient.account.address,
-    )
-    if (isApprovedForAll) {
-      return undefined
-    }
-    return walletClient.writeContract({
-      account: walletClient.account,
-      chain: CHAIN_MAP[chainId],
-      address: CONTRACT_ADDRESSES[chainId]!.BookManager,
-      abi: [
-        {
-          inputs: [
-            {
-              internalType: 'address',
-              name: 'operator',
-              type: 'address',
-            },
-            {
-              internalType: 'bool',
-              name: 'approved',
-              type: 'bool',
-            },
-          ],
-          name: 'setApprovalForAll',
-          outputs: [],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-      ] as const,
-      functionName: 'setApprovalForAll',
-      args: [CONTRACT_ADDRESSES[chainId]!.Controller, true],
-    })
-  },
-)
+    walletClient.account.address,
+  )
+  if (isApprovedForAll) {
+    return undefined
+  }
+  return walletClient.writeContract({
+    account: walletClient.account,
+    chain: CHAIN_MAP[chainId],
+    address: CONTRACT_ADDRESSES[chainId]!.BookManager,
+    abi: [
+      {
+        inputs: [
+          {
+            internalType: 'address',
+            name: 'operator',
+            type: 'address',
+          },
+          {
+            internalType: 'bool',
+            name: 'approved',
+            type: 'bool',
+          },
+        ],
+        name: 'setApprovalForAll',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ] as const,
+    functionName: 'setApprovalForAll',
+    args: [CONTRACT_ADDRESSES[chainId]!.Controller, true],
+  })
+}
 
 /**
  * @dev This function relates with `viem` dependency
@@ -108,69 +111,70 @@ export const setApprovalOfOpenOrdersForAll = decorator(
  *   amount: '1000.123', // approve 1000.123 USDC
  * })
  */
-export const approveERC20 = decorator(
-  async ({
-    chainId,
-    walletClient,
-    token,
-    amount,
-  }: {
-    chainId: CHAIN_IDS
-    walletClient: WalletClient
-    token: `0x${string}`
-    amount?: string
-    options?: DefaultOptions
-  }): Promise<`0x${string}` | undefined> => {
-    if (!walletClient.account) {
-      throw new Error('Account is not found')
-    }
-    const [currency, allowance] = await Promise.all([
-      fetchCurrency(chainId, token),
-      fetchAllowance(
-        chainId,
-        token,
-        walletClient.account.address,
-        CONTRACT_ADDRESSES[chainId]!.Controller,
-      ),
-    ])
-    const value = amount
-      ? parseUnits(amount, currency.decimals)
-      : 2n ** 256n - 1n
-    if (allowance >= value) {
-      return undefined
-    }
-    return walletClient.writeContract({
-      account: walletClient.account,
-      chain: CHAIN_MAP[chainId],
-      address: token,
-      abi: [
-        {
-          inputs: [
-            {
-              internalType: 'address',
-              name: 'spender',
-              type: 'address',
-            },
-            {
-              internalType: 'uint256',
-              name: 'value',
-              type: 'uint256',
-            },
-          ],
-          name: 'approve',
-          outputs: [
-            {
-              internalType: 'bool',
-              name: '',
-              type: 'bool',
-            },
-          ],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-      ] as const,
-      functionName: 'approve',
-      args: [CONTRACT_ADDRESSES[chainId]!.Controller, value],
-    })
-  },
-)
+export const approveERC20 = async ({
+  chainId,
+  walletClient,
+  token,
+  amount,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  walletClient: WalletClient
+  token: `0x${string}`
+  amount?: string
+  options?: DefaultOptions
+}): Promise<`0x${string}` | undefined> => {
+  if (!walletClient.account) {
+    throw new Error('Account is not found')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const [currency, allowance] = await Promise.all([
+    fetchCurrency(publicClient, chainId, token),
+    fetchAllowance(
+      publicClient,
+      token,
+      walletClient.account.address,
+      CONTRACT_ADDRESSES[chainId]!.Controller,
+    ),
+  ])
+  const value = amount ? parseUnits(amount, currency.decimals) : 2n ** 256n - 1n
+  if (allowance >= value) {
+    return undefined
+  }
+  return walletClient.writeContract({
+    account: walletClient.account,
+    chain: CHAIN_MAP[chainId],
+    address: token,
+    abi: [
+      {
+        inputs: [
+          {
+            internalType: 'address',
+            name: 'spender',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: 'value',
+            type: 'uint256',
+          },
+        ],
+        name: 'approve',
+        outputs: [
+          {
+            internalType: 'bool',
+            name: '',
+            type: 'bool',
+          },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ] as const,
+    functionName: 'approve',
+    args: [CONTRACT_ADDRESSES[chainId]!.Controller, value],
+  })
+}

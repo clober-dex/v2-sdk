@@ -1,5 +1,6 @@
+import { PublicClient } from 'viem'
+
 import { CHAIN_IDS } from '../../src'
-import { cachedPublicClients } from '../../src/constants/client'
 
 const _abi = [
   {
@@ -24,11 +25,12 @@ const _abi = [
 ] as const
 
 export const fetchTokenBalance = async (
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   token: `0x${string}`,
   userAddress: `0x${string}`,
 ): Promise<bigint> => {
-  return cachedPublicClients[chainId]!.readContract({
+  return publicClient.readContract({
     address: token,
     abi: _abi,
     functionName: 'balanceOf',

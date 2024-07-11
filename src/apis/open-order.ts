@@ -1,4 +1,4 @@
-import { formatUnits, getAddress, isAddressEqual } from 'viem'
+import { formatUnits, getAddress, isAddressEqual, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
 import { getMarketId } from '../utils/market'
@@ -10,14 +10,18 @@ import type { OpenOrder, OpenOrderDto } from '../model/open-order'
 import { fetchCurrency } from '../utils/currency'
 import { applyPercent } from '../utils/bigint'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
-import { cachedSubgraph } from '../constants/subgraph'
+import { Subgraph } from '../constants/subgraph'
 
-const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
-  return cachedSubgraph[chainId]!.get<{
+const getOpenOrderFromSubgraph = async (
+  chainId: CHAIN_IDS,
+  orderId: string,
+) => {
+  return Subgraph.get<{
     data: {
       openOrder: OpenOrderDto | null
     }
   }>(
+    chainId,
     'getOpenOrder',
     'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {
@@ -26,12 +30,16 @@ const getOpenOrder = async (chainId: CHAIN_IDS, orderId: string) => {
   )
 }
 
-const getOpenOrders = async (chainId: CHAIN_IDS, orderIds: string[]) => {
-  return cachedSubgraph[chainId]!.get<{
+const getOpenOrdersFromSubgraph = async (
+  chainId: CHAIN_IDS,
+  orderIds: string[],
+) => {
+  return Subgraph.get<{
     data: {
       openOrders: OpenOrderDto[]
     }
   }>(
+    chainId,
     'getOpenOrders',
     'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {
@@ -40,15 +48,16 @@ const getOpenOrders = async (chainId: CHAIN_IDS, orderIds: string[]) => {
   )
 }
 
-const getOpenOrdersByUserAddress = async (
+const getOpenOrdersByUserAddressFromSubgraph = async (
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ) => {
-  return cachedSubgraph[chainId]!.get<{
+  return Subgraph.get<{
     data: {
       openOrders: OpenOrderDto[]
     }
   }>(
+    chainId,
     'getOpenOrdersByUserAddress',
     'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {
@@ -58,12 +67,13 @@ const getOpenOrdersByUserAddress = async (
 }
 
 export async function fetchOpenOrdersByUserAddress(
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
-  } = await getOpenOrdersByUserAddress(chainId, userAddress)
+  } = await getOpenOrdersByUserAddressFromSubgraph(chainId, userAddress)
   const currencies = await Promise.all(
     openOrders
       .map((openOrder) => [
@@ -75,7 +85,7 @@ export async function fetchOpenOrdersByUserAddress(
         (address, index, self) =>
           self.findIndex((c) => isAddressEqual(c, address)) === index,
       )
-      .map((address) => fetchCurrency(chainId, address)),
+      .map((address) => fetchCurrency(publicClient, chainId, address)),
   )
   return openOrders.map((openOrder) =>
     toOpenOrder(chainId, currencies, openOrder),
@@ -83,29 +93,31 @@ export async function fetchOpenOrdersByUserAddress(
 }
 
 export async function fetchOpenOrder(
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   id: string,
 ): Promise<OpenOrder> {
   const {
     data: { openOrder },
-  } = await getOpenOrder(chainId, id)
+  } = await getOpenOrderFromSubgraph(chainId, id)
   if (!openOrder) {
     throw new Error(`Open order not found: ${id}`)
   }
   const currencies = await Promise.all([
-    fetchCurrency(chainId, getAddress(openOrder.book.base.id)),
-    fetchCurrency(chainId, getAddress(openOrder.book.quote.id)),
+    fetchCurrency(publicClient, chainId, getAddress(openOrder.book.base.id)),
+    fetchCurrency(publicClient, chainId, getAddress(openOrder.book.quote.id)),
   ])
   return toOpenOrder(chainId, currencies, openOrder)
 }
 
 export async function fetchOpenOrders(
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   ids: string[],
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
-  } = await getOpenOrders(chainId, ids)
+  } = await getOpenOrdersFromSubgraph(chainId, ids)
   const currencies = await Promise.all(
     openOrders
       .map((openOrder) => [
@@ -117,7 +129,7 @@ export async function fetchOpenOrders(
         (address, index, self) =>
           self.findIndex((c) => isAddressEqual(c, address)) === index,
       )
-      .map((address) => fetchCurrency(chainId, address)),
+      .map((address) => fetchCurrency(publicClient, chainId, address)),
   )
   return openOrders.map((openOrder) =>
     toOpenOrder(chainId, currencies, openOrder),

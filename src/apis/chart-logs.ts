@@ -1,7 +1,7 @@
 import { CHAIN_IDS } from '../constants/chain'
 import { CHART_LOG_INTERVALS, ChartLog } from '../type'
 import { ChartLogDto } from '../model/chart-log'
-import { cachedSubgraph } from '../constants/subgraph'
+import { Subgraph } from '../constants/subgraph'
 
 const CHART_LOG_INTERVAL_TIMESTAMP: {
   [key in CHART_LOG_INTERVALS]: number
@@ -22,7 +22,7 @@ const CHART_LOG_INTERVAL_TIMESTAMP: {
 
 const PAGE_SIZE = 1000
 
-const getChartLogs = async ({
+const getChartLogsFromSubgraph = async ({
   chainId,
   first,
   skip,
@@ -39,11 +39,12 @@ const getChartLogs = async ({
   from: number
   to: number
 }) => {
-  return cachedSubgraph[chainId]!.get<{
+  return Subgraph.get<{
     data: {
       chartLogs: ChartLogDto[]
     }
   }>(
+    chainId,
     'getChartLogs',
     'query getChartLogs($first: Int!, $skip: Int!, $marketCode: String!, $intervalType: String!, $from: BigInt!, $to: BigInt!) { chartLogs( first: $first, skip: $skip, orderBy: timestamp, orderDirection: desc where: { marketCode: $marketCode, intervalType: $intervalType, timestamp_gte: $from, timestamp_lte: $to, }) { timestamp open high low close baseVolume } }',
     {
@@ -57,18 +58,19 @@ const getChartLogs = async ({
   )
 }
 
-const getLatestChartLog = async ({
+const getLatestChartLogFromSubgraph = async ({
   chainId,
   marketCode,
 }: {
   chainId: CHAIN_IDS
   marketCode: string
 }) => {
-  return cachedSubgraph[chainId]!.get<{
+  return Subgraph.get<{
     data: {
       chartLogs: ChartLogDto[]
     }
   }>(
+    chainId,
     'getLatestChartLog',
     'query getLatestChartLog($marketCode: String!) { chartLogs( first: 1, orderBy: timestamp, orderDirection: desc where: { marketCode: $marketCode, }) { timestamp open high low close baseVolume } }',
     {
@@ -83,7 +85,7 @@ export async function fetchLatestChartLog(
 ): Promise<ChartLog> {
   const {
     data: { chartLogs },
-  } = await getLatestChartLog({
+  } = await getLatestChartLogFromSubgraph({
     chainId,
     marketCode: marketCode.toLowerCase(),
   })
@@ -106,6 +108,37 @@ export async function fetchLatestChartLog(
       }
 }
 
+const buildChartCacheKey = (
+  chainId: CHAIN_IDS,
+  marketCode: string,
+  intervalType: CHART_LOG_INTERVALS,
+  from: number,
+  to: number,
+) => `${chainId}:${marketCode}:${intervalType}:${from}:${to}`
+const chartLogsCache = new Map<string, ChartLog[]>()
+const getChartLogsFromCache = (
+  chainId: CHAIN_IDS,
+  marketCode: string,
+  intervalType: CHART_LOG_INTERVALS,
+  from: number,
+  to: number,
+): ChartLog[] | undefined =>
+  chartLogsCache.get(
+    buildChartCacheKey(chainId, marketCode, intervalType, from, to),
+  )
+const setChartLogsToCache = (
+  chainId: CHAIN_IDS,
+  marketCode: string,
+  intervalType: CHART_LOG_INTERVALS,
+  from: number,
+  to: number,
+  chartLogs: ChartLog[],
+) =>
+  chartLogsCache.set(
+    buildChartCacheKey(chainId, marketCode, intervalType, from, to),
+    chartLogs,
+  )
+
 export async function fetchChartLogs(
   chainId: CHAIN_IDS,
   marketCode: string,
@@ -113,13 +146,23 @@ export async function fetchChartLogs(
   from: number,
   to: number,
 ): Promise<ChartLog[]> {
+  const cachedChartLogs = getChartLogsFromCache(
+    chainId,
+    marketCode,
+    intervalType,
+    from,
+    to,
+  )
+  if (cachedChartLogs !== undefined) {
+    return cachedChartLogs
+  }
   const chartLogsBetweenFromAndTo: ChartLog[] = []
   let skip = 0
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const {
       data: { chartLogs },
-    } = await getChartLogs({
+    } = await getChartLogsFromSubgraph({
       chainId,
       first: PAGE_SIZE,
       skip,
@@ -150,7 +193,7 @@ export async function fetchChartLogs(
   )
   const {
     data: { chartLogs: chartLogsBeforeFrom },
-  } = await getChartLogs({
+  } = await getChartLogsFromSubgraph({
     chainId,
     first: 1,
     skip: 0,
@@ -218,6 +261,6 @@ export async function fetchChartLogs(
 
     timestampForAcc += intervalInNumber
   }
-
+  setChartLogsToCache(chainId, marketCode, intervalType, from, to, result)
   return result
 }

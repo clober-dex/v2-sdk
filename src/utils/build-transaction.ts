@@ -1,27 +1,27 @@
 import {
   encodeFunctionData,
+  PublicClient,
   type SimulateContractParameters,
   type WriteContractParameters,
 } from 'viem'
 
-import { CHAIN_IDS, type Transaction } from '../type'
-import { cachedPublicClients } from '../constants/client'
+import { type Transaction } from '../type'
 
 export const buildTransaction = async (
-  chainId: CHAIN_IDS,
+  publicClient: PublicClient,
   args: WriteContractParameters | SimulateContractParameters,
   gasLimit?: bigint,
 ): Promise<Transaction> => {
   const data = encodeFunctionData(args)
   const [gas, gasPrice] = await Promise.all([
     gasLimit ??
-      cachedPublicClients[chainId]!.estimateGas({
+      publicClient.estimateGas({
         account: args.account,
         data,
         to: args.address,
         value: args.value || 0n,
       }),
-    cachedPublicClients[chainId]!.getGasPrice(),
+    publicClient.getGasPrice(),
   ])
   return {
     gas,

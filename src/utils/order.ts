@@ -1,9 +1,13 @@
-import { formatUnits, getAddress, isAddressEqual, zeroAddress } from 'viem'
+import {
+  formatUnits,
+  getAddress,
+  isAddressEqual,
+  zeroAddress,
+  PublicClient,
+} from 'viem'
 
 import { CHAIN_IDS, type OpenOrder } from '../index'
-import { cachedPublicClients } from '../constants/client'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { cachedSubgraph } from '../constants/subgraph'
 import { fetchOpenOrders } from '../apis/open-order'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { BOOK_MANAGER_ABI } from '../abis/core/book-manager-abi'
@@ -14,17 +18,20 @@ import { getMarketId } from './market'
 import { applyPercent } from './bigint'
 
 export const fetchOrders = async (
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   orderIds: bigint[],
+  useSubgraph: boolean,
 ): Promise<OpenOrder[]> => {
-  if (cachedSubgraph[chainId]) {
+  if (useSubgraph) {
     return fetchOpenOrders(
+      publicClient,
       chainId,
       orderIds.map((orderId) => orderId.toString()),
     )
   }
 
-  const result = await cachedPublicClients[chainId]!.multicall({
+  const result = await publicClient.multicall({
     contracts: [
       ...orderIds.map((orderId) => ({
         address: CONTRACT_ADDRESSES[chainId]!.BookManager,
@@ -55,7 +62,7 @@ export const fetchOrders = async (
       return [base, quote]
     })
     .flat()
-  const currencyMap = await fetchCurrencyMap(chainId, addresses)
+  const currencyMap = await fetchCurrencyMap(publicClient, chainId, addresses)
 
   return orderIds.map((orderId, index) => {
     const order = result[index].result as {
