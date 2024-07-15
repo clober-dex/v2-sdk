@@ -14,7 +14,7 @@ export const getMarketId = (
   if (tokenAddresses.length !== 2) {
     throw new Error('Invalid token pair')
   }
-  tokenAddresses = tokenAddresses.map((address) => getAddress(address))
+  tokenAddresses = tokenAddresses.map((address) => getAddress(address)).sort()
 
   // include stable coin
   const stable = tokenAddresses.find((address) => {
