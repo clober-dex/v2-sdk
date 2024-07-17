@@ -29,6 +29,8 @@ import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { fetchOrders } from './utils/order'
 import { applyPercent } from './utils/bigint'
+import { fetchPool } from './apis/pool'
+import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
 
 /**
  * Build a transaction to open a market.
@@ -993,4 +995,44 @@ export const cancelOrders = async ({
       return acc
     }, [] as CurrencyFlow[]),
   }
+}
+
+export const openVault = async ({
+  chainId,
+  userAddress,
+  inputToken,
+  outputToken,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  inputToken: `0x${string}`
+  outputToken: `0x${string}`
+  options?: DefaultOptions
+}): Promise<Transaction | undefined> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = await fetchPool(
+    publicClient,
+    chainId,
+    [inputToken, outputToken],
+    !!(options && options.useSubgraph),
+  )
+  if (!pool.isOpened) {
+    return buildTransaction(
+      publicClient,
+      {
+        chain: CHAIN_MAP[chainId],
+        address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
+        account: userAddress,
+        abi: REBALANCER_ABI,
+        functionName: 'open',
+        args: [pool.market.bidBook.id, pool.market.askBook.id],
+      },
+      options?.gasLimit,
+    )
+  }
+  return undefined
 }

@@ -33,6 +33,19 @@ export type Market = {
   askBook: Book
 }
 
+export type Pool = {
+  chainId: CHAIN_IDS
+  key: `0x${string}`
+  market: Market
+  strategy: `0x${string}`
+  currencyA: Currency
+  currencyB: Currency
+  reserveA: string
+  reserveB: string
+  orderListA: OpenOrder[]
+  orderListB: OpenOrder[]
+}
+
 export type Transaction = {
   data: `0x${string}`
   gas: bigint

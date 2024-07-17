@@ -9,7 +9,7 @@ import {
 
 import { fetchMarket } from './apis/market'
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
-import type { ChartLog, Currency, DefaultOptions, Market } from './type'
+import type { ChartLog, Currency, DefaultOptions, Market, Pool } from './type'
 import { CHART_LOG_INTERVALS } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
@@ -19,6 +19,7 @@ import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
+import { fetchPool } from './apis/pool'
 
 /**
  * Get contract addresses by chain id
@@ -113,6 +114,46 @@ export const getMarket = async ({
       quote: market.askBook.quote,
       isOpened: market.askBook.isOpened,
     },
+  }
+}
+
+export const getPool = async ({
+  chainId,
+  token0,
+  token1,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  token0: `0x${string}`
+  token1: `0x${string}`
+  options?: {
+    n?: number
+  } & DefaultOptions
+}): Promise<Pool> => {
+  if (isAddressEqual(token0, token1)) {
+    throw new Error('Token0 and token1 must be different')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = await fetchPool(
+    publicClient,
+    chainId,
+    [token0, token1],
+    !!(options && options.useSubgraph),
+  )
+  return {
+    chainId,
+    key: pool.key,
+    market: pool.market,
+    strategy: pool.strategy,
+    currencyA: pool.currencyA,
+    currencyB: pool.currencyB,
+    reserveA: pool.reserveA,
+    reserveB: pool.reserveB,
+    orderListA: pool.orderListA,
+    orderListB: pool.orderListB,
   }
 }
 
