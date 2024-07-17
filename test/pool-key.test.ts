@@ -3,7 +3,7 @@ import { createPublicClient, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
 import { toBookId } from '../src/utils/book-id'
-import { toPoolId } from '../src/utils/pool-id'
+import { toPoolKey } from '../src/utils/pool-key'
 
 import { FORK_URL } from './utils/constants'
 
@@ -34,7 +34,7 @@ const _abi = [
   },
 ] as const
 
-const POOL_ID_WRAPPER_ADDRESS = '0xE7af7E0b3b45999C0166692cEa2b619eF88f1a65'
+const POOL_KEY_WRAPPER_ADDRESS = '0xE7af7E0b3b45999C0166692cEa2b619eF88f1a65'
 
 const publicClient = createPublicClient({
   chain: arbitrumSepolia,
@@ -57,19 +57,19 @@ const ASK_BID_ID = toBookId(
 test('check encodeKey function', async () => {
   expect(
     await publicClient.readContract({
-      address: POOL_ID_WRAPPER_ADDRESS,
+      address: POOL_KEY_WRAPPER_ADDRESS,
       abi: _abi,
       functionName: 'encodeKey',
       args: [ASK_BID_ID, BID_BOOK_ID],
     }),
-  ).toBe(toPoolId(ASK_BID_ID, BID_BOOK_ID))
+  ).toBe(toPoolKey(ASK_BID_ID, BID_BOOK_ID))
 
   expect(
     await publicClient.readContract({
-      address: POOL_ID_WRAPPER_ADDRESS,
+      address: POOL_KEY_WRAPPER_ADDRESS,
       abi: _abi,
       functionName: 'encodeKey',
       args: [ASK_BID_ID, BID_BOOK_ID],
     }),
-  ).toBe(toPoolId(BID_BOOK_ID, ASK_BID_ID))
+  ).toBe(toPoolKey(BID_BOOK_ID, ASK_BID_ID))
 })
