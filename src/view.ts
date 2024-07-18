@@ -13,9 +13,9 @@ import type { ChartLog, Currency, DefaultOptions, Market, Pool } from './type'
 import { CHART_LOG_INTERVALS } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
-import { type OpenOrder } from './model/open-order'
+import { OpenOrder } from './model/open-order'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
-import { getMarketId } from './utils/market'
+import { buildMarket, getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
@@ -84,37 +84,7 @@ export const getMarket = async ({
     !!(options && options.useSubgraph),
     options?.n,
   )
-  return {
-    chainId,
-    quote: market.quote,
-    base: market.base,
-    makerFee: market.makerFee,
-    takerFee: market.takerFee,
-    bids: market.bids.map(({ price, tick, baseAmount }) => ({
-      price,
-      tick: Number(tick),
-      baseAmount: formatUnits(baseAmount, market.base.decimals),
-    })),
-    bidBook: {
-      id: market.bidBook.id.toString(),
-      base: market.bidBook.base,
-      unitSize: market.bidBook.unitSize.toString(),
-      quote: market.bidBook.quote,
-      isOpened: market.bidBook.isOpened,
-    },
-    asks: market.asks.map(({ price, tick, baseAmount }) => ({
-      price,
-      tick: Number(tick),
-      baseAmount: formatUnits(baseAmount, market.base.decimals),
-    })),
-    askBook: {
-      id: market.askBook.id.toString(),
-      base: market.askBook.base,
-      unitSize: market.askBook.unitSize.toString(),
-      quote: market.askBook.quote,
-      isOpened: market.askBook.isOpened,
-    },
-  }
+  return buildMarket(chainId, market)
 }
 
 export const getPool = async ({
@@ -146,7 +116,7 @@ export const getPool = async ({
   return {
     chainId,
     key: pool.key,
-    market: pool.market,
+    market: buildMarket(chainId, pool.market),
     isOpened: pool.isOpened,
     strategy: pool.strategy,
     currencyA: pool.currencyA,
