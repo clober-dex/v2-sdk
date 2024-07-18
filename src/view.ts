@@ -147,6 +147,7 @@ export const getPool = async ({
     chainId,
     key: pool.key,
     market: pool.market,
+    isOpened: pool.isOpened,
     strategy: pool.strategy,
     currencyA: pool.currencyA,
     currencyB: pool.currencyB,

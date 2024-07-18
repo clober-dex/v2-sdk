@@ -37,6 +37,7 @@ export type Pool = {
   chainId: CHAIN_IDS
   key: `0x${string}`
   market: Market
+  isOpened: boolean
   strategy: `0x${string}`
   currencyA: Currency
   currencyB: Currency
