@@ -15,7 +15,7 @@ import { formatPrice, parsePrice } from './utils/prices'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
 import { OpenOrder } from './model/open-order'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
-import { buildMarket, getMarketId } from './utils/market'
+import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
@@ -84,7 +84,7 @@ export const getMarket = async ({
     !!(options && options.useSubgraph),
     options?.n,
   )
-  return buildMarket(chainId, market)
+  return market.toJson()
 }
 
 export const getPool = async ({
@@ -116,7 +116,7 @@ export const getPool = async ({
   return {
     chainId,
     key: pool.key,
-    market: buildMarket(chainId, pool.market),
+    market: pool.market.toJson(),
     isOpened: pool.isOpened,
     strategy: pool.strategy,
     currencyA: pool.currencyA,

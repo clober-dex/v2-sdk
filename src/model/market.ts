@@ -1,4 +1,4 @@
-import { isAddressEqual } from 'viem'
+import { formatUnits, isAddressEqual } from 'viem'
 
 import { getMarketId } from '../utils/market'
 import { CHAIN_IDS } from '../constants/chain'
@@ -6,12 +6,14 @@ import { invertTick, toPrice } from '../utils/tick'
 import { formatPrice } from '../utils/prices'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../constants/fee'
 import { quoteToBase } from '../utils/decimals'
+import { Market as MarketType } from '../type'
 
 import { Book } from './book'
 import type { Currency } from './currency'
 import type { Depth } from './depth'
 
 export class Market {
+  chainId: CHAIN_IDS
   makerFee: number
   takerFee: number
 
@@ -34,6 +36,7 @@ export class Market {
     bidBook: Book
     askBook: Book
   }) {
+    this.chainId = chainId
     const { marketId, quoteTokenAddress, baseTokenAddress } = getMarketId(
       chainId,
       tokens.map((token) => token.address),
@@ -138,6 +141,40 @@ export class Market {
           amountIn,
         }),
       }
+    }
+  }
+
+  toJson = (): MarketType => {
+    return {
+      chainId: this.chainId,
+      quote: this.quote,
+      base: this.base,
+      makerFee: this.makerFee,
+      takerFee: this.takerFee,
+      bids: this.bids.map(({ price, tick, baseAmount }) => ({
+        price,
+        tick: Number(tick),
+        baseAmount: formatUnits(baseAmount, this.base.decimals),
+      })),
+      bidBook: {
+        id: this.bidBook.id.toString(),
+        base: this.bidBook.base,
+        unitSize: this.bidBook.unitSize.toString(),
+        quote: this.bidBook.quote,
+        isOpened: this.bidBook.isOpened,
+      },
+      asks: this.asks.map(({ price, tick, baseAmount }) => ({
+        price,
+        tick: Number(tick),
+        baseAmount: formatUnits(baseAmount, this.base.decimals),
+      })),
+      askBook: {
+        id: this.askBook.id.toString(),
+        base: this.askBook.base,
+        unitSize: this.askBook.unitSize.toString(),
+        quote: this.askBook.quote,
+        isOpened: this.askBook.isOpened,
+      },
     }
   }
 }
