@@ -1029,7 +1029,25 @@ export const openPool = async ({
         account: userAddress,
         abi: REBALANCER_ABI,
         functionName: 'open',
-        args: [pool.market.bidBook.id, pool.market.askBook.id],
+        args: [
+          {
+            base: pool.market.bidBook.base.address,
+            unitSize: pool.market.bidBook.unitSize,
+            quote: pool.market.bidBook.quote.address,
+            makerPolicy: MAKER_DEFAULT_POLICY[chainId].value,
+            hooks: zeroAddress,
+            takerPolicy: TAKER_DEFAULT_POLICY[chainId].value,
+          },
+          {
+            base: pool.market.askBook.base.address,
+            unitSize: pool.market.askBook.unitSize,
+            quote: pool.market.askBook.quote.address,
+            makerPolicy: MAKER_DEFAULT_POLICY[chainId].value,
+            hooks: zeroAddress,
+            takerPolicy: TAKER_DEFAULT_POLICY[chainId].value,
+          },
+          CONTRACT_ADDRESSES[chainId]!.Strategy,
+        ],
       },
       options?.gasLimit,
     )
