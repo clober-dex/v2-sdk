@@ -2,6 +2,7 @@ import type { Account } from 'viem'
 
 import { CHAIN_IDS } from './constants/chain'
 import type { Currency } from './model/currency'
+import { OpenOrder } from './model/open-order'
 
 export { CHAIN_IDS } from './constants/chain'
 export type { Currency } from './model/currency'
