@@ -26,7 +26,7 @@ export async function fetchPool(
   const poolKey = toPoolKey(market.bidBook.id, market.askBook.id)
   const { bookIdA, bookIdB, reserveA, reserveB, orderListA, orderListB } =
     await publicClient.readContract({
-      address: CONTRACT_ADDRESSES[chainId]!.BookManager,
+      address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
       abi: [
         {
           inputs: [
