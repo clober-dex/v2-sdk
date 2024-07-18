@@ -42,10 +42,8 @@ export const getContractAddresses = ({ chainId }: { chainId: CHAIN_IDS }) => {
  * @param chainId - chain id from {@link CHAIN_IDS}
  * @param token0 - token0 address
  * @param token1 - token1 address
- * @param options
+ * @param options {@link DefaultOptions} options.
  * @param options.n - number of depth levels to fetch
- * @param options.rpcUrl - RPC URL of the blockchain
- * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
  * @returns A market {@link Market}
  *
  * @example
@@ -87,6 +85,24 @@ export const getMarket = async ({
   return market.toJson()
 }
 
+/**
+ * Get pool information by chain id and token addresses
+ * @param chainId - chain id from {@link CHAIN_IDS}
+ * @param token0 - token0 address
+ * @param token1 - token1 address
+ * @param options {@link DefaultOptions} options.
+ * @param options.n - number of depth levels to fetch
+ * @returns A pool {@link Pool}
+ *
+ * @example
+ * import { getPool } from '@clober/v2-sdk'
+ *
+ * const market = await getPool({
+ *   chainId: 421614,
+ *   token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   token1: '0x0000000000000000000000000000000000000000',
+ * })
+ */
 export const getPool = async ({
   chainId,
   token0,
@@ -315,10 +331,10 @@ export const getPriceNeighborhood = ({
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
  * @param amountIn The amount of expected input amount. (ex 1.2 ETH -> 1.2)
- * @param options
- * @param options.limitPrice The maximum limit price to spend.
- * @param options.rpcUrl The RPC URL of the blockchain.
- * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
+ * @param options {@link DefaultOptions} options.
+ * @param options.limitPrice The maximum limit price to take.
+ * @param options.roundingDownTakenBid Whether to round down the taken bid.
+ * @param options.roundingUpTakenAsk Whether to round up the taken ask.
  * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
  * import { getExpectedOutput } from '@clober/v2-sdk'
@@ -431,9 +447,10 @@ export const getExpectedOutput = async ({
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
  * @param amountOut The amount of expected output amount. (ex 1.2 ETH -> 1.2)
- * @param options
+ * @param options {@link DefaultOptions} options.
  * @param options.limitPrice The maximum limit price to take.
- * @param options.rpcUrl The RPC URL of the blockchain.
+ * @param options.roundingDownTakenBid Whether to round down the taken bid.
+ * @param options.roundingUpTakenAsk Whether to round up the taken ask.
  * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
  * @returns A Promise resolving to an object containing the taken amount, spent amount and result of the calculation.
  * @example
@@ -539,9 +556,7 @@ export const getExpectedInput = async ({
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {string} id The ID of the open order.
- * @param options
- * @param options.rpcUrl The RPC URL of the blockchain.
- * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<OpenOrder>} Promise resolving to the open order object, or undefined if not found.
  * @example
  * import { getOpenOrder } from '@clober/v2-sdk'
@@ -571,9 +586,7 @@ export const getOpenOrder = async ({
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
- * @param options
- * @param options.rpcUrl The RPC URL of the blockchain.
- * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<OpenOrder[]>} Promise resolving to an array of open orders.
  * @example
  * import { getOpenOrders } from '@clober/v2-sdk'

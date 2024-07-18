@@ -39,8 +39,7 @@ import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
  * @param userAddress The address of the user.
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
- * @param options
- * @param options.rpcUrl The RPC URL of the blockchain.
+ * @param options {@link DefaultOptions} options.
  * @returns A Promise resolving to a transaction object. If the market is already open, returns undefined.
  * @example
  * import { openMarket } from '@clober/v2-sdk'
@@ -125,14 +124,15 @@ export const openMarket = async ({
  * @param {`0x${string}`} outputToken The address of the token to be received as output.
  * @param {string} amount The amount of input tokens for the order.
  * @param {string} price The price at which the order should be executed.
- * @param {Object} [options] Optional parameters for the limit order.
+ * @param options {@link DefaultOptions} options.
  * @param {erc20PermitParam} [options.erc20PermitParam] The permit signature for token approval.
  * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
- * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
  * @param {bigint} [options.makeTick] The tick for the make order.
  * @param {bigint} [options.takeLimitTick] The tick for the take order.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
+ * @param {boolean} [options.roundingUpMakeBid] A boolean indicating whether to round up the make bid.
+ * @param {boolean} [options.roundingDownMakeAsk] A boolean indicating whether to round down the make ask.
+ * @param {boolean} [options.roundingDownTakenBid] A boolean indicating whether to round down the taken bid.
+ * @param {boolean} [options.roundingUpTakenAsk] A boolean indicating whether to round up the taken ask.
  * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyFlow, take: CurrencyFlow, spent: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the limit order with the result of the order.
  * @example
@@ -422,12 +422,11 @@ export const limitOrder = async ({
  * @param {`0x${string}`} outputToken The address of the token to be received as output.
  * @param {string} amountIn The amount of input tokens for the order to spend.
  * @param {string} amountOut The amount of output tokens for the order to take.
- * @param {Object} [options] Optional parameters for the market order.
+ * @param options {@link DefaultOptions} options.
  * @param {erc20PermitParam} [options.erc20PermitParam] The permit signature for token approval.
- * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
  * @param {number} [options.slippage] The maximum slippage percentage allowed for the order.
+ * @param {boolean} [options.roundingDownTakenBid] A boolean indicating whether to round down the taken bid.
+ * @param {boolean} [options.roundingUpTakenAsk] A boolean indicating whether to round up the taken ask.
  * if the slippage is not provided, unlimited slippage is allowed.
  * @returns {Promise<{ transaction: Transaction, result: { spent: CurrencyFlow, taken: CurrencyFlow } }>}
  * Promise resolving to the transaction object representing the market order with the result of the order.
@@ -677,10 +676,7 @@ export const marketOrder = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string} id An ID representing the open order to be claimed.
- * @param {Object} [options] Optional parameters for claiming orders.
- * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the claim action with the result of the order.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -727,10 +723,7 @@ export const claimOrder = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string[]} ids An array of IDs representing the open orders to be claimed.
- * @param {Object} [options] Optional parameters for claiming orders.
- * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow[] }>}
  * Promise resolving to the transaction object representing the claim action with the result of the orders.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -840,10 +833,7 @@ export const claimOrders = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string} id An ID representing the open order to be canceled
- * @param {Object} [options] Optional parameters for canceling orders.
- * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the cancel action with the result of the order.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -890,10 +880,7 @@ export const cancelOrder = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string[]} ids An array of IDs representing the open orders to be canceled.
- * @param {Object} [options] Optional parameters for canceling orders.
- * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow[] }>
  * Promise resolving to the transaction object representing the cancel action with the result of the orders.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -997,6 +984,25 @@ export const cancelOrders = async ({
   }
 }
 
+/**
+ * Build a transaction to open a pool,
+ *
+ * @param chainId The chain ID of the blockchain.
+ * @param userAddress The address of the user.
+ * @param inputToken The address of the input token.
+ * @param outputToken The address of the output token.
+ * @param options {@link DefaultOptions} options.
+ * @returns A Promise resolving to a transaction object. If the market is already open, returns undefined.
+ * @example
+ * import { openPool } from '@clober/v2-sdk'
+ *
+ * const transaction = await openPool({
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69',
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000'
+ * })
+ */
 export const openPool = async ({
   chainId,
   userAddress,
