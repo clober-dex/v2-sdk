@@ -50,6 +50,10 @@ export class Pool {
     } else if (bookIdA === market.askBook.id && bookIdB === market.bidBook.id) {
       this.currencyA = market.askBook.quote // or market.bidBook.base
       this.currencyB = market.askBook.base // or market.bidBook.quote
+    } else if (bookIdA === 0n && bookIdB === 0n) {
+      // pool is not opened, so we don't know the currency pair
+      this.currencyA = market.bidBook.base
+      this.currencyB = market.askBook.base
     } else {
       throw new Error('Invalid book id')
     }
