@@ -997,7 +997,7 @@ export const cancelOrders = async ({
   }
 }
 
-export const openVault = async ({
+export const openPool = async ({
   chainId,
   userAddress,
   inputToken,
