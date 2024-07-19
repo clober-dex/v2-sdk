@@ -110,8 +110,8 @@ test('try open pool', async () => {
   const transaction1 = await openPool({
     chainId: cloberTestChain.id,
     userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-    inputToken: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
-    outputToken: '0x0000000000000000000000000000000000000000',
+    tokenA: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
+    tokenB: '0x0000000000000000000000000000000000000000',
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,

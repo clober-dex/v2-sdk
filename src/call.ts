@@ -1006,14 +1006,14 @@ export const cancelOrders = async ({
 export const openPool = async ({
   chainId,
   userAddress,
-  inputToken,
-  outputToken,
+  tokenA,
+  tokenB,
   options,
 }: {
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
-  inputToken: `0x${string}`
-  outputToken: `0x${string}`
+  tokenA: `0x${string}`
+  tokenB: `0x${string}`
   options?: DefaultOptions
 }): Promise<Transaction | undefined> => {
   const publicClient = createPublicClient({
@@ -1023,7 +1023,7 @@ export const openPool = async ({
   const pool = await fetchPool(
     publicClient,
     chainId,
-    [inputToken, outputToken],
+    [tokenA, tokenB],
     !!(options && options.useSubgraph),
   )
   if (!pool.isOpened) {
