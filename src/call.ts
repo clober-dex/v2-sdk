@@ -1,6 +1,7 @@
 import {
   createPublicClient,
   formatUnits,
+  getAddress,
   http,
   isAddressEqual,
   parseUnits,
@@ -1059,4 +1060,74 @@ export const openPool = async ({
     )
   }
   return undefined
+}
+
+export const addLiquidity = async ({
+  chainId,
+  userAddress,
+  token0,
+  token1,
+  amount0,
+  amount1,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  token0: `0x${string}`
+  token1: `0x${string}`
+  amount0?: string
+  amount1?: string
+  options?: {
+    initialPrice?: string
+    doSwap?: boolean
+  } & DefaultOptions
+}): Promise<{
+  transaction: Transaction
+  result: {
+    currencyA: CurrencyFlow
+    currencyB: CurrencyFlow
+    lpCurrency: CurrencyFlow
+  }
+}> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = await fetchPool(
+    publicClient,
+    chainId,
+    [token0, token1],
+    !!(options && options.useSubgraph),
+  )
+  if (!pool.isOpened) {
+    throw new Error(`
+       Open the market before placing a limit order.
+       import { openPool } from '@clober/v2-sdk'
+
+       const transaction = await openMarket({
+            chainId: ${chainId},
+            tokenA: '${token0}',
+            tokenB: '${token1}',
+       })
+    `)
+  }
+  const [currencyA, currencyB] = isAddressEqual(
+    pool.currencyA.address,
+    getAddress(token0),
+  )
+    ? [pool.currencyA, pool.currencyB]
+    : [pool.currencyB, pool.currencyA]
+  const [amountA, amountB] = isAddressEqual(
+    pool.currencyA.address,
+    getAddress(token0),
+  )
+    ? [
+        parseUnits(amount0 ?? '0', currencyA.decimals),
+        parseUnits(amount1 ?? '0', currencyB.decimals),
+      ]
+    : [
+        parseUnits(amount1 ?? '0', currencyA.decimals),
+        parseUnits(amount0 ?? '0', currencyB.decimals),
+      ]
+  const doSwap = !!(options && options.doSwap)
 }
