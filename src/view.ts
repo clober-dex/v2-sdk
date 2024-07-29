@@ -56,25 +56,21 @@ export const getSubgraphBlockNumber = async ({
 }) => {
   const {
     data: {
-      _meta: {
-        block: { number },
-      },
+      latestBlock: { blockNumber },
     },
   } = await Subgraph.get<{
     data: {
-      _meta: {
-        block: {
-          number: number
-        }
+      latestBlock: {
+        blockNumber: string
       }
     }
   }>(
     chainId,
     'getLatestBlockNumber',
-    'query getLatestBlockNumber { _meta { block { number } } }',
+    'query getLatestBlockNumber { latestBlock(id: "latest") { blockNumber } }',
     {},
   )
-  return number
+  return Number(blockNumber)
 }
 
 /**
