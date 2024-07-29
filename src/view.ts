@@ -20,7 +20,6 @@ import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 import { Subgraph } from './constants/subgraph'
-import { ChartLogDto } from './model/chart-log'
 
 /**
  * Get contract addresses by chain id
