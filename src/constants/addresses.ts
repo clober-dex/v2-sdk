@@ -20,7 +20,7 @@ export const CONTRACT_ADDRESSES: {
     BookViewer: getAddress('0x73c524e103C94Bf2743659d739586395B1A9e1BE'),
   },
   [CHAIN_IDS.BASE]: {
-    Controller: getAddress('0xA694fDd88E7FEE1f5EBF878153B68ADb2ce6EbbF'),
+    Controller: getAddress('0x4FaC849f948E59f9AEB62d9f7E628138DeF03BfA'),
     BookManager: getAddress('0x382CCccbD3b142D7DA063bF68cd0c89634767F76'),
     BookViewer: getAddress('0xcAf89a60D0911AeB8C2b997B5eF9b2017a19Be0d'),
   },
