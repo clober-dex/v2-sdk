@@ -1,7 +1,7 @@
 import type { Account } from 'viem'
 
 import { CHAIN_IDS } from './constants/chain'
-import type { Currency } from './model/currency'
+import type { Currency, Currency6909 } from './model/currency'
 import { OpenOrder } from './model/open-order'
 
 export { CHAIN_IDS } from './constants/chain'
@@ -78,6 +78,12 @@ export type DefaultOptions = {
 
 export type CurrencyFlow = {
   currency: Currency
+  amount: string
+  direction: 'in' | 'out'
+}
+
+export type Currency6909Flow = {
+  currency: Currency6909
   amount: string
   direction: 'in' | 'out'
 }

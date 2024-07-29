@@ -20,6 +20,8 @@ import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 import { fetchPool } from './apis/pool'
+import { fetchStrategyPrice } from './apis/strategy'
+import { StrategyPrice } from './model/strategy'
 
 /**
  * Get contract addresses by chain id
@@ -107,11 +109,13 @@ export const getPool = async ({
   chainId,
   token0,
   token1,
+  salt,
   options,
 }: {
   chainId: CHAIN_IDS
   token0: `0x${string}`
   token1: `0x${string}`
+  salt: `0x${string}`
   options?: {
     n?: number
   } & DefaultOptions
@@ -127,6 +131,7 @@ export const getPool = async ({
     publicClient,
     chainId,
     [token0, token1],
+    salt,
     !!(options && options.useSubgraph),
   )
   return {
@@ -142,6 +147,35 @@ export const getPool = async ({
     orderListA: pool.orderListA,
     orderListB: pool.orderListB,
   }
+}
+
+export const getStrategyPrice = async ({
+  chainId,
+  token0,
+  token1,
+  salt,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  options?: DefaultOptions
+}): Promise<StrategyPrice> => {
+  if (isAddressEqual(token0, token1)) {
+    throw new Error('Token0 and token1 must be different')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  return fetchStrategyPrice(
+    publicClient,
+    chainId,
+    [token0, token1],
+    salt,
+    !!(options && options.useSubgraph),
+  )
 }
 
 /**

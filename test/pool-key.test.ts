@@ -20,6 +20,11 @@ const _abi = [
         name: 'bookIdB',
         type: 'uint192',
       },
+      {
+        internalType: 'bytes32',
+        name: 'salt',
+        type: 'bytes32',
+      },
     ],
     name: 'encodeKey',
     outputs: [
@@ -34,7 +39,7 @@ const _abi = [
   },
 ] as const
 
-const POOL_KEY_WRAPPER_ADDRESS = '0xE7af7E0b3b45999C0166692cEa2b619eF88f1a65'
+const POOL_KEY_WRAPPER_ADDRESS = '0xacC73989c94f749D3eb958206f409674474868E2'
 
 const publicClient = createPublicClient({
   chain: arbitrumSepolia,
@@ -53,6 +58,8 @@ const ASK_BID_ID = toBookId(
   '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
   1n,
 )
+const SALT =
+  '0x0000000000000000000000000000000000000000000000000000000000000000'
 
 test('check encodeKey function', async () => {
   expect(
@@ -60,16 +67,16 @@ test('check encodeKey function', async () => {
       address: POOL_KEY_WRAPPER_ADDRESS,
       abi: _abi,
       functionName: 'encodeKey',
-      args: [ASK_BID_ID, BID_BOOK_ID],
+      args: [ASK_BID_ID, BID_BOOK_ID, SALT],
     }),
-  ).toBe(toPoolKey(ASK_BID_ID, BID_BOOK_ID))
+  ).toBe(toPoolKey(ASK_BID_ID, BID_BOOK_ID, SALT))
 
   expect(
     await publicClient.readContract({
       address: POOL_KEY_WRAPPER_ADDRESS,
       abi: _abi,
       functionName: 'encodeKey',
-      args: [ASK_BID_ID, BID_BOOK_ID],
+      args: [ASK_BID_ID, BID_BOOK_ID, SALT],
     }),
-  ).toBe(toPoolKey(BID_BOOK_ID, ASK_BID_ID))
+  ).toBe(toPoolKey(BID_BOOK_ID, ASK_BID_ID, '0x'))
 })

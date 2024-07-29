@@ -28,6 +28,11 @@ export const REBALANCER_ABI = [
   },
   {
     inputs: [],
+    name: 'AlreadyOpened',
+    type: 'error',
+  },
+  {
+    inputs: [],
     name: 'ERC20TransferFailed',
     type: 'error',
   },
@@ -80,6 +85,11 @@ export const REBALANCER_ABI = [
   {
     inputs: [],
     name: 'InvalidMaker',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'InvalidStrategy',
     type: 'error',
   },
   {
@@ -138,6 +148,11 @@ export const REBALANCER_ABI = [
       },
     ],
     name: 'SafeERC20FailedOperation',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'Slippage',
     type: 'error',
   },
   {
@@ -265,6 +280,12 @@ export const REBALANCER_ABI = [
         internalType: 'BookId',
         name: 'bookIdB',
         type: 'uint192',
+      },
+      {
+        indexed: false,
+        internalType: 'bytes32',
+        name: 'salt',
+        type: 'bytes32',
       },
       {
         indexed: false,
@@ -397,14 +418,31 @@ export const REBALANCER_ABI = [
         type: 'bytes32',
       },
       {
-        internalType: 'address',
-        name: 'user',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'burnAmount',
-        type: 'uint256',
+        components: [
+          {
+            internalType: 'address',
+            name: 'user',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: 'burnAmount',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'minAmountA',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'minAmountB',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct Rebalancer.BurnParams',
+        name: 'burnParams',
+        type: 'tuple',
       },
     ],
     name: '_burnAndRebalance',
@@ -498,6 +536,11 @@ export const REBALANCER_ABI = [
         internalType: 'struct IBookManager.BookKey',
         name: 'bookKeyB',
         type: 'tuple',
+      },
+      {
+        internalType: 'bytes32',
+        name: 'salt',
+        type: 'bytes32',
       },
       {
         internalType: 'address',
@@ -649,6 +692,16 @@ export const REBALANCER_ABI = [
         name: 'amount',
         type: 'uint256',
       },
+      {
+        internalType: 'uint256',
+        name: 'minAmountA',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'minAmountB',
+        type: 'uint256',
+      },
     ],
     name: 'burn',
     outputs: [
@@ -664,6 +717,25 @@ export const REBALANCER_ABI = [
       },
     ],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    name: 'decimals',
+    outputs: [
+      {
+        internalType: 'uint8',
+        name: '',
+        type: 'uint8',
+      },
+    ],
+    stateMutability: 'pure',
     type: 'function',
   },
   {
@@ -762,7 +834,7 @@ export const REBALANCER_ABI = [
             type: 'uint256[]',
           },
         ],
-        internalType: 'struct IRebalancer.Pool',
+        internalType: 'struct IPoolStorage.Pool',
         name: '',
         type: 'tuple',
       },
@@ -833,6 +905,11 @@ export const REBALANCER_ABI = [
       {
         internalType: 'uint256',
         name: 'amountB',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'minLpAmount',
         type: 'uint256',
       },
     ],
@@ -922,6 +999,11 @@ export const REBALANCER_ABI = [
         internalType: 'struct IBookManager.BookKey',
         name: 'bookKeyB',
         type: 'tuple',
+      },
+      {
+        internalType: 'bytes32',
+        name: 'salt',
+        type: 'bytes32',
       },
       {
         internalType: 'address',

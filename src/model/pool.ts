@@ -5,6 +5,7 @@ import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 
 import { Market } from './market'
+import { Currency6909 } from './currency'
 
 export class Pool {
   key: `0x${string}`
@@ -13,9 +14,14 @@ export class Pool {
   strategy: `0x${string}`
   currencyA: Currency
   currencyB: Currency
+  currencyLp: Currency6909
 
+  totalSupply: bigint
+  decimals: number
   reserveA: string
   reserveB: string
+  liquidityA: bigint
+  liquidityB: bigint
   orderListA: OpenOrder[]
   orderListB: OpenOrder[]
 
@@ -25,8 +31,14 @@ export class Pool {
     isOpened,
     bookIdA,
     bookIdB,
+    salt,
+    poolKey,
+    totalSupply,
+    decimals,
     reserveA,
     reserveB,
+    liquidityA,
+    liquidityB,
     orderListA,
     orderListB,
   }: {
@@ -35,12 +47,18 @@ export class Pool {
     isOpened: boolean
     bookIdA: bigint
     bookIdB: bigint
+    salt: `0x${string}`
+    poolKey: `0x${string}`
+    totalSupply: bigint
+    decimals: number
     reserveA: bigint
     reserveB: bigint
+    liquidityA: bigint
+    liquidityB: bigint
     orderListA: OpenOrder[]
     orderListB: OpenOrder[]
   }) {
-    this.key = toPoolKey(bookIdA, bookIdB)
+    this.key = toPoolKey(bookIdA, bookIdB, salt)
     this.market = market
     this.isOpened = isOpened
     this.strategy = CONTRACT_ADDRESSES[chainId]!.Strategy
@@ -57,6 +75,17 @@ export class Pool {
     } else {
       throw new Error('Invalid book id')
     }
+    this.currencyLp = {
+      address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
+      id: BigInt(poolKey),
+      name: `${this.currencyA.symbol}-${this.currencyB.symbol} LP Token`,
+      symbol: `${this.currencyA.symbol}-${this.currencyB.symbol}`,
+      decimals: decimals,
+    }
+    this.totalSupply = totalSupply
+    this.decimals = decimals
+    this.liquidityA = liquidityA
+    this.liquidityB = liquidityB
     this.reserveA = formatUnits(reserveA, this.currencyA.decimals)
     this.reserveB = formatUnits(reserveB, this.currencyB.decimals)
     this.orderListA = orderListA
