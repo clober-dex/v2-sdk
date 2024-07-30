@@ -1086,7 +1086,6 @@ export const addLiquidity = async ({
   salt,
   amount0,
   amount1,
-  slippage,
   options,
 }: {
   chainId: CHAIN_IDS
@@ -1096,10 +1095,12 @@ export const addLiquidity = async ({
   salt: `0x${string}`
   amount0?: string
   amount1?: string
-  slippage?: number
   options?: {
+    slippage?: number
     disableSwap?: boolean
     testnetPrice?: string // token1 amount per token0
+    token0PermitParams?: ERC20PermitParam
+    token1PermitParams?: ERC20PermitParam
   } & DefaultOptions
 }): Promise<{
   transaction: Transaction | undefined
@@ -1145,6 +1146,18 @@ export const addLiquidity = async ({
         parseUnits(amount0 ?? '0', pool.currencyB.decimals),
       ]
   let [amountA, amountB] = [amountAOrigin, amountBOrigin]
+  const tokenAPermitParams = isAddressEqual(
+    pool.currencyA.address,
+    getAddress(token0),
+  )
+    ? options?.token0PermitParams ?? emptyERC20PermitParams
+    : options?.token1PermitParams ?? emptyERC20PermitParams
+  const tokenBPermitParams = isAddressEqual(
+    pool.currencyA.address,
+    getAddress(token0),
+  )
+    ? options?.token1PermitParams ?? emptyERC20PermitParams
+    : options?.token0PermitParams ?? emptyERC20PermitParams
   let disableSwap = !!(options && options.disableSwap)
   if (
     pool.totalSupply === 0n ||
@@ -1152,7 +1165,7 @@ export const addLiquidity = async ({
   ) {
     disableSwap = true
   }
-  const slippageLimitPercent = slippage ?? 2
+  const slippageLimitPercent = options?.slippage ?? 2
 
   const swapParams: {
     inCurrency: `0x${string}`
@@ -1175,13 +1188,11 @@ export const addLiquidity = async ({
     const { amountOut: swapAmountB } = await fetchQuote({
       chainId,
       amountIn: swapAmountA,
-      tokenIn: pool.currencyA.address,
-      tokenOut: pool.currencyB.address,
+      tokenIn: pool.currencyA,
+      tokenOut: pool.currencyB,
       slippageLimitPercent: 20,
       userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
       testnetPrice: currencyBPerCurrencyA,
-      tokenInDecimals: pool.currencyA.decimals,
-      tokenOutDecimals: pool.currencyB.decimals,
     })
     const { deltaA, deltaB } = getIdealDelta(
       amountA,
@@ -1198,13 +1209,11 @@ export const addLiquidity = async ({
       const { amountOut: actualDeltaB, data: calldata } = await fetchCallData({
         chainId,
         amountIn: swapParams.amount,
-        tokenIn: swapParams.inCurrency,
-        tokenOut: pool.currencyB.address,
+        tokenIn: pool.currencyA,
+        tokenOut: pool.currencyB,
         slippageLimitPercent,
         userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
         testnetPrice: currencyBPerCurrencyA,
-        tokenInDecimals: pool.currencyA.decimals,
-        tokenOutDecimals: pool.currencyB.decimals,
       })
       swapParams.data = calldata
       amountA += deltaA
@@ -1215,13 +1224,11 @@ export const addLiquidity = async ({
       const { amountOut: actualDeltaA, data: calldata } = await fetchCallData({
         chainId,
         amountIn: swapParams.amount,
-        tokenIn: swapParams.inCurrency,
-        tokenOut: pool.currencyA.address,
+        tokenIn: pool.currencyB,
+        tokenOut: pool.currencyA,
         slippageLimitPercent,
         userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
         testnetPrice: 1 / currencyBPerCurrencyA,
-        tokenInDecimals: pool.currencyB.decimals,
-        tokenOutDecimals: pool.currencyA.decimals,
       })
       swapParams.data = calldata
       amountA += actualDeltaA
@@ -1277,16 +1284,24 @@ export const addLiquidity = async ({
         amountAOrigin,
         amountBOrigin,
         minMintAmount,
-        emptyERC20PermitParams,
-        emptyERC20PermitParams,
+        {
+          permitAmount: tokenAPermitParams.permitAmount,
+          signature: tokenAPermitParams.signature,
+        },
+        {
+          permitAmount: tokenBPermitParams.permitAmount,
+          signature: tokenBPermitParams.signature,
+        },
         swapParams,
       ],
     },
     options?.gasLimit,
   )
 
-  const currencyAResultAmount = amountAOrigin - (amountA - inAmountA)
-  const currencyBResultAmount = amountBOrigin - (amountB - inAmountB)
+  const currencyARefund = amountA - inAmountA
+  const currencyBRefund = amountB - inAmountB
+  const currencyAResultAmount = amountAOrigin - currencyARefund
+  const currencyBResultAmount = amountBOrigin - currencyBRefund
 
   return {
     transaction,
@@ -1316,6 +1331,7 @@ export const addLiquidity = async ({
   }
 }
 
+// @dev: Withdraw amount calculation logic is based on the contract code.
 export const removeLiquidity = async ({
   chainId,
   userAddress,
@@ -1323,7 +1339,6 @@ export const removeLiquidity = async ({
   token1,
   salt,
   amount,
-  slippage,
   options,
 }: {
   chainId: CHAIN_IDS
@@ -1332,8 +1347,9 @@ export const removeLiquidity = async ({
   token1: `0x${string}`
   salt: `0x${string}`
   amount: string
-  slippage?: number
-  options?: DefaultOptions
+  options?: {
+    slippage?: number
+  } & DefaultOptions
 }): Promise<{
   transaction: Transaction | undefined
   result: {
@@ -1366,7 +1382,7 @@ export const removeLiquidity = async ({
     `)
   }
   const burnAmount = parseUnits(amount, pool.currencyLp.decimals)
-  const slippageLimitPercent = slippage ?? 2
+  const slippageLimitPercent = options?.slippage ?? 2
   const withdrawAmountA = (burnAmount * pool.liquidityA) / pool.totalSupply
   const withdrawAmountB = (burnAmount * pool.liquidityB) / pool.totalSupply
   const minWithdrawAmountA = applyPercent(

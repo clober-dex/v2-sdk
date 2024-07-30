@@ -1,5 +1,6 @@
 import { Currency } from '../model/currency'
 
+// @dev: This function is ported from the contract code
 export function getExpectedMintResult(
   totalSupply: bigint,
   liquidityA: bigint,

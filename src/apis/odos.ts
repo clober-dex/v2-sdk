@@ -2,6 +2,7 @@ import { encodeFunctionData, formatUnits, parseUnits } from 'viem'
 
 import { CHAIN_IDS, isTestnetChain } from '../constants/chain'
 import { MOCK_SWAP_ABI } from '../abis/rebalancer/mock-swap-abi'
+import { Currency } from '../model/currency'
 
 export async function fetchOdosApi<T>(
   path: string,
@@ -27,35 +28,29 @@ export async function fetchQuote({
   slippageLimitPercent,
   userAddress,
   testnetPrice,
-  tokenInDecimals,
-  tokenOutDecimals,
 }: {
   chainId: CHAIN_IDS
   amountIn: bigint
-  tokenIn: `0x${string}`
-  tokenOut: `0x${string}`
+  tokenIn: Currency
+  tokenOut: Currency
   slippageLimitPercent: number
-  userAddress: string
+  userAddress: `0x${string}`
   testnetPrice?: number // tokenOutAmount per tokenIn, for testnet chains only
-  tokenInDecimals?: number // for testnet chains only
-  tokenOutDecimals?: number // for testnet chains only
 }): Promise<{
   amountOut: bigint
   pathId: string
 }> {
   if (isTestnetChain(chainId)) {
-    if (!testnetPrice || !tokenInDecimals || !tokenOutDecimals) {
-      throw new Error(
-        'Missing testnetPrice, tokenInDecimals, or tokenOutDecimals for testnet chain',
-      )
+    if (!testnetPrice) {
+      throw new Error('Missing testnetPrice for testnet chain')
     }
 
     return {
       amountOut: parseUnits(
         (
-          Number(formatUnits(amountIn, tokenInDecimals)) * testnetPrice
+          Number(formatUnits(amountIn, tokenIn.decimals)) * testnetPrice
         ).toFixed(),
-        tokenOutDecimals,
+        tokenOut.decimals,
       ),
       pathId: '0x',
     }
@@ -76,13 +71,13 @@ export async function fetchQuote({
       chainId,
       inputTokens: [
         {
-          tokenAddress: tokenIn,
+          tokenAddress: tokenIn.address,
           amount: amountIn.toString(),
         },
       ],
       outputTokens: [
         {
-          tokenAddress: tokenOut,
+          tokenAddress: tokenOut.address,
           proportion: 1,
         },
       ],
@@ -104,32 +99,28 @@ export async function fetchCallData({
   slippageLimitPercent,
   userAddress,
   testnetPrice,
-  tokenInDecimals,
-  tokenOutDecimals,
 }: {
   chainId: CHAIN_IDS
   amountIn: bigint
-  tokenIn: `0x${string}`
-  tokenOut: `0x${string}`
+  tokenIn: Currency
+  tokenOut: Currency
   slippageLimitPercent: number
-  userAddress: string
+  userAddress: `0x${string}`
   testnetPrice?: number // tokenOutAmount per tokenIn, for testnet chains only
-  tokenInDecimals?: number // for testnet chains only
-  tokenOutDecimals?: number // for testnet chains only
 }): Promise<{
   amountOut: bigint
   data: `0x${string}`
 }> {
   if (isTestnetChain(chainId)) {
-    if (!testnetPrice || !tokenInDecimals || !tokenOutDecimals) {
-      throw new Error(
-        'Missing testnetPrice, tokenInDecimals, or tokenOutDecimals for testnet chain',
-      )
+    if (!testnetPrice) {
+      throw new Error('Missing testnetPrice for testnet chain')
     }
 
     const amountOut = parseUnits(
-      (Number(formatUnits(amountIn, tokenInDecimals)) * testnetPrice).toFixed(),
-      tokenOutDecimals,
+      (
+        Number(formatUnits(amountIn, tokenIn.decimals)) * testnetPrice
+      ).toFixed(),
+      tokenOut.decimals,
     )
 
     return {
@@ -137,7 +128,7 @@ export async function fetchCallData({
       data: encodeFunctionData({
         abi: MOCK_SWAP_ABI,
         functionName: 'swap',
-        args: [tokenIn, amountIn, tokenOut, amountOut],
+        args: [tokenIn.address, amountIn, tokenOut.address, amountOut],
       }),
     }
   }
