@@ -22,6 +22,7 @@ import { MAX_TICK, MIN_TICK } from './constants/tick'
 import { fetchPool } from './apis/pool'
 import { fetchStrategyPrice } from './apis/strategy'
 import { StrategyPrice } from './model/strategy'
+import { Subgraph } from './constants/subgraph'
 
 /**
  * Get contract addresses by chain id
@@ -37,6 +38,42 @@ import { StrategyPrice } from './model/strategy'
  */
 export const getContractAddresses = ({ chainId }: { chainId: CHAIN_IDS }) => {
   return CONTRACT_ADDRESSES[chainId]
+}
+
+/**
+ * Get subgraph block number by chain id
+ * @param chainId - chain id from {@link CHAIN_IDS}
+ * @returns Contract addresses
+ *
+ * @example
+ * import { getContractAddresses } from '@clober/v2-sdk'
+ *
+ * const blockNumber = await getSubgraphBlockNumber({
+ *   chainId: 421614,
+ * })
+ */
+export const getSubgraphBlockNumber = async ({
+  chainId,
+}: {
+  chainId: CHAIN_IDS
+}) => {
+  const {
+    data: {
+      latestBlock: { blockNumber },
+    },
+  } = await Subgraph.get<{
+    data: {
+      latestBlock: {
+        blockNumber: string
+      }
+    }
+  }>(
+    chainId,
+    'getLatestBlockNumber',
+    'query getLatestBlockNumber { latestBlock(id: "latest") { blockNumber } }',
+    {},
+  )
+  return Number(blockNumber)
 }
 
 /**
