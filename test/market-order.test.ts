@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from 'vitest'
-import { getMarket, marketOrder, signERC20Permit } from '@clober/v2-sdk'
+import { approveERC20, getMarket, marketOrder } from '@clober/v2-sdk'
 import { getAddress } from 'viem'
 
 import { cloberTestChain } from '../src/constants/test-chain'
@@ -48,7 +48,7 @@ test('market order in not open market', async () => {
 test('spend with token', async () => {
   const { publicClient, walletClient } = clients[1] as any
 
-  const erc20PermitParams = await signERC20Permit({
+  const approveHash = await approveERC20({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -58,6 +58,11 @@ test('spend with token', async () => {
       useSubgraph: false,
     },
   })
+  const approveReceipt = await publicClient.waitForTransactionReceipt({
+    hash: approveHash!,
+  })
+  expect(approveReceipt.status).toEqual('success')
+
   const { transaction, result } = await marketOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
@@ -65,7 +70,6 @@ test('spend with token', async () => {
     outputToken: '0x0000000000000000000000000000000000000000',
     amountIn: '1000000',
     options: {
-      erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
     },
@@ -209,7 +213,7 @@ test('spend with eth', async () => {
 test('take with token', async () => {
   const { publicClient, walletClient } = clients[3] as any
 
-  const erc20PermitParams = await signERC20Permit({
+  const approveHash = await approveERC20({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -219,6 +223,11 @@ test('take with token', async () => {
       useSubgraph: false,
     },
   })
+  const approveReceipt = await publicClient.waitForTransactionReceipt({
+    hash: approveHash!,
+  })
+  expect(approveReceipt.status).toEqual('success')
+
   const { transaction, result } = await marketOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
@@ -226,7 +235,6 @@ test('take with token', async () => {
     outputToken: '0x0000000000000000000000000000000000000000',
     amountOut: '1.001',
     options: {
-      erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
     },
