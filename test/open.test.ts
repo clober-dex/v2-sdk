@@ -1,5 +1,6 @@
 import { expect, test, afterEach } from 'vitest'
 import { getMarket, getPool, openMarket, openPool } from '@clober/v2-sdk'
+import { zeroHash } from 'viem'
 
 import { cloberTestChain } from '../src/constants/test-chain'
 
@@ -102,7 +103,7 @@ test('try open pool', async () => {
     clients.map(({ testClient }) => {
       return testClient.reset({
         jsonRpcUrl: FORK_URL,
-        blockNumber: 63951990n,
+        blockNumber: 66686973n,
       })
     }),
   )
@@ -112,6 +113,7 @@ test('try open pool', async () => {
     userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     tokenA: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
     tokenB: '0x0000000000000000000000000000000000000000',
+    salt: zeroHash,
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
@@ -121,6 +123,7 @@ test('try open pool', async () => {
     chainId: cloberTestChain.id,
     token0: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
     token1: '0x0000000000000000000000000000000000000000',
+    salt: zeroHash,
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
@@ -137,6 +140,7 @@ test('try open pool', async () => {
     chainId: cloberTestChain.id,
     token0: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
     token1: '0x0000000000000000000000000000000000000000',
+    salt: zeroHash,
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
