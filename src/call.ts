@@ -1,6 +1,7 @@
 import {
   createPublicClient,
   formatUnits,
+  getAddress,
   http,
   isAddressEqual,
   parseUnits,
@@ -10,6 +11,7 @@ import {
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type {
+  Currency6909Flow,
   CurrencyFlow,
   DefaultOptions,
   ERC20PermitParam,
@@ -22,13 +24,26 @@ import { buildTransaction } from './utils/build-transaction'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
 import { fetchMarket } from './apis/market'
-import { formatPrice, parsePrice } from './utils/prices'
+import {
+  convertHumanReadablePriceToRawPrice,
+  formatPrice,
+  parsePrice,
+} from './utils/prices'
 import { invertTick, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { fetchOrders } from './utils/order'
 import { applyPercent } from './utils/bigint'
+import { fetchPool } from './apis/pool'
+import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
+import { getExpectedMintResult, getIdealDelta } from './utils/pool'
+import { fetchCallData, fetchQuote } from './apis/odos'
+import { MINTER_ABI } from './abis/rebalancer/minter-abi'
+import { emptyERC20PermitParams } from './constants/permit'
+import { abs } from './utils/math'
+import { toBytes32 } from './utils/pool-key'
+import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
 
 /**
  * Build a transaction to open a market.
@@ -37,8 +52,7 @@ import { applyPercent } from './utils/bigint'
  * @param userAddress The address of the user.
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
- * @param options
- * @param options.rpcUrl The RPC URL of the blockchain.
+ * @param options {@link DefaultOptions} options.
  * @returns A Promise resolving to a transaction object. If the market is already open, returns undefined.
  * @example
  * import { openMarket } from '@clober/v2-sdk'
@@ -123,14 +137,15 @@ export const openMarket = async ({
  * @param {`0x${string}`} outputToken The address of the token to be received as output.
  * @param {string} amount The amount of input tokens for the order.
  * @param {string} price The price at which the order should be executed.
- * @param {Object} [options] Optional parameters for the limit order.
+ * @param options {@link DefaultOptions} options.
  * @param {erc20PermitParam} [options.erc20PermitParam] The permit signature for token approval.
  * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
- * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
  * @param {bigint} [options.makeTick] The tick for the make order.
  * @param {bigint} [options.takeLimitTick] The tick for the take order.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
+ * @param {boolean} [options.roundingUpMakeBid] A boolean indicating whether to round up the make bid.
+ * @param {boolean} [options.roundingDownMakeAsk] A boolean indicating whether to round down the make ask.
+ * @param {boolean} [options.roundingDownTakenBid] A boolean indicating whether to round down the taken bid.
+ * @param {boolean} [options.roundingUpTakenAsk] A boolean indicating whether to round up the taken ask.
  * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyFlow, take: CurrencyFlow, spent: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the limit order with the result of the order.
  * @example
@@ -420,12 +435,11 @@ export const limitOrder = async ({
  * @param {`0x${string}`} outputToken The address of the token to be received as output.
  * @param {string} amountIn The amount of input tokens for the order to spend.
  * @param {string} amountOut The amount of output tokens for the order to take.
- * @param {Object} [options] Optional parameters for the market order.
+ * @param options {@link DefaultOptions} options.
  * @param {erc20PermitParam} [options.erc20PermitParam] The permit signature for token approval.
- * @param {string} [options.rpcUrl] The RPC URL of the blockchain.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
  * @param {number} [options.slippage] The maximum slippage percentage allowed for the order.
+ * @param {boolean} [options.roundingDownTakenBid] A boolean indicating whether to round down the taken bid.
+ * @param {boolean} [options.roundingUpTakenAsk] A boolean indicating whether to round up the taken ask.
  * if the slippage is not provided, unlimited slippage is allowed.
  * @returns {Promise<{ transaction: Transaction, result: { spent: CurrencyFlow, taken: CurrencyFlow } }>}
  * Promise resolving to the transaction object representing the market order with the result of the order.
@@ -675,10 +689,7 @@ export const marketOrder = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string} id An ID representing the open order to be claimed.
- * @param {Object} [options] Optional parameters for claiming orders.
- * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the claim action with the result of the order.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -725,10 +736,7 @@ export const claimOrder = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string[]} ids An array of IDs representing the open orders to be claimed.
- * @param {Object} [options] Optional parameters for claiming orders.
- * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow[] }>}
  * Promise resolving to the transaction object representing the claim action with the result of the orders.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -838,10 +846,7 @@ export const claimOrders = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string} id An ID representing the open order to be canceled
- * @param {Object} [options] Optional parameters for canceling orders.
- * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the cancel action with the result of the order.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -888,10 +893,7 @@ export const cancelOrder = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string[]} ids An array of IDs representing the open orders to be canceled.
- * @param {Object} [options] Optional parameters for canceling orders.
- * @param {string} [options.rpcUrl] The RPC URL to use for executing the transaction.
- * @param {number} [options.gasLimit] The gas limit to use for the transaction.
- * @param {boolean} [options.useSubgraph] A boolean indicating whether to use the subgraph for fetching orders.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow[] }>
  * Promise resolving to the transaction object representing the cancel action with the result of the orders.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -993,4 +995,608 @@ export const cancelOrders = async ({
       return acc
     }, [] as CurrencyFlow[]),
   }
+}
+
+/**
+ * Build a transaction to open a pool,
+ *
+ * @param chainId The chain ID of the blockchain.
+ * @param userAddress The address of the user.
+ * @param inputToken The address of the input token.
+ * @param outputToken The address of the output token.
+ * @param options {@link DefaultOptions} options.
+ * @returns A Promise resolving to a transaction object. If the market is already open, returns undefined.
+ * @example
+ * import { openPool } from '@clober/v2-sdk'
+ *
+ * const transaction = await openPool({
+ *   chainId: 421614,
+ *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69',
+ *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   outputToken: '0x0000000000000000000000000000000000000000'
+ * })
+ */
+export const openPool = async ({
+  chainId,
+  userAddress,
+  tokenA,
+  tokenB,
+  salt,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  tokenA: `0x${string}`
+  tokenB: `0x${string}`
+  salt: `0x${string}`
+  options?: DefaultOptions
+}): Promise<Transaction | undefined> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = await fetchPool(
+    publicClient,
+    chainId,
+    [tokenA, tokenB],
+    salt,
+    !!(options && options.useSubgraph),
+  )
+  if (!pool.isOpened) {
+    return buildTransaction(
+      publicClient,
+      {
+        chain: CHAIN_MAP[chainId],
+        address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
+        account: userAddress,
+        abi: REBALANCER_ABI,
+        functionName: 'open',
+        args: [
+          {
+            base: pool.market.bidBook.base.address,
+            unitSize: pool.market.bidBook.unitSize,
+            quote: pool.market.bidBook.quote.address,
+            makerPolicy: MAKER_DEFAULT_POLICY[chainId].value,
+            hooks: zeroAddress,
+            takerPolicy: TAKER_DEFAULT_POLICY[chainId].value,
+          },
+          {
+            base: pool.market.askBook.base.address,
+            unitSize: pool.market.askBook.unitSize,
+            quote: pool.market.askBook.quote.address,
+            makerPolicy: MAKER_DEFAULT_POLICY[chainId].value,
+            hooks: zeroAddress,
+            takerPolicy: TAKER_DEFAULT_POLICY[chainId].value,
+          },
+          toBytes32(salt),
+          CONTRACT_ADDRESSES[chainId]!.Strategy,
+        ],
+      },
+      options?.gasLimit,
+    )
+  }
+  return undefined
+}
+
+export const addLiquidity = async ({
+  chainId,
+  userAddress,
+  token0,
+  token1,
+  salt,
+  amount0,
+  amount1,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  amount0?: string
+  amount1?: string
+  options?: {
+    slippage?: number
+    disableSwap?: boolean
+    testnetPrice?: string // token1 amount per token0
+    token0PermitParams?: ERC20PermitParam
+    token1PermitParams?: ERC20PermitParam
+  } & DefaultOptions
+}): Promise<{
+  transaction: Transaction | undefined
+  result: {
+    currencyA: CurrencyFlow
+    currencyB: CurrencyFlow
+    lpCurrency: Currency6909Flow
+  }
+}> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = await fetchPool(
+    publicClient,
+    chainId,
+    [token0, token1],
+    salt,
+    !!(options && options.useSubgraph),
+  )
+  if (!pool.isOpened) {
+    throw new Error(`
+       Open the pool before adding liquidity.
+       import { openPool } from '@clober/v2-sdk'
+
+       const transaction = await openPool({
+            chainId: ${chainId},
+            tokenA: '${token0}',
+            tokenB: '${token1}',
+       })
+    `)
+  }
+  const [amountAOrigin, amountBOrigin] = isAddressEqual(
+    pool.currencyA.address,
+    getAddress(token0),
+  )
+    ? [
+        parseUnits(amount0 ?? '0', pool.currencyA.decimals),
+        parseUnits(amount1 ?? '0', pool.currencyB.decimals),
+      ]
+    : [
+        parseUnits(amount1 ?? '0', pool.currencyA.decimals),
+        parseUnits(amount0 ?? '0', pool.currencyB.decimals),
+      ]
+  let [amountA, amountB] = [amountAOrigin, amountBOrigin]
+  const tokenAPermitParams = isAddressEqual(
+    pool.currencyA.address,
+    getAddress(token0),
+  )
+    ? options?.token0PermitParams ?? emptyERC20PermitParams
+    : options?.token1PermitParams ?? emptyERC20PermitParams
+  const tokenBPermitParams = isAddressEqual(
+    pool.currencyA.address,
+    getAddress(token0),
+  )
+    ? options?.token1PermitParams ?? emptyERC20PermitParams
+    : options?.token0PermitParams ?? emptyERC20PermitParams
+  let disableSwap = !!(options && options.disableSwap)
+  if (
+    pool.totalSupply === 0n ||
+    (pool.liquidityA === 0n && pool.liquidityB === 0n)
+  ) {
+    disableSwap = true
+  }
+  const slippageLimitPercent = options?.slippage ?? 2
+
+  const swapParams: {
+    inCurrency: `0x${string}`
+    amount: bigint
+    data: string
+  } = {
+    inCurrency: zeroAddress,
+    amount: 0n,
+    data: '0x',
+  }
+
+  if (!disableSwap) {
+    const token0Price = Number(
+      options?.testnetPrice ? options.testnetPrice : '1',
+    )
+    const currencyBPerCurrencyA = isAddressEqual(token1, pool.currencyB.address)
+      ? token0Price
+      : 1 / token0Price
+    const swapAmountA = parseUnits('1', pool.currencyA.decimals)
+    const { amountOut: swapAmountB } = await fetchQuote({
+      chainId,
+      amountIn: swapAmountA,
+      tokenIn: pool.currencyA,
+      tokenOut: pool.currencyB,
+      slippageLimitPercent: 20,
+      userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+      testnetPrice: currencyBPerCurrencyA,
+    })
+    const { deltaA, deltaB } = getIdealDelta(
+      amountA,
+      amountB,
+      pool.liquidityA,
+      pool.liquidityB,
+      swapAmountA,
+      swapAmountB,
+    )
+
+    if (deltaA < 0n) {
+      swapParams.inCurrency = pool.currencyA.address
+      swapParams.amount = -deltaA
+      const { amountOut: actualDeltaB, data: calldata } = await fetchCallData({
+        chainId,
+        amountIn: swapParams.amount,
+        tokenIn: pool.currencyA,
+        tokenOut: pool.currencyB,
+        slippageLimitPercent,
+        userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+        testnetPrice: currencyBPerCurrencyA,
+      })
+      swapParams.data = calldata
+      amountA += deltaA
+      amountB += actualDeltaB
+    } else if (deltaB < 0n) {
+      swapParams.inCurrency = pool.currencyB.address
+      swapParams.amount = -deltaB
+      const { amountOut: actualDeltaA, data: calldata } = await fetchCallData({
+        chainId,
+        amountIn: swapParams.amount,
+        tokenIn: pool.currencyB,
+        tokenOut: pool.currencyA,
+        slippageLimitPercent,
+        userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+        testnetPrice: 1 / currencyBPerCurrencyA,
+      })
+      swapParams.data = calldata
+      amountA += actualDeltaA
+      amountB += deltaB
+    }
+  }
+
+  const { mintAmount, inAmountA, inAmountB } = getExpectedMintResult(
+    pool.totalSupply,
+    pool.liquidityA,
+    pool.liquidityB,
+    amountA,
+    amountB,
+    pool.currencyA,
+    pool.currencyB,
+  )
+
+  if (mintAmount === 0n) {
+    return {
+      transaction: undefined,
+      result: {
+        currencyA: {
+          currency: pool.currencyA,
+          amount: '0',
+          direction: 'in',
+        },
+        currencyB: {
+          currency: pool.currencyB,
+          amount: '0',
+          direction: 'in',
+        },
+        lpCurrency: {
+          currency: pool.currencyLp,
+          amount: '0',
+          direction: 'out',
+        },
+      },
+    }
+  }
+
+  const minMintAmount = applyPercent(mintAmount, 100 - slippageLimitPercent)
+
+  const transaction = await buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Minter,
+      abi: MINTER_ABI,
+      functionName: 'mint',
+      args: [
+        pool.key,
+        amountAOrigin,
+        amountBOrigin,
+        minMintAmount,
+        {
+          permitAmount: tokenAPermitParams.permitAmount,
+          signature: tokenAPermitParams.signature,
+        },
+        {
+          permitAmount: tokenBPermitParams.permitAmount,
+          signature: tokenBPermitParams.signature,
+        },
+        swapParams,
+      ],
+    },
+    options?.gasLimit,
+  )
+
+  const currencyARefund = amountA - inAmountA
+  const currencyBRefund = amountB - inAmountB
+  const currencyAResultAmount = amountAOrigin - currencyARefund
+  const currencyBResultAmount = amountBOrigin - currencyBRefund
+
+  return {
+    transaction,
+    result: {
+      currencyA: {
+        currency: pool.currencyA,
+        amount: formatUnits(
+          abs(currencyAResultAmount),
+          pool.currencyA.decimals,
+        ),
+        direction: currencyAResultAmount >= 0 ? 'in' : 'out',
+      },
+      currencyB: {
+        currency: pool.currencyB,
+        amount: formatUnits(
+          abs(currencyBResultAmount),
+          pool.currencyB.decimals,
+        ),
+        direction: currencyBResultAmount >= 0 ? 'in' : 'out',
+      },
+      lpCurrency: {
+        currency: pool.currencyLp,
+        amount: formatUnits(mintAmount, pool.currencyLp.decimals),
+        direction: 'out',
+      },
+    },
+  }
+}
+
+// @dev: Withdraw amount calculation logic is based on the contract code.
+export const removeLiquidity = async ({
+  chainId,
+  userAddress,
+  token0,
+  token1,
+  salt,
+  amount,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  amount: string
+  options?: {
+    slippage?: number
+  } & DefaultOptions
+}): Promise<{
+  transaction: Transaction | undefined
+  result: {
+    currencyA: CurrencyFlow
+    currencyB: CurrencyFlow
+    lpCurrency: Currency6909Flow
+  }
+}> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = await fetchPool(
+    publicClient,
+    chainId,
+    [token0, token1],
+    salt,
+    !!(options && options.useSubgraph),
+  )
+  if (!pool.isOpened) {
+    throw new Error(`
+       Open the pool before removing liquidity.
+       import { openPool } from '@clober/v2-sdk'
+
+       const transaction = await openPool({
+            chainId: ${chainId},
+            tokenA: '${token0}',
+            tokenB: '${token1}',
+       })
+    `)
+  }
+  const burnAmount = parseUnits(amount, pool.currencyLp.decimals)
+  const slippageLimitPercent = options?.slippage ?? 2
+  const withdrawAmountA = (burnAmount * pool.liquidityA) / pool.totalSupply
+  const withdrawAmountB = (burnAmount * pool.liquidityB) / pool.totalSupply
+  const minWithdrawAmountA = applyPercent(
+    withdrawAmountA,
+    100 - slippageLimitPercent,
+  )
+  const minWithdrawAmountB = applyPercent(
+    withdrawAmountB,
+    100 - slippageLimitPercent,
+  )
+
+  if (burnAmount === 0n) {
+    return {
+      transaction: undefined,
+      result: {
+        currencyA: {
+          currency: pool.currencyA,
+          amount: '0',
+          direction: 'out',
+        },
+        currencyB: {
+          currency: pool.currencyB,
+          amount: '0',
+          direction: 'out',
+        },
+        lpCurrency: {
+          currency: pool.currencyLp,
+          amount: '0',
+          direction: 'in',
+        },
+      },
+    }
+  }
+
+  const transaction = await buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
+      abi: REBALANCER_ABI,
+      functionName: 'burn',
+      args: [pool.key, burnAmount, minWithdrawAmountA, minWithdrawAmountB],
+    },
+    options?.gasLimit,
+  )
+
+  return {
+    transaction,
+    result: {
+      currencyA: {
+        currency: pool.currencyA,
+        amount: formatUnits(withdrawAmountA, pool.currencyA.decimals),
+        direction: 'out',
+      },
+      currencyB: {
+        currency: pool.currencyB,
+        amount: formatUnits(withdrawAmountB, pool.currencyB.decimals),
+        direction: 'out',
+      },
+      lpCurrency: {
+        currency: pool.currencyLp,
+        amount: amount,
+        direction: 'in',
+      },
+    },
+  }
+}
+
+export const rebalance = async ({
+  chainId,
+  userAddress,
+  token0,
+  token1,
+  salt,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  options?: DefaultOptions
+}): Promise<Transaction> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = await fetchPool(
+    publicClient,
+    chainId,
+    [token0, token1],
+    salt,
+    !!(options && options.useSubgraph),
+  )
+  if (!pool.isOpened) {
+    throw new Error(`
+       Open the pool before rebalancing pool.
+       import { openPool } from '@clober/v2-sdk'
+
+       const transaction = await openPool({
+            chainId: ${chainId},
+            tokenA: '${token0}',
+            tokenB: '${token1}',
+       })
+    `)
+  }
+
+  return buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
+      abi: REBALANCER_ABI,
+      functionName: 'rebalance',
+      args: [pool.key],
+    },
+    options?.gasLimit,
+  )
+}
+
+export const updateStrategyPrice = async ({
+  chainId,
+  userAddress,
+  token0,
+  token1,
+  salt,
+  oraclePrice,
+  priceA,
+  priceB,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  oraclePrice: string // price with currencyA as quote
+  priceA: string // price with currencyA as quote
+  priceB: string // price when currencyA as quote
+  options?: {
+    tickA?: bigint
+    tickB?: bigint
+    roundingUpPriceA?: boolean
+    roundingUpPriceB?: boolean
+  } & DefaultOptions
+}): Promise<Transaction> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = await fetchPool(
+    publicClient,
+    chainId,
+    [token0, token1],
+    salt,
+    !!(options && options.useSubgraph),
+  )
+  if (!pool.isOpened) {
+    throw new Error(`
+       Open the pool before updating strategy price.
+       import { openPool } from '@clober/v2-sdk'
+
+       const transaction = await openPool({
+            chainId: ${chainId},
+            tokenA: '${token0}',
+            tokenB: '${token1}',
+       })
+    `)
+  }
+  const [roundingUpPriceA, roundingUpPriceB] = [
+    options?.roundingUpPriceA ? options.roundingUpPriceA : false,
+    options?.roundingUpPriceB ? options.roundingUpPriceB : false,
+  ]
+  const {
+    roundingDownTick: roundingDownTickA,
+    roundingUpTick: roundingUpTickA,
+  } = parsePrice(
+    Number(priceA),
+    pool.currencyA.decimals,
+    pool.currencyB.decimals,
+  )
+  const {
+    roundingDownTick: roundingDownTickB,
+    roundingUpTick: roundingUpTickB,
+  } = parsePrice(
+    Number(priceB),
+    pool.currencyA.decimals,
+    pool.currencyB.decimals,
+  )
+
+  const oracleRawPrice = convertHumanReadablePriceToRawPrice(
+    Number(oraclePrice),
+    pool.currencyA.decimals,
+    pool.currencyB.decimals,
+  )
+  const tickA = options?.tickA
+    ? Number(options.tickA)
+    : Number(roundingUpPriceA ? roundingUpTickA : roundingDownTickA)
+  const tickB = options?.tickB
+    ? Number(options.tickB)
+    : Number(invertTick(roundingUpPriceB ? roundingUpTickB : roundingDownTickB))
+
+  return buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Operator,
+      abi: OPERATOR_ABI,
+      functionName: 'updatePrice',
+      args: [pool.key, oracleRawPrice, tickA, tickB],
+    },
+    options?.gasLimit,
+  )
 }

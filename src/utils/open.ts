@@ -3,56 +3,54 @@ import { PublicClient } from 'viem'
 import { CHAIN_IDS } from '../constants/chain'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 
-const _abi = [
-  {
-    inputs: [
-      {
-        internalType: 'BookId',
-        name: 'id',
-        type: 'uint192',
-      },
-    ],
-    name: 'isOpened',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-] as const
-
 const buildBookCacheKey = (chainId: CHAIN_IDS, bookId: bigint) =>
   `${chainId}:${bookId}`
-const isOpenedCache = new Map<string, boolean>()
-const getIsOpenedFromCache = (chainId: CHAIN_IDS, bookId: bigint) =>
-  isOpenedCache.get(buildBookCacheKey(chainId, bookId))
-const setIsOpenedToCache = (
+const isMarketOpenedCache = new Map<string, boolean>()
+const getIsMarketOpenedFromCache = (chainId: CHAIN_IDS, bookId: bigint) =>
+  isMarketOpenedCache.get(buildBookCacheKey(chainId, bookId))
+const setIsMarketOpenedToCache = (
   chainId: CHAIN_IDS,
   bookId: bigint,
   isOpened: boolean,
-) => isOpenedCache.set(buildBookCacheKey(chainId, bookId), isOpened)
+) => isMarketOpenedCache.set(buildBookCacheKey(chainId, bookId), isOpened)
 
-export async function fetchIsOpened(
+export async function fetchIsMarketOpened(
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   bookId: bigint,
 ) {
-  const cachedIsOpened = getIsOpenedFromCache(chainId, bookId)
-  if (cachedIsOpened !== undefined) {
-    return cachedIsOpened
+  const cachedIsMarketOpened = getIsMarketOpenedFromCache(chainId, bookId)
+  if (cachedIsMarketOpened !== undefined) {
+    return cachedIsMarketOpened
   }
-  const isOpened = await publicClient.readContract({
+  const isMarketOpened = await publicClient.readContract({
     address: CONTRACT_ADDRESSES[chainId]!.BookManager,
-    abi: _abi,
+    abi: [
+      {
+        inputs: [
+          {
+            internalType: 'BookId',
+            name: 'id',
+            type: 'uint192',
+          },
+        ],
+        name: 'isOpened',
+        outputs: [
+          {
+            internalType: 'bool',
+            name: '',
+            type: 'bool',
+          },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ] as const,
     functionName: 'isOpened',
     args: [bookId],
   })
-  if (isOpened) {
-    setIsOpenedToCache(chainId, bookId, isOpened)
+  if (isMarketOpened) {
+    setIsMarketOpenedToCache(chainId, bookId, isMarketOpened)
   }
-  return isOpened
+  return isMarketOpened
 }

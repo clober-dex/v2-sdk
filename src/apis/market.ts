@@ -9,7 +9,7 @@ import { calculateUnitSize } from '../utils/unit-size'
 import type { Currency } from '../model/currency'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { BOOK_VIEWER_ABI } from '../abis/core/book-viewer-abi'
-import { fetchIsOpened } from '../utils/open'
+import { fetchIsMarketOpened } from '../utils/open'
 import { fetchCurrency } from '../utils/currency'
 import { Subgraph } from '../constants/subgraph'
 
@@ -78,7 +78,7 @@ const getBook = async (
       functionName: 'getLiquidity',
       args: [bookId, Number(2n ** 19n - 1n), BigInt(n)],
     }),
-    fetchIsOpened(publicClient, chainId, bookId),
+    fetchIsMarketOpened(publicClient, chainId, bookId),
   ])
 
   return new Book({
