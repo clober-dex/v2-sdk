@@ -254,7 +254,7 @@ test('claim bid order', async () => {
       ])
     ).map((order) => order.claimable),
   ).toEqual([0n])
-  expect(afterBalance).greaterThan(beforeBalance)
+  expect(Number(afterBalance)).greaterThan(Number(beforeBalance))
   expect(result.direction).toEqual('out')
   expect(result.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
