@@ -129,6 +129,7 @@ export const getMarket = async ({
  * @param chainId - chain id from {@link CHAIN_IDS}
  * @param token0 - token0 address
  * @param token1 - token1 address
+ * @param salt - salt for the pool
  * @param options {@link DefaultOptions} options.
  * @param options.n - number of depth levels to fetch
  * @returns A pool {@link Pool}
