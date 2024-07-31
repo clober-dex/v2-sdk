@@ -1,10 +1,5 @@
 import { expect, test, afterEach } from 'vitest'
-import {
-  getMarket,
-  limitOrder,
-  openMarket,
-  signERC20Permit,
-} from '@clober/v2-sdk'
+import { approveERC20, getMarket, limitOrder, openMarket } from '@clober/v2-sdk'
 import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
 
@@ -50,7 +45,7 @@ test('limit order in not open market', async () => {
 test('make bid order', async () => {
   const { publicClient, walletClient } = clients[1] as any
 
-  const erc20PermitParams = await signERC20Permit({
+  const approveHash = await approveERC20({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -60,6 +55,11 @@ test('make bid order', async () => {
       useSubgraph: false,
     },
   })
+  const approveReceipt = await publicClient.waitForTransactionReceipt({
+    hash: approveHash!,
+  })
+  expect(approveReceipt.status).toEqual('success')
+
   const {
     transaction,
     result: { make, taken, spent },
@@ -71,7 +71,6 @@ test('make bid order', async () => {
     amount: '1',
     price: '0.01',
     options: {
-      erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
       useSubgraph: false,
@@ -167,7 +166,7 @@ test('make bid order at $1', async () => {
   const r = await publicClient.waitForTransactionReceipt({ hash: openHash })
   expect(r.status).toEqual('success')
 
-  const erc20PermitParams = await signERC20Permit({
+  const approveHash = await approveERC20({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -177,6 +176,11 @@ test('make bid order at $1', async () => {
       useSubgraph: false,
     },
   })
+  const approveReceipt = await publicClient.waitForTransactionReceipt({
+    hash: approveHash!,
+  })
+  expect(approveReceipt.status).toEqual('success')
+
   const {
     transaction,
     result: { make, taken, spent },
@@ -188,7 +192,6 @@ test('make bid order at $1', async () => {
     amount: '1',
     price: '1',
     options: {
-      erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
       useSubgraph: false,
@@ -366,7 +369,7 @@ test('limit bid order', async () => {
       }),
     ],
   )
-  const erc20PermitParams = await signERC20Permit({
+  const approveHash = await approveERC20({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -376,6 +379,11 @@ test('limit bid order', async () => {
       useSubgraph: false,
     },
   })
+  const approveReceipt = await publicClient.waitForTransactionReceipt({
+    hash: approveHash!,
+  })
+  expect(approveReceipt.status).toEqual('success')
+
   const {
     transaction,
     result: { make, taken, spent },
@@ -387,7 +395,6 @@ test('limit bid order', async () => {
     amount: '100000',
     price: '3500.3',
     options: {
-      erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
     },
@@ -478,7 +485,7 @@ test('limit bid order with rounding up', async () => {
       }),
     ],
   )
-  const erc20PermitParams = await signERC20Permit({
+  const approveHash = await approveERC20({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -488,6 +495,11 @@ test('limit bid order with rounding up', async () => {
       useSubgraph: false,
     },
   })
+  const approveReceipt = await publicClient.waitForTransactionReceipt({
+    hash: approveHash!,
+  })
+  expect(approveReceipt.status).toEqual('success')
+
   const {
     transaction,
     result: { make, taken, spent },
@@ -499,7 +511,6 @@ test('limit bid order with rounding up', async () => {
     amount: '100000',
     price: '3500.2673',
     options: {
-      erc20PermitParam: erc20PermitParams!,
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
       roundingUpMakeBid: true,

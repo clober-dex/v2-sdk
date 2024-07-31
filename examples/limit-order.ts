@@ -2,12 +2,7 @@ import { createWalletClient, http, parseUnits } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
 import * as dotenv from 'dotenv'
-import {
-  getMarket,
-  getOpenOrders,
-  limitOrder,
-  signERC20Permit,
-} from '@clober/v2-sdk'
+import { getMarket, getOpenOrders, limitOrder } from '@clober/v2-sdk'
 
 dotenv.config()
 
@@ -20,16 +15,9 @@ const main = async () => {
     transport: http(),
   })
 
-  const erc20PermitParam = await signERC20Permit({
-    chainId: arbitrumSepolia.id,
-    walletClient,
-    token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    amount: '1.12',
-  })
-
   const {
     transaction,
-    result: { make, taken },
+    result: { make, take },
   } = await limitOrder({
     chainId: arbitrumSepolia.id,
     userAddress: walletClient.account.address,
@@ -37,9 +25,6 @@ const main = async () => {
     outputToken: '0x0000000000000000000000000000000000000000',
     amount: '1.12',
     price: '8000.01',
-    options: {
-      erc20PermitParam: erc20PermitParam!,
-    },
   })
   const hash = await walletClient.sendTransaction({
     ...transaction,
@@ -47,7 +32,7 @@ const main = async () => {
   })
   console.log(`limit order hash: ${hash}`)
   console.log(`make: `, make)
-  console.log(`taken: `, taken)
+  console.log(`take: `, take)
 
   const market = await getMarket({
     chainId: arbitrumSepolia.id,
