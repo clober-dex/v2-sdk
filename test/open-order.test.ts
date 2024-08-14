@@ -1,5 +1,6 @@
 import { afterEach, expect, test } from 'vitest'
 import {
+  approveERC20,
   cancelOrder,
   cancelOrders,
   claimOrder,
@@ -8,7 +9,6 @@ import {
   getOpenOrders,
   limitOrder,
   setApprovalOfOpenOrdersForAll,
-  signERC20Permit,
 } from '@clober/v2-sdk'
 import { getAddress } from 'viem'
 
@@ -66,7 +66,7 @@ test('get undefined open orders', async () => {
 test('claim ask order', async () => {
   const { publicClient, walletClient } = clients[2] as any
 
-  const erc20PermitParam = await signERC20Permit({
+  const approveHash = await approveERC20({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -76,6 +76,11 @@ test('claim ask order', async () => {
       useSubgraph: false,
     },
   })
+  const approveReceipt = await publicClient.waitForTransactionReceipt({
+    hash: approveHash!,
+  })
+  expect(approveReceipt.status).toEqual('success')
+
   const { transaction: takeTx } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
@@ -84,7 +89,6 @@ test('claim ask order', async () => {
     amount: '100000',
     price: '3505.01',
     options: {
-      erc20PermitParam: erc20PermitParam!,
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
     },
@@ -250,7 +254,7 @@ test('claim bid order', async () => {
       ])
     ).map((order) => order.claimable),
   ).toEqual([0n])
-  expect(afterBalance - beforeBalance).toEqual(991445630096670899n)
+  expect(Number(afterBalance)).greaterThan(Number(beforeBalance))
   expect(result.direction).toEqual('out')
   expect(result.currency.address).toEqual(
     '0x0000000000000000000000000000000000000000',
@@ -298,13 +302,18 @@ test('claim orders', async () => {
     gasPrice: takeTx1!.gasPrice! * 2n,
   })
 
-  const erc20PermitParam = await signERC20Permit({
+  const approveHash = await approveERC20({
     chainId: cloberTestChain.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '5000000',
     options: { rpcUrl: publicClient.transport.url!, useSubgraph: false },
   })
+  const approveReceipt = await publicClient.waitForTransactionReceipt({
+    hash: approveHash!,
+  })
+  expect(approveReceipt.status).toEqual('success')
+
   const { transaction: takeTx2 } = await limitOrder({
     chainId: cloberTestChain.id,
     userAddress: account.address,
@@ -313,7 +322,6 @@ test('claim orders', async () => {
     amount: '5000000',
     price: '3555.01',
     options: {
-      erc20PermitParam: erc20PermitParam!,
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
     },

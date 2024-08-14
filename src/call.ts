@@ -149,15 +149,8 @@ export const openMarket = async ({
  * @returns {Promise<{ transaction: Transaction, result: { make: CurrencyFlow, take: CurrencyFlow, spent: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the limit order with the result of the order.
  * @example
- * import { signERC20Permit, limitOrder } from '@clober/v2-sdk'
+ * import { limitOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
- *
- * const erc20PermitParam = await signERC20Permit({
- *   chainId: 421614,
- *   walletClient,
- *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   amount: '100.123'
- * })
  *
  * const { transaction } = await limitOrder({
  *   chainId: 421614,
@@ -166,7 +159,6 @@ export const openMarket = async ({
  *   outputToken: '0x0000000000000000000000000000000000000000',
  *   amount: '100.123', // 100.123 USDC
  *   price: '4000.01', // price at 4000.01 (ETH/USDC)
- *   options: { erc20PermitParam }
  * })
  *
  * @example
@@ -444,15 +436,8 @@ export const limitOrder = async ({
  * @returns {Promise<{ transaction: Transaction, result: { spent: CurrencyFlow, taken: CurrencyFlow } }>}
  * Promise resolving to the transaction object representing the market order with the result of the order.
  * @example
- * import { signERC20Permit, marketOrder } from '@clober/v2-sdk'
+ * import { marketOrder } from '@clober/v2-sdk'
  * import { privateKeyToAccount } from 'viem/accounts'
- *
- * const erc20PermitParam = await signERC20Permit({
- *   chainId: 421614,
- *   walletClient,
- *   token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   amount: '100.123'
- * })
  *
  * const transaction = await marketOrder({
  *   chainId: 421614,
