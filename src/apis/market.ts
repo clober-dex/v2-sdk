@@ -53,7 +53,7 @@ const getBook = async (
     const {
       data: { book },
     } = await fetchBookFromSubgraph(chainId, bookId.toString())
-    new Book({
+    return new Book({
       chainId,
       id: bookId,
       base: baseCurrency,
