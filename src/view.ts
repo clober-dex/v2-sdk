@@ -9,16 +9,20 @@ import {
 
 import { fetchMarket } from './apis/market'
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
-import type { ChartLog, Currency, DefaultOptions, Market } from './type'
+import type { ChartLog, Currency, DefaultOptions, Market, Pool } from './type'
 import { CHART_LOG_INTERVALS } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
-import { type OpenOrder } from './model/open-order'
+import { OpenOrder } from './model/open-order'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
 import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
+import { fetchPool } from './apis/pool'
+import { fetchStrategyPrice } from './apis/strategy'
+import { StrategyPrice } from './model/strategy'
+import { Subgraph } from './constants/subgraph'
 
 /**
  * Get contract addresses by chain id
@@ -37,14 +41,48 @@ export const getContractAddresses = ({ chainId }: { chainId: CHAIN_IDS }) => {
 }
 
 /**
+ * Get subgraph block number by chain id
+ * @param chainId - chain id from {@link CHAIN_IDS}
+ * @returns Contract addresses
+ *
+ * @example
+ * import { getContractAddresses } from '@clober/v2-sdk'
+ *
+ * const blockNumber = await getSubgraphBlockNumber({
+ *   chainId: 421614,
+ * })
+ */
+export const getSubgraphBlockNumber = async ({
+  chainId,
+}: {
+  chainId: CHAIN_IDS
+}) => {
+  const {
+    data: {
+      latestBlock: { blockNumber },
+    },
+  } = await Subgraph.get<{
+    data: {
+      latestBlock: {
+        blockNumber: string
+      }
+    }
+  }>(
+    chainId,
+    'getLatestBlockNumber',
+    'query getLatestBlockNumber { latestBlock(id: "latest") { blockNumber } }',
+    {},
+  )
+  return Number(blockNumber)
+}
+
+/**
  * Get market information by chain id and token addresses
  * @param chainId - chain id from {@link CHAIN_IDS}
  * @param token0 - token0 address
  * @param token1 - token1 address
- * @param options
+ * @param options {@link DefaultOptions} options.
  * @param options.n - number of depth levels to fetch
- * @param options.rpcUrl - RPC URL of the blockchain
- * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
  * @returns A market {@link Market}
  *
  * @example
@@ -83,37 +121,98 @@ export const getMarket = async ({
     !!(options && options.useSubgraph),
     options?.n,
   )
+  return market.toJson()
+}
+
+/**
+ * Get pool information by chain id and token addresses
+ * @param chainId - chain id from {@link CHAIN_IDS}
+ * @param token0 - token0 address
+ * @param token1 - token1 address
+ * @param options {@link DefaultOptions} options.
+ * @param options.n - number of depth levels to fetch
+ * @returns A pool {@link Pool}
+ *
+ * @example
+ * import { getPool } from '@clober/v2-sdk'
+ *
+ * const market = await getPool({
+ *   chainId: 421614,
+ *   token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   token1: '0x0000000000000000000000000000000000000000',
+ * })
+ */
+export const getPool = async ({
+  chainId,
+  token0,
+  token1,
+  salt,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  options?: {
+    n?: number
+  } & DefaultOptions
+}): Promise<Pool> => {
+  if (isAddressEqual(token0, token1)) {
+    throw new Error('Token0 and token1 must be different')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = await fetchPool(
+    publicClient,
+    chainId,
+    [token0, token1],
+    salt,
+    !!(options && options.useSubgraph),
+  )
   return {
     chainId,
-    quote: market.quote,
-    base: market.base,
-    makerFee: market.makerFee,
-    takerFee: market.takerFee,
-    bids: market.bids.map(({ price, tick, baseAmount }) => ({
-      price,
-      tick: Number(tick),
-      baseAmount: formatUnits(baseAmount, market.base.decimals),
-    })),
-    bidBook: {
-      id: market.bidBook.id.toString(),
-      base: market.bidBook.base,
-      unitSize: market.bidBook.unitSize.toString(),
-      quote: market.bidBook.quote,
-      isOpened: market.bidBook.isOpened,
-    },
-    asks: market.asks.map(({ price, tick, baseAmount }) => ({
-      price,
-      tick: Number(tick),
-      baseAmount: formatUnits(baseAmount, market.base.decimals),
-    })),
-    askBook: {
-      id: market.askBook.id.toString(),
-      base: market.askBook.base,
-      unitSize: market.askBook.unitSize.toString(),
-      quote: market.askBook.quote,
-      isOpened: market.askBook.isOpened,
-    },
+    key: pool.key,
+    market: pool.market.toJson(),
+    isOpened: pool.isOpened,
+    strategy: pool.strategy,
+    currencyA: pool.currencyA,
+    currencyB: pool.currencyB,
+    reserveA: pool.reserveA,
+    reserveB: pool.reserveB,
+    orderListA: pool.orderListA,
+    orderListB: pool.orderListB,
   }
+}
+
+export const getStrategyPrice = async ({
+  chainId,
+  token0,
+  token1,
+  salt,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  options?: DefaultOptions
+}): Promise<StrategyPrice> => {
+  if (isAddressEqual(token0, token1)) {
+    throw new Error('Token0 and token1 must be different')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  return fetchStrategyPrice(
+    publicClient,
+    chainId,
+    [token0, token1],
+    salt,
+    !!(options && options.useSubgraph),
+  )
 }
 
 /**
@@ -303,10 +402,10 @@ export const getPriceNeighborhood = ({
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
  * @param amountIn The amount of expected input amount. (ex 1.2 ETH -> 1.2)
- * @param options
- * @param options.limitPrice The maximum limit price to spend.
- * @param options.rpcUrl The RPC URL of the blockchain.
- * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
+ * @param options {@link DefaultOptions} options.
+ * @param options.limitPrice The maximum limit price to take.
+ * @param options.roundingDownTakenBid Whether to round down the taken bid.
+ * @param options.roundingUpTakenAsk Whether to round up the taken ask.
  * @returns A Promise resolving to an object containing the taken amount, spend amount and result of the calculation.
  * @example
  * import { getExpectedOutput } from '@clober/v2-sdk'
@@ -419,9 +518,10 @@ export const getExpectedOutput = async ({
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
  * @param amountOut The amount of expected output amount. (ex 1.2 ETH -> 1.2)
- * @param options
+ * @param options {@link DefaultOptions} options.
  * @param options.limitPrice The maximum limit price to take.
- * @param options.rpcUrl The RPC URL of the blockchain.
+ * @param options.roundingDownTakenBid Whether to round down the taken bid.
+ * @param options.roundingUpTakenAsk Whether to round up the taken ask.
  * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
  * @returns A Promise resolving to an object containing the taken amount, spent amount and result of the calculation.
  * @example
@@ -527,9 +627,7 @@ export const getExpectedInput = async ({
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {string} id The ID of the open order.
- * @param options
- * @param options.rpcUrl The RPC URL of the blockchain.
- * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<OpenOrder>} Promise resolving to the open order object, or undefined if not found.
  * @example
  * import { getOpenOrder } from '@clober/v2-sdk'
@@ -559,9 +657,7 @@ export const getOpenOrder = async ({
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
- * @param options
- * @param options.rpcUrl The RPC URL of the blockchain.
- * @param options.useSubgraph Whether to use the subgraph to fetch the market data.
+ * @param options {@link DefaultOptions} options.
  * @returns {Promise<OpenOrder[]>} Promise resolving to an array of open orders.
  * @example
  * import { getOpenOrders } from '@clober/v2-sdk'

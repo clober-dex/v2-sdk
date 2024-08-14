@@ -1,3 +1,5 @@
+export const abs = (x: bigint): bigint => (x < 0n ? -x : x)
+
 export const divide = (x: bigint, y: bigint, roundUp: boolean): bigint => {
   if (roundUp) {
     if (x === 0n) {

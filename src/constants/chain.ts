@@ -33,3 +33,8 @@ export const CHAIN_MAP: {
   },
   [CHAIN_IDS.ZKSYNC]: zkSync,
 }
+
+export const isTestnetChain = (chainId: CHAIN_IDS): boolean =>
+  chainId === CHAIN_IDS.CLOBER_TESTNET ||
+  chainId === CHAIN_IDS.ARBITRUM_SEPOLIA ||
+  chainId === CHAIN_IDS.BERACHAIN_TESTNET

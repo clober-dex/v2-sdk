@@ -23,6 +23,21 @@ export const formatPrice = (
     .toFixed()
 }
 
+export const convertHumanReadablePriceToRawPrice = (
+  humanReadablePrice: number,
+  quoteDecimals: number,
+  baseDecimals: number,
+): bigint => {
+  const value = new BigNumber(humanReadablePrice)
+    .times(new BigNumber(2).pow(PRICE_PRECISION.toString()))
+    .times(new BigNumber(10).pow(quoteDecimals))
+    .div(new BigNumber(10).pow(baseDecimals))
+  const rawPrice = BigInt(
+    value.isInteger() ? value.toFixed() : value.integerValue().toFixed(),
+  )
+  return rawPrice
+}
+
 export const parsePrice = (
   humanReadablePrice: number,
   quoteDecimals: number,
@@ -31,12 +46,10 @@ export const parsePrice = (
   roundingDownTick: bigint
   roundingUpTick: bigint
 } => {
-  const value = new BigNumber(humanReadablePrice)
-    .times(new BigNumber(2).pow(PRICE_PRECISION.toString()))
-    .times(new BigNumber(10).pow(quoteDecimals))
-    .div(new BigNumber(10).pow(baseDecimals))
-  const rawPrice = BigInt(
-    value.isInteger() ? value.toFixed() : value.integerValue().toFixed(),
+  const rawPrice = convertHumanReadablePriceToRawPrice(
+    humanReadablePrice,
+    quoteDecimals,
+    baseDecimals,
   )
   const cutOffRawPrice = max(MIN_PRICE, min(rawPrice, MAX_PRICE))
   const tick = fromPrice(cutOffRawPrice)
