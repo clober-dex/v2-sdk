@@ -23,7 +23,7 @@ export const CONTRACT_ADDRESSES: {
     Operator: getAddress('0xEEE4F3b484787bd28aa0e790b4ab92660e7ecd06'),
   },
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
-    Controller: getAddress('0x91101543D3Bd3e919dAd034Bf978ef9d87290993'),
+    Controller: getAddress('0x42D9B8eFB54d0d763c4219e1B9E1846C60A56463'),
     BookManager: getAddress('0xC528b9ED5d56d1D0d3C18A2342954CE1069138a4'),
     BookViewer: getAddress('0x73c524e103C94Bf2743659d739586395B1A9e1BE'),
     Rebalancer: getAddress('0x4Ba00c2849D993279AD30E1618C73d6db4c64ACe'),
@@ -50,9 +50,9 @@ export const CONTRACT_ADDRESSES: {
     Operator: zeroAddress,
   },
   [CHAIN_IDS.ZKSYNC]: {
-    Controller: getAddress('0x11BB911a7F0EE10d4cEB569f3D7d6b741dEbdfcc'),
+    Controller: getAddress('0xC6DFb3CCE884b283460dB0fB0e33335EeF7cdD57'),
     BookManager: getAddress('0xAaA0e933e1EcC812fc075A81c116Aa0a82A5bbb8'),
-    BookViewer: getAddress('0xc1925FaeB02aD934e000B4698367C9B9eAd0b666'),
+    BookViewer: getAddress('0x8CA1585D798cBC121139E3809e340c41D1762723'),
     Rebalancer: zeroAddress,
     Strategy: zeroAddress,
     Minter: zeroAddress,
