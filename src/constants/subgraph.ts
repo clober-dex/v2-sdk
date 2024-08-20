@@ -12,7 +12,7 @@ const SUBGRAPH_URL: {
   [CHAIN_IDS.BERACHAIN_TESTNET]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph/v1.3.2/gn',
   [CHAIN_IDS.ZKSYNC]:
-    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-zksync-era/v1.5.1/gn',
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-zksync-era/v1.5.4/gn',
 }
 
 export class Subgraph {
