@@ -152,11 +152,14 @@ const fetchCurrencyInner = async (
         },
       ],
     })
+  if (!name || !symbol || !decimals) {
+    throw new Error(`Failed to fetch currency: ${address}`)
+  }
   return {
     address,
-    name: name ?? 'Unknown',
-    symbol: symbol ?? 'Unknown',
-    decimals: decimals ?? 18,
+    name,
+    symbol,
+    decimals,
   }
 }
 
