@@ -2,6 +2,7 @@ import { getAddress, isAddressEqual, PublicClient, zeroAddress } from 'viem'
 
 import type { Currency } from '../model/currency'
 import { CHAIN_IDS } from '../constants/chain'
+import { ETH, NATIVE_CURRENCY } from '../constants/currency'
 
 const _abi = [
   {
@@ -124,12 +125,10 @@ const fetchCurrencyInner = async (
   address: `0x${string}`,
 ): Promise<Currency> => {
   if (isAddressEqual(address, zeroAddress)) {
-    return {
-      address: zeroAddress,
-      name: 'Ethereum',
-      symbol: 'ETH',
-      decimals: 18,
+    if (!publicClient.chain) {
+      return ETH
     }
+    return NATIVE_CURRENCY[publicClient.chain.id]
   }
 
   const [{ result: name }, { result: symbol }, { result: decimals }] =
