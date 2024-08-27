@@ -1,6 +1,32 @@
 import { zeroAddress } from 'viem'
 
+import { Currency } from '../model/currency'
+
 import { CHAIN_IDS } from './chain'
+
+export const ETH: Currency = {
+  address: zeroAddress,
+  name: 'Ethereum',
+  symbol: 'ETH',
+  decimals: 18,
+}
+
+export const BERA: Currency = {
+  address: zeroAddress,
+  name: 'BERA Token',
+  symbol: 'BERA',
+  decimals: 18,
+}
+
+export const NATIVE_CURRENCY: {
+  [chain in CHAIN_IDS]: Currency
+} = {
+  [CHAIN_IDS.CLOBER_TESTNET]: ETH,
+  [CHAIN_IDS.ARBITRUM_SEPOLIA]: ETH,
+  [CHAIN_IDS.BASE]: ETH,
+  [CHAIN_IDS.BERACHAIN_TESTNET]: BERA,
+  [CHAIN_IDS.ZKSYNC]: ETH,
+}
 
 export const WETH_ADDRESSES: {
   [chain in CHAIN_IDS]: `0x${string}`[]
@@ -35,6 +61,8 @@ export const STABLE_COIN_ADDRESSES: {
   ],
   [CHAIN_IDS.BERACHAIN_TESTNET]: [
     '0x0E4aaF1351de4c0264C5c7056Ef3777b41BD8e03', // HONEY
+    '0xd6D83aF58a19Cd14eF3CF6fe848C9A4d21e5727c', // USDC
+    '0x05D0dD5135E3eF3aDE32a9eF9Cb06e8D37A6795D', // USDT
   ],
   [CHAIN_IDS.ZKSYNC]: [
     '0x1d17CBcF0D6D143135aE902365D2E5e2A16538D4', // USDC
