@@ -1,18 +1,13 @@
-import {
-  arbitrumSepolia,
-  base,
-  berachainTestnet,
-  type Chain,
-  zkSync,
-} from 'viem/chains'
+import { arbitrumSepolia, base, type Chain, zkSync } from 'viem/chains'
 
 import { cloberTestChain } from './test-chain'
+import { berachainBartioTestnet } from './bera-bartio-chain'
 
 export enum CHAIN_IDS {
   CLOBER_TESTNET = cloberTestChain.id,
   ARBITRUM_SEPOLIA = arbitrumSepolia.id,
   BASE = base.id,
-  BERACHAIN_TESTNET = berachainTestnet.id,
+  BERACHAIN_TESTNET = berachainBartioTestnet.id,
   ZKSYNC = zkSync.id,
 }
 
@@ -22,15 +17,7 @@ export const CHAIN_MAP: {
   [CHAIN_IDS.CLOBER_TESTNET]: cloberTestChain,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: arbitrumSepolia,
   [CHAIN_IDS.BASE]: base,
-  [CHAIN_IDS.BERACHAIN_TESTNET]: {
-    ...berachainTestnet,
-    contracts: {
-      multicall3: {
-        address: '0xcA11bde05977b3631167028862bE2a173976CA11',
-        blockCreated: 866924,
-      },
-    },
-  },
+  [CHAIN_IDS.BERACHAIN_TESTNET]: berachainBartioTestnet,
   [CHAIN_IDS.ZKSYNC]: zkSync,
 }
 
