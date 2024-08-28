@@ -41,7 +41,7 @@ export const CONTRACT_ADDRESSES: {
     Operator: zeroAddress,
   },
   [CHAIN_IDS.BERACHAIN_TESTNET]: {
-    Controller: getAddress('0x1A0E22870dE507c140B7C765a04fCCd429B8343F'),
+    Controller: getAddress('0x7588AFc469d95300C2206Bf8a6Ee9bf5d2719314'),
     BookManager: getAddress('0x874b1B795993653fbFC3f1c1fc0469214cC9F4A5'),
     BookViewer: getAddress('0x5C91A02B8B5D10597fc6cA23faF56F9718D1feD0'),
     Rebalancer: zeroAddress,
