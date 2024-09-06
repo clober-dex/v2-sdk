@@ -23,7 +23,7 @@ export const CONTRACT_ADDRESSES: {
     Operator: getAddress('0xEEE4F3b484787bd28aa0e790b4ab92660e7ecd06'),
   },
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
-    Controller: getAddress('0x42D9B8eFB54d0d763c4219e1B9E1846C60A56463'),
+    Controller: getAddress('0xFbbA685a39bE6640B8EB08c6E6DDf2664fD1D668'),
     BookManager: getAddress('0xC528b9ED5d56d1D0d3C18A2342954CE1069138a4'),
     BookViewer: getAddress('0x73c524e103C94Bf2743659d739586395B1A9e1BE'),
     Rebalancer: getAddress('0x4Ba00c2849D993279AD30E1618C73d6db4c64ACe'),
@@ -32,7 +32,7 @@ export const CONTRACT_ADDRESSES: {
     Operator: getAddress('0xEEE4F3b484787bd28aa0e790b4ab92660e7ecd06'),
   },
   [CHAIN_IDS.BASE]: {
-    Controller: getAddress('0x4FaC849f948E59f9AEB62d9f7E628138DeF03BfA'),
+    Controller: getAddress('0x57dDD0d3DF50685444442076AC59F9c7Df75D150'),
     BookManager: getAddress('0x382CCccbD3b142D7DA063bF68cd0c89634767F76'),
     BookViewer: getAddress('0xcAf89a60D0911AeB8C2b997B5eF9b2017a19Be0d'),
     Rebalancer: zeroAddress,
