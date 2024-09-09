@@ -50,9 +50,9 @@ export const CONTRACT_ADDRESSES: {
     Operator: zeroAddress,
   },
   [CHAIN_IDS.ZKSYNC]: {
-    Controller: getAddress('0xC6DFb3CCE884b283460dB0fB0e33335EeF7cdD57'),
-    BookManager: getAddress('0xAaA0e933e1EcC812fc075A81c116Aa0a82A5bbb8'),
-    BookViewer: getAddress('0x8CA1585D798cBC121139E3809e340c41D1762723'),
+    Controller: getAddress('0xF990dd12883be85e1863F477972131cD4873B4C9'),
+    BookManager: getAddress('0xAc6AdB2727F99C309acd511D942c0b2812e03614'),
+    BookViewer: getAddress('0x13E8F7b988013729EcF00b0A3F8e0E47915aA893'),
     Rebalancer: zeroAddress,
     Strategy: zeroAddress,
     Minter: zeroAddress,
