@@ -1,0 +1,17 @@
+name: v2-sdk Contract Address Checker
+on:
+  pull_request:
+    paths:
+      - 'src/constants/addresses.ts'
+
+jobs:
+  checker:
+    name: Contract Address Checker
+    runs-on: ubuntu-latest
+    env:
+      PR_NUMBER: ${{ github.event.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - run: PR_NUMBER=$PR_NUMBER bun scripts/address-checker.ts
