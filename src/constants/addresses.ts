@@ -41,7 +41,7 @@ export const CONTRACT_ADDRESSES: {
     Operator: zeroAddress,
   },
   [CHAIN_IDS.BERACHAIN_TESTNET]: {
-    Controller: getAddress('0x1A0E22870dE507c140B7C765a04fCCd429B8343F'),
+    Controller: getAddress('0x7d06c636bA86BD1fc2C38B11F1e5701145CABc30'),
     BookManager: getAddress('0x874b1B795993653fbFC3f1c1fc0469214cC9F4A5'),
     BookViewer: getAddress('0x5C91A02B8B5D10597fc6cA23faF56F9718D1feD0'),
     Rebalancer: zeroAddress,
@@ -50,9 +50,9 @@ export const CONTRACT_ADDRESSES: {
     Operator: zeroAddress,
   },
   [CHAIN_IDS.ZKSYNC]: {
-    Controller: getAddress('0xC6DFb3CCE884b283460dB0fB0e33335EeF7cdD57'),
-    BookManager: getAddress('0xAaA0e933e1EcC812fc075A81c116Aa0a82A5bbb8'),
-    BookViewer: getAddress('0x8CA1585D798cBC121139E3809e340c41D1762723'),
+    Controller: getAddress('0x9aF80CC61AAd734604f139A53E22c56Cdbf9a158'),
+    BookManager: getAddress('0xAc6AdB2727F99C309acd511D942c0b2812e03614'),
+    BookViewer: getAddress('0x13E8F7b988013729EcF00b0A3F8e0E47915aA893'),
     Rebalancer: zeroAddress,
     Strategy: zeroAddress,
     Minter: zeroAddress,
