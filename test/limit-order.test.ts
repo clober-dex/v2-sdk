@@ -52,7 +52,6 @@ test('make bid order', async () => {
     amount: '1',
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   const approveReceipt = await publicClient.waitForTransactionReceipt({
@@ -173,7 +172,6 @@ test('make bid order at $1', async () => {
     amount: '1',
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   const approveReceipt = await publicClient.waitForTransactionReceipt({
@@ -376,7 +374,6 @@ test('limit bid order', async () => {
     amount: '100000',
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   const approveReceipt = await publicClient.waitForTransactionReceipt({
@@ -492,7 +489,6 @@ test('limit bid order with rounding up', async () => {
     amount: '100000',
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   const approveReceipt = await publicClient.waitForTransactionReceipt({

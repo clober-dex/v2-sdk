@@ -75,7 +75,9 @@ export const openMarket = async ({
   userAddress: `0x${string}`
   inputToken: `0x${string}`
   outputToken: `0x${string}`
-  options?: DefaultWriteContractOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<Transaction | undefined> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -197,6 +199,7 @@ export const limitOrder = async ({
     roundingDownMakeAsk?: boolean
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
+    useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction
@@ -469,6 +472,7 @@ export const marketOrder = async ({
     slippage?: number
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
+    useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction
@@ -700,7 +704,9 @@ export const claimOrder = async ({
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
   id: string
-  options?: DefaultWriteContractOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<{ transaction: Transaction; result: CurrencyFlow }> => {
   const { transaction, result } = await claimOrders({
     chainId,
@@ -747,7 +753,9 @@ export const claimOrders = async ({
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
   ids: string[]
-  options?: DefaultWriteContractOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -857,7 +865,9 @@ export const cancelOrder = async ({
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
   id: string
-  options?: DefaultWriteContractOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<{ transaction: Transaction; result: CurrencyFlow }> => {
   const { transaction, result } = await cancelOrders({
     chainId,
@@ -904,7 +914,9 @@ export const cancelOrders = async ({
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
   ids: string[]
-  options?: DefaultWriteContractOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -1014,7 +1026,9 @@ export const openPool = async ({
   tokenA: `0x${string}`
   tokenB: `0x${string}`
   salt: `0x${string}`
-  options?: DefaultWriteContractOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<Transaction | undefined> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -1086,6 +1100,7 @@ export const addLiquidity = async ({
     testnetPrice?: string // token1 amount per token0
     token0PermitParams?: ERC20PermitParam
     token1PermitParams?: ERC20PermitParam
+    useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction | undefined
@@ -1334,6 +1349,7 @@ export const removeLiquidity = async ({
   amount: string
   options?: {
     slippage?: number
+    useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction | undefined
@@ -1450,7 +1466,9 @@ export const rebalance = async ({
   token0: `0x${string}`
   token1: `0x${string}`
   salt: `0x${string}`
-  options?: DefaultWriteContractOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<Transaction> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -1514,6 +1532,7 @@ export const updateStrategyPrice = async ({
     tickB?: bigint
     roundingUpPriceA?: boolean
     roundingUpPriceB?: boolean
+    useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<Transaction> => {
   const publicClient = createPublicClient({

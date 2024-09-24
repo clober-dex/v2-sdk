@@ -72,7 +72,6 @@ export type ERC20PermitParam = {
 
 type DefaultOptions = {
   rpcUrl?: string
-  useSubgraph?: boolean
 }
 
 export type DefaultReadContractOptions = DefaultOptions

@@ -111,6 +111,7 @@ export const getMarket = async ({
   token1: `0x${string}`
   options?: {
     n?: number
+    useSubgraph?: boolean
   } & DefaultReadContractOptions
 }): Promise<Market> => {
   if (isAddressEqual(token0, token1)) {
@@ -162,6 +163,7 @@ export const getPool = async ({
   salt: `0x${string}`
   options?: {
     n?: number
+    useSubgraph?: boolean
   } & DefaultReadContractOptions
 }): Promise<Pool> => {
   if (isAddressEqual(token0, token1)) {
@@ -204,7 +206,9 @@ export const getStrategyPrice = async ({
   token0: `0x${string}`
   token1: `0x${string}`
   salt: `0x${string}`
-  options?: DefaultReadContractOptions
+  options?: DefaultReadContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<StrategyPrice> => {
   if (isAddressEqual(token0, token1)) {
     throw new Error('Token0 and token1 must be different')
@@ -439,6 +443,7 @@ export const getExpectedOutput = async ({
     limitPrice?: string
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
+    useSubgraph?: boolean
   } & DefaultReadContractOptions
 }): Promise<{
   takenAmount: string
@@ -556,6 +561,7 @@ export const getExpectedInput = async ({
     limitPrice?: string
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
+    useSubgraph?: boolean
   } & DefaultReadContractOptions
 }): Promise<{
   takenAmount: string

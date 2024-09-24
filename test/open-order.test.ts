@@ -73,7 +73,6 @@ test('claim ask order', async () => {
     amount: '100000',
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   const approveReceipt = await publicClient.waitForTransactionReceipt({
@@ -122,7 +121,6 @@ test('claim ask order', async () => {
     walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   if (hash) {
@@ -221,7 +219,6 @@ test('claim bid order', async () => {
     walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   if (hash) {
@@ -307,7 +304,7 @@ test('claim orders', async () => {
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '5000000',
-    options: { rpcUrl: publicClient.transport.url!, useSubgraph: false },
+    options: { rpcUrl: publicClient.transport.url! },
   })
   const approveReceipt = await publicClient.waitForTransactionReceipt({
     hash: approveHash!,
@@ -349,7 +346,6 @@ test('claim orders', async () => {
     walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   if (hash) {
@@ -433,7 +429,6 @@ test('cancel ask order', async () => {
     walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   if (hash) {
@@ -492,7 +487,6 @@ test('cancel bid order', async () => {
     walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   if (hash) {
@@ -572,7 +566,6 @@ test('cancel orders', async () => {
     walletClient,
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   if (hash) {
