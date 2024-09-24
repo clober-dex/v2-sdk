@@ -70,10 +70,15 @@ export type ERC20PermitParam = {
   signature: PermitSignature
 }
 
-export type DefaultOptions = {
+type DefaultOptions = {
   rpcUrl?: string
-  gasLimit?: bigint
   useSubgraph?: boolean
+}
+
+export type DefaultReadContractOptions = DefaultOptions
+
+export type DefaultWriteContractOptions = DefaultOptions & {
+  gasLimit?: bigint
 }
 
 export type CurrencyFlow = {

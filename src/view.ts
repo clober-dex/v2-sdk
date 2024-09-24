@@ -9,7 +9,13 @@ import {
 
 import { fetchMarket } from './apis/market'
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
-import type { ChartLog, Currency, DefaultOptions, Market, Pool } from './type'
+import type {
+  ChartLog,
+  Currency,
+  DefaultReadContractOptions,
+  Market,
+  Pool,
+} from './type'
 import { CHART_LOG_INTERVALS } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
@@ -81,7 +87,7 @@ export const getSubgraphBlockNumber = async ({
  * @param chainId - chain id from {@link CHAIN_IDS}
  * @param token0 - token0 address
  * @param token1 - token1 address
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultReadContractOptions} options.
  * @param options.n - number of depth levels to fetch
  * @returns A market {@link Market}
  *
@@ -105,7 +111,7 @@ export const getMarket = async ({
   token1: `0x${string}`
   options?: {
     n?: number
-  } & DefaultOptions
+  } & DefaultReadContractOptions
 }): Promise<Market> => {
   if (isAddressEqual(token0, token1)) {
     throw new Error('Token0 and token1 must be different')
@@ -130,7 +136,7 @@ export const getMarket = async ({
  * @param token0 - token0 address
  * @param token1 - token1 address
  * @param salt - salt for the pool
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultReadContractOptions} options.
  * @param options.n - number of depth levels to fetch
  * @returns A pool {@link Pool}
  *
@@ -156,7 +162,7 @@ export const getPool = async ({
   salt: `0x${string}`
   options?: {
     n?: number
-  } & DefaultOptions
+  } & DefaultReadContractOptions
 }): Promise<Pool> => {
   if (isAddressEqual(token0, token1)) {
     throw new Error('Token0 and token1 must be different')
@@ -198,7 +204,7 @@ export const getStrategyPrice = async ({
   token0: `0x${string}`
   token1: `0x${string}`
   salt: `0x${string}`
-  options?: DefaultOptions
+  options?: DefaultReadContractOptions
 }): Promise<StrategyPrice> => {
   if (isAddressEqual(token0, token1)) {
     throw new Error('Token0 and token1 must be different')
@@ -403,7 +409,7 @@ export const getPriceNeighborhood = ({
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
  * @param amountIn The amount of expected input amount. (ex 1.2 ETH -> 1.2)
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultReadContractOptions} options.
  * @param options.limitPrice The maximum limit price to take.
  * @param options.roundingDownTakenBid Whether to round down the taken bid.
  * @param options.roundingUpTakenAsk Whether to round up the taken ask.
@@ -433,7 +439,7 @@ export const getExpectedOutput = async ({
     limitPrice?: string
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
-  } & DefaultOptions
+  } & DefaultReadContractOptions
 }): Promise<{
   takenAmount: string
   spentAmount: string
@@ -519,7 +525,7 @@ export const getExpectedOutput = async ({
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
  * @param amountOut The amount of expected output amount. (ex 1.2 ETH -> 1.2)
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultReadContractOptions} options.
  * @param options.limitPrice The maximum limit price to take.
  * @param options.roundingDownTakenBid Whether to round down the taken bid.
  * @param options.roundingUpTakenAsk Whether to round up the taken ask.
@@ -550,7 +556,7 @@ export const getExpectedInput = async ({
     limitPrice?: string
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
-  } & DefaultOptions
+  } & DefaultReadContractOptions
 }): Promise<{
   takenAmount: string
   spentAmount: string
@@ -628,7 +634,7 @@ export const getExpectedInput = async ({
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {string} id The ID of the open order.
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultReadContractOptions} options.
  * @returns {Promise<OpenOrder>} Promise resolving to the open order object, or undefined if not found.
  * @example
  * import { getOpenOrder } from '@clober/v2-sdk'
@@ -645,7 +651,7 @@ export const getOpenOrder = async ({
 }: {
   chainId: CHAIN_IDS
   id: string
-  options?: DefaultOptions
+  options?: DefaultReadContractOptions
 }): Promise<OpenOrder> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -658,7 +664,7 @@ export const getOpenOrder = async ({
  *
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultReadContractOptions} options.
  * @returns {Promise<OpenOrder[]>} Promise resolving to an array of open orders.
  * @example
  * import { getOpenOrders } from '@clober/v2-sdk'
@@ -675,7 +681,7 @@ export const getOpenOrders = async ({
 }: {
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
-  options?: DefaultOptions
+  options?: DefaultReadContractOptions
 }): Promise<OpenOrder[]> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
