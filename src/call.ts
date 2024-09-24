@@ -33,7 +33,7 @@ import { invertTick, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
-import { fetchOrders } from './utils/order'
+import { fetchOnChainOrders } from './utils/order'
 import { applyPercent } from './utils/bigint'
 import { fetchPool } from './apis/pool'
 import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
@@ -779,7 +779,7 @@ export const claimOrders = async ({
   }
 
   const orders = (
-    await fetchOrders(
+    await fetchOnChainOrders(
       publicClient,
       chainId,
       ids.map((id) => BigInt(id)),
@@ -940,7 +940,7 @@ export const cancelOrders = async ({
   }
 
   const orders = (
-    await fetchOrders(
+    await fetchOnChainOrders(
       publicClient,
       chainId,
       ids.map((id) => BigInt(id)),
