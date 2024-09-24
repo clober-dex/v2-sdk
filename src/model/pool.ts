@@ -1,11 +1,12 @@
 import { formatUnits } from 'viem'
 
-import { CHAIN_IDS, Currency, OpenOrder } from '../type'
+import { CHAIN_IDS, Currency } from '../type'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 
 import { Market } from './market'
 import { Currency6909 } from './currency'
+import { OnChainOpenOrder } from './open-order'
 
 export class Pool {
   key: `0x${string}`
@@ -22,8 +23,8 @@ export class Pool {
   reserveB: string
   liquidityA: bigint
   liquidityB: bigint
-  orderListA: OpenOrder[]
-  orderListB: OpenOrder[]
+  orderListA: OnChainOpenOrder[]
+  orderListB: OnChainOpenOrder[]
 
   constructor({
     chainId,
@@ -55,8 +56,8 @@ export class Pool {
     reserveB: bigint
     liquidityA: bigint
     liquidityB: bigint
-    orderListA: OpenOrder[]
-    orderListB: OpenOrder[]
+    orderListA: OnChainOpenOrder[]
+    orderListB: OnChainOpenOrder[]
   }) {
     this.key = toPoolKey(bookIdA, bookIdB, salt)
     this.market = market

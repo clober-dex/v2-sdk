@@ -2,7 +2,7 @@ import type { Account } from 'viem'
 
 import { CHAIN_IDS } from './constants/chain'
 import type { Currency, Currency6909 } from './model/currency'
-import { OpenOrder } from './model/open-order'
+import { OnChainOpenOrder } from './model/open-order'
 
 export { CHAIN_IDS } from './constants/chain'
 export type { Currency } from './model/currency'
@@ -44,8 +44,8 @@ export type Pool = {
   currencyB: Currency
   reserveA: string
   reserveB: string
-  orderListA: OpenOrder[]
-  orderListB: OpenOrder[]
+  orderListA: OnChainOpenOrder[]
+  orderListB: OnChainOpenOrder[]
 }
 
 export type Transaction = {
@@ -70,10 +70,14 @@ export type ERC20PermitParam = {
   signature: PermitSignature
 }
 
-export type DefaultOptions = {
+type DefaultOptions = {
   rpcUrl?: string
+}
+
+export type DefaultReadContractOptions = DefaultOptions
+
+export type DefaultWriteContractOptions = DefaultOptions & {
   gasLimit?: bigint
-  useSubgraph?: boolean
 }
 
 export type CurrencyFlow = {

@@ -55,7 +55,6 @@ test('spend with token', async () => {
     amount: '1000000',
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   const approveReceipt = await publicClient.waitForTransactionReceipt({
@@ -220,7 +219,6 @@ test('take with token', async () => {
     amount: '1000000',
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
     },
   })
   const approveReceipt = await publicClient.waitForTransactionReceipt({

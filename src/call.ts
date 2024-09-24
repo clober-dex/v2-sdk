@@ -13,7 +13,7 @@ import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type {
   Currency6909Flow,
   CurrencyFlow,
-  DefaultOptions,
+  DefaultWriteContractOptions,
   ERC20PermitParam,
   Transaction,
 } from './type'
@@ -33,7 +33,7 @@ import { invertTick, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
-import { fetchOrders } from './utils/order'
+import { fetchOnChainOrders } from './utils/order'
 import { applyPercent } from './utils/bigint'
 import { fetchPool } from './apis/pool'
 import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
@@ -52,7 +52,7 @@ import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
  * @param userAddress The address of the user.
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultWriteContractOptions} options.
  * @returns A Promise resolving to a transaction object. If the market is already open, returns undefined.
  * @example
  * import { openMarket } from '@clober/v2-sdk'
@@ -75,7 +75,9 @@ export const openMarket = async ({
   userAddress: `0x${string}`
   inputToken: `0x${string}`
   outputToken: `0x${string}`
-  options?: DefaultOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<Transaction | undefined> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -137,7 +139,7 @@ export const openMarket = async ({
  * @param {`0x${string}`} outputToken The address of the token to be received as output.
  * @param {string} amount The amount of input tokens for the order.
  * @param {string} price The price at which the order should be executed.
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultWriteContractOptions} options.
  * @param {erc20PermitParam} [options.erc20PermitParam] The permit signature for token approval.
  * @param {boolean} [options.postOnly] A boolean indicating whether the order is only to be made not taken.
  * @param {bigint} [options.makeTick] The tick for the make order.
@@ -197,7 +199,8 @@ export const limitOrder = async ({
     roundingDownMakeAsk?: boolean
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
-  } & DefaultOptions
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction
   result: {
@@ -427,7 +430,7 @@ export const limitOrder = async ({
  * @param {`0x${string}`} outputToken The address of the token to be received as output.
  * @param {string} amountIn The amount of input tokens for the order to spend.
  * @param {string} amountOut The amount of output tokens for the order to take.
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultWriteContractOptions} options.
  * @param {erc20PermitParam} [options.erc20PermitParam] The permit signature for token approval.
  * @param {number} [options.slippage] The maximum slippage percentage allowed for the order.
  * @param {boolean} [options.roundingDownTakenBid] A boolean indicating whether to round down the taken bid.
@@ -469,7 +472,8 @@ export const marketOrder = async ({
     slippage?: number
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
-  } & DefaultOptions
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction
   result: {
@@ -674,7 +678,7 @@ export const marketOrder = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string} id An ID representing the open order to be claimed.
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultWriteContractOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the claim action with the result of the order.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -700,7 +704,9 @@ export const claimOrder = async ({
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
   id: string
-  options?: DefaultOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<{ transaction: Transaction; result: CurrencyFlow }> => {
   const { transaction, result } = await claimOrders({
     chainId,
@@ -721,7 +727,7 @@ export const claimOrder = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string[]} ids An array of IDs representing the open orders to be claimed.
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultWriteContractOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow[] }>}
  * Promise resolving to the transaction object representing the claim action with the result of the orders.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -747,7 +753,9 @@ export const claimOrders = async ({
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
   ids: string[]
-  options?: DefaultOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -771,7 +779,7 @@ export const claimOrders = async ({
   }
 
   const orders = (
-    await fetchOrders(
+    await fetchOnChainOrders(
       publicClient,
       chainId,
       ids.map((id) => BigInt(id)),
@@ -831,7 +839,7 @@ export const claimOrders = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string} id An ID representing the open order to be canceled
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultWriteContractOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow }>}
  * Promise resolving to the transaction object representing the cancel action with the result of the order.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -857,7 +865,9 @@ export const cancelOrder = async ({
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
   id: string
-  options?: DefaultOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<{ transaction: Transaction; result: CurrencyFlow }> => {
   const { transaction, result } = await cancelOrders({
     chainId,
@@ -878,7 +888,7 @@ export const cancelOrder = async ({
  * @param {CHAIN_IDS} chainId The chain ID.
  * @param {`0x${string}`} userAddress The Ethereum address of the user.
  * @param {string[]} ids An array of IDs representing the open orders to be canceled.
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultWriteContractOptions} options.
  * @returns {Promise<{ transaction: Transaction, result: CurrencyFlow[] }>
  * Promise resolving to the transaction object representing the cancel action with the result of the orders.
  * @throws {Error} Throws an error if no open orders are found for the specified user.
@@ -904,7 +914,9 @@ export const cancelOrders = async ({
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
   ids: string[]
-  options?: DefaultOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -928,7 +940,7 @@ export const cancelOrders = async ({
   }
 
   const orders = (
-    await fetchOrders(
+    await fetchOnChainOrders(
       publicClient,
       chainId,
       ids.map((id) => BigInt(id)),
@@ -989,7 +1001,7 @@ export const cancelOrders = async ({
  * @param userAddress The address of the user.
  * @param inputToken The address of the input token.
  * @param outputToken The address of the output token.
- * @param options {@link DefaultOptions} options.
+ * @param options {@link DefaultWriteContractOptions} options.
  * @returns A Promise resolving to a transaction object. If the market is already open, returns undefined.
  * @example
  * import { openPool } from '@clober/v2-sdk'
@@ -1014,7 +1026,9 @@ export const openPool = async ({
   tokenA: `0x${string}`
   tokenB: `0x${string}`
   salt: `0x${string}`
-  options?: DefaultOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<Transaction | undefined> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -1086,7 +1100,8 @@ export const addLiquidity = async ({
     testnetPrice?: string // token1 amount per token0
     token0PermitParams?: ERC20PermitParam
     token1PermitParams?: ERC20PermitParam
-  } & DefaultOptions
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction | undefined
   result: {
@@ -1334,7 +1349,8 @@ export const removeLiquidity = async ({
   amount: string
   options?: {
     slippage?: number
-  } & DefaultOptions
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction | undefined
   result: {
@@ -1450,7 +1466,9 @@ export const rebalance = async ({
   token0: `0x${string}`
   token1: `0x${string}`
   salt: `0x${string}`
-  options?: DefaultOptions
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
 }): Promise<Transaction> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -1514,7 +1532,8 @@ export const updateStrategyPrice = async ({
     tickB?: bigint
     roundingUpPriceA?: boolean
     roundingUpPriceB?: boolean
-  } & DefaultOptions
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
 }): Promise<Transaction> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],

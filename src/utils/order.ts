@@ -1,33 +1,55 @@
-import {
-  formatUnits,
-  getAddress,
-  isAddressEqual,
-  zeroAddress,
-  PublicClient,
-} from 'viem'
+import { formatUnits, getAddress, isAddressEqual, PublicClient } from 'viem'
 
-import { CHAIN_IDS, type OpenOrder } from '../index'
+import { CHAIN_IDS, getMarketPrice } from '../index'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { fetchOpenOrders } from '../apis/open-order'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { BOOK_MANAGER_ABI } from '../abis/core/book-manager-abi'
+import { OnChainOpenOrder } from '../model/open-order'
 
 import { fetchCurrencyMap } from './currency'
 import { quoteToBase } from './decimals'
 import { getMarketId } from './market'
 import { applyPercent } from './bigint'
 
-export const fetchOrders = async (
+export const fetchOnChainOrders = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   orderIds: bigint[],
   useSubgraph: boolean,
-): Promise<OpenOrder[]> => {
+): Promise<OnChainOpenOrder[]> => {
   if (useSubgraph) {
-    return fetchOpenOrders(
+    const openOrders = await fetchOpenOrders(
       publicClient,
       chainId,
       orderIds.map((orderId) => orderId.toString()),
+    )
+    return openOrders.map(
+      ({
+        id,
+        user,
+        isBid,
+        price,
+        tick,
+        orderIndex,
+        inputCurrency,
+        outputCurrency,
+        cancelable,
+        claimable,
+      }) => {
+        return {
+          id,
+          user,
+          isBid,
+          price,
+          tick,
+          orderIndex,
+          inputCurrency,
+          outputCurrency,
+          cancelable,
+          claimable,
+        }
+      },
     )
   }
 
@@ -93,10 +115,27 @@ export const fetchOrders = async (
       quote,
       getMarketId(chainId, [base, quote]).quoteTokenAddress,
     )
+    const { tick, index: orderIndex } = fromOrderId(orderId)
+    const [quoteCurrency, baseCurrency] = isBid
+      ? [currencyMap[quote], currencyMap[base]]
+      : [currencyMap[base], currencyMap[quote]]
     return {
       id: orderId.toString(),
       user: owner,
       isBid,
+      price: isBid
+        ? getMarketPrice({
+            marketQuoteCurrency: quoteCurrency,
+            marketBaseCurrency: baseCurrency,
+            bidTick: tick,
+          })
+        : getMarketPrice({
+            marketQuoteCurrency: quoteCurrency,
+            marketBaseCurrency: baseCurrency,
+            askTick: tick,
+          }),
+      tick: Number(tick),
+      orderIndex: orderIndex.toString(),
       inputCurrency: currencyMap[getAddress(quote)],
       outputCurrency: currencyMap[getAddress(base)],
       cancelable: {
@@ -106,24 +145,6 @@ export const fetchOrders = async (
       claimable: {
         currency: currencyMap[getAddress(base)],
         value: formatUnits(claimable, currencyMap[getAddress(base)].decimals),
-      },
-      // don't care about these fields
-      txHash: '' as `0x${string}`,
-      createdAt: 0,
-      price: '0',
-      tick: 0,
-      orderIndex: '0',
-      amount: {
-        currency: currencyMap[zeroAddress],
-        value: '0',
-      },
-      filled: {
-        currency: currencyMap[zeroAddress],
-        value: '0',
-      },
-      claimed: {
-        currency: currencyMap[zeroAddress],
-        value: '0',
       },
     }
   })

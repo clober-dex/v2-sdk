@@ -3,7 +3,7 @@ import { createPublicClient, http, parseUnits, WalletClient } from 'viem'
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { fetchIsApprovedForAll } from './utils/approval'
-import type { DefaultOptions } from './type'
+import type { DefaultWriteContractOptions } from './type'
 import { fetchAllowance } from './utils/allowance'
 import { fetchCurrency } from './utils/currency'
 
@@ -38,7 +38,7 @@ export const setApprovalOfOpenOrdersForAll = async ({
 }: {
   chainId: CHAIN_IDS
   walletClient: WalletClient
-  options?: DefaultOptions
+  options?: DefaultWriteContractOptions
 }): Promise<`0x${string}` | undefined> => {
   if (!walletClient.account) {
     throw new Error('Account is not found')
@@ -122,7 +122,7 @@ export const approveERC20 = async ({
   walletClient: WalletClient
   token: `0x${string}`
   amount?: string
-  options?: DefaultOptions
+  options?: DefaultWriteContractOptions
 }): Promise<`0x${string}` | undefined> => {
   if (!walletClient.account) {
     throw new Error('Account is not found')

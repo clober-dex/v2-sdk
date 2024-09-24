@@ -4,7 +4,7 @@ import { CHAIN_IDS } from '../constants/chain'
 import { Pool } from '../model/pool'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
-import { fetchOrders } from '../utils/order'
+import { fetchOnChainOrders } from '../utils/order'
 import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
 
 import { fetchMarket } from './market'
@@ -53,7 +53,7 @@ export async function fetchPool(
       },
     ],
   })
-  const orders = await fetchOrders(
+  const orders = await fetchOnChainOrders(
     publicClient,
     chainId,
     [...orderListA, ...orderListB],
