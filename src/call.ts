@@ -30,7 +30,7 @@ import {
   parsePrice,
 } from './utils/prices'
 import { invertTick, toPrice } from './utils/tick'
-import { getExpectedInput, getExpectedOutput } from './view'
+import { getExpectedInput, getExpectedOutput, getQuoteToken } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { fetchOnChainOrders } from './utils/order'
@@ -1099,6 +1099,7 @@ export const addLiquidity = async ({
     disableSwap?: boolean
     token0PermitParams?: ERC20PermitParam
     token1PermitParams?: ERC20PermitParam
+    testnetPrice?: number
     useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<{
@@ -1183,9 +1184,18 @@ export const addLiquidity = async ({
   }
 
   if (!disableSwap) {
-    const currencyBPerCurrencyA =
-      Number(formatUnits(pool.liquidityB, pool.currencyB.decimals)) /
-      Number(formatUnits(pool.liquidityA, pool.currencyA.decimals))
+    const currencyBPerCurrencyA = options?.testnetPrice
+      ? isAddressEqual(
+          getQuoteToken({
+            chainId,
+            token0,
+            token1,
+          }),
+          pool.currencyA.address,
+        )
+        ? 1 / Number(options.testnetPrice)
+        : Number(options.testnetPrice)
+      : undefined
     const swapAmountA = parseUnits('1', pool.currencyA.decimals)
     const { amountOut: swapAmountB } = await fetchQuote({
       chainId,
@@ -1230,7 +1240,9 @@ export const addLiquidity = async ({
         tokenOut: pool.currencyA,
         slippageLimitPercent,
         userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
-        testnetPrice: 1 / currencyBPerCurrencyA,
+        testnetPrice: currencyBPerCurrencyA
+          ? 1 / currencyBPerCurrencyA
+          : undefined,
       })
       swapParams.data = calldata
       amountA += actualDeltaA

@@ -19,7 +19,7 @@ beforeEach(async () => {
     clients.map(({ testClient }) => {
       return testClient.reset({
         jsonRpcUrl: FORK_URL,
-        blockNumber: 83907945n,
+        blockNumber: 84040472n,
       })
     }),
   )
@@ -72,6 +72,7 @@ test('Add liquidity without swap - 1', async () => {
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
+      disableSwap: true,
     },
   })
 
@@ -144,6 +145,7 @@ test('Add liquidity without swap - 1', async () => {
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
+      disableSwap: true,
     },
   })
 
@@ -232,6 +234,7 @@ test('Add liquidity without swap - 2', async () => {
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
+      disableSwap: true,
     },
   })
 
@@ -304,6 +307,7 @@ test('Add liquidity without swap - 2', async () => {
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
+      disableSwap: true,
     },
   })
 
@@ -392,6 +396,7 @@ test('Add liquidity one side with swap', async () => {
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
+      disableSwap: true,
     },
   })
 
@@ -464,6 +469,7 @@ test('Add liquidity one side with swap', async () => {
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
+      testnetPrice: 2000,
     },
   })
 
@@ -537,6 +543,7 @@ test('Add liquidity one side with swap', async () => {
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
+      testnetPrice: 2000,
     },
   })
 
@@ -699,6 +706,7 @@ test('Add liquidity two sides with swap', async () => {
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
+      testnetPrice: 2000,
     },
   })
 
@@ -772,6 +780,7 @@ test('Add liquidity two sides with swap', async () => {
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
+      testnetPrice: 2000,
     },
   })
 
