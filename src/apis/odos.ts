@@ -49,7 +49,7 @@ export async function fetchQuote({
       amountOut: parseUnits(
         (
           Number(formatUnits(amountIn, tokenIn.decimals)) * testnetPrice
-        ).toFixed(),
+        ).toString(),
         tokenOut.decimals,
       ),
       pathId: '0x',
@@ -119,7 +119,7 @@ export async function fetchCallData({
     const amountOut = parseUnits(
       (
         Number(formatUnits(amountIn, tokenIn.decimals)) * testnetPrice
-      ).toFixed(),
+      ).toString(),
       tokenOut.decimals,
     )
 
