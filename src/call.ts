@@ -1097,7 +1097,6 @@ export const addLiquidity = async ({
   options?: {
     slippage?: number
     disableSwap?: boolean
-    testnetPrice?: string // token1 amount per token0
     token0PermitParams?: ERC20PermitParam
     token1PermitParams?: ERC20PermitParam
     useSubgraph?: boolean
@@ -1178,12 +1177,9 @@ export const addLiquidity = async ({
   }
 
   if (!disableSwap) {
-    const token0Price = Number(
-      options?.testnetPrice ? options.testnetPrice : '1',
-    )
-    const currencyBPerCurrencyA = isAddressEqual(token1, pool.currencyB.address)
-      ? token0Price
-      : 1 / token0Price
+    const currencyBPerCurrencyA =
+      Number(formatUnits(pool.liquidityB, pool.currencyB.decimals)) /
+      Number(formatUnits(pool.liquidityA, pool.currencyA.decimals))
     const swapAmountA = parseUnits('1', pool.currencyA.decimals)
     const { amountOut: swapAmountB } = await fetchQuote({
       chainId,
