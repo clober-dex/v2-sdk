@@ -1517,6 +1517,7 @@ export const updateStrategyPrice = async ({
   oraclePrice,
   priceA,
   priceB,
+  alpha,
   options,
 }: {
   chainId: CHAIN_IDS
@@ -1527,6 +1528,7 @@ export const updateStrategyPrice = async ({
   oraclePrice: string // price with currencyA as quote
   priceA: string // price with currencyA as quote
   priceB: string // price when currencyA as quote
+  alpha: string // alpha value, 0 < alpha <= 1
   options?: {
     tickA?: bigint
     tickB?: bigint
@@ -1535,6 +1537,9 @@ export const updateStrategyPrice = async ({
     useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<Transaction> => {
+  if (Number(alpha) <= 0 || Number(alpha) > 1) {
+    throw new Error('Alpha value must be in the range (0, 1]')
+  }
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
@@ -1591,6 +1596,8 @@ export const updateStrategyPrice = async ({
     ? Number(options.tickB)
     : Number(invertTick(roundingUpPriceB ? roundingUpTickB : roundingDownTickB))
 
+  const alphaRaw = parseUnits(alpha, 6)
+
   return buildTransaction(
     publicClient,
     {
@@ -1599,7 +1606,7 @@ export const updateStrategyPrice = async ({
       address: CONTRACT_ADDRESSES[chainId]!.Operator,
       abi: OPERATOR_ABI,
       functionName: 'updatePrice',
-      args: [pool.key, oracleRawPrice, tickA, tickB],
+      args: [pool.key, oracleRawPrice, tickA, tickB, alphaRaw],
     },
     options?.gasLimit,
   )

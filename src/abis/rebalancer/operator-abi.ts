@@ -323,6 +323,11 @@ export const OPERATOR_ABI = [
         name: 'tickB',
         type: 'int24',
       },
+      {
+        internalType: 'uint64',
+        name: 'alpha',
+        type: 'uint64',
+      },
     ],
     name: 'updatePrice',
     outputs: [],

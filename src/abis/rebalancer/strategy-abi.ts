@@ -47,6 +47,11 @@ export const STRATEGY_ABI = [
   },
   {
     inputs: [],
+    name: 'InvalidValue',
+    type: 'error',
+  },
+  {
+    inputs: [],
     name: 'NotOperator',
     type: 'error',
   },
@@ -228,6 +233,12 @@ export const STRATEGY_ABI = [
         name: 'tickB',
         type: 'int24',
       },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'alpha',
+        type: 'uint256',
+      },
     ],
     name: 'UpdatePrice',
     type: 'event',
@@ -318,6 +329,19 @@ export const STRATEGY_ABI = [
         internalType: 'struct IStrategy.Order[]',
         name: 'ordersB',
         type: 'tuple[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getAlpha',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
       },
     ],
     stateMutability: 'view',
@@ -619,6 +643,11 @@ export const STRATEGY_ABI = [
         internalType: 'Tick',
         name: 'tickB',
         type: 'int24',
+      },
+      {
+        internalType: 'uint256',
+        name: 'alpha',
+        type: 'uint256',
       },
     ],
     name: 'updatePrice',
