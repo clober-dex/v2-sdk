@@ -1455,7 +1455,7 @@ export const removeLiquidity = async ({
   }
 }
 
-export const rebalance = async ({
+export const refillOrder = async ({
   chainId,
   userAddress,
   token0,
@@ -1510,7 +1510,7 @@ export const rebalance = async ({
   )
 }
 
-export const updateStrategyPrice = async ({
+export const adjustOrderPrice = async ({
   chainId,
   userAddress,
   token0,
