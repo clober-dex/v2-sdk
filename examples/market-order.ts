@@ -10,7 +10,7 @@ const main = async () => {
   const walletClient = createWalletClient({
     chain: arbitrumSepolia,
     account: privateKeyToAccount(
-      (process.env.DEV_PRIVATE_KEY || '0x') as `0x${string}`,
+      (process.env.TESTNET_PRIVATE_KEY || '0x') as `0x${string}`,
     ),
     transport: http(),
   })
