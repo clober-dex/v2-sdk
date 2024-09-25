@@ -29,7 +29,7 @@ export async function fetchPool(
   const [
     { bookIdA, bookIdB, reserveA, reserveB, orderListA, orderListB },
     totalSupply,
-    [liquidityA, liquidityB],
+    [totalLiquidityA, totalLiquidityB],
   ] = await publicClient.multicall({
     allowFailure: false,
     contracts: [
@@ -53,6 +53,14 @@ export async function fetchPool(
       },
     ],
   })
+  const liquidityA =
+    totalLiquidityA.reserve +
+    totalLiquidityA.cancelable +
+    totalLiquidityA.claimable
+  const liquidityB =
+    totalLiquidityB.reserve +
+    totalLiquidityB.cancelable +
+    totalLiquidityB.claimable
   const orders = await fetchOnChainOrders(
     publicClient,
     chainId,
@@ -74,6 +82,10 @@ export async function fetchPool(
         : market.quote.decimals,
     liquidityA: BigInt(liquidityA),
     liquidityB: BigInt(liquidityB),
+    cancelableA: BigInt(totalLiquidityA.cancelable),
+    cancelableB: BigInt(totalLiquidityB.cancelable),
+    claimableA: BigInt(totalLiquidityA.claimable),
+    claimableB: BigInt(totalLiquidityB.claimable),
     reserveA: BigInt(reserveA),
     reserveB: BigInt(reserveB),
     orderListA: orders.filter((order) => orderListA.includes(BigInt(order.id))),

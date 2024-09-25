@@ -23,6 +23,10 @@ export class Pool {
   reserveB: string
   liquidityA: bigint
   liquidityB: bigint
+  cancelableA: bigint
+  cancelableB: bigint
+  claimableA: bigint
+  claimableB: bigint
   orderListA: OnChainOpenOrder[]
   orderListB: OnChainOpenOrder[]
 
@@ -40,6 +44,10 @@ export class Pool {
     reserveB,
     liquidityA,
     liquidityB,
+    cancelableA,
+    cancelableB,
+    claimableA,
+    claimableB,
     orderListA,
     orderListB,
   }: {
@@ -56,6 +64,10 @@ export class Pool {
     reserveB: bigint
     liquidityA: bigint
     liquidityB: bigint
+    cancelableA: bigint
+    cancelableB: bigint
+    claimableA: bigint
+    claimableB: bigint
     orderListA: OnChainOpenOrder[]
     orderListB: OnChainOpenOrder[]
   }) {
@@ -87,6 +99,10 @@ export class Pool {
     this.decimals = decimals
     this.liquidityA = liquidityA
     this.liquidityB = liquidityB
+    this.cancelableA = cancelableA
+    this.cancelableB = cancelableB
+    this.claimableA = claimableA
+    this.claimableB = claimableB
     this.reserveA = formatUnits(reserveA, this.currencyA.decimals)
     this.reserveB = formatUnits(reserveB, this.currencyB.decimals)
     this.orderListA = orderListA

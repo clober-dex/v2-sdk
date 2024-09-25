@@ -16,17 +16,6 @@ export const REBALANCER_ABI = [
     type: 'constructor',
   },
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'target',
-        type: 'address',
-      },
-    ],
-    name: 'AddressEmptyCode',
-    type: 'error',
-  },
-  {
     inputs: [],
     name: 'AlreadyOpened',
     type: 'error',
@@ -34,27 +23,6 @@ export const REBALANCER_ABI = [
   {
     inputs: [],
     name: 'ERC20TransferFailed',
-    type: 'error',
-  },
-  {
-    inputs: [],
-    name: 'FailedCall',
-    type: 'error',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'balance',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'needed',
-        type: 'uint256',
-      },
-    ],
-    name: 'InsufficientBalance',
     type: 'error',
   },
   {
@@ -773,14 +741,48 @@ export const REBALANCER_ABI = [
     name: 'getLiquidity',
     outputs: [
       {
-        internalType: 'uint256',
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'reserve',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'claimable',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'cancelable',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IRebalancer.Liquidity',
         name: 'liquidityA',
-        type: 'uint256',
+        type: 'tuple',
       },
       {
-        internalType: 'uint256',
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'reserve',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'claimable',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'cancelable',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IRebalancer.Liquidity',
         name: 'liquidityB',
-        type: 'uint256',
+        type: 'tuple',
       },
     ],
     stateMutability: 'view',
