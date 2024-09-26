@@ -30,7 +30,7 @@ import {
   parsePrice,
 } from './utils/prices'
 import { invertTick, toPrice } from './utils/tick'
-import { getExpectedInput, getExpectedOutput } from './view'
+import { getExpectedInput, getExpectedOutput, getQuoteToken } from './view'
 import { toBookId } from './utils/book-id'
 import { fetchIsApprovedForAll } from './utils/approval'
 import { fetchOnChainOrders } from './utils/order'
@@ -1097,9 +1097,9 @@ export const addLiquidity = async ({
   options?: {
     slippage?: number
     disableSwap?: boolean
-    testnetPrice?: string // token1 amount per token0
     token0PermitParams?: ERC20PermitParam
     token1PermitParams?: ERC20PermitParam
+    testnetPrice?: number
     useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<{
@@ -1110,6 +1110,12 @@ export const addLiquidity = async ({
     lpCurrency: Currency6909Flow
   }
 }> => {
+  if (
+    isAddressEqual(token0, zeroAddress) ||
+    isAddressEqual(token1, zeroAddress)
+  ) {
+    throw new Error('ETH is not supported for adding liquidity')
+  }
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
@@ -1178,12 +1184,18 @@ export const addLiquidity = async ({
   }
 
   if (!disableSwap) {
-    const token0Price = Number(
-      options?.testnetPrice ? options.testnetPrice : '1',
-    )
-    const currencyBPerCurrencyA = isAddressEqual(token1, pool.currencyB.address)
-      ? token0Price
-      : 1 / token0Price
+    const currencyBPerCurrencyA = options?.testnetPrice
+      ? isAddressEqual(
+          getQuoteToken({
+            chainId,
+            token0,
+            token1,
+          }),
+          pool.currencyA.address,
+        )
+        ? 1 / Number(options.testnetPrice)
+        : Number(options.testnetPrice)
+      : undefined
     const swapAmountA = parseUnits('1', pool.currencyA.decimals)
     const { amountOut: swapAmountB } = await fetchQuote({
       chainId,
@@ -1228,7 +1240,9 @@ export const addLiquidity = async ({
         tokenOut: pool.currencyA,
         slippageLimitPercent,
         userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
-        testnetPrice: 1 / currencyBPerCurrencyA,
+        testnetPrice: currencyBPerCurrencyA
+          ? 1 / currencyBPerCurrencyA
+          : undefined,
       })
       swapParams.data = calldata
       amountA += actualDeltaA

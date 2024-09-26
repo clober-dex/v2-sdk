@@ -35,7 +35,7 @@ export async function fetchQuote({
   tokenOut: Currency
   slippageLimitPercent: number
   userAddress: `0x${string}`
-  testnetPrice?: number // tokenOutAmount per tokenIn, for testnet chains only
+  testnetPrice?: number | undefined // tokenOutAmount per tokenIn, for testnet chains only
 }): Promise<{
   amountOut: bigint
   pathId: string
@@ -49,7 +49,7 @@ export async function fetchQuote({
       amountOut: parseUnits(
         (
           Number(formatUnits(amountIn, tokenIn.decimals)) * testnetPrice
-        ).toFixed(),
+        ).toString(),
         tokenOut.decimals,
       ),
       pathId: '0x',
@@ -106,7 +106,7 @@ export async function fetchCallData({
   tokenOut: Currency
   slippageLimitPercent: number
   userAddress: `0x${string}`
-  testnetPrice?: number // tokenOutAmount per tokenIn, for testnet chains only
+  testnetPrice?: number | undefined // tokenOutAmount per tokenIn, for testnet chains only
 }): Promise<{
   amountOut: bigint
   data: `0x${string}`
@@ -119,7 +119,7 @@ export async function fetchCallData({
     const amountOut = parseUnits(
       (
         Number(formatUnits(amountIn, tokenIn.decimals)) * testnetPrice
-      ).toFixed(),
+      ).toString(),
       tokenOut.decimals,
     )
 
