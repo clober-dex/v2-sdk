@@ -2,8 +2,7 @@ import * as dotenv from 'dotenv'
 import { createWalletClient, http, parseUnits, zeroHash } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
-
-import { openPool } from '../../src'
+import { getPool, openPool } from '@clober/v2-sdk'
 
 dotenv.config()
 
@@ -28,6 +27,14 @@ const main = async () => {
     gasPrice: parseUnits('1', 9),
   })
   console.log(`open pool hash: ${hash}`)
+
+  const pool = await getPool({
+    chainId: arbitrumSepolia.id,
+    token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
+    salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  })
+  console.log(`pool: `, pool)
 }
 
 main()
