@@ -148,6 +148,7 @@ export const getMarket = async ({
  *   chainId: 421614,
  *   token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
  *   token1: '0x0000000000000000000000000000000000000000',
+ *   salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
  * })
  */
 export const getPool = async ({
