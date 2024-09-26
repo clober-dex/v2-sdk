@@ -1010,7 +1010,8 @@ export const cancelOrders = async ({
  *   chainId: 421614,
  *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69',
  *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   outputToken: '0x0000000000000000000000000000000000000000'
+ *   outputToken: '0x0000000000000000000000000000000000000000',
+ *   salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
  * })
  */
 export const openPool = async ({
@@ -1136,6 +1137,7 @@ export const addLiquidity = async ({
             chainId: ${chainId},
             tokenA: '${token0}',
             tokenB: '${token1}',
+            salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
        })
     `)
   }
@@ -1393,6 +1395,7 @@ export const removeLiquidity = async ({
             chainId: ${chainId},
             tokenA: '${token0}',
             tokenB: '${token1}',
+            salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
        })
     `)
   }
@@ -1504,6 +1507,7 @@ export const rebalance = async ({
             chainId: ${chainId},
             tokenA: '${token0}',
             tokenB: '${token1}',
+            salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
        })
     `)
   }
@@ -1574,6 +1578,7 @@ export const updateStrategyPrice = async ({
             chainId: ${chainId},
             tokenA: '${token0}',
             tokenB: '${token1}',
+            salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
        })
     `)
   }
