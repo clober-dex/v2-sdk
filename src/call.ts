@@ -1518,8 +1518,8 @@ export const adjustOrderPrice = async ({
   token1,
   salt,
   oraclePrice,
-  priceA,
-  priceB,
+  bidPrice,
+  askPrice,
   alpha,
   options,
 }: {
@@ -1529,25 +1529,25 @@ export const adjustOrderPrice = async ({
   token1: `0x${string}`
   salt: `0x${string}`
   oraclePrice: string // price with currencyA as quote
-  priceA: string // price with bookA. bid price
-  priceB: string // price with bookA. ask price
+  bidPrice: string // price with bookA. bid price
+  askPrice: string // price with bookA. ask price
   alpha: string // alpha value, 0 < alpha <= 1
   options?: {
     tickA?: bigint
     tickB?: bigint
-    roundingUpPriceA?: boolean
-    roundingUpPriceB?: boolean
+    roundingUpBidPrice?: boolean
+    roundingUpAskPrice?: boolean
     useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<Transaction> => {
   if (Number(alpha) <= 0 || Number(alpha) > 1) {
     throw new Error('Alpha value must be in the range (0, 1]')
   }
-  if (Number(priceA) <= 0 || Number(priceB) <= 0) {
+  if (Number(bidPrice) <= 0 || Number(askPrice) <= 0) {
     throw new Error('Price must be greater than 0')
   }
-  if (Number(priceA) >= Number(priceB)) {
-    throw new Error('PriceA must be less than PriceB')
+  if (Number(bidPrice) >= Number(askPrice)) {
+    throw new Error('Bid price must be less than ask price')
   }
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -1572,15 +1572,15 @@ export const adjustOrderPrice = async ({
        })
     `)
   }
-  const [roundingUpPriceA, roundingUpPriceB] = [
-    options?.roundingUpPriceA ? options.roundingUpPriceA : false,
-    options?.roundingUpPriceB ? options.roundingUpPriceB : false,
+  const [roundingUpBidPrice, roundingUpAskPrice] = [
+    options?.roundingUpBidPrice ? options.roundingUpBidPrice : false,
+    options?.roundingUpAskPrice ? options.roundingUpAskPrice : false,
   ]
   const {
     roundingDownTick: roundingDownTickA,
     roundingUpTick: roundingUpTickA,
   } = parsePrice(
-    Number(priceA),
+    Number(bidPrice),
     pool.currencyA.decimals,
     pool.currencyB.decimals,
   )
@@ -1588,7 +1588,7 @@ export const adjustOrderPrice = async ({
     roundingDownTick: roundingDownTickB,
     roundingUpTick: roundingUpTickB,
   } = parsePrice(
-    Number(priceB),
+    Number(askPrice),
     pool.currencyA.decimals,
     pool.currencyB.decimals,
   )
@@ -1600,10 +1600,12 @@ export const adjustOrderPrice = async ({
   )
   const tickA = options?.tickA
     ? Number(options.tickA)
-    : Number(roundingUpPriceA ? roundingUpTickA : roundingDownTickA)
+    : Number(roundingUpBidPrice ? roundingUpTickA : roundingDownTickA)
   const tickB = options?.tickB
     ? Number(options.tickB)
-    : Number(invertTick(roundingUpPriceB ? roundingUpTickB : roundingDownTickB))
+    : Number(
+        invertTick(roundingUpAskPrice ? roundingUpTickB : roundingDownTickB),
+      )
 
   const alphaRaw = parseUnits(alpha, 6)
 

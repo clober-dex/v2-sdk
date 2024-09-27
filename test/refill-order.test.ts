@@ -92,8 +92,8 @@ test('Refill order', async () => {
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
     oraclePrice: '2620',
-    priceA: '2610',
-    priceB: '2630',
+    bidPrice: '2610',
+    askPrice: '2630',
     alpha: '0.5',
     options: {
       rpcUrl: publicClient.transport.url!,
