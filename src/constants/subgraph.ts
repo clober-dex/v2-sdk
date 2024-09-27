@@ -27,11 +27,17 @@ export class Subgraph {
     if (!SUBGRAPH_URL[chainId]) {
       throw new Error('Unsupported chain for subgraph')
     }
-    const response = await axios.post(SUBGRAPH_URL[chainId], {
-      query,
-      variables,
-      operationName,
-    })
+    const response = await axios.post(
+      SUBGRAPH_URL[chainId],
+      {
+        query,
+        variables,
+        operationName,
+      },
+      {
+        timeout: 2000, // TODO: pass with option
+      },
+    )
 
     if (response.status === 200) {
       return response.data
