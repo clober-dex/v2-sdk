@@ -1,10 +1,9 @@
 import { formatUnits } from 'viem'
 
-import { CHAIN_IDS, Currency } from '../type'
+import { CHAIN_IDS, Currency, Market } from '../type'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 
-import { Market } from './market'
 import { Currency6909 } from './currency'
 
 export class Pool {
@@ -74,10 +73,16 @@ export class Pool {
     this.market = market
     this.isOpened = isOpened
     this.strategy = CONTRACT_ADDRESSES[chainId]!.Strategy
-    if (bookIdA === market.bidBook.id && bookIdB === market.askBook.id) {
+    if (
+      bookIdA === BigInt(market.bidBook.id) &&
+      bookIdB === BigInt(market.askBook.id)
+    ) {
       this.currencyA = market.bidBook.quote // or market.askBook.base
       this.currencyB = market.bidBook.base // or market.askBook.quote
-    } else if (bookIdA === market.askBook.id && bookIdB === market.bidBook.id) {
+    } else if (
+      bookIdA === BigInt(market.askBook.id) &&
+      bookIdB === BigInt(market.bidBook.id)
+    ) {
       this.currencyA = market.askBook.quote // or market.bidBook.base
       this.currencyB = market.askBook.base // or market.bidBook.quote
     } else if (bookIdA === 0n && bookIdB === 0n) {

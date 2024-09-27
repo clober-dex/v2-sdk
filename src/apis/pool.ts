@@ -5,6 +5,7 @@ import { Pool } from '../model/pool'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
+import { Market } from '../type'
 
 import { fetchMarket } from './market'
 
@@ -14,17 +15,21 @@ export async function fetchPool(
   tokenAddresses: `0x${string}`[],
   salt: `0x${string}`,
   useSubgraph: boolean,
+  market?: Market,
 ): Promise<Pool> {
   if (tokenAddresses.length !== 2) {
     throw new Error('Invalid token pair')
   }
-  const market = await fetchMarket(
-    publicClient,
-    chainId,
-    tokenAddresses,
-    useSubgraph,
+  if (!market) {
+    market = (
+      await fetchMarket(publicClient, chainId, tokenAddresses, useSubgraph)
+    ).toJson()
+  }
+  const poolKey = toPoolKey(
+    BigInt(market.bidBook.id),
+    BigInt(market.askBook.id),
+    salt,
   )
-  const poolKey = toPoolKey(market.bidBook.id, market.askBook.id, salt)
   const [
     { bookIdA, bookIdB, reserveA, reserveB, orderListA, orderListB },
     totalSupply,
@@ -69,10 +74,7 @@ export async function fetchPool(
     salt,
     poolKey,
     totalSupply: BigInt(totalSupply),
-    decimals:
-      market.base.decimals > market.quote.decimals
-        ? market.base.decimals
-        : market.quote.decimals,
+    decimals: 18,
     liquidityA: BigInt(liquidityA),
     liquidityB: BigInt(liquidityB),
     cancelableA: BigInt(totalLiquidityA.cancelable),
