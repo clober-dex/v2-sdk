@@ -190,6 +190,13 @@ export const getPool = async ({
     currencyB: pool.currencyB,
     reserveA: pool.reserveA,
     reserveB: pool.reserveB,
+    totalSupply: pool.totalSupply,
+    liquidityA: pool.liquidityA,
+    liquidityB: pool.liquidityB,
+    cancelableA: pool.cancelableA,
+    cancelableB: pool.cancelableB,
+    claimableA: pool.claimableA,
+    claimableB: pool.claimableB,
     orderListA: pool.orderListA,
     orderListB: pool.orderListB,
   }

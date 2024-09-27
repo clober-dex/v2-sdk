@@ -4,7 +4,6 @@ import { CHAIN_IDS } from '../constants/chain'
 import { Pool } from '../model/pool'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
-import { fetchOnChainOrders } from '../utils/order'
 import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
 
 import { fetchMarket } from './market'
@@ -61,12 +60,6 @@ export async function fetchPool(
     totalLiquidityB.reserve +
     totalLiquidityB.cancelable +
     totalLiquidityB.claimable
-  const orders = await fetchOnChainOrders(
-    publicClient,
-    chainId,
-    [...orderListA, ...orderListB],
-    useSubgraph,
-  )
   return new Pool({
     chainId,
     market,
@@ -88,7 +81,7 @@ export async function fetchPool(
     claimableB: BigInt(totalLiquidityB.claimable),
     reserveA: BigInt(reserveA),
     reserveB: BigInt(reserveB),
-    orderListA: orders.filter((order) => orderListA.includes(BigInt(order.id))),
-    orderListB: orders.filter((order) => orderListB.includes(BigInt(order.id))),
+    orderListA: orderListA.map((id: bigint) => BigInt(id)),
+    orderListB: orderListB.map((id: bigint) => BigInt(id)),
   })
 }

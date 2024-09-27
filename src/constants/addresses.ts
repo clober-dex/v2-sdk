@@ -22,6 +22,15 @@ export const CONTRACT_ADDRESSES: {
     Minter: getAddress('0xF2f51B00C2e9b77F23fD66649bbabf8a025c39eF'),
     Operator: getAddress('0x33559576B062D08230b467ea7DC7Ce75aFcbdE92'),
   },
+  [CHAIN_IDS.CLOBER_TESTNET_2]: {
+    Controller: getAddress('0xFbbA685a39bE6640B8EB08c6E6DDf2664fD1D668'),
+    BookManager: getAddress('0xC528b9ED5d56d1D0d3C18A2342954CE1069138a4'),
+    BookViewer: getAddress('0x73c524e103C94Bf2743659d739586395B1A9e1BE'),
+    Rebalancer: getAddress('0xCF556d850277BC579c99C0729F4E72e62C57D811'),
+    Strategy: getAddress('0x8aDF62b0b6078EaE5a2D54e9e5DD2AA71F6748C4'),
+    Minter: getAddress('0xF2f51B00C2e9b77F23fD66649bbabf8a025c39eF'),
+    Operator: getAddress('0x33559576B062D08230b467ea7DC7Ce75aFcbdE92'),
+  },
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
     Controller: getAddress('0xFbbA685a39bE6640B8EB08c6E6DDf2664fD1D668'),
     BookManager: getAddress('0xC528b9ED5d56d1D0d3C18A2342954CE1069138a4'),

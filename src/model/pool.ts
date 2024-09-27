@@ -6,7 +6,6 @@ import { toPoolKey } from '../utils/pool-key'
 
 import { Market } from './market'
 import { Currency6909 } from './currency'
-import { OnChainOpenOrder } from './open-order'
 
 export class Pool {
   key: `0x${string}`
@@ -27,8 +26,8 @@ export class Pool {
   cancelableB: bigint
   claimableA: bigint
   claimableB: bigint
-  orderListA: OnChainOpenOrder[]
-  orderListB: OnChainOpenOrder[]
+  orderListA: bigint[]
+  orderListB: bigint[]
 
   constructor({
     chainId,
@@ -68,8 +67,8 @@ export class Pool {
     cancelableB: bigint
     claimableA: bigint
     claimableB: bigint
-    orderListA: OnChainOpenOrder[]
-    orderListB: OnChainOpenOrder[]
+    orderListA: bigint[]
+    orderListB: bigint[]
   }) {
     this.key = toPoolKey(bookIdA, bookIdB, salt)
     this.market = market
