@@ -5,7 +5,7 @@ import { berachainBartioTestnet } from './bera-bartio-chain'
 
 export enum CHAIN_IDS {
   CLOBER_TESTNET = cloberTestChain.id,
-  CLOBER_TESTNET_2 = cloberTestChain.id,
+  CLOBER_TESTNET_2 = cloberTestChain2.id,
   ARBITRUM_SEPOLIA = arbitrumSepolia.id,
   BASE = base.id,
   BERACHAIN_TESTNET = berachainBartioTestnet.id,

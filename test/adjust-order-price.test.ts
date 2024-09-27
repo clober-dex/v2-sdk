@@ -1,14 +1,19 @@
 import { beforeEach, expect, test } from 'vitest'
-import { addLiquidity, adjustOrderPrice, getPool } from '@clober/v2-sdk'
+import {
+  addLiquidity,
+  adjustOrderPrice,
+  getPool,
+  setStrategyConfig,
+} from '@clober/v2-sdk'
 import { zeroHash } from 'viem'
 import BigNumber from 'bignumber.js'
 
-import { cloberTestChain } from '../src/constants/test-chain'
+import { cloberTestChain2 } from '../src/constants/test-chain'
 
 import { account, FORK_URL } from './utils/constants'
-import { createProxyClients } from './utils/utils'
+import { createProxyClients2 } from './utils/utils'
 
-const clients = createProxyClients(
+const clients = createProxyClients2(
   Array.from({ length: 2 }, () => Math.floor(new Date().getTime())).map(
     (id) => id,
   ),
@@ -29,7 +34,7 @@ test('Adjust order price', async () => {
   const { publicClient, walletClient, testClient } = clients[0] as any
 
   const poolStep1 = await getPool({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain2.id,
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -41,7 +46,7 @@ test('Adjust order price', async () => {
 
   // Add liquidity to the pool
   const { transaction: tx1 } = await addLiquidity({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain2.id,
     userAddress: account.address,
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
@@ -61,7 +66,7 @@ test('Adjust order price', async () => {
   await publicClient.waitForTransactionReceipt({ hash: hash1 })
 
   const poolStep2 = await getPool({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain2.id,
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -74,8 +79,34 @@ test('Adjust order price', async () => {
   await testClient.impersonateAccount({
     address: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
   })
+  const transactionForSetConfig = await setStrategyConfig({
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+    token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
+    salt: zeroHash,
+    config: {
+      referenceThreshold: '0.1',
+      rateA: '0.1',
+      rateB: '0.1',
+      minRateA: '0.003',
+      minRateB: '0.003',
+      priceThresholdA: '0.1',
+      priceThresholdB: '0.1',
+    },
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+  const hashForSetConfig = await walletClient.sendTransaction({
+    ...transactionForSetConfig!,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+    gasPrice: transactionForSetConfig!.gasPrice! * 2n,
+  })
+  await publicClient.waitForTransactionReceipt({ hash: hashForSetConfig })
   const adjustOrderPriceTx = await adjustOrderPrice({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain2.id,
     userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
@@ -92,12 +123,12 @@ test('Adjust order price', async () => {
   const hash2 = await walletClient.sendTransaction({
     ...adjustOrderPriceTx!,
     account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-    gasPrice: tx1!.gasPrice! * 2n,
+    gasPrice: adjustOrderPriceTx!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash2 })
 
   const poolStep3 = await getPool({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain2.id,
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -134,7 +165,7 @@ test('Adjust order price with invalid alpha', async () => {
 
   await expect(
     adjustOrderPrice({
-      chainId: cloberTestChain.id,
+      chainId: cloberTestChain2.id,
       userAddress: account.address,
       token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
