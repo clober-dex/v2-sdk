@@ -1,3 +1,5 @@
+import { post } from 'axios'
+
 import { CHAIN_IDS } from './chain'
 
 const SUBGRAPH_URL: {
@@ -25,24 +27,16 @@ export class Subgraph {
     if (!SUBGRAPH_URL[chainId]) {
       throw new Error('Unsupported chain for subgraph')
     }
-    const response = await fetch(SUBGRAPH_URL[chainId], {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query,
-        variables,
-        operationName,
-      }),
+    const response = await post(SUBGRAPH_URL[chainId], {
+      query,
+      variables,
+      operationName,
     })
 
-    if (response.ok) {
-      return response.json() as Promise<T>
+    if (response.status === 200) {
+      return response.data
     } else {
-      const errorResponse = await response.json()
-
-      throw new Error((errorResponse as any).message || 'Unknown Error')
+      throw new Error((response.data as any).errors || 'Failed to fetch data')
     }
   }
 }
