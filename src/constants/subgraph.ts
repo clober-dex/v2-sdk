@@ -1,4 +1,4 @@
-import { post } from 'axios'
+import axios from 'axios'
 
 import { CHAIN_IDS } from './chain'
 
@@ -27,7 +27,7 @@ export class Subgraph {
     if (!SUBGRAPH_URL[chainId]) {
       throw new Error('Unsupported chain for subgraph')
     }
-    const response = await post(SUBGRAPH_URL[chainId], {
+    const response = await axios.post(SUBGRAPH_URL[chainId], {
       query,
       variables,
       operationName,
