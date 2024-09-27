@@ -8,5 +8,4 @@
     "sourceMap": true,
     "rootDir": "./src"
   },
-  "allowSyntheticDefaultImports": true
 }
