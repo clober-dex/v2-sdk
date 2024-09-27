@@ -5,7 +5,10 @@ import {
   http,
 } from 'viem'
 
-import { cloberTestChain } from '../../src/constants/test-chain'
+import {
+  cloberTestChain,
+  cloberTestChain2,
+} from '../../src/constants/test-chain'
 
 import { account } from './constants'
 
@@ -37,6 +40,34 @@ export function createProxyClients<const TIds extends readonly number[]>(
 
     const walletClient = createWalletClient({
       chain: cloberTestChain,
+      account,
+      transport: http(`http://127.0.0.1:${port}/${i}`),
+    })
+
+    return { publicClient, testClient, walletClient } as const
+  })
+
+  return output as Tuple<(typeof output)[number], TIds['length']>
+}
+
+export function createProxyClients2<const TIds extends readonly number[]>(
+  ids: TIds,
+  port = 8546,
+) {
+  const output = ids.map((i) => {
+    const publicClient = createPublicClient({
+      chain: cloberTestChain2,
+      transport: http(`http://127.0.0.1:${port}/${i}`),
+    })
+
+    const testClient = createTestClient({
+      chain: cloberTestChain2,
+      mode: 'anvil',
+      transport: http(`http://127.0.0.1:${port}/${i}`),
+    })
+
+    const walletClient = createWalletClient({
+      chain: cloberTestChain2,
       account,
       transport: http(`http://127.0.0.1:${port}/${i}`),
     })

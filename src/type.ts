@@ -2,7 +2,6 @@ import type { Account } from 'viem'
 
 import { CHAIN_IDS } from './constants/chain'
 import type { Currency, Currency6909 } from './model/currency'
-import { OnChainOpenOrder } from './model/open-order'
 
 export { CHAIN_IDS } from './constants/chain'
 export type { Currency } from './model/currency'
@@ -44,8 +43,15 @@ export type Pool = {
   currencyB: Currency
   reserveA: string
   reserveB: string
-  orderListA: OnChainOpenOrder[]
-  orderListB: OnChainOpenOrder[]
+  totalSupply: bigint
+  liquidityA: bigint
+  liquidityB: bigint
+  cancelableA: bigint
+  cancelableB: bigint
+  claimableA: bigint
+  claimableB: bigint
+  orderListA: bigint[]
+  orderListB: bigint[]
 }
 
 export type Transaction = {

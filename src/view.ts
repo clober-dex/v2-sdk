@@ -163,6 +163,7 @@ export const getPool = async ({
   token1: `0x${string}`
   salt: `0x${string}`
   options?: {
+    market?: Market
     n?: number
     useSubgraph?: boolean
   } & DefaultReadContractOptions
@@ -180,17 +181,25 @@ export const getPool = async ({
     [token0, token1],
     salt,
     !!(options && options.useSubgraph),
+    options?.market,
   )
   return {
     chainId,
     key: pool.key,
-    market: pool.market.toJson(),
+    market: pool.market,
     isOpened: pool.isOpened,
     strategy: pool.strategy,
     currencyA: pool.currencyA,
     currencyB: pool.currencyB,
     reserveA: pool.reserveA,
     reserveB: pool.reserveB,
+    totalSupply: pool.totalSupply,
+    liquidityA: pool.liquidityA,
+    liquidityB: pool.liquidityB,
+    cancelableA: pool.cancelableA,
+    cancelableB: pool.cancelableB,
+    claimableA: pool.claimableA,
+    claimableB: pool.claimableB,
     orderListA: pool.orderListA,
     orderListB: pool.orderListB,
   }

@@ -7,6 +7,8 @@ const SUBGRAPH_URL: {
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]:
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph/api',
+  [CHAIN_IDS.CLOBER_TESTNET_2]:
+    'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph/api',
   [CHAIN_IDS.ARBITRUM_SEPOLIA]:
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph/api',
   [CHAIN_IDS.BASE]:

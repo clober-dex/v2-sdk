@@ -44,6 +44,7 @@ import { emptyERC20PermitParams } from './constants/permit'
 import { abs } from './utils/math'
 import { toBytes32 } from './utils/pool-key'
 import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
+import { STRATEGY_ABI } from './abis/rebalancer/strategy-abi'
 
 /**
  * Build a transaction to open a market.
@@ -1470,7 +1471,7 @@ export const removeLiquidity = async ({
   }
 }
 
-export const rebalance = async ({
+export const refillOrder = async ({
   chainId,
   userAddress,
   token0,
@@ -1526,15 +1527,15 @@ export const rebalance = async ({
   )
 }
 
-export const updateStrategyPrice = async ({
+export const adjustOrderPrice = async ({
   chainId,
   userAddress,
   token0,
   token1,
   salt,
   oraclePrice,
-  priceA,
-  priceB,
+  bidPrice,
+  askPrice,
   alpha,
   options,
 }: {
@@ -1544,19 +1545,25 @@ export const updateStrategyPrice = async ({
   token1: `0x${string}`
   salt: `0x${string}`
   oraclePrice: string // price with currencyA as quote
-  priceA: string // price with currencyA as quote
-  priceB: string // price when currencyA as quote
+  bidPrice: string // price with bookA. bid price
+  askPrice: string // price with bookA. ask price
   alpha: string // alpha value, 0 < alpha <= 1
   options?: {
     tickA?: bigint
     tickB?: bigint
-    roundingUpPriceA?: boolean
-    roundingUpPriceB?: boolean
+    roundingUpBidPrice?: boolean
+    roundingUpAskPrice?: boolean
     useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<Transaction> => {
   if (Number(alpha) <= 0 || Number(alpha) > 1) {
     throw new Error('Alpha value must be in the range (0, 1]')
+  }
+  if (Number(bidPrice) <= 0 || Number(askPrice) <= 0) {
+    throw new Error('Price must be greater than 0')
+  }
+  if (Number(bidPrice) >= Number(askPrice)) {
+    throw new Error('Bid price must be less than ask price')
   }
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -1582,15 +1589,15 @@ export const updateStrategyPrice = async ({
        })
     `)
   }
-  const [roundingUpPriceA, roundingUpPriceB] = [
-    options?.roundingUpPriceA ? options.roundingUpPriceA : false,
-    options?.roundingUpPriceB ? options.roundingUpPriceB : false,
+  const [roundingUpBidPrice, roundingUpAskPrice] = [
+    options?.roundingUpBidPrice ? options.roundingUpBidPrice : false,
+    options?.roundingUpAskPrice ? options.roundingUpAskPrice : false,
   ]
   const {
     roundingDownTick: roundingDownTickA,
     roundingUpTick: roundingUpTickA,
   } = parsePrice(
-    Number(priceA),
+    Number(bidPrice),
     pool.currencyA.decimals,
     pool.currencyB.decimals,
   )
@@ -1598,7 +1605,7 @@ export const updateStrategyPrice = async ({
     roundingDownTick: roundingDownTickB,
     roundingUpTick: roundingUpTickB,
   } = parsePrice(
-    Number(priceB),
+    Number(askPrice),
     pool.currencyA.decimals,
     pool.currencyB.decimals,
   )
@@ -1610,10 +1617,12 @@ export const updateStrategyPrice = async ({
   )
   const tickA = options?.tickA
     ? Number(options.tickA)
-    : Number(roundingUpPriceA ? roundingUpTickA : roundingDownTickA)
+    : Number(roundingUpBidPrice ? roundingUpTickA : roundingDownTickA)
   const tickB = options?.tickB
     ? Number(options.tickB)
-    : Number(invertTick(roundingUpPriceB ? roundingUpTickB : roundingDownTickB))
+    : Number(
+        invertTick(roundingUpAskPrice ? roundingUpTickB : roundingDownTickB),
+      )
 
   const alphaRaw = parseUnits(alpha, 6)
 
@@ -1626,6 +1635,117 @@ export const updateStrategyPrice = async ({
       abi: OPERATOR_ABI,
       functionName: 'updatePrice',
       args: [pool.key, oracleRawPrice, tickA, tickB, alphaRaw],
+    },
+    options?.gasLimit,
+  )
+}
+
+export const setStrategyConfig = async ({
+  chainId,
+  userAddress,
+  token0,
+  token1,
+  salt,
+  config,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  config: {
+    referenceThreshold: string // 0 <= referenceThreshold <= 1
+    rateA: string // 0 <= rateA <= 1
+    rateB: string // 0 <= rateB <= 1
+    minRateA: string // 0 <= minRateA <= rateA
+    minRateB: string // 0 <= minRateB <= rateB
+    priceThresholdA: string // 0 <= priceThresholdA <= 1
+    priceThresholdB: string // 0 <= priceThresholdB <= 1
+  }
+  options?: {
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
+}): Promise<Transaction> => {
+  // validate config
+  if (
+    Number(config.referenceThreshold) < 0 ||
+    Number(config.referenceThreshold) > 1
+  ) {
+    throw new Error('Reference threshold must be in the range [0, 1]')
+  }
+  if (
+    Number(config.priceThresholdA) < 0 ||
+    Number(config.priceThresholdA) > 1 ||
+    Number(config.priceThresholdB) < 0 ||
+    Number(config.priceThresholdB) > 1
+  ) {
+    throw new Error('Price threshold must be in the range [0, 1]')
+  }
+  if (
+    Number(config.rateA) < 0 ||
+    Number(config.rateA) > 1 ||
+    Number(config.rateB) < 0 ||
+    Number(config.rateB) > 1
+  ) {
+    throw new Error('Rate must be in the range [0, 1]')
+  }
+  if (
+    Number(config.minRateA) < 0 ||
+    Number(config.minRateA) > 1 ||
+    Number(config.minRateB) < 0 ||
+    Number(config.minRateB) > 1
+  ) {
+    throw new Error('Min rate must be in the range [0, 1]')
+  }
+  if (
+    Number(config.minRateA) > Number(config.rateA) ||
+    Number(config.minRateB) > Number(config.rateB)
+  ) {
+    throw new Error('Min rate must be less or equal to rate')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = await fetchPool(
+    publicClient,
+    chainId,
+    [token0, token1],
+    salt,
+    !!(options && options.useSubgraph),
+  )
+  if (!pool.isOpened) {
+    throw new Error(`
+       Open the pool before set strategy config.
+       import { openPool } from '@clober/v2-sdk'
+
+       const transaction = await openPool({
+            chainId: ${chainId},
+            tokenA: '${token0}',
+            tokenB: '${token1}',
+       })
+    `)
+  }
+
+  const configRaw = {
+    referenceThreshold: parseUnits(config.referenceThreshold, 6),
+    rateA: parseUnits(config.rateA, 6),
+    rateB: parseUnits(config.rateB, 6),
+    minRateA: parseUnits(config.minRateA, 6),
+    minRateB: parseUnits(config.minRateB, 6),
+    priceThresholdA: parseUnits(config.priceThresholdA, 6),
+    priceThresholdB: parseUnits(config.priceThresholdB, 6),
+  }
+  return buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Strategy,
+      abi: STRATEGY_ABI,
+      functionName: 'setConfig',
+      args: [pool.key, configRaw],
     },
     options?.gasLimit,
   )
