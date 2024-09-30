@@ -1,3 +1,5 @@
+import { CurrencyAmount } from '../type'
+
 import type { Currency } from './currency'
 
 export type OpenOrderDto = {
@@ -38,14 +40,14 @@ export type OnChainOpenOrder = {
   price: string
   tick: number
   orderIndex: string
-  claimable: { currency: Currency; value: string }
-  cancelable: { currency: Currency; value: string }
+  claimable: CurrencyAmount
+  cancelable: CurrencyAmount
 }
 
 export type OpenOrder = OnChainOpenOrder & {
   txHash: `0x${string}`
   createdAt: number
-  amount: { currency: Currency; value: string }
-  filled: { currency: Currency; value: string }
-  claimed: { currency: Currency; value: string }
+  amount: CurrencyAmount
+  filled: CurrencyAmount
+  claimed: CurrencyAmount
 }
