@@ -209,13 +209,13 @@ test('Refill order', async () => {
     },
   })
 
-  expect(poolStep4.cancelableA).toBe(0n)
-  expect(poolStep4.cancelableB).toBe(155953200000000n)
-  expect(poolStep4.claimableA).toBe(99997469n)
-  expect(poolStep4.claimableB).toBe(38329361063758775n)
+  expect(poolStep4.reserveA.cancelable).toBe(0n)
+  expect(poolStep4.reserveB.cancelable).toBe(155953200000000n)
+  expect(poolStep4.reserveA.claimable).toBe(99997469n)
+  expect(poolStep4.reserveB.claimable).toBe(38329361063758775n)
 
-  expect(poolStep5.cancelableA).toBe(99999872n)
-  expect(poolStep5.cancelableB).toBe(38167546300000000n)
-  expect(poolStep5.claimableA).toBe(0n)
-  expect(poolStep5.claimableB).toBe(0n)
+  expect(poolStep5.reserveA.cancelable).toBe(99999872n)
+  expect(poolStep5.reserveB.cancelable).toBe(38167546300000000n)
+  expect(poolStep5.reserveA.claimable).toBe(0n)
+  expect(poolStep5.reserveB.claimable).toBe(0n)
 })
