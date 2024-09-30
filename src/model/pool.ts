@@ -1,12 +1,13 @@
 import { formatUnits } from 'viem'
 
-import { CHAIN_IDS, Currency, Market } from '../type'
+import { Pool as PoolType, CHAIN_IDS, Currency, Market } from '../type'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 
 import { Currency6909 } from './currency'
 
 export class Pool {
+  chainId: CHAIN_IDS
   key: `0x${string}`
   market: Market
   isOpened: boolean
@@ -17,8 +18,8 @@ export class Pool {
 
   totalSupply: bigint
   decimals: number
-  reserveA: string
-  reserveB: string
+  reserveA: bigint
+  reserveB: bigint
   liquidityA: bigint
   liquidityB: bigint
   cancelableA: bigint
@@ -69,6 +70,7 @@ export class Pool {
     orderListA: bigint[]
     orderListB: bigint[]
   }) {
+    this.chainId = chainId
     this.key = toPoolKey(bookIdA, bookIdB, salt)
     this.market = market
     this.isOpened = isOpened
@@ -107,9 +109,63 @@ export class Pool {
     this.cancelableB = cancelableB
     this.claimableA = claimableA
     this.claimableB = claimableB
-    this.reserveA = formatUnits(reserveA, this.currencyA.decimals)
-    this.reserveB = formatUnits(reserveB, this.currencyB.decimals)
+    this.reserveA = reserveA
+    this.reserveB = reserveB
     this.orderListA = orderListA
     this.orderListB = orderListB
+  }
+
+  toJson = (): PoolType => {
+    return {
+      chainId: this.chainId,
+      key: this.key,
+      market: this.market,
+      isOpened: this.isOpened,
+      strategy: this.strategy,
+      currencyA: this.currencyA,
+      currencyB: this.currencyB,
+      reserveA: {
+        total: {
+          currency: this.currencyA,
+          value: formatUnits(this.reserveA, this.currencyA.decimals),
+        },
+        liquidity: {
+          currency: this.currencyA,
+          value: formatUnits(this.liquidityA, this.currencyA.decimals),
+        },
+        cancelable: {
+          currency: this.currencyA,
+          value: formatUnits(this.cancelableA, this.currencyA.decimals),
+        },
+        claimable: {
+          currency: this.currencyA,
+          value: formatUnits(this.claimableA, this.currencyA.decimals),
+        },
+      },
+      reserveB: {
+        total: {
+          currency: this.currencyB,
+          value: formatUnits(this.reserveB, this.currencyB.decimals),
+        },
+        liquidity: {
+          currency: this.currencyB,
+          value: formatUnits(this.liquidityB, this.currencyB.decimals),
+        },
+        cancelable: {
+          currency: this.currencyB,
+          value: formatUnits(this.cancelableB, this.currencyB.decimals),
+        },
+        claimable: {
+          currency: this.currencyB,
+          value: formatUnits(this.claimableB, this.currencyB.decimals),
+        },
+      },
+      totalSupply: {
+        currency: this.currencyLp,
+        value: formatUnits(this.totalSupply, this.decimals),
+      },
+      orderListA: this.orderListA.map((order) => order.toString()),
+      orderListB: this.orderListB.map((order) => order.toString()),
+    }
   }
 }

@@ -41,17 +41,21 @@ export type Pool = {
   strategy: `0x${string}`
   currencyA: Currency
   currencyB: Currency
-  reserveA: string
-  reserveB: string
-  totalSupply: bigint
-  liquidityA: bigint
-  liquidityB: bigint
-  cancelableA: bigint
-  cancelableB: bigint
-  claimableA: bigint
-  claimableB: bigint
-  orderListA: bigint[]
-  orderListB: bigint[]
+  reserveA: {
+    total: CurrencyAmount
+    liquidity: CurrencyAmount
+    cancelable: CurrencyAmount
+    claimable: CurrencyAmount
+  }
+  reserveB: {
+    total: CurrencyAmount
+    liquidity: CurrencyAmount
+    cancelable: CurrencyAmount
+    claimable: CurrencyAmount
+  }
+  totalSupply: Currency6909Amount
+  orderListA: string[]
+  orderListB: string[]
 }
 
 export type Transaction = {
@@ -121,3 +125,6 @@ export enum CHART_LOG_INTERVALS {
   oneDay = '1d',
   oneWeek = '1w',
 }
+
+export type CurrencyAmount = { currency: Currency; value: string }
+export type Currency6909Amount = { currency: Currency6909; value: string }
