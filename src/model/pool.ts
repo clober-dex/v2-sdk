@@ -1,6 +1,6 @@
 import { formatUnits } from 'viem'
 
-import { Pool as PoolType, CHAIN_IDS, Currency, Market } from '../type'
+import { CHAIN_IDS, Currency, Market, Pool as PoolType } from '../type'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 
@@ -124,14 +124,14 @@ export class Pool {
       strategy: this.strategy,
       currencyA: this.currencyA,
       currencyB: this.currencyB,
-      reserveA: {
+      liquidityA: {
         total: {
           currency: this.currencyA,
-          value: formatUnits(this.reserveA, this.currencyA.decimals),
-        },
-        liquidity: {
-          currency: this.currencyA,
           value: formatUnits(this.liquidityA, this.currencyA.decimals),
+        },
+        reserve: {
+          currency: this.currencyA,
+          value: formatUnits(this.reserveA, this.currencyA.decimals),
         },
         cancelable: {
           currency: this.currencyA,
@@ -142,14 +142,14 @@ export class Pool {
           value: formatUnits(this.claimableA, this.currencyA.decimals),
         },
       },
-      reserveB: {
+      liquidityB: {
         total: {
           currency: this.currencyB,
-          value: formatUnits(this.reserveB, this.currencyB.decimals),
-        },
-        liquidity: {
-          currency: this.currencyB,
           value: formatUnits(this.liquidityB, this.currencyB.decimals),
+        },
+        reserve: {
+          currency: this.currencyB,
+          value: formatUnits(this.reserveB, this.currencyB.decimals),
         },
         cancelable: {
           currency: this.currencyB,
