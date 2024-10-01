@@ -139,25 +139,25 @@ test('Adjust order price', async () => {
   })
 
   expect(
-    BigNumber(poolStep1.reserveA.total.value).plus('2000').toString(),
-  ).toBe(poolStep2.reserveA.total.value)
-  expect(BigNumber(poolStep1.reserveB.total.value).plus('1').toString()).toBe(
-    poolStep2.reserveB.total.value,
+    BigNumber(poolStep1.liquidityA.total.value).plus('2000').toString(),
+  ).toBe(poolStep2.liquidityA.total.value)
+  expect(BigNumber(poolStep1.liquidityB.total.value).plus('1').toString()).toBe(
+    poolStep2.liquidityB.total.value,
   )
-  expect(poolStep1.reserveA.cancelable.value).toBe('0')
-  expect(poolStep1.reserveB.cancelable.value).toBe('0')
-  expect(poolStep1.reserveA.claimable.value).toBe('0')
-  expect(poolStep1.reserveB.claimable.value).toBe('0')
+  expect(poolStep1.liquidityA.cancelable.value).toBe('0')
+  expect(poolStep1.liquidityB.cancelable.value).toBe('0')
+  expect(poolStep1.liquidityA.claimable.value).toBe('0')
+  expect(poolStep1.liquidityB.claimable.value).toBe('0')
 
-  expect(poolStep2.reserveA.cancelable.value).toBe('0')
-  expect(poolStep2.reserveB.cancelable.value).toBe('0')
-  expect(poolStep2.reserveA.claimable.value).toBe('0')
-  expect(poolStep2.reserveB.claimable.value).toBe('0')
+  expect(poolStep2.liquidityA.cancelable.value).toBe('0')
+  expect(poolStep2.liquidityB.cancelable.value).toBe('0')
+  expect(poolStep2.liquidityA.claimable.value).toBe('0')
+  expect(poolStep2.liquidityB.claimable.value).toBe('0')
 
-  expect(poolStep3.reserveA.cancelable.value).toBe('99.999999')
-  expect(poolStep3.reserveB.cancelable.value).toBe('0.0381675463')
-  expect(poolStep3.reserveA.claimable.value).toBe('0')
-  expect(poolStep3.reserveB.claimable.value).toBe('0')
+  expect(poolStep3.liquidityA.cancelable.value).toBe('99.999999')
+  expect(poolStep3.liquidityB.cancelable.value).toBe('0.0381675463')
+  expect(poolStep3.liquidityA.claimable.value).toBe('0')
+  expect(poolStep3.liquidityB.claimable.value).toBe('0')
 })
 
 test('Adjust order price with invalid alpha', async () => {
