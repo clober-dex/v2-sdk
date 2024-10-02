@@ -88,6 +88,7 @@ export type DefaultReadContractOptions = DefaultOptions
 
 export type DefaultWriteContractOptions = DefaultOptions & {
   gasLimit?: bigint
+  gasPriceLimit?: bigint
 }
 
 export type CurrencyFlow = {
