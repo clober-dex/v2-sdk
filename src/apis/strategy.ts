@@ -4,7 +4,8 @@ import { CHAIN_IDS } from '../constants/chain'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { StrategyPrice } from '../model/strategy'
 import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
-import { formatPrice } from '../utils/prices'
+import { Market } from '../type'
+import { toPoolKey } from '../utils/pool-key'
 
 import { fetchPool } from './pool'
 
@@ -14,27 +15,34 @@ export async function fetchStrategyPrice(
   tokenAddresses: `0x${string}`[],
   salt: `0x${string}`,
   useSubgraph: boolean,
+  market?: Market,
 ): Promise<StrategyPrice> {
-  const pool = await fetchPool(
-    publicClient,
-    chainId,
-    tokenAddresses,
-    salt,
-    useSubgraph,
-  )
+  let poolKey: `0x${string}` | undefined = undefined
+  if (market) {
+    poolKey = toPoolKey(
+      BigInt(market.bidBook.id),
+      BigInt(market.askBook.id),
+      salt,
+    )
+  } else {
+    const pool = await fetchPool(
+      publicClient,
+      chainId,
+      tokenAddresses,
+      salt,
+      useSubgraph,
+    )
+    poolKey = pool.key
+  }
   const getPriceResult = await publicClient.readContract({
     address: CONTRACT_ADDRESSES[chainId]!.Strategy,
     abi: STRATEGY_ABI,
     functionName: 'getPrice',
-    args: [pool.key],
+    args: [poolKey],
   })
   return {
-    oraclePrice: formatPrice(
-      BigInt(getPriceResult.oraclePrice),
-      pool.currencyA.decimals,
-      pool.currencyB.decimals,
-    ),
-    tickA: BigInt(getPriceResult.tickA),
-    tickB: BigInt(getPriceResult.tickB),
+    oraclePrice: BigInt(getPriceResult.oraclePrice),
+    bidTick: BigInt(getPriceResult.tickA),
+    askTick: BigInt(getPriceResult.tickB),
   }
 }

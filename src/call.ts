@@ -15,6 +15,7 @@ import type {
   CurrencyFlow,
   DefaultWriteContractOptions,
   ERC20PermitParam,
+  Pool,
   Transaction,
 } from './type'
 import { calculateUnitSize } from './utils/unit-size'
@@ -1486,19 +1487,24 @@ export const refillOrder = async ({
   salt: `0x${string}`
   options?: DefaultWriteContractOptions & {
     useSubgraph?: boolean
+    pool?: Pool
   }
 }): Promise<Transaction> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  const pool = await fetchPool(
-    publicClient,
-    chainId,
-    [token0, token1],
-    salt,
-    !!(options && options.useSubgraph),
-  )
+  const pool = options?.pool
+    ? options.pool
+    : (
+        await fetchPool(
+          publicClient,
+          chainId,
+          [token0, token1],
+          salt,
+          !!(options && options.useSubgraph),
+        )
+      ).toJson()
   if (!pool.isOpened) {
     throw new Error(`
        Open the pool before rebalancing pool.
@@ -1524,6 +1530,7 @@ export const refillOrder = async ({
       args: [pool.key],
     },
     options?.gasLimit,
+    options?.gasPriceLimit,
   )
 }
 
@@ -1549,11 +1556,12 @@ export const adjustOrderPrice = async ({
   askPrice: string // price with bookA. ask price
   alpha: string // alpha value, 0 < alpha <= 1
   options?: {
-    tickA?: bigint
-    tickB?: bigint
+    bidTick?: bigint
+    askTick?: bigint
     roundingUpBidPrice?: boolean
     roundingUpAskPrice?: boolean
     useSubgraph?: boolean
+    pool?: Pool
   } & DefaultWriteContractOptions
 }): Promise<Transaction> => {
   if (Number(alpha) <= 0 || Number(alpha) > 1) {
@@ -1569,13 +1577,17 @@ export const adjustOrderPrice = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  const pool = await fetchPool(
-    publicClient,
-    chainId,
-    [token0, token1],
-    salt,
-    !!(options && options.useSubgraph),
-  )
+  const pool = options?.pool
+    ? options.pool
+    : (
+        await fetchPool(
+          publicClient,
+          chainId,
+          [token0, token1],
+          salt,
+          !!(options && options.useSubgraph),
+        )
+      ).toJson()
   if (!pool.isOpened) {
     throw new Error(`
        Open the pool before updating strategy price.
@@ -1615,11 +1627,11 @@ export const adjustOrderPrice = async ({
     pool.currencyA.decimals,
     pool.currencyB.decimals,
   )
-  const tickA = options?.tickA
-    ? Number(options.tickA)
+  const tickA = options?.bidTick
+    ? Number(options.bidTick)
     : Number(roundingUpBidPrice ? roundingUpTickA : roundingDownTickA)
-  const tickB = options?.tickB
-    ? Number(options.tickB)
+  const tickB = options?.askTick
+    ? Number(options.askTick)
     : Number(
         invertTick(roundingUpAskPrice ? roundingUpTickB : roundingDownTickB),
       )
@@ -1637,6 +1649,7 @@ export const adjustOrderPrice = async ({
       args: [pool.key, oracleRawPrice, tickA, tickB, alphaRaw],
     },
     options?.gasLimit,
+    options?.gasPriceLimit,
   )
 }
 

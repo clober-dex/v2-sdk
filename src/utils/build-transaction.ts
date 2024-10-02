@@ -11,6 +11,7 @@ export const buildTransaction = async (
   publicClient: PublicClient,
   args: WriteContractParameters | SimulateContractParameters,
   gasLimit?: bigint,
+  gasPriceLimit?: bigint,
 ): Promise<Transaction> => {
   const data = encodeFunctionData(args)
   const [gas, gasPrice] = await Promise.all([
@@ -21,7 +22,7 @@ export const buildTransaction = async (
         to: args.address,
         value: args.value || 0n,
       }),
-    publicClient.getGasPrice(),
+    gasPriceLimit ?? publicClient.getGasPrice(),
   ])
   return {
     gas,
