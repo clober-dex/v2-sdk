@@ -21,6 +21,12 @@ export type Book = {
   isOpened: boolean
 }
 
+export type StrategyPrice = {
+  oraclePrice: bigint
+  bidTick: bigint
+  askTick: bigint
+}
+
 export type Market = {
   chainId: CHAIN_IDS
   quote: Currency
