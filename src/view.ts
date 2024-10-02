@@ -15,6 +15,7 @@ import type {
   DefaultReadContractOptions,
   Market,
   Pool,
+  StrategyPrice,
 } from './type'
 import { CHART_LOG_INTERVALS } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
@@ -27,7 +28,6 @@ import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 import { fetchPool } from './apis/pool'
 import { fetchStrategyPrice } from './apis/strategy'
-import { StrategyPrice } from './model/strategy'
 import { Subgraph } from './constants/subgraph'
 
 /**

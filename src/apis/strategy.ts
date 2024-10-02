@@ -2,9 +2,8 @@ import { PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { StrategyPrice } from '../model/strategy'
+import { Market, StrategyPrice } from '../type'
 import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
-import { Market } from '../type'
 import { toPoolKey } from '../utils/pool-key'
 
 import { fetchPool } from './pool'
