@@ -198,6 +198,7 @@ export const getStrategyPrice = async ({
   token1: `0x${string}`
   salt: `0x${string}`
   options?: DefaultReadContractOptions & {
+    market?: Market
     useSubgraph?: boolean
   }
 }): Promise<StrategyPrice> => {
@@ -214,6 +215,7 @@ export const getStrategyPrice = async ({
     [token0, token1],
     salt,
     !!(options && options.useSubgraph),
+    options?.market,
   )
 }
 

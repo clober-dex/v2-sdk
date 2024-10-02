@@ -1,5 +1,5 @@
 export type StrategyPrice = {
-  oraclePrice: string
-  tickA: bigint
-  tickB: bigint
+  oraclePrice: bigint
+  bidTick: bigint
+  askTick: bigint
 }
