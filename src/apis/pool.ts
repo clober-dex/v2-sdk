@@ -1,13 +1,37 @@
 import { PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
-import { Pool } from '../model/pool'
+import { Pool, PoolSnapshotDto, PoolVolumeDto } from '../model/pool'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
 import { Market } from '../type'
+import { Subgraph } from '../constants/subgraph'
 
 import { fetchMarket } from './market'
+
+export const fetchPoolPerformance = async (
+  chainId: CHAIN_IDS,
+  poolKey: `0x${string}`,
+  volumeFromTimestamp: number,
+  snapshotFromTimestamp: number,
+) => {
+  return Subgraph.get<{
+    data: {
+      poolVolumes: PoolVolumeDto[]
+      poolSnapshots: PoolSnapshotDto[]
+    }
+  }>(
+    chainId,
+    'getPoolPerformanceData',
+    'query getPoolPerformanceData($poolKey: String!, $volumeFrom: BigInt!, $snapshotFrom: BigInt!) { poolVolumes(where: { poolKey: $poolKey, intervalType: "1d", timestamp_gte: $volumeFrom, }) { id poolKey intervalType timestamp currencyAVolume currencyBVolume bookACurrencyAVolume bookACurrencyBVolume bookBCurrencyAVolume bookBCurrencyBVolume } poolSnapshots( where: { poolKey: $poolKey, intervalType: "1h", timestamp_gte: $snapshotFrom, } ) { id poolKey intervalType timestamp price liquidityA liquidityB totalSupply } }',
+    {
+      poolKey,
+      volumeFrom: BigInt(volumeFromTimestamp),
+      snapshotFrom: BigInt(snapshotFromTimestamp),
+    },
+  )
+}
 
 export async function fetchPool(
   publicClient: PublicClient,

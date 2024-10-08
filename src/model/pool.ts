@@ -124,6 +124,7 @@ export class Pool {
       strategy: this.strategy,
       currencyA: this.currencyA,
       currencyB: this.currencyB,
+      currencyLp: this.currencyLp,
       liquidityA: {
         total: {
           currency: this.currencyA,
@@ -168,4 +169,28 @@ export class Pool {
       orderListB: this.orderListB.map((order) => order.toString()),
     }
   }
+}
+
+export type PoolVolumeDto = {
+  id: string
+  poolKey: `0x${string}`
+  intervalType: '1d'
+  timestamp: bigint
+  currencyAVolume: bigint
+  currencyBVolume: bigint
+  bookACurrencyAVolume: bigint
+  bookACurrencyBVolume: bigint
+  bookBCurrencyAVolume: bigint
+  bookBCurrencyBVolume: bigint
+}
+
+export type PoolSnapshotDto = {
+  id: string
+  poolKey: `0x${string}`
+  intervalType: '1h'
+  timestamp: bigint
+  price: bigint
+  liquidityA: bigint
+  liquidityB: bigint
+  totalSupply: bigint
 }
