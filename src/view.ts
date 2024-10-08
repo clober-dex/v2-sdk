@@ -15,6 +15,7 @@ import type {
   DefaultReadContractOptions,
   Market,
   Pool,
+  PoolPerformanceData,
   StrategyPrice,
 } from './type'
 import { CHART_LOG_INTERVALS } from './type'
@@ -26,7 +27,7 @@ import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
-import { fetchPool } from './apis/pool'
+import { fetchPool, fetchPoolPerformance } from './apis/pool'
 import { fetchStrategyPrice } from './apis/strategy'
 import { Subgraph } from './constants/subgraph'
 
@@ -184,6 +185,92 @@ export const getPool = async ({
     options?.market,
   )
   return pool.toJson()
+}
+
+export const getPoolPerformance = async ({
+  chainId,
+  token0,
+  token1,
+  salt,
+  volumeFromTimestamp,
+  snapshotFromTimestamp,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  volumeFromTimestamp: number
+  snapshotFromTimestamp: number
+  options?: {
+    pool?: Pool
+    useSubgraph?: boolean
+  } & DefaultReadContractOptions
+}): Promise<PoolPerformanceData> => {
+  if (isAddressEqual(token0, token1)) {
+    throw new Error('Token0 and token1 must be different')
+  }
+  if (!options?.useSubgraph) {
+    throw new Error('useSubgraph must be true')
+  }
+  let pool: Pool
+  if (options?.pool) {
+    pool = options.pool
+  } else {
+    const publicClient = createPublicClient({
+      chain: CHAIN_MAP[chainId],
+      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+    })
+    pool = (
+      await fetchPool(
+        publicClient,
+        chainId,
+        [token0, token1],
+        salt,
+        !!(options && options.useSubgraph),
+        undefined,
+      )
+    ).toJson()
+  }
+  const poolPerformance = await fetchPoolPerformance(
+    chainId,
+    pool.key,
+    volumeFromTimestamp,
+    snapshotFromTimestamp,
+  )
+  return {
+    poolVolumes: poolPerformance.data.poolVolumes.map((poolVolume) => ({
+      poolKey: poolVolume.poolKey,
+      intervalType: poolVolume.intervalType,
+      timestamp: Number(poolVolume.timestamp),
+      currencyAVolume: {
+        currency: pool.currencyA,
+        value: formatUnits(poolVolume.currencyAVolume, pool.currencyA.decimals),
+      },
+      currencyBVolume: {
+        currency: pool.currencyB,
+        value: formatUnits(poolVolume.currencyBVolume, pool.currencyB.decimals),
+      },
+    })),
+    poolSnapshots: poolPerformance.data.poolSnapshots.map((poolSnapshot) => ({
+      poolKey: poolSnapshot.poolKey,
+      intervalType: poolSnapshot.intervalType,
+      timestamp: Number(poolSnapshot.timestamp),
+      price: formatUnits(poolSnapshot.price, 8),
+      liquidityA: {
+        currency: pool.currencyA,
+        value: formatUnits(poolSnapshot.liquidityA, pool.currencyA.decimals),
+      },
+      liquidityB: {
+        currency: pool.currencyB,
+        value: formatUnits(poolSnapshot.liquidityB, pool.currencyB.decimals),
+      },
+      totalSupply: {
+        currency: pool.currencyLp,
+        value: formatUnits(poolSnapshot.totalSupply, pool.currencyLp.decimals),
+      },
+    })),
+  }
 }
 
 export const getStrategyPrice = async ({
