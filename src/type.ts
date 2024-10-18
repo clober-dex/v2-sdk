@@ -47,6 +47,7 @@ export type Pool = {
   strategy: `0x${string}`
   currencyA: Currency
   currencyB: Currency
+  currencyLp: Currency6909
   liquidityA: {
     total: CurrencyAmount
     reserve: CurrencyAmount
@@ -62,6 +63,7 @@ export type Pool = {
   totalSupply: Currency6909Amount
   orderListA: string[]
   orderListB: string[]
+  paused: boolean
 }
 
 export type Transaction = {
@@ -135,3 +137,26 @@ export enum CHART_LOG_INTERVALS {
 
 export type CurrencyAmount = { currency: Currency; value: string }
 export type Currency6909Amount = { currency: Currency6909; value: string }
+
+export type PoolVolumeDto = {
+  poolKey: `0x${string}`
+  intervalType: '1d'
+  timestamp: number
+  currencyAVolume: CurrencyAmount
+  currencyBVolume: CurrencyAmount
+}
+
+export type PoolSnapshotDto = {
+  poolKey: `0x${string}`
+  intervalType: '1h'
+  timestamp: number
+  price: string
+  liquidityA: CurrencyAmount
+  liquidityB: CurrencyAmount
+  totalSupply: Currency6909Amount
+}
+
+export type PoolPerformanceData = {
+  poolVolumes: PoolVolumeDto[]
+  poolSnapshots: PoolSnapshotDto[]
+}

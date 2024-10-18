@@ -1669,6 +1669,7 @@ export const setStrategyConfig = async ({
   salt: `0x${string}`
   config: {
     referenceThreshold: string // 0 <= referenceThreshold <= 1
+    rebalanceThreshold: string // 0 <= rebalanceThreshold <= 1
     rateA: string // 0 <= rateA <= 1
     rateB: string // 0 <= rateB <= 1
     minRateA: string // 0 <= minRateA <= rateA
@@ -1686,6 +1687,12 @@ export const setStrategyConfig = async ({
     Number(config.referenceThreshold) > 1
   ) {
     throw new Error('Reference threshold must be in the range [0, 1]')
+  }
+  if (
+    Number(config.rebalanceThreshold) < 0 ||
+    Number(config.rebalanceThreshold) > 1
+  ) {
+    throw new Error('Rebalance threshold must be in the range [0, 1]')
   }
   if (
     Number(config.priceThresholdA) < 0 ||
@@ -1743,6 +1750,7 @@ export const setStrategyConfig = async ({
 
   const configRaw = {
     referenceThreshold: parseUnits(config.referenceThreshold, 6),
+    rebalanceThreshold: parseUnits(config.rebalanceThreshold, 6),
     rateA: parseUnits(config.rateA, 6),
     rateB: parseUnits(config.rateB, 6),
     minRateA: parseUnits(config.minRateA, 6),
@@ -1761,5 +1769,137 @@ export const setStrategyConfig = async ({
       args: [pool.key, configRaw],
     },
     options?.gasLimit,
+  )
+}
+
+export const pausePool = async ({
+  chainId,
+  userAddress,
+  token0,
+  token1,
+  salt,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  options?: {
+    useSubgraph?: boolean
+    pool?: Pool
+  } & DefaultWriteContractOptions
+}): Promise<Transaction | undefined> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = options?.pool
+    ? options.pool
+    : (
+        await fetchPool(
+          publicClient,
+          chainId,
+          [token0, token1],
+          salt,
+          !!(options && options.useSubgraph),
+        )
+      ).toJson()
+  if (!pool.isOpened) {
+    throw new Error(`
+       Open the pool before trying pause.
+       import { openPool } from '@clober/v2-sdk'
+
+       const transaction = await openPool({
+            chainId: ${chainId},
+            tokenA: '${token0}',
+            tokenB: '${token1}',
+            salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
+       })
+    `)
+  }
+
+  if (pool.paused) {
+    return undefined
+  }
+
+  return buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
+      abi: REBALANCER_ABI,
+      functionName: 'pause',
+      args: [pool.key],
+    },
+    options?.gasLimit,
+    options?.gasPriceLimit,
+  )
+}
+
+export const resumePool = async ({
+  chainId,
+  userAddress,
+  token0,
+  token1,
+  salt,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  options?: {
+    useSubgraph?: boolean
+    pool?: Pool
+  } & DefaultWriteContractOptions
+}): Promise<Transaction | undefined> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const pool = options?.pool
+    ? options.pool
+    : (
+        await fetchPool(
+          publicClient,
+          chainId,
+          [token0, token1],
+          salt,
+          !!(options && options.useSubgraph),
+        )
+      ).toJson()
+  if (!pool.isOpened) {
+    throw new Error(`
+       Open the pool before trying resume.
+       import { openPool } from '@clober/v2-sdk'
+
+       const transaction = await openPool({
+            chainId: ${chainId},
+            tokenA: '${token0}',
+            tokenB: '${token1}',
+            salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
+       })
+    `)
+  }
+
+  if (!pool.paused) {
+    return undefined
+  }
+
+  return buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
+      abi: REBALANCER_ABI,
+      functionName: 'resume',
+      args: [pool.key],
+    },
+    options?.gasLimit,
+    options?.gasPriceLimit,
   )
 }
