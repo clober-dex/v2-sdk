@@ -63,6 +63,7 @@ export type Pool = {
   totalSupply: Currency6909Amount
   orderListA: string[]
   orderListB: string[]
+  paused: boolean
 }
 
 export type Transaction = {

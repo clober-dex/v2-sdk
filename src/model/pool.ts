@@ -28,6 +28,7 @@ export class Pool {
   claimableB: bigint
   orderListA: bigint[]
   orderListB: bigint[]
+  paused: boolean
 
   constructor({
     chainId,
@@ -49,6 +50,7 @@ export class Pool {
     claimableB,
     orderListA,
     orderListB,
+    paused,
   }: {
     chainId: CHAIN_IDS
     market: Market
@@ -69,6 +71,7 @@ export class Pool {
     claimableB: bigint
     orderListA: bigint[]
     orderListB: bigint[]
+    paused: boolean
   }) {
     this.chainId = chainId
     this.key = toPoolKey(bookIdA, bookIdB, salt)
@@ -113,6 +116,7 @@ export class Pool {
     this.reserveB = reserveB
     this.orderListA = orderListA
     this.orderListB = orderListB
+    this.paused = paused
   }
 
   toJson = (): PoolType => {
@@ -167,6 +171,7 @@ export class Pool {
       },
       orderListA: this.orderListA.map((order) => order.toString()),
       orderListB: this.orderListB.map((order) => order.toString()),
+      paused: this.paused,
     }
   }
 }

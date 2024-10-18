@@ -7,8 +7,8 @@ export const STRATEGY_ABI = [
         type: 'address',
       },
       {
-        internalType: 'contract IPoolStorage',
-        name: 'poolStorage_',
+        internalType: 'contract IRebalancer',
+        name: 'rebalancer_',
         type: 'address',
       },
       {
@@ -28,6 +28,11 @@ export const STRATEGY_ABI = [
   {
     inputs: [],
     name: 'ExceedsThreshold',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'InvalidAccess',
     type: 'error',
   },
   {
@@ -168,6 +173,11 @@ export const STRATEGY_ABI = [
           },
           {
             internalType: 'uint24',
+            name: 'rebalanceThreshold',
+            type: 'uint24',
+          },
+          {
+            internalType: 'uint24',
             name: 'rateA',
             type: 'uint24',
           },
@@ -279,19 +289,37 @@ export const STRATEGY_ABI = [
   {
     inputs: [
       {
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
+      },
+      {
         internalType: 'bytes32',
         name: 'key',
         type: 'bytes32',
       },
       {
         internalType: 'uint256',
-        name: 'amountA',
+        name: 'burnAmount',
         type: 'uint256',
       },
       {
         internalType: 'uint256',
-        name: 'amountB',
+        name: 'totalSupply',
         type: 'uint256',
+      },
+    ],
+    name: 'burnHook',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
       },
     ],
     name: 'computeOrders',
@@ -362,6 +390,11 @@ export const STRATEGY_ABI = [
           {
             internalType: 'uint24',
             name: 'referenceThreshold',
+            type: 'uint24',
+          },
+          {
+            internalType: 'uint24',
+            name: 'rebalanceThreshold',
             type: 'uint24',
           },
           {
@@ -478,6 +511,34 @@ export const STRATEGY_ABI = [
     type: 'function',
   },
   {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+      {
+        internalType: 'uint256',
+        name: 'mintAmount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'totalSupply',
+        type: 'uint256',
+      },
+    ],
+    name: 'mintHook',
+    outputs: [],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [],
     name: 'owner',
     outputs: [
@@ -504,11 +565,63 @@ export const STRATEGY_ABI = [
     type: 'function',
   },
   {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+      {
+        components: [
+          {
+            internalType: 'Tick',
+            name: 'tick',
+            type: 'int24',
+          },
+          {
+            internalType: 'uint64',
+            name: 'rawAmount',
+            type: 'uint64',
+          },
+        ],
+        internalType: 'struct IStrategy.Order[]',
+        name: 'liquidityA',
+        type: 'tuple[]',
+      },
+      {
+        components: [
+          {
+            internalType: 'Tick',
+            name: 'tick',
+            type: 'int24',
+          },
+          {
+            internalType: 'uint64',
+            name: 'rawAmount',
+            type: 'uint64',
+          },
+        ],
+        internalType: 'struct IStrategy.Order[]',
+        name: 'liquidityB',
+        type: 'tuple[]',
+      },
+    ],
+    name: 'rebalanceHook',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     inputs: [],
-    name: 'poolStorage',
+    name: 'rebalancer',
     outputs: [
       {
-        internalType: 'contract IPoolStorage',
+        internalType: 'contract IRebalancer',
         name: '',
         type: 'address',
       },
@@ -548,6 +661,11 @@ export const STRATEGY_ABI = [
           {
             internalType: 'uint24',
             name: 'referenceThreshold',
+            type: 'uint24',
+          },
+          {
+            internalType: 'uint24',
+            name: 'rebalanceThreshold',
             type: 'uint24',
           },
           {

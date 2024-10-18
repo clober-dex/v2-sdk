@@ -108,6 +108,27 @@ export const REBALANCER_ABI = [
     type: 'error',
   },
   {
+    inputs: [],
+    name: 'Paused',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint8',
+        name: 'bits',
+        type: 'uint8',
+      },
+      {
+        internalType: 'uint256',
+        name: 'value',
+        type: 'uint256',
+      },
+    ],
+    name: 'SafeCastOverflowedUintDowncast',
+    type: 'error',
+  },
+  {
     inputs: [
       {
         internalType: 'address',
@@ -189,6 +210,56 @@ export const REBALANCER_ABI = [
       },
     ],
     name: 'Burn',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'canceledAmountA',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'canceledAmountB',
+        type: 'uint256',
+      },
+    ],
+    name: 'Cancel',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'claimedAmountA',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'claimedAmountB',
+        type: 'uint256',
+      },
+    ],
+    name: 'Claim',
     type: 'event',
   },
   {
@@ -337,6 +408,25 @@ export const REBALANCER_ABI = [
         name: 'key',
         type: 'bytes32',
       },
+      {
+        indexed: false,
+        internalType: 'bool',
+        name: 'paused',
+        type: 'bool',
+      },
+    ],
+    name: 'Pause',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
     ],
     name: 'Rebalance',
     type: 'event',
@@ -379,6 +469,19 @@ export const REBALANCER_ABI = [
     type: 'event',
   },
   {
+    inputs: [],
+    name: 'RATE_PRECISION',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         internalType: 'bytes32',
@@ -386,34 +489,17 @@ export const REBALANCER_ABI = [
         type: 'bytes32',
       },
       {
-        components: [
-          {
-            internalType: 'address',
-            name: 'user',
-            type: 'address',
-          },
-          {
-            internalType: 'uint256',
-            name: 'burnAmount',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'minAmountA',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'minAmountB',
-            type: 'uint256',
-          },
-        ],
-        internalType: 'struct Rebalancer.BurnParams',
-        name: 'burnParams',
-        type: 'tuple',
+        internalType: 'address',
+        name: 'user',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'burnAmount',
+        type: 'uint256',
       },
     ],
-    name: '_burnAndRebalance',
+    name: '_burn',
     outputs: [
       {
         internalType: 'uint256',
@@ -524,6 +610,19 @@ export const REBALANCER_ABI = [
         type: 'bytes32',
       },
     ],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: '_rebalance',
+    outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
@@ -675,12 +774,12 @@ export const REBALANCER_ABI = [
     outputs: [
       {
         internalType: 'uint256',
-        name: '',
+        name: 'withdrawalA',
         type: 'uint256',
       },
       {
         internalType: 'uint256',
-        name: '',
+        name: 'withdrawalB',
         type: 'uint256',
       },
     ],
@@ -816,6 +915,11 @@ export const REBALANCER_ABI = [
             type: 'address',
           },
           {
+            internalType: 'bool',
+            name: 'paused',
+            type: 'bool',
+          },
+          {
             internalType: 'uint256',
             name: 'reserveA',
             type: 'uint256',
@@ -836,7 +940,7 @@ export const REBALANCER_ABI = [
             type: 'uint256[]',
           },
         ],
-        internalType: 'struct IPoolStorage.Pool',
+        internalType: 'struct IRebalancer.Pool',
         name: '',
         type: 'tuple',
       },
@@ -1038,6 +1142,19 @@ export const REBALANCER_ABI = [
     type: 'function',
   },
   {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: 'pause',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     inputs: [],
     name: 'pendingOwner',
     outputs: [
@@ -1066,6 +1183,19 @@ export const REBALANCER_ABI = [
   {
     inputs: [],
     name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: 'resume',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

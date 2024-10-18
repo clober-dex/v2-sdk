@@ -55,7 +55,7 @@ export async function fetchPool(
     salt,
   )
   const [
-    { bookIdA, bookIdB, reserveA, reserveB, orderListA, orderListB },
+    { bookIdA, bookIdB, reserveA, reserveB, orderListA, orderListB, paused },
     totalSupply,
     [totalLiquidityA, totalLiquidityB],
   ] = await publicClient.multicall({
@@ -109,5 +109,6 @@ export async function fetchPool(
     reserveB: BigInt(reserveB),
     orderListA: orderListA.map((id: bigint) => BigInt(id)),
     orderListB: orderListB.map((id: bigint) => BigInt(id)),
+    paused,
   })
 }
