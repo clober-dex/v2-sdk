@@ -156,7 +156,14 @@ export type PoolSnapshotDto = {
   totalSupply: Currency6909Amount
 }
 
+export type PoolSpreadProfitDto = {
+  intervalType: '1h'
+  timestamp: number
+  accumulatedProfitInUsd: string
+}
+
 export type PoolPerformanceData = {
   poolVolumes: PoolVolumeDto[]
   poolSnapshots: PoolSnapshotDto[]
+  poolSpreadProfits: PoolSpreadProfitDto[]
 }

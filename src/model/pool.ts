@@ -199,3 +199,10 @@ export type PoolSnapshotDto = {
   liquidityB: bigint
   totalSupply: bigint
 }
+
+export type PoolSpreadProfitDto = {
+  id: string
+  intervalType: '1h'
+  timestamp: bigint
+  accumulatedProfitInUsd: string
+}
