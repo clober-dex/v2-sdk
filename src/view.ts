@@ -30,6 +30,12 @@ import { MAX_TICK, MIN_TICK } from './constants/tick'
 import { fetchPool, fetchPoolPerformance } from './apis/pool'
 import { fetchStrategyPrice } from './apis/strategy'
 import { Subgraph } from './constants/subgraph'
+import { fillAndSortByTimestamp } from './utils/time-series'
+import {
+  PoolSnapshotDto as ModelPoolSnapshot,
+  PoolSpreadProfitDto as ModelPoolSpreadProfit,
+  PoolVolumeDto as ModelPoolVolume,
+} from './model/pool'
 
 /**
  * Get contract addresses by chain id
@@ -194,6 +200,7 @@ export const getPoolPerformance = async ({
   salt,
   volumeFromTimestamp,
   snapshotFromTimestamp,
+  spreadProfitFromTimestamp,
   options,
 }: {
   chainId: CHAIN_IDS
@@ -202,6 +209,7 @@ export const getPoolPerformance = async ({
   salt: `0x${string}`
   volumeFromTimestamp: number
   snapshotFromTimestamp: number
+  spreadProfitFromTimestamp: number
   options?: {
     pool?: Pool
     useSubgraph?: boolean
@@ -237,9 +245,59 @@ export const getPoolPerformance = async ({
     pool.key,
     volumeFromTimestamp,
     snapshotFromTimestamp,
+    spreadProfitFromTimestamp,
+  )
+  const poolVolumes = fillAndSortByTimestamp(
+    poolPerformance.data.poolVolumes,
+    24 * 60 * 60,
+    (timestamp: number) => {
+      const emptyPoolVolume: ModelPoolVolume = {
+        id: '',
+        poolKey: pool.key,
+        intervalType: '1d',
+        timestamp: BigInt(timestamp),
+        currencyAVolume: 0n,
+        currencyBVolume: 0n,
+        bookACurrencyAVolume: 0n,
+        bookACurrencyBVolume: 0n,
+        bookBCurrencyAVolume: 0n,
+        bookBCurrencyBVolume: 0n,
+      }
+      return emptyPoolVolume
+    },
+  )
+  const poolSnapshots = fillAndSortByTimestamp(
+    poolPerformance.data.poolSnapshots,
+    60 * 60,
+    (timestamp: number, prev: ModelPoolSnapshot) => {
+      const emptyPoolSnapshot: ModelPoolSnapshot = {
+        id: '',
+        poolKey: pool.key,
+        intervalType: '1h',
+        timestamp: BigInt(timestamp),
+        price: prev.price,
+        liquidityA: prev.liquidityA,
+        liquidityB: prev.liquidityB,
+        totalSupply: prev.totalSupply,
+      }
+      return emptyPoolSnapshot
+    },
+  )
+  const poolSpreadProfits = fillAndSortByTimestamp(
+    poolPerformance.data.poolSpreadProfits,
+    60 * 60,
+    (timestamp: number) => {
+      const emptyPoolSpreadProfit: ModelPoolSpreadProfit = {
+        id: '',
+        intervalType: '1h',
+        timestamp: BigInt(timestamp),
+        accumulatedProfitInUsd: '0',
+      }
+      return emptyPoolSpreadProfit
+    },
   )
   return {
-    poolVolumes: poolPerformance.data.poolVolumes.map((poolVolume) => ({
+    poolVolumes: poolVolumes.map((poolVolume) => ({
       poolKey: poolVolume.poolKey,
       intervalType: poolVolume.intervalType,
       timestamp: Number(poolVolume.timestamp),
@@ -252,7 +310,7 @@ export const getPoolPerformance = async ({
         value: formatUnits(poolVolume.currencyBVolume, pool.currencyB.decimals),
       },
     })),
-    poolSnapshots: poolPerformance.data.poolSnapshots.map((poolSnapshot) => ({
+    poolSnapshots: poolSnapshots.map((poolSnapshot) => ({
       poolKey: poolSnapshot.poolKey,
       intervalType: poolSnapshot.intervalType,
       timestamp: Number(poolSnapshot.timestamp),
@@ -269,6 +327,11 @@ export const getPoolPerformance = async ({
         currency: pool.currencyLp,
         value: formatUnits(poolSnapshot.totalSupply, pool.currencyLp.decimals),
       },
+    })),
+    poolSpreadProfits: poolSpreadProfits.map((poolSpreadProfit) => ({
+      intervalType: poolSpreadProfit.intervalType,
+      timestamp: Number(poolSpreadProfit.timestamp),
+      accumulatedProfitInUsd: poolSpreadProfit.accumulatedProfitInUsd,
     })),
   }
 }

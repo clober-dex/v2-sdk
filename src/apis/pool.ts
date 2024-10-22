@@ -1,7 +1,12 @@
 import { PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
-import { Pool, PoolSnapshotDto, PoolVolumeDto } from '../model/pool'
+import {
+  Pool,
+  PoolSnapshotDto,
+  PoolSpreadProfitDto,
+  PoolVolumeDto,
+} from '../model/pool'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
@@ -15,20 +20,23 @@ export const fetchPoolPerformance = async (
   poolKey: `0x${string}`,
   volumeFromTimestamp: number,
   snapshotFromTimestamp: number,
+  spreadProfitFromTimestamp: number,
 ) => {
   return Subgraph.get<{
     data: {
       poolVolumes: PoolVolumeDto[]
       poolSnapshots: PoolSnapshotDto[]
+      poolSpreadProfits: PoolSpreadProfitDto[]
     }
   }>(
     chainId,
     'getPoolPerformanceData',
-    'query getPoolPerformanceData($poolKey: String!, $volumeFrom: BigInt!, $snapshotFrom: BigInt!) { poolVolumes(where: { poolKey: $poolKey, intervalType: "1d", timestamp_gte: $volumeFrom, }) { id poolKey intervalType timestamp currencyAVolume currencyBVolume bookACurrencyAVolume bookACurrencyBVolume bookBCurrencyAVolume bookBCurrencyBVolume } poolSnapshots( where: { poolKey: $poolKey, intervalType: "1h", timestamp_gte: $snapshotFrom, } ) { id poolKey intervalType timestamp price liquidityA liquidityB totalSupply } }',
+    'query getPoolPerformanceData($poolKey: String!, $volumeFrom: BigInt!, $snapshotFrom: BigInt!, $spreadProfitFrom: BigInt!) { poolVolumes(where: { poolKey: $poolKey, intervalType: "1d", timestamp_gte: $volumeFrom, }) { id poolKey intervalType timestamp currencyAVolume currencyBVolume bookACurrencyAVolume bookACurrencyBVolume bookBCurrencyAVolume bookBCurrencyBVolume } poolSnapshots( where: { poolKey: $poolKey, intervalType: "1h", timestamp_gte: $snapshotFrom, } ) { id poolKey intervalType timestamp price liquidityA liquidityB totalSupply } poolSpreadProfits( where: { intervalType: "1h", timestamp_gte: $spreadProfitFrom, } ) { id intervalType timestamp accumulatedProfitInUsd } }',
     {
       poolKey,
       volumeFrom: BigInt(volumeFromTimestamp),
       snapshotFrom: BigInt(snapshotFromTimestamp),
+      spreadProfitFrom: BigInt(spreadProfitFromTimestamp),
     },
   )
 }
