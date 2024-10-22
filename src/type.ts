@@ -21,8 +21,14 @@ export type Book = {
   isOpened: boolean
 }
 
-export type StrategyPrice = {
+export type LastRawAmounts = {
+  lastRawAmountA: bigint
+  lastRawAmountB: bigint
+}
+
+export type StrategyPosition = {
   oraclePrice: bigint
+  rate: string
   bidTick: bigint
   askTick: bigint
 }

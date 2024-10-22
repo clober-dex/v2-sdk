@@ -34,6 +34,7 @@ const main = async () => {
     salt: zeroHash,
     config: {
       referenceThreshold: '0.1',
+      rebalanceThreshold: '0.1',
       rateA: '0.1',
       rateB: '0.1',
       minRateA: '0.003',

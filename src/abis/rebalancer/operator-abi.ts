@@ -1,56 +1,19 @@
 export const OPERATOR_ABI = [
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: false,
-        internalType: 'address',
-        name: 'previousAdmin',
+        internalType: 'contract ISimpleOracleStrategy',
+        name: 'oracleStrategy_',
         type: 'address',
       },
       {
-        indexed: false,
-        internalType: 'address',
-        name: 'newAdmin',
+        internalType: 'contract IRebalancer',
+        name: 'rebalancer_',
         type: 'address',
       },
     ],
-    name: 'AdminChanged',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'beacon',
-        type: 'address',
-      },
-    ],
-    name: 'BeaconUpgraded',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'implementation',
-        type: 'address',
-      },
-    ],
-    name: 'Upgraded',
-    type: 'event',
-  },
-  {
-    stateMutability: 'payable',
-    type: 'fallback',
-  },
-  {
-    stateMutability: 'payable',
-    type: 'receive',
+    stateMutability: 'nonpayable',
+    type: 'constructor',
   },
   {
     inputs: [
@@ -181,6 +144,19 @@ export const OPERATOR_ABI = [
       },
     ],
     name: 'OwnershipTransferred',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'implementation',
+        type: 'address',
+      },
+    ],
+    name: 'Upgraded',
     type: 'event',
   },
   {
@@ -324,12 +300,12 @@ export const OPERATOR_ABI = [
         type: 'int24',
       },
       {
-        internalType: 'uint64',
-        name: 'alpha',
-        type: 'uint64',
+        internalType: 'uint24',
+        name: 'rate',
+        type: 'uint24',
       },
     ],
-    name: 'updatePrice',
+    name: 'updatePosition',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -351,21 +327,5 @@ export const OPERATOR_ABI = [
     outputs: [],
     stateMutability: 'payable',
     type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '_logic',
-        type: 'address',
-      },
-      {
-        internalType: 'bytes',
-        name: '_data',
-        type: 'bytes',
-      },
-    ],
-    stateMutability: 'payable',
-    type: 'constructor',
   },
 ] as const

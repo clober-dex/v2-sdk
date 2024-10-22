@@ -1636,7 +1636,7 @@ export const adjustOrderPrice = async ({
         invertTick(roundingUpAskPrice ? roundingUpTickB : roundingDownTickB),
       )
 
-  const alphaRaw = parseUnits(alpha, 6)
+  const rateRaw = parseUnits(alpha, 6)
 
   return buildTransaction(
     publicClient,
@@ -1645,8 +1645,8 @@ export const adjustOrderPrice = async ({
       account: userAddress,
       address: CONTRACT_ADDRESSES[chainId]!.Operator,
       abi: OPERATOR_ABI,
-      functionName: 'updatePrice',
-      args: [pool.key, oracleRawPrice, tickA, tickB, alphaRaw],
+      functionName: 'updatePosition',
+      args: [pool.key, oracleRawPrice, tickA, tickB, rateRaw],
     },
     options?.gasLimit,
     options?.gasPriceLimit,
