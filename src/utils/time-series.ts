@@ -21,10 +21,10 @@ export function fillAndSortByTimestamp<
   }
 
   if (sortedData.findIndex((d) => Number(d.timestamp) === toTimestamp) === -1) {
-    const after =
-      sortedData.filter((d) => Number(d.timestamp) > toTimestamp).shift() ||
-      null
-    sortedData.push(emptyObjectGenerator(toTimestamp, after))
+    const before =
+      sortedData.filter((d) => Number(d.timestamp) < toTimestamp).pop() || null
+    null
+    sortedData.push(emptyObjectGenerator(toTimestamp, before))
   }
 
   const result: T[] = []
