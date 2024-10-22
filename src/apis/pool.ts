@@ -10,7 +10,7 @@ import {
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
-import { Market } from '../type'
+import { CHART_LOG_INTERVALS, Market } from '../type'
 import { Subgraph } from '../constants/subgraph'
 
 import { fetchMarket } from './market'
@@ -20,25 +20,35 @@ export const fetchPoolPerformance = async (
   poolKey: `0x${string}`,
   volumeFromTimestamp: number,
   snapshotFromTimestamp: number,
+  snapshotIntervalType: CHART_LOG_INTERVALS,
   spreadProfitFromTimestamp: number,
 ) => {
-  return Subgraph.get<{
+  const result = await Subgraph.get<{
     data: {
       poolVolumes: PoolVolumeDto[]
       poolSnapshots: PoolSnapshotDto[]
+      poolSnapshotBefore: PoolSnapshotDto[]
       poolSpreadProfits: PoolSpreadProfitDto[]
     }
   }>(
     chainId,
     'getPoolPerformanceData',
-    'query getPoolPerformanceData($poolKey: String!, $volumeFrom: BigInt!, $snapshotFrom: BigInt!, $spreadProfitFrom: BigInt!) { poolVolumes(where: { poolKey: $poolKey, intervalType: "1d", timestamp_gte: $volumeFrom, }) { id poolKey intervalType timestamp currencyAVolume currencyBVolume bookACurrencyAVolume bookACurrencyBVolume bookBCurrencyAVolume bookBCurrencyBVolume } poolSnapshots( where: { poolKey: $poolKey, intervalType: "1h", timestamp_gte: $snapshotFrom, } ) { id poolKey intervalType timestamp price liquidityA liquidityB totalSupply } poolSpreadProfits( where: { intervalType: "1h", timestamp_gte: $spreadProfitFrom, } ) { id intervalType timestamp accumulatedProfitInUsd } }',
+    'query getPoolPerformanceData($poolKey: String!, $volumeFrom: BigInt!, $snapshotFrom: BigInt!, $snapshotIntervalType: String!, $spreadProfitFrom: BigInt!) { poolVolumes(where: { poolKey: $poolKey, intervalType: "1d", timestamp_gte: $volumeFrom, }) { id poolKey intervalType timestamp currencyAVolume currencyBVolume bookACurrencyAVolume bookACurrencyBVolume bookBCurrencyAVolume bookBCurrencyBVolume } poolSnapshots( first: 1000, skip: 0, orderBy: timestamp, orderDirection: asc where: { poolKey: $poolKey, intervalType: $snapshotIntervalType, timestamp_gte: $snapshotFrom, } ) { id poolKey intervalType timestamp price liquidityA liquidityB totalSupply } poolSnapshotBefore: poolSnapshots( first: 1, skip: 0, orderBy: timestamp, orderDirection: desc, where: { poolKey: $poolKey, intervalType: $snapshotIntervalType, timestamp_lt: $snapshotFrom, } ) { id poolKey intervalType timestamp price liquidityA liquidityB totalSupply } poolSpreadProfits( where: { intervalType: "1h", timestamp_gte: $spreadProfitFrom, } ) { id intervalType timestamp accumulatedProfitInUsd } }',
     {
       poolKey,
       volumeFrom: volumeFromTimestamp,
       snapshotFrom: snapshotFromTimestamp,
+      snapshotIntervalType: snapshotIntervalType.valueOf(),
       spreadProfitFrom: spreadProfitFromTimestamp,
     },
   )
+  return {
+    poolVolumes: result.data.poolVolumes,
+    poolSnapshots: result.data.poolSnapshotBefore.concat(
+      result.data.poolSnapshots,
+    ),
+    poolSpreadProfits: result.data.poolSpreadProfits,
+  }
 }
 
 export async function fetchPool(

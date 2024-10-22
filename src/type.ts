@@ -154,7 +154,7 @@ export type PoolVolumeDto = {
 
 export type PoolSnapshotDto = {
   poolKey: `0x${string}`
-  intervalType: '1h'
+  intervalType: CHART_LOG_INTERVALS
   timestamp: number
   price: string
   liquidityA: CurrencyAmount
