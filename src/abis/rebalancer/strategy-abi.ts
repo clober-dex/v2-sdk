@@ -246,12 +246,25 @@ export const STRATEGY_ABI = [
       {
         indexed: false,
         internalType: 'uint256',
-        name: 'alpha',
+        name: 'rate',
         type: 'uint256',
       },
     ],
-    name: 'UpdatePrice',
+    name: 'UpdatePosition',
     type: 'event',
+  },
+  {
+    inputs: [],
+    name: 'LAST_RAW_AMOUNT_MASK',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
   },
   {
     inputs: [],
@@ -290,7 +303,7 @@ export const STRATEGY_ABI = [
     inputs: [
       {
         internalType: 'address',
-        name: 'sender',
+        name: '',
         type: 'address',
       },
       {
@@ -357,19 +370,6 @@ export const STRATEGY_ABI = [
         internalType: 'struct IStrategy.Order[]',
         name: 'ordersB',
         type: 'tuple[]',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'getAlpha',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
       },
     ],
     stateMutability: 'view',
@@ -444,14 +444,43 @@ export const STRATEGY_ABI = [
         type: 'bytes32',
       },
     ],
-    name: 'getPrice',
+    name: 'getLastRawAmount',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: 'getPosition',
     outputs: [
       {
         components: [
           {
-            internalType: 'uint208',
+            internalType: 'uint184',
             name: 'oraclePrice',
-            type: 'uint208',
+            type: 'uint184',
+          },
+          {
+            internalType: 'uint24',
+            name: 'rate',
+            type: 'uint24',
           },
           {
             internalType: 'Tick',
@@ -464,7 +493,7 @@ export const STRATEGY_ABI = [
             type: 'int24',
           },
         ],
-        internalType: 'struct ISimpleOracleStrategy.Price',
+        internalType: 'struct ISimpleOracleStrategy.Position',
         name: '',
         type: 'tuple',
       },
@@ -514,22 +543,22 @@ export const STRATEGY_ABI = [
     inputs: [
       {
         internalType: 'address',
-        name: 'sender',
+        name: '',
         type: 'address',
       },
       {
         internalType: 'bytes32',
-        name: 'key',
+        name: '',
         type: 'bytes32',
       },
       {
         internalType: 'uint256',
-        name: 'mintAmount',
+        name: '',
         type: 'uint256',
       },
       {
         internalType: 'uint256',
-        name: 'totalSupply',
+        name: '',
         type: 'uint256',
       },
     ],
@@ -568,7 +597,7 @@ export const STRATEGY_ABI = [
     inputs: [
       {
         internalType: 'address',
-        name: 'sender',
+        name: '',
         type: 'address',
       },
       {
@@ -763,12 +792,12 @@ export const STRATEGY_ABI = [
         type: 'int24',
       },
       {
-        internalType: 'uint256',
-        name: 'alpha',
-        type: 'uint256',
+        internalType: 'uint24',
+        name: 'rate',
+        type: 'uint24',
       },
     ],
-    name: 'updatePrice',
+    name: 'updatePosition',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

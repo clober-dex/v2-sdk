@@ -16,6 +16,17 @@ export const REBALANCER_ABI = [
     type: 'constructor',
   },
   {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'target',
+        type: 'address',
+      },
+    ],
+    name: 'AddressEmptyCode',
+    type: 'error',
+  },
+  {
     inputs: [],
     name: 'AlreadyOpened',
     type: 'error',
@@ -23,6 +34,27 @@ export const REBALANCER_ABI = [
   {
     inputs: [],
     name: 'ERC20TransferFailed',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'FailedCall',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'balance',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'needed',
+        type: 'uint256',
+      },
+    ],
+    name: 'InsufficientBalance',
     type: 'error',
   },
   {

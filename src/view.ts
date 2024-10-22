@@ -13,10 +13,11 @@ import type {
   ChartLog,
   Currency,
   DefaultReadContractOptions,
+  LastRawAmounts,
   Market,
   Pool,
   PoolPerformanceData,
-  StrategyPrice,
+  StrategyPosition,
 } from './type'
 import { CHART_LOG_INTERVALS } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
@@ -28,7 +29,7 @@ import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 import { fetchPool, fetchPoolPerformance } from './apis/pool'
-import { fetchStrategyPrice } from './apis/strategy'
+import { fetchLastRawAmounts, fetchStrategyPosition } from './apis/strategy'
 import { Subgraph } from './constants/subgraph'
 import { fillAndSortByTimestamp } from './utils/time-series'
 import {
@@ -351,7 +352,7 @@ export const getStrategyPrice = async ({
     market?: Market
     useSubgraph?: boolean
   }
-}): Promise<StrategyPrice> => {
+}): Promise<StrategyPosition> => {
   if (isAddressEqual(token0, token1)) {
     throw new Error('Token0 and token1 must be different')
   }
@@ -359,7 +360,40 @@ export const getStrategyPrice = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  return fetchStrategyPrice(
+  return fetchStrategyPosition(
+    publicClient,
+    chainId,
+    [token0, token1],
+    salt,
+    !!(options && options.useSubgraph),
+    options?.market,
+  )
+}
+
+export const getLastRawAmounts = async ({
+  chainId,
+  token0,
+  token1,
+  salt,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  token0: `0x${string}`
+  token1: `0x${string}`
+  salt: `0x${string}`
+  options?: DefaultReadContractOptions & {
+    market?: Market
+    useSubgraph?: boolean
+  }
+}): Promise<LastRawAmounts> => {
+  if (isAddressEqual(token0, token1)) {
+    throw new Error('Token0 and token1 must be different')
+  }
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  return fetchLastRawAmounts(
     publicClient,
     chainId,
     [token0, token1],
