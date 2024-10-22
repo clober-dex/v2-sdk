@@ -34,9 +34,9 @@ export const fetchPoolPerformance = async (
     'query getPoolPerformanceData($poolKey: String!, $volumeFrom: BigInt!, $snapshotFrom: BigInt!, $spreadProfitFrom: BigInt!) { poolVolumes(where: { poolKey: $poolKey, intervalType: "1d", timestamp_gte: $volumeFrom, }) { id poolKey intervalType timestamp currencyAVolume currencyBVolume bookACurrencyAVolume bookACurrencyBVolume bookBCurrencyAVolume bookBCurrencyBVolume } poolSnapshots( where: { poolKey: $poolKey, intervalType: "1h", timestamp_gte: $snapshotFrom, } ) { id poolKey intervalType timestamp price liquidityA liquidityB totalSupply } poolSpreadProfits( where: { intervalType: "1h", timestamp_gte: $spreadProfitFrom, } ) { id intervalType timestamp accumulatedProfitInUsd } }',
     {
       poolKey,
-      volumeFrom: BigInt(volumeFromTimestamp),
-      snapshotFrom: BigInt(snapshotFromTimestamp),
-      spreadProfitFrom: BigInt(spreadProfitFromTimestamp),
+      volumeFrom: volumeFromTimestamp,
+      snapshotFrom: snapshotFromTimestamp,
+      spreadProfitFrom: spreadProfitFromTimestamp,
     },
   )
 }
