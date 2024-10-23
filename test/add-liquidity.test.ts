@@ -1,14 +1,15 @@
 import { expect, beforeEach, test } from 'vitest'
-import { addLiquidity, getPool } from '@clober/v2-sdk'
+import { addLiquidity, getPool, openPool } from '@clober/v2-sdk'
 import { formatUnits, zeroHash } from 'viem'
 
-import { cloberTestChain } from '../src/constants/test-chain'
+import { cloberTestChain2 } from '../src/constants/test-chain'
+import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
 
-import { account, FORK_URL } from './utils/constants'
-import { createProxyClients } from './utils/utils'
+import { FORK_URL } from './utils/constants'
+import { createProxyClients2 } from './utils/utils'
 import { fetchLPBalance, fetchTokenBalance } from './utils/currency'
 
-const clients = createProxyClients(
+const clients = createProxyClients2(
   Array.from({ length: 2 }, () => Math.floor(new Date().getTime())).map(
     (id) => id,
   ),
@@ -19,17 +20,122 @@ beforeEach(async () => {
     clients.map(({ testClient }) => {
       return testClient.reset({
         jsonRpcUrl: FORK_URL,
-        blockNumber: 84040472n,
+        blockNumber: 90651133n,
       })
     }),
   )
 })
 
+const setting = async (
+  publicClient: any,
+  walletClient: any,
+  testClient: any,
+) => {
+  await testClient.impersonateAccount({
+    address: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+  })
+
+  const openPoolTx = await openPool({
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+    tokenA: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    tokenB: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
+    salt: zeroHash,
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+  const openPoolHash = await walletClient.sendTransaction({
+    ...openPoolTx!,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+    gasPrice: openPoolTx!.gasPrice! * 2n,
+  })
+  await publicClient.waitForTransactionReceipt({ hash: openPoolHash })
+
+  const approveMintHash1 = await walletClient.writeContract({
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+    chain: cloberTestChain2,
+    address: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    abi: [
+      {
+        inputs: [
+          {
+            internalType: 'address',
+            name: 'spender',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: 'value',
+            type: 'uint256',
+          },
+        ],
+        name: 'approve',
+        outputs: [
+          {
+            internalType: 'bool',
+            name: '',
+            type: 'bool',
+          },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ] as const,
+    functionName: 'approve',
+    args: [CONTRACT_ADDRESSES[cloberTestChain2.id]!.Minter, 2n ** 256n - 1n],
+  })
+  const approveMintReceipt1 = await publicClient.waitForTransactionReceipt({
+    hash: approveMintHash1!,
+  })
+  expect(approveMintReceipt1.status).toEqual('success')
+  const approveMintHash2 = await walletClient.writeContract({
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
+    chain: cloberTestChain2,
+    address: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
+    abi: [
+      {
+        inputs: [
+          {
+            internalType: 'address',
+            name: 'spender',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: 'value',
+            type: 'uint256',
+          },
+        ],
+        name: 'approve',
+        outputs: [
+          {
+            internalType: 'bool',
+            name: '',
+            type: 'bool',
+          },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ] as const,
+    functionName: 'approve',
+    args: [CONTRACT_ADDRESSES[cloberTestChain2.id]!.Minter, 2n ** 256n - 1n],
+  })
+  const approveMintReceipt2 = await publicClient.waitForTransactionReceipt({
+    hash: approveMintHash2!,
+  })
+  expect(approveMintReceipt2.status).toEqual('success')
+}
+
 test('Add liquidity without swap - 1', async () => {
-  const { publicClient, walletClient } = clients[0] as any
+  const { publicClient, walletClient, testClient } = clients[0] as any
+
+  await setting(publicClient, walletClient, testClient)
 
   const pool = await getPool({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain2.id,
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -43,27 +149,27 @@ test('Add liquidity without swap - 1', async () => {
     await Promise.all([
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
       fetchLPBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         BigInt(pool.key),
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
     ])
 
   const { transaction: tx1, result: result1 } = await addLiquidity({
-    chainId: cloberTestChain.id,
-    userAddress: account.address,
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -78,28 +184,28 @@ test('Add liquidity without swap - 1', async () => {
 
   const hash1 = await walletClient.sendTransaction({
     ...tx1!,
-    account,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     gasPrice: tx1!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash1 })
   let [afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
   expect(formatUnits(beforeUSDCBalance - afterUSDCBalance, 6)).toBe(
@@ -116,27 +222,27 @@ test('Add liquidity without swap - 1', async () => {
   ;[beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
   const { transaction: tx2, result: result2 } = await addLiquidity({
-    chainId: cloberTestChain.id,
-    userAddress: account.address,
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -151,28 +257,28 @@ test('Add liquidity without swap - 1', async () => {
 
   const hash2 = await walletClient.sendTransaction({
     ...tx2!,
-    account,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     gasPrice: tx2!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash2 })
   ;[afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
@@ -188,10 +294,12 @@ test('Add liquidity without swap - 1', async () => {
 })
 
 test('Add liquidity without swap - 2', async () => {
-  const { publicClient, walletClient } = clients[0] as any
+  const { publicClient, walletClient, testClient } = clients[0] as any
+
+  await setting(publicClient, walletClient, testClient)
 
   const pool = await getPool({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain2.id,
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -205,27 +313,27 @@ test('Add liquidity without swap - 2', async () => {
     await Promise.all([
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
       fetchLPBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         BigInt(pool.key),
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
     ])
 
   const { transaction: tx1, result: result1 } = await addLiquidity({
-    chainId: cloberTestChain.id,
-    userAddress: account.address,
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -240,28 +348,28 @@ test('Add liquidity without swap - 2', async () => {
 
   const hash1 = await walletClient.sendTransaction({
     ...tx1!,
-    account,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     gasPrice: tx1!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash1 })
   let [afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
   expect(formatUnits(beforeUSDCBalance - afterUSDCBalance, 6)).toBe(
@@ -278,27 +386,27 @@ test('Add liquidity without swap - 2', async () => {
   ;[beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
   const { transaction: tx2, result: result2 } = await addLiquidity({
-    chainId: cloberTestChain.id,
-    userAddress: account.address,
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -313,28 +421,28 @@ test('Add liquidity without swap - 2', async () => {
 
   const hash2 = await walletClient.sendTransaction({
     ...tx2!,
-    account,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     gasPrice: tx2!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash2 })
   ;[afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
@@ -350,10 +458,12 @@ test('Add liquidity without swap - 2', async () => {
 })
 
 test('Add liquidity one side with swap', async () => {
-  const { publicClient, walletClient } = clients[0] as any
+  const { publicClient, walletClient, testClient } = clients[0] as any
+
+  await setting(publicClient, walletClient, testClient)
 
   const pool = await getPool({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain2.id,
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -367,27 +477,27 @@ test('Add liquidity one side with swap', async () => {
     await Promise.all([
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
       fetchLPBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         BigInt(pool.key),
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
     ])
 
   const { transaction: tx1, result: result1 } = await addLiquidity({
-    chainId: cloberTestChain.id,
-    userAddress: account.address,
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -402,28 +512,28 @@ test('Add liquidity one side with swap', async () => {
 
   const hash1 = await walletClient.sendTransaction({
     ...tx1!,
-    account,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     gasPrice: tx1!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash1 })
   let [afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
   expect(formatUnits(beforeUSDCBalance - afterUSDCBalance, 6)).toBe(
@@ -440,27 +550,27 @@ test('Add liquidity one side with swap', async () => {
   ;[beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
   const { transaction: tx2, result: result2 } = await addLiquidity({
-    chainId: cloberTestChain.id,
-    userAddress: account.address,
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -475,28 +585,28 @@ test('Add liquidity one side with swap', async () => {
 
   const hash2 = await walletClient.sendTransaction({
     ...tx2!,
-    account,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     gasPrice: tx2!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash2 })
   ;[afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
@@ -514,27 +624,27 @@ test('Add liquidity one side with swap', async () => {
   ;[beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
   const { transaction: tx3, result: result3 } = await addLiquidity({
-    chainId: cloberTestChain.id,
-    userAddress: account.address,
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -549,28 +659,28 @@ test('Add liquidity one side with swap', async () => {
 
   const hash3 = await walletClient.sendTransaction({
     ...tx3!,
-    account,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     gasPrice: tx2!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash3 })
   ;[afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
@@ -588,10 +698,12 @@ test('Add liquidity one side with swap', async () => {
 })
 
 test('Add liquidity two sides with swap', async () => {
-  const { publicClient, walletClient } = clients[0] as any
+  const { publicClient, walletClient, testClient } = clients[0] as any
+
+  await setting(publicClient, walletClient, testClient)
 
   const pool = await getPool({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain2.id,
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -605,27 +717,27 @@ test('Add liquidity two sides with swap', async () => {
     await Promise.all([
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
       fetchLPBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain2.id,
         BigInt(pool.key),
-        account.address,
+        '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
       ),
     ])
 
   const { transaction: tx1, result: result1 } = await addLiquidity({
-    chainId: cloberTestChain.id,
-    userAddress: account.address,
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -639,28 +751,28 @@ test('Add liquidity two sides with swap', async () => {
 
   const hash1 = await walletClient.sendTransaction({
     ...tx1!,
-    account,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     gasPrice: tx1!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash1 })
   let [afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
   expect(formatUnits(beforeUSDCBalance - afterUSDCBalance, 6)).toBe(
@@ -677,27 +789,27 @@ test('Add liquidity two sides with swap', async () => {
   ;[beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
   const { transaction: tx2, result: result2 } = await addLiquidity({
-    chainId: cloberTestChain.id,
-    userAddress: account.address,
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -712,28 +824,28 @@ test('Add liquidity two sides with swap', async () => {
 
   const hash2 = await walletClient.sendTransaction({
     ...tx2!,
-    account,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     gasPrice: tx2!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash2 })
   ;[afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
@@ -751,27 +863,27 @@ test('Add liquidity two sides with swap', async () => {
   ;[beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
   const { transaction: tx3, result: result3 } = await addLiquidity({
-    chainId: cloberTestChain.id,
-    userAddress: account.address,
+    chainId: cloberTestChain2.id,
+    userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
     salt: zeroHash,
@@ -786,28 +898,28 @@ test('Add liquidity two sides with swap', async () => {
 
   const hash3 = await walletClient.sendTransaction({
     ...tx3!,
-    account,
+    account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     gasPrice: tx3!.gasPrice! * 2n,
   })
   await publicClient.waitForTransactionReceipt({ hash: hash3 })
   ;[afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
     fetchLPBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain2.id,
       BigInt(pool.key),
-      account.address,
+      '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
     ),
   ])
 
