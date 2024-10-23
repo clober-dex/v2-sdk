@@ -3,7 +3,7 @@ import { CHART_LOG_INTERVALS, ChartLog } from '../type'
 import { ChartLogDto } from '../model/chart-log'
 import { Subgraph } from '../constants/subgraph'
 
-const CHART_LOG_INTERVAL_TIMESTAMP: {
+export const CHART_LOG_INTERVAL_TIMESTAMP: {
   [key in CHART_LOG_INTERVALS]: number
 } = {
   [CHART_LOG_INTERVALS.oneMinute]: 60,

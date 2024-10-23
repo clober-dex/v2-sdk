@@ -1,6 +1,12 @@
 import { formatUnits } from 'viem'
 
-import { CHAIN_IDS, Currency, Market, Pool as PoolType } from '../type'
+import {
+  CHAIN_IDS,
+  CHART_LOG_INTERVALS,
+  Currency,
+  Market,
+  Pool as PoolType,
+} from '../type'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 
@@ -192,7 +198,7 @@ export type PoolVolumeDto = {
 export type PoolSnapshotDto = {
   id: string
   poolKey: `0x${string}`
-  intervalType: '1h'
+  intervalType: CHART_LOG_INTERVALS
   timestamp: bigint
   price: bigint
   liquidityA: bigint

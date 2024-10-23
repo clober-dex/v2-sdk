@@ -3,11 +3,29 @@ export function fillAndSortByTimestamp<
 >(
   data: T[],
   granularity: number,
-  emptyObjectGenerator: (timestamp: number, prev: T) => T,
+  fromTimestamp: number,
+  toTimestamp: number,
+  emptyObjectGenerator: (timestamp: number, prev: T | null) => T,
 ): T[] {
   const sortedData = data.sort(
     (a, b) => Number(a.timestamp) - Number(b.timestamp),
   )
+
+  if (
+    sortedData.findIndex((d) => Number(d.timestamp) === fromTimestamp) === -1
+  ) {
+    const before =
+      sortedData.filter((d) => Number(d.timestamp) < fromTimestamp).pop() ||
+      null
+    sortedData.unshift(emptyObjectGenerator(fromTimestamp, before))
+  }
+
+  if (sortedData.findIndex((d) => Number(d.timestamp) === toTimestamp) === -1) {
+    const before =
+      sortedData.filter((d) => Number(d.timestamp) < toTimestamp).pop() || null
+    null
+    sortedData.push(emptyObjectGenerator(toTimestamp, before))
+  }
 
   const result: T[] = []
 
@@ -27,5 +45,9 @@ export function fillAndSortByTimestamp<
     }
   }
 
-  return result
+  return result.filter(
+    (d) =>
+      Number(d.timestamp) >= fromTimestamp &&
+      Number(d.timestamp) <= toTimestamp,
+  )
 }

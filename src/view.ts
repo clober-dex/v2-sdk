@@ -23,7 +23,11 @@ import { CHART_LOG_INTERVALS } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
 import { OpenOrder } from './model/open-order'
-import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
+import {
+  CHART_LOG_INTERVAL_TIMESTAMP,
+  fetchChartLogs,
+  fetchLatestChartLog,
+} from './apis/chart-logs'
 import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
@@ -200,8 +204,12 @@ export const getPoolPerformance = async ({
   token1,
   salt,
   volumeFromTimestamp,
+  volumeToTimestamp,
   snapshotFromTimestamp,
+  snapshotToTimestamp,
+  snapshotIntervalType,
   spreadProfitFromTimestamp,
+  spreadProfitToTimestamp,
   options,
 }: {
   chainId: CHAIN_IDS
@@ -209,8 +217,12 @@ export const getPoolPerformance = async ({
   token1: `0x${string}`
   salt: `0x${string}`
   volumeFromTimestamp: number
+  volumeToTimestamp: number
   snapshotFromTimestamp: number
+  snapshotToTimestamp: number
+  snapshotIntervalType: CHART_LOG_INTERVALS
   spreadProfitFromTimestamp: number
+  spreadProfitToTimestamp: number
   options?: {
     pool?: Pool
     useSubgraph?: boolean
@@ -246,11 +258,14 @@ export const getPoolPerformance = async ({
     pool.key,
     volumeFromTimestamp,
     snapshotFromTimestamp,
+    snapshotIntervalType,
     spreadProfitFromTimestamp,
   )
   const poolVolumes = fillAndSortByTimestamp(
-    poolPerformance.data.poolVolumes,
+    poolPerformance.poolVolumes,
     24 * 60 * 60,
+    volumeFromTimestamp,
+    volumeToTimestamp,
     (timestamp: number) => {
       const emptyPoolVolume: ModelPoolVolume = {
         id: '',
@@ -268,25 +283,29 @@ export const getPoolPerformance = async ({
     },
   )
   const poolSnapshots = fillAndSortByTimestamp(
-    poolPerformance.data.poolSnapshots,
-    60 * 60,
-    (timestamp: number, prev: ModelPoolSnapshot) => {
+    poolPerformance.poolSnapshots,
+    CHART_LOG_INTERVAL_TIMESTAMP[snapshotIntervalType],
+    snapshotFromTimestamp,
+    snapshotToTimestamp,
+    (timestamp: number, prev: ModelPoolSnapshot | null) => {
       const emptyPoolSnapshot: ModelPoolSnapshot = {
         id: '',
         poolKey: pool.key,
-        intervalType: '1h',
+        intervalType: snapshotIntervalType,
         timestamp: BigInt(timestamp),
-        price: prev.price,
-        liquidityA: prev.liquidityA,
-        liquidityB: prev.liquidityB,
-        totalSupply: prev.totalSupply,
+        price: prev ? prev.price : 0n,
+        liquidityA: prev ? prev.liquidityA : 0n,
+        liquidityB: prev ? prev.liquidityB : 0n,
+        totalSupply: prev ? prev.totalSupply : 0n,
       }
       return emptyPoolSnapshot
     },
   )
   const poolSpreadProfits = fillAndSortByTimestamp(
-    poolPerformance.data.poolSpreadProfits,
+    poolPerformance.poolSpreadProfits,
     60 * 60,
+    spreadProfitFromTimestamp,
+    spreadProfitToTimestamp,
     (timestamp: number) => {
       const emptyPoolSpreadProfit: ModelPoolSpreadProfit = {
         id: '',
