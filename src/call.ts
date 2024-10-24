@@ -1828,8 +1828,8 @@ export const pausePool = async ({
     {
       chain: CHAIN_MAP[chainId],
       account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
-      abi: REBALANCER_ABI,
+      address: CONTRACT_ADDRESSES[chainId]!.Operator,
+      abi: OPERATOR_ABI,
       functionName: 'pause',
       args: [pool.key],
     },
@@ -1894,9 +1894,9 @@ export const resumePool = async ({
     {
       chain: CHAIN_MAP[chainId],
       account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
-      abi: REBALANCER_ABI,
-      functionName: 'resume',
+      address: CONTRACT_ADDRESSES[chainId]!.Strategy,
+      abi: STRATEGY_ABI,
+      functionName: 'unpause',
       args: [pool.key],
     },
     options?.gasLimit,

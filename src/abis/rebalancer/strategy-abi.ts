@@ -42,6 +42,11 @@ export const STRATEGY_ABI = [
   },
   {
     inputs: [],
+    name: 'InvalidOraclePrice',
+    type: 'error',
+  },
+  {
+    inputs: [],
     name: 'InvalidPrice',
     type: 'error',
   },
@@ -80,6 +85,11 @@ export const STRATEGY_ABI = [
       },
     ],
     name: 'OwnableUnauthorizedAccount',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'Paused',
     type: 'error',
   },
   {
@@ -141,6 +151,19 @@ export const STRATEGY_ABI = [
     inputs: [
       {
         indexed: true,
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: 'Pause',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
         internalType: 'address',
         name: 'operator',
         type: 'address',
@@ -153,6 +176,19 @@ export const STRATEGY_ABI = [
       },
     ],
     name: 'SetOperator',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: 'Unpause',
     type: 'event',
   },
   {
@@ -318,7 +354,7 @@ export const STRATEGY_ABI = [
       },
       {
         internalType: 'uint256',
-        name: 'totalSupply',
+        name: 'lastTotalSupply',
         type: 'uint256',
       },
     ],
@@ -473,9 +509,14 @@ export const STRATEGY_ABI = [
       {
         components: [
           {
-            internalType: 'uint184',
+            internalType: 'bool',
+            name: 'paused',
+            type: 'bool',
+          },
+          {
+            internalType: 'uint128',
             name: 'oraclePrice',
-            type: 'uint184',
+            type: 'uint128',
           },
           {
             internalType: 'uint24',
@@ -542,6 +583,25 @@ export const STRATEGY_ABI = [
   {
     inputs: [
       {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: 'isPaused',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'address',
         name: '',
         type: 'address',
@@ -578,6 +638,19 @@ export const STRATEGY_ABI = [
       },
     ],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: 'pause',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -765,6 +838,19 @@ export const STRATEGY_ABI = [
       },
     ],
     name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: 'unpause',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
