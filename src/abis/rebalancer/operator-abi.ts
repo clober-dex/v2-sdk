@@ -219,6 +219,19 @@ export const OPERATOR_ABI = [
     type: 'function',
   },
   {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: 'pause',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     inputs: [],
     name: 'pendingOwner',
     outputs: [

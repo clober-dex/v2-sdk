@@ -12,6 +12,7 @@ import { toPoolKey } from '../utils/pool-key'
 import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
 import { CHART_LOG_INTERVALS, Market } from '../type'
 import { Subgraph } from '../constants/subgraph'
+import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
 
 import { fetchMarket } from './market'
 
@@ -73,9 +74,10 @@ export async function fetchPool(
     salt,
   )
   const [
-    { bookIdA, bookIdB, reserveA, reserveB, orderListA, orderListB, paused },
+    { bookIdA, bookIdB, reserveA, reserveB, orderListA, orderListB },
     totalSupply,
     [totalLiquidityA, totalLiquidityB],
+    paused,
   ] = await publicClient.multicall({
     allowFailure: false,
     contracts: [
@@ -95,6 +97,12 @@ export async function fetchPool(
         address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
         abi: REBALANCER_ABI,
         functionName: 'getLiquidity',
+        args: [poolKey],
+      },
+      {
+        address: CONTRACT_ADDRESSES[chainId]!.Strategy,
+        abi: STRATEGY_ABI,
+        functionName: 'isPaused',
         args: [poolKey],
       },
     ],
