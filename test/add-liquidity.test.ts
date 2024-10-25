@@ -1,4 +1,4 @@
-import { expect, beforeEach, test } from 'vitest'
+import { beforeEach, expect, test } from 'vitest'
 import { addLiquidity, getPool, openPool } from '@clober/v2-sdk'
 import { formatUnits, zeroHash } from 'viem'
 
@@ -20,7 +20,7 @@ beforeEach(async () => {
     clients.map(({ testClient }) => {
       return testClient.reset({
         jsonRpcUrl: FORK_URL,
-        blockNumber: 90651133n,
+        blockNumber: 91501200n,
       })
     }),
   )
