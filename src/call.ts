@@ -1630,11 +1630,15 @@ export const adjustOrderPrice = async ({
   const tickA = options?.bidTick
     ? Number(options.bidTick)
     : Number(roundingUpBidPrice ? roundingUpTickA : roundingDownTickA)
-  const tickB = options?.askTick
+  let tickB = options?.askTick
     ? Number(options.askTick)
     : Number(
         invertTick(roundingUpAskPrice ? roundingUpTickB : roundingDownTickB),
       )
+
+  if (invertTick(BigInt(tickB)) <= BigInt(tickA)) {
+    tickB = Number(invertTick(BigInt(tickA + 1)))
+  }
 
   const rateRaw = parseUnits(alpha, 6)
 
