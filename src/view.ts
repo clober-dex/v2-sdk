@@ -270,7 +270,7 @@ export const getPoolPerformance = async ({
       const emptyPoolVolume: ModelPoolVolume = {
         id: '',
         poolKey: pool.key,
-        intervalType: '1d',
+        intervalType: '5m',
         timestamp: BigInt(timestamp),
         currencyAVolume: 0n,
         currencyBVolume: 0n,
@@ -309,7 +309,7 @@ export const getPoolPerformance = async ({
     (timestamp: number) => {
       const emptyPoolSpreadProfit: ModelPoolSpreadProfit = {
         id: '',
-        intervalType: '1h',
+        intervalType: '5m',
         timestamp: BigInt(timestamp),
         accumulatedProfitInUsd: '0',
       }

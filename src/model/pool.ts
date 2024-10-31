@@ -185,7 +185,7 @@ export class Pool {
 export type PoolVolumeDto = {
   id: string
   poolKey: `0x${string}`
-  intervalType: '1d'
+  intervalType: '5m'
   timestamp: bigint
   currencyAVolume: bigint
   currencyBVolume: bigint
@@ -208,7 +208,7 @@ export type PoolSnapshotDto = {
 
 export type PoolSpreadProfitDto = {
   id: string
-  intervalType: '1h'
+  intervalType: '5m'
   timestamp: bigint
   accumulatedProfitInUsd: string
 }
