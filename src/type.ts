@@ -146,7 +146,7 @@ export type Currency6909Amount = { currency: Currency6909; value: string }
 
 export type PoolVolumeDto = {
   poolKey: `0x${string}`
-  intervalType: '1d'
+  intervalType: '5m'
   timestamp: number
   currencyAVolume: CurrencyAmount
   currencyBVolume: CurrencyAmount
@@ -163,7 +163,7 @@ export type PoolSnapshotDto = {
 }
 
 export type PoolSpreadProfitDto = {
-  intervalType: '1h'
+  intervalType: '5m'
   timestamp: number
   accumulatedProfitInUsd: string
 }
