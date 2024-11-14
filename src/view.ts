@@ -334,7 +334,7 @@ export const getPoolPerformance = async ({
       poolKey: poolSnapshot.poolKey,
       intervalType: poolSnapshot.intervalType,
       timestamp: Number(poolSnapshot.timestamp),
-      price: formatUnits(poolSnapshot.price, 8),
+      price: formatUnits(poolSnapshot.price, 18),
       liquidityA: {
         currency: pool.currencyA,
         value: formatUnits(poolSnapshot.liquidityA, pool.currencyA.decimals),
