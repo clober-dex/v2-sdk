@@ -46,6 +46,7 @@ import { abs } from './utils/math'
 import { toBytes32 } from './utils/pool-key'
 import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
 import { STRATEGY_ABI } from './abis/rebalancer/strategy-abi'
+import { ELECTION_GOVERNOR_ABI } from './abis/governance/election-governor-abi'
 
 /**
  * Build a transaction to open a market.
@@ -1902,6 +1903,103 @@ export const resumePool = async ({
       abi: STRATEGY_ABI,
       functionName: 'unpause',
       args: [pool.key],
+    },
+    options?.gasLimit,
+    options?.gasPriceLimit,
+  )
+}
+
+export const vote = async ({
+  chainId,
+  userAddress,
+  candidateAddress,
+  inFavor,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  candidateAddress: `0x${string}`
+  inFavor: boolean
+  options?: {
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
+}): Promise<Transaction> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+
+  return buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+      abi: ELECTION_GOVERNOR_ABI,
+      functionName: 'vote',
+      args: [candidateAddress, inFavor],
+    },
+    options?.gasLimit,
+    options?.gasPriceLimit,
+  )
+}
+
+export const register = async ({
+  chainId,
+  userAddress,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  options?: {
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
+}): Promise<Transaction> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+
+  return buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+      abi: ELECTION_GOVERNOR_ABI,
+      functionName: 'register',
+      args: [],
+    },
+    options?.gasLimit,
+    options?.gasPriceLimit,
+  )
+}
+
+export const end = async ({
+  chainId,
+  userAddress,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  options?: {
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
+}): Promise<Transaction> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+
+  return buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+      abi: ELECTION_GOVERNOR_ABI,
+      functionName: 'end',
+      args: [],
     },
     options?.gasLimit,
     options?.gasPriceLimit,

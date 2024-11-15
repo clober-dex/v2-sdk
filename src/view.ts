@@ -1,4 +1,5 @@
 import {
+  Address,
   createPublicClient,
   formatUnits,
   getAddress,
@@ -13,13 +14,16 @@ import type {
   ChartLog,
   Currency,
   DefaultReadContractOptions,
+  ElectionGovernorMetadata,
+  ElectionRoundData,
   LastRawAmounts,
   Market,
   Pool,
   PoolPerformanceData,
   StrategyPosition,
+  VCLOB,
 } from './type'
-import { CHART_LOG_INTERVALS } from './type'
+import { CHART_LOG_INTERVALS, ElectionCandidate } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
 import { OpenOrder } from './model/open-order'
@@ -41,6 +45,9 @@ import {
   PoolSpreadProfitDto as ModelPoolSpreadProfit,
   PoolVolumeDto as ModelPoolVolume,
 } from './model/pool'
+import { fetchVCLOBList } from './apis/vclob'
+import { ELECTION_GOVERNOR_ABI } from './abis/governance/election-governor-abi'
+import { VCLOB_ABI } from './abis/governance/vclob-abi'
 
 /**
  * Get contract addresses by chain id
@@ -420,6 +427,182 @@ export const getLastRawAmounts = async ({
     !!(options && options.useSubgraph),
     options?.market,
   )
+}
+
+export const getVCLOBList = async ({
+  chainId,
+  userAddress,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  options?: DefaultReadContractOptions & {
+    useSubgraph?: boolean
+  }
+}): Promise<VCLOB[]> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  return fetchVCLOBList(
+    publicClient,
+    chainId,
+    userAddress,
+    !!(options && options.useSubgraph),
+  )
+}
+
+export const getKeepersElectionGovernorMetadata = async ({
+  chainId,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  options?: DefaultReadContractOptions
+}): Promise<ElectionGovernorMetadata> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const [minCandidateBalance, quota] = await publicClient.multicall({
+    contracts: [
+      {
+        address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+        abi: ELECTION_GOVERNOR_ABI,
+        functionName: 'minCandidateBalance',
+      },
+      {
+        address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+        abi: ELECTION_GOVERNOR_ABI,
+        functionName: 'quota',
+      },
+    ],
+    allowFailure: false,
+  })
+  return {
+    minCandidateBalance,
+    quota,
+  }
+}
+
+export const getKeepersElectionCurrentRoundData = async ({
+  chainId,
+  userAddress,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  options?: DefaultReadContractOptions & {
+    useSubgraph?: boolean
+  }
+}): Promise<ElectionRoundData> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  const [currentRound, nextRoundStartTime] = await publicClient.multicall({
+    contracts: [
+      {
+        address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+        abi: ELECTION_GOVERNOR_ABI,
+        functionName: 'currentRound',
+      },
+      {
+        address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+        abi: ELECTION_GOVERNOR_ABI,
+        functionName: 'nextRoundStartTime',
+      },
+    ],
+    allowFailure: false,
+  })
+  const [currentRoundData, candidates, finalists] =
+    await publicClient.multicall({
+      contracts: [
+        {
+          address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+          abi: ELECTION_GOVERNOR_ABI,
+          functionName: 'getRoundData',
+          args: [currentRound],
+        },
+        {
+          address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+          abi: ELECTION_GOVERNOR_ABI,
+          functionName: 'getCandidates',
+          args: [currentRound],
+        },
+        {
+          address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+          abi: ELECTION_GOVERNOR_ABI,
+          functionName: 'getFinalists',
+          args: [currentRound],
+        },
+      ],
+      allowFailure: false,
+    })
+  const [userVCLOBAmount, ...multicallResults] = await publicClient.multicall({
+    contracts: [
+      {
+        address: CONTRACT_ADDRESSES[chainId]!.VoteLockedCloberToken,
+        abi: VCLOB_ABI,
+        functionName: 'getPastBalanceOf',
+        args: [userAddress, currentRoundData.startTime],
+      },
+      ...candidates.map((candidate: Address) => ({
+        address: CONTRACT_ADDRESSES[chainId]!.VoteLockedCloberToken,
+        abi: VCLOB_ABI,
+        functionName: 'getPastBalanceOf',
+        args: [candidate, currentRoundData.startTime],
+      })),
+      ...candidates.map((candidate: Address) => ({
+        address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+        abi: ELECTION_GOVERNOR_ABI,
+        functionName: 'hasVotedTo',
+        args: [currentRound, userAddress, candidate],
+      })),
+      ...candidates.map((candidate: Address) => ({
+        address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+        abi: ELECTION_GOVERNOR_ABI,
+        functionName: 'getVotes',
+        args: [currentRound, candidate],
+      })),
+    ],
+    allowFailure: false,
+  })
+  const vclobAmountOfCandidateList = multicallResults.slice(
+    0,
+    candidates.length,
+  ) as bigint[]
+  const hasVotedToCandidateList = multicallResults.slice(
+    candidates.length,
+    candidates.length * 2,
+  ) as any as boolean[]
+  const votesForCandidateList = multicallResults.slice(
+    candidates.length * 2,
+  ) as any as [bigint, bigint][]
+  const candidateDataMap = new Map<Address, ElectionCandidate>()
+  for (let i = 0; i < candidates.length; i++) {
+    candidateDataMap.set(candidates[i], {
+      address: candidates[i],
+      vclobAmount: vclobAmountOfCandidateList[i],
+      hasVotedTo: hasVotedToCandidateList[i],
+      forVotes: votesForCandidateList[i][0],
+      againstVotes: votesForCandidateList[i][1],
+    })
+  }
+  return {
+    round: currentRound,
+    nextRoundStartTime: nextRoundStartTime,
+    vclobAmount: userVCLOBAmount as bigint,
+    status: currentRoundData.status,
+    quota: currentRoundData.quota,
+    finalistsThreshold: currentRoundData.finalistsThreshold,
+    startTime: BigInt(currentRoundData.startTime),
+    votingEndTime: BigInt(currentRoundData.votingEndTime),
+    registrationEndTime: BigInt(currentRoundData.registrationEndTime),
+    candidatesLength: currentRoundData.candidatesLength,
+    finalistsLength: currentRoundData.finalistsLength,
+    candidates: candidates.map((candidate) => candidateDataMap.get(candidate)!),
+    finalists: finalists.map((finalist) => candidateDataMap.get(finalist)!),
+  }
 }
 
 /**
