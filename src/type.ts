@@ -173,3 +173,48 @@ export type PoolPerformanceData = {
   poolSnapshots: PoolSnapshotDto[]
   poolSpreadProfits: PoolSpreadProfitDto[]
 }
+
+export type VCLOB = {
+  id: string
+  owner: `0x${string}`
+  amount: bigint
+  lockedTimepoint: bigint
+  withdrawalStartTimepoint: bigint
+  withdrawalEndTimepoint: bigint
+}
+
+export type ElectionGovernorMetadata = {
+  minCandidateBalance: bigint
+  quota: number
+}
+
+export enum ElectionRoundStatus {
+  NotStarted,
+  Voting,
+  Registration,
+  Ended,
+}
+
+export type ElectionCandidate = {
+  address: `0x${string}`
+  vclobAmount: bigint
+  hasVotedTo: boolean
+  forVotes: bigint
+  againstVotes: bigint
+}
+
+export type ElectionRoundData = {
+  round: number
+  nextRoundStartTime: bigint
+  vclobAmount: bigint
+  status: ElectionRoundStatus
+  quota: number
+  finalistsThreshold: bigint
+  startTime: bigint
+  votingEndTime: bigint
+  registrationEndTime: bigint
+  candidatesLength: number
+  finalistsLength: number
+  candidates: ElectionCandidate[]
+  finalists: ElectionCandidate[]
+}
