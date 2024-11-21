@@ -13,6 +13,7 @@ export const CONTRACT_ADDRESSES: {
     Operator: `0x${string}`
     VoteLockedCloberToken: `0x${string}`
     ElectionGovernor: `0x${string}`
+    KeepersRegistry: `0x${string}`
   }
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: {
@@ -27,6 +28,7 @@ export const CONTRACT_ADDRESSES: {
       '0xA8d4E6BC755b3ed8DCE2FaFE4104Bdad645763A5',
     ),
     ElectionGovernor: getAddress('0xE002A871B314Cc253d4e25E43Afca0557df9577f'),
+    KeepersRegistry: getAddress('0x683E045f5b318d343d6f5E9fF83AF4BB0f6fd026'),
   },
   [CHAIN_IDS.CLOBER_TESTNET_2]: {
     Controller: getAddress('0xE64aCE1bF550E57461cd4e24706633d7faC9D7b0'),
@@ -40,6 +42,7 @@ export const CONTRACT_ADDRESSES: {
       '0xA8d4E6BC755b3ed8DCE2FaFE4104Bdad645763A5',
     ),
     ElectionGovernor: getAddress('0xE002A871B314Cc253d4e25E43Afca0557df9577f'),
+    KeepersRegistry: getAddress('0x683E045f5b318d343d6f5E9fF83AF4BB0f6fd026'),
   },
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
     Controller: getAddress('0xE64aCE1bF550E57461cd4e24706633d7faC9D7b0'),
@@ -53,6 +56,7 @@ export const CONTRACT_ADDRESSES: {
       '0xA8d4E6BC755b3ed8DCE2FaFE4104Bdad645763A5',
     ),
     ElectionGovernor: getAddress('0xE002A871B314Cc253d4e25E43Afca0557df9577f'),
+    KeepersRegistry: getAddress('0x683E045f5b318d343d6f5E9fF83AF4BB0f6fd026'),
   },
   [CHAIN_IDS.BASE]: {
     Controller: getAddress('0xe4AB03992e214acfdCD05ccFB5C5C16e3d0Ca371'),
@@ -64,6 +68,7 @@ export const CONTRACT_ADDRESSES: {
     Operator: getAddress('0xBB854e8C0f04d919aD770b27015Ee90a9EF31Bf0'),
     VoteLockedCloberToken: zeroAddress,
     ElectionGovernor: zeroAddress,
+    KeepersRegistry: zeroAddress,
   },
   [CHAIN_IDS.BERACHAIN_TESTNET]: {
     Controller: getAddress('0xce3F3C90970C08Fe451998441b30879560AA6757'),
@@ -75,6 +80,7 @@ export const CONTRACT_ADDRESSES: {
     Operator: zeroAddress,
     VoteLockedCloberToken: zeroAddress,
     ElectionGovernor: zeroAddress,
+    KeepersRegistry: zeroAddress,
   },
   [CHAIN_IDS.ZKSYNC]: {
     Controller: getAddress('0x2Bd904F455928833F8E8C706d1cf01Eb5daaee7C'),
@@ -86,5 +92,6 @@ export const CONTRACT_ADDRESSES: {
     Operator: zeroAddress,
     VoteLockedCloberToken: zeroAddress,
     ElectionGovernor: zeroAddress,
+    KeepersRegistry: zeroAddress,
   },
 }

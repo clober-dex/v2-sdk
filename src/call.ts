@@ -47,6 +47,7 @@ import { toBytes32 } from './utils/pool-key'
 import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
 import { STRATEGY_ABI } from './abis/rebalancer/strategy-abi'
 import { ELECTION_GOVERNOR_ABI } from './abis/governance/election-governor-abi'
+import { VCLOB_ABI } from './abis/governance/vclob-abi'
 
 /**
  * Build a transaction to open a market.
@@ -2000,6 +2001,72 @@ export const end = async ({
       abi: ELECTION_GOVERNOR_ABI,
       functionName: 'end',
       args: [],
+    },
+    options?.gasLimit,
+    options?.gasPriceLimit,
+  )
+}
+
+export const mintVCLOB = async ({
+  chainId,
+  userAddress,
+  amount,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  amount: bigint
+  options?: {
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
+}): Promise<Transaction> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+
+  return buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.VoteLockedCloberToken,
+      abi: VCLOB_ABI,
+      functionName: 'mint',
+      args: [amount, userAddress],
+    },
+    options?.gasLimit,
+    options?.gasPriceLimit,
+  )
+}
+
+export const burnVCLOB = async ({
+  chainId,
+  userAddress,
+  id,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+  id: string
+  options?: {
+    useSubgraph?: boolean
+  } & DefaultWriteContractOptions
+}): Promise<Transaction> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+
+  return buildTransaction(
+    publicClient,
+    {
+      chain: CHAIN_MAP[chainId],
+      account: userAddress,
+      address: CONTRACT_ADDRESSES[chainId]!.VoteLockedCloberToken,
+      abi: VCLOB_ABI,
+      functionName: 'burn',
+      args: [Number(id), userAddress],
     },
     options?.gasLimit,
     options?.gasPriceLimit,
