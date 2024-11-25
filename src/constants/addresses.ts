@@ -76,6 +76,18 @@ export const CONTRACT_ADDRESSES: {
     VoteLockedCloberToken: zeroAddress,
     ElectionGovernor: zeroAddress,
   },
+  [CHAIN_IDS.MITOSIS_TESTNET]: {
+    Controller: getAddress('0xB09bA57835f6ce356DBE122B93A43a5126B69798'),
+    BookManager: getAddress('0x9C6C405cbB2c1DC7aAAa65156744fC00efc7EC82'),
+    BookViewer: getAddress('0xBc6eaFe723723DED3a411b6a1089a63bc5d73568'),
+    Rebalancer: zeroAddress,
+    Strategy: zeroAddress,
+    Minter: zeroAddress,
+    Operator: zeroAddress,
+    VoteLockedCloberToken: zeroAddress,
+    ElectionGovernor: zeroAddress,
+    KeepersRegistry: zeroAddress,
+  },
   [CHAIN_IDS.ZKSYNC]: {
     Controller: getAddress('0x2Bd904F455928833F8E8C706d1cf01Eb5daaee7C'),
     BookManager: getAddress('0xAc6AdB2727F99C309acd511D942c0b2812e03614'),
