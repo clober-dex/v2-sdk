@@ -48,6 +48,7 @@ import {
 import { fetchVCLOBList } from './apis/vclob'
 import { ELECTION_GOVERNOR_ABI } from './abis/governance/election-governor-abi'
 import { VCLOB_ABI } from './abis/governance/vclob-abi'
+import { KEEPERS_REGISTRY_ABI } from './abis/governance/keepers-registry-abi'
 
 /**
  * Get contract addresses by chain id
@@ -499,21 +500,27 @@ export const getKeepersElectionCurrentRoundData = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  const [currentRound, nextRoundStartTime] = await publicClient.multicall({
-    contracts: [
-      {
-        address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
-        abi: ELECTION_GOVERNOR_ABI,
-        functionName: 'currentRound',
-      },
-      {
-        address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
-        abi: ELECTION_GOVERNOR_ABI,
-        functionName: 'nextRoundStartTime',
-      },
-    ],
-    allowFailure: false,
-  })
+  const [currentRound, nextRoundStartTime, currentKeepers] =
+    await publicClient.multicall({
+      contracts: [
+        {
+          address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+          abi: ELECTION_GOVERNOR_ABI,
+          functionName: 'currentRound',
+        },
+        {
+          address: CONTRACT_ADDRESSES[chainId]!.ElectionGovernor,
+          abi: ELECTION_GOVERNOR_ABI,
+          functionName: 'nextRoundStartTime',
+        },
+        {
+          address: CONTRACT_ADDRESSES[chainId]!.KeepersRegistry,
+          abi: KEEPERS_REGISTRY_ABI,
+          functionName: 'getCurrentKeepers',
+        },
+      ],
+      allowFailure: false,
+    })
   const [currentRoundData, candidates, finalists] =
     await publicClient.multicall({
       contracts: [
@@ -590,6 +597,7 @@ export const getKeepersElectionCurrentRoundData = async ({
   }
   return {
     round: currentRound,
+    keepers: currentKeepers as Address[],
     nextRoundStartTime: nextRoundStartTime,
     vclobAmount: userVCLOBAmount as bigint,
     status: currentRoundData.status,

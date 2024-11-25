@@ -205,6 +205,7 @@ export type ElectionCandidate = {
 
 export type ElectionRoundData = {
   round: number
+  keepers: `0x${string}`[]
   nextRoundStartTime: bigint
   vclobAmount: bigint
   status: ElectionRoundStatus
