@@ -8,10 +8,11 @@ import {
   register,
   vote,
 } from '@clober/v2-sdk'
-import { parseEther } from 'viem'
+import { encodeFunctionData, parseEther } from 'viem'
 
 import { cloberTestChain2 } from '../src/constants/test-chain'
 import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
+import { KEEPERS_REGISTRY_ABI } from '../src/abis/governance/keepers-registry-abi'
 
 import { FORK_URL } from './utils/constants'
 import { createProxyClients2 } from './utils/utils'
@@ -27,7 +28,7 @@ beforeEach(async () => {
     clients.map(({ testClient }) => {
       return testClient.reset({
         jsonRpcUrl: FORK_URL,
-        blockNumber: 98954710n,
+        blockNumber: 100675747n,
       })
     }),
   )
@@ -40,7 +41,6 @@ test('Get election metadata', async () => {
     '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49' as `0x${string}`
   const clobTokenAddress =
     '0x920D79Aeb75bBFd9467BC487DfA862FEB91D23c3' as `0x${string}`
-  const startBlockTimestamp = 1732106810n
 
   await testClient.impersonateAccount({
     address: devAddress,
@@ -92,7 +92,7 @@ test('Mint and election', async () => {
     '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49' as `0x${string}`
   const clobTokenAddress =
     '0x920D79Aeb75bBFd9467BC487DfA862FEB91D23c3' as `0x${string}`
-  const startBlockTimestamp = 1732106810n
+  const startBlockTimestamp = 1732601941n
 
   await testClient.impersonateAccount({
     address: devAddress,
@@ -333,6 +333,67 @@ test('Mint and election', async () => {
     hash: endHash,
   })
   expect(endReceipt.status).toEqual('success')
+
+  await testClient.increaseTime({
+    seconds: 48 * 60 * 60, // 2 days
+  })
+
+  const timelockExecuteHash = await walletClient.writeContract({
+    account: devAddress,
+    chain: cloberTestChain2,
+    address: `0x6c38c81810665a56f717c5adc5b527657220dac7` as `0x${string}`,
+    abi: [
+      {
+        type: 'function',
+        name: 'execute',
+        inputs: [
+          {
+            name: 'target',
+            type: 'address',
+            internalType: 'address',
+          },
+          {
+            name: 'value',
+            type: 'uint256',
+            internalType: 'uint256',
+          },
+          {
+            name: 'payload',
+            type: 'bytes',
+            internalType: 'bytes',
+          },
+          {
+            name: 'predecessor',
+            type: 'bytes32',
+            internalType: 'bytes32',
+          },
+          {
+            name: 'salt',
+            type: 'bytes32',
+            internalType: 'bytes32',
+          },
+        ],
+        outputs: [],
+        stateMutability: 'payable',
+      },
+    ] as const,
+    functionName: 'execute',
+    args: [
+      CONTRACT_ADDRESSES[cloberTestChain2.id]!.KeepersRegistry,
+      0n,
+      encodeFunctionData({
+        abi: KEEPERS_REGISTRY_ABI,
+        functionName: 'setKeepers',
+        args: [rounddata.round, [devAddress]],
+      }),
+      `0x${'0'.repeat(64)}` as `0x${string}`,
+      `0x${rounddata.round.toString(16).padStart(64, '0')}` as `0x${string}`,
+    ],
+  })
+  const timelockExecuteReceipt = await publicClient.waitForTransactionReceipt({
+    hash: timelockExecuteHash,
+  })
+  expect(timelockExecuteReceipt.status).toEqual('success')
 
   rounddata = await getKeepersElectionCurrentRoundData({
     chainId: cloberTestChain2.id,
