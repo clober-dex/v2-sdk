@@ -83,9 +83,9 @@ export const CONTRACT_ADDRESSES: {
     KeepersRegistry: zeroAddress,
   },
   [CHAIN_IDS.MITOSIS_TESTNET]: {
-    Controller: getAddress('0xB09bA57835f6ce356DBE122B93A43a5126B69798'),
-    BookManager: getAddress('0x9C6C405cbB2c1DC7aAAa65156744fC00efc7EC82'),
-    BookViewer: getAddress('0xBc6eaFe723723DED3a411b6a1089a63bc5d73568'),
+    Controller: getAddress('0x6ef1c5D4cB1ebcC24d4BD7eB1b4467F26B6F2C1e'),
+    BookManager: getAddress('0x874b1B795993653fbFC3f1c1fc0469214cC9F4A5'),
+    BookViewer: getAddress('0x5C91A02B8B5D10597fc6cA23faF56F9718D1feD0'),
     Rebalancer: zeroAddress,
     Strategy: zeroAddress,
     Minter: zeroAddress,
