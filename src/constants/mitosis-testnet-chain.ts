@@ -14,7 +14,7 @@ export const mitosisTestnet = /*#__PURE__*/ defineChain({
   blockExplorers: {
     default: {
       name: 'Mitosis Testnet',
-      url: 'https://blockscout-internal.testnet.mitosis.org',
+      url: 'https://testnet.mitosiscan.xyz',
     },
   },
   testnet: true,
