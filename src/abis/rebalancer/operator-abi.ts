@@ -2,13 +2,13 @@ export const OPERATOR_ABI = [
   {
     inputs: [
       {
-        internalType: 'contract ISimpleOracleStrategy',
-        name: 'oracleStrategy_',
+        internalType: 'contract IRebalancer',
+        name: 'rebalancer_',
         type: 'address',
       },
       {
-        internalType: 'contract IRebalancer',
-        name: 'rebalancer_',
+        internalType: 'contract IDatastreamOracle',
+        name: 'datastreamOracle_',
         type: 'address',
       },
     ],
@@ -44,12 +44,22 @@ export const OPERATOR_ABI = [
   },
   {
     inputs: [],
+    name: 'ERC20TransferFailed',
+    type: 'error',
+  },
+  {
+    inputs: [],
     name: 'FailedCall',
     type: 'error',
   },
   {
     inputs: [],
     name: 'InvalidInitialization',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'NativeTransferFailed',
     type: 'error',
   },
   {
@@ -180,6 +190,19 @@ export const OPERATOR_ABI = [
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'datastreamOracle',
+    outputs: [
+      {
+        internalType: 'contract IDatastreamOracle',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         internalType: 'address',
@@ -190,19 +213,6 @@ export const OPERATOR_ABI = [
     name: 'initialize',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'oracleStrategy',
-    outputs: [
-      {
-        internalType: 'contract ISimpleOracleStrategy',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -280,6 +290,26 @@ export const OPERATOR_ABI = [
   {
     inputs: [
       {
+        internalType: 'uint256',
+        name: 'bitmap',
+        type: 'uint256',
+      },
+    ],
+    name: 'requestOracle',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'requestOraclePublic',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'address',
         name: 'newOwner',
         type: 'address',
@@ -339,6 +369,29 @@ export const OPERATOR_ABI = [
     name: 'upgradeToAndCall',
     outputs: [],
     stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'Currency',
+        name: 'currency',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'to',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+    ],
+    name: 'withdraw',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
 ] as const
