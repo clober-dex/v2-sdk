@@ -271,7 +271,7 @@ export const getPoolPerformance = async ({
   )
   const poolVolumes = fillAndSortByTimestamp(
     poolPerformance.poolVolumes,
-    24 * 60 * 60,
+    300,
     volumeFromTimestamp,
     volumeToTimestamp,
     (timestamp: number) => {
@@ -311,7 +311,7 @@ export const getPoolPerformance = async ({
   )
   const poolSpreadProfits = fillAndSortByTimestamp(
     poolPerformance.poolSpreadProfits,
-    60 * 60,
+    300,
     spreadProfitFromTimestamp,
     spreadProfitToTimestamp,
     (timestamp: number) => {
