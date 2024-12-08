@@ -111,12 +111,7 @@ export const fetchCurrencyMap = async (
       },
     ),
     ...uncachedCurrencies,
-    [zeroAddress as `0x${string}`]: {
-      address: zeroAddress,
-      name: 'Ethereum',
-      symbol: 'ETH',
-      decimals: 18,
-    } as Currency,
+    [zeroAddress as `0x${string}`]: NATIVE_CURRENCY[chainId],
   }
 }
 
