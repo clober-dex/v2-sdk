@@ -94,6 +94,18 @@ export const CONTRACT_ADDRESSES: {
     ElectionGovernor: zeroAddress,
     KeepersRegistry: zeroAddress,
   },
+  [CHAIN_IDS.SONIC_MAINNET]: {
+    Controller: getAddress('0xADc0CC0c3Ea12e57b8BcB7d7C8ac03222487E337'),
+    BookManager: getAddress('0xD4aD5Ed9E1436904624b6dB8B1BE31f36317C636'),
+    BookViewer: getAddress('0xe81e78f946e34d13Dcb6fd46a78713E0FFDA5613'),
+    Rebalancer: zeroAddress,
+    Strategy: zeroAddress,
+    Minter: zeroAddress,
+    Operator: zeroAddress,
+    VoteLockedCloberToken: zeroAddress,
+    ElectionGovernor: zeroAddress,
+    KeepersRegistry: zeroAddress,
+  },
   [CHAIN_IDS.ZKSYNC]: {
     Controller: getAddress('0x2Bd904F455928833F8E8C706d1cf01Eb5daaee7C'),
     BookManager: getAddress('0xAc6AdB2727F99C309acd511D942c0b2812e03614'),

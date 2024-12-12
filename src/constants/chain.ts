@@ -3,6 +3,7 @@ import { arbitrumSepolia, base, type Chain, zkSync } from 'viem/chains'
 import { cloberTestChain, cloberTestChain2 } from './test-chain'
 import { berachainBartioTestnet } from './bera-bartio-chain'
 import { mitosisTestnet } from './mitosis-testnet-chain'
+import { sonicMainnet } from './sonic-mainnet-chain'
 
 export enum CHAIN_IDS {
   CLOBER_TESTNET = cloberTestChain.id,
@@ -11,6 +12,7 @@ export enum CHAIN_IDS {
   BASE = base.id,
   BERACHAIN_TESTNET = berachainBartioTestnet.id,
   MITOSIS_TESTNET = mitosisTestnet.id,
+  SONIC_MAINNET = sonicMainnet.id,
   ZKSYNC = zkSync.id,
 }
 
@@ -23,6 +25,7 @@ export const CHAIN_MAP: {
   [CHAIN_IDS.BASE]: base,
   [CHAIN_IDS.BERACHAIN_TESTNET]: berachainBartioTestnet,
   [CHAIN_IDS.MITOSIS_TESTNET]: mitosisTestnet,
+  [CHAIN_IDS.SONIC_MAINNET]: sonicMainnet,
   [CHAIN_IDS.ZKSYNC]: zkSync,
 }
 
