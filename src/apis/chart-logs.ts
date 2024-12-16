@@ -146,15 +146,26 @@ export async function fetchChartLogs(
   from: number,
   to: number,
 ): Promise<ChartLog[]> {
-  const cachedChartLogs = getChartLogsFromCache(
-    chainId,
-    marketCode,
-    intervalType,
-    from,
-    to,
-  )
-  if (cachedChartLogs !== undefined) {
-    return cachedChartLogs
+  const intervalInNumber = CHART_LOG_INTERVAL_TIMESTAMP[intervalType]
+  const fromTimestampForAcc =
+    Math.floor(from / intervalInNumber) * intervalInNumber
+  const toTimestampForAcc = Math.floor(to / intervalInNumber) * intervalInNumber
+  const currentTimestamp = Math.floor(Date.now() / 1000)
+  const currentTimestampForAcc =
+    Math.floor(currentTimestamp / intervalInNumber) * intervalInNumber
+  const onePreviousTimestampForAcc = currentTimestampForAcc - intervalInNumber
+  const disableCache = onePreviousTimestampForAcc <= toTimestampForAcc
+  if (!disableCache) {
+    const cachedChartLogs = getChartLogsFromCache(
+      chainId,
+      marketCode,
+      intervalType,
+      from,
+      to,
+    )
+    if (cachedChartLogs !== undefined) {
+      return cachedChartLogs
+    }
   }
   const chartLogsBetweenFromAndTo: ChartLog[] = []
   let skip = 0
@@ -220,10 +231,6 @@ export async function fetchChartLogs(
           close: '0',
           volume: '0',
         }
-  const intervalInNumber = CHART_LOG_INTERVAL_TIMESTAMP[intervalType]
-  const fromTimestampForAcc =
-    Math.floor(from / intervalInNumber) * intervalInNumber
-  const toTimestampForAcc = Math.floor(to / intervalInNumber) * intervalInNumber
 
   let timestampForAcc = fromTimestampForAcc
   let result: ChartLog[] = []
@@ -261,6 +268,8 @@ export async function fetchChartLogs(
 
     timestampForAcc += intervalInNumber
   }
-  setChartLogsToCache(chainId, marketCode, intervalType, from, to, result)
+  if (!disableCache) {
+    setChartLogsToCache(chainId, marketCode, intervalType, from, to, result)
+  }
   return result
 }
