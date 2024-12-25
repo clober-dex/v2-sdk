@@ -104,6 +104,8 @@ export const openMarket = async ({
     [inputToken, outputToken],
     makerFeePolicy,
     takerFeePolicy,
+    makerFeePolicy,
+    takerFeePolicy,
     !!(options && options.useSubgraph),
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -243,16 +245,22 @@ export const limitOrder = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  const market = await fetchMarket(
-    publicClient,
-    chainId,
-    [inputToken, outputToken],
+  const [makerFeePolicy, takerFeePolicy] = [
     options && options.makerFeePolicy
       ? options.makerFeePolicy
       : MAKER_DEFAULT_POLICY[chainId],
     options && options.takerFeePolicy
       ? options.takerFeePolicy
       : TAKER_DEFAULT_POLICY[chainId],
+  ]
+  const market = await fetchMarket(
+    publicClient,
+    chainId,
+    [inputToken, outputToken],
+    makerFeePolicy,
+    takerFeePolicy,
+    makerFeePolicy,
+    takerFeePolicy,
     !!(options && options.useSubgraph),
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -537,16 +545,22 @@ export const marketOrder = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  const market = await fetchMarket(
-    publicClient,
-    chainId,
-    [inputToken, outputToken],
+  const [makerFeePolicy, takerFeePolicy] = [
     options && options.makerFeePolicy
       ? options.makerFeePolicy
       : MAKER_DEFAULT_POLICY[chainId],
     options && options.takerFeePolicy
       ? options.takerFeePolicy
       : TAKER_DEFAULT_POLICY[chainId],
+  ]
+  const market = await fetchMarket(
+    publicClient,
+    chainId,
+    [inputToken, outputToken],
+    makerFeePolicy,
+    takerFeePolicy,
+    makerFeePolicy,
+    takerFeePolicy,
     !!(options && options.useSubgraph),
   )
   const isTakingBid = isAddressEqual(market.base.address, inputToken)

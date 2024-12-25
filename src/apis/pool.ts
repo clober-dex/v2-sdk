@@ -75,6 +75,8 @@ export async function fetchPool(
         tokenAddresses,
         MAKER_DEFAULT_POLICY[chainId],
         TAKER_DEFAULT_POLICY[chainId],
+        MAKER_DEFAULT_POLICY[chainId],
+        TAKER_DEFAULT_POLICY[chainId],
         useSubgraph,
       )
     ).toJson()
