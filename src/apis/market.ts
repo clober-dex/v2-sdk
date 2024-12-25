@@ -72,8 +72,8 @@ const getBook = async (
           )
         : [],
       isOpened: book !== null,
-      takerFeePolicy,
       makerFeePolicy,
+      takerFeePolicy,
     })
   }
 
@@ -98,8 +98,8 @@ const getBook = async (
       unitAmount: depth,
     })),
     isOpened,
-    takerFeePolicy,
     makerFeePolicy,
+    takerFeePolicy,
   })
 }
 

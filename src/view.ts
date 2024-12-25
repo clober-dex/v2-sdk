@@ -153,7 +153,7 @@ export const getMarket = async ({
       : MAKER_DEFAULT_POLICY[chainId],
     options && options.takerFeePolicy
       ? options.takerFeePolicy
-      : MAKER_DEFAULT_POLICY[chainId],
+      : TAKER_DEFAULT_POLICY[chainId],
     !!(options && options.useSubgraph),
     options?.n,
   )
@@ -866,7 +866,7 @@ export const getExpectedOutput = async ({
       : MAKER_DEFAULT_POLICY[chainId],
     options && options.takerFeePolicy
       ? options.takerFeePolicy
-      : MAKER_DEFAULT_POLICY[chainId],
+      : TAKER_DEFAULT_POLICY[chainId],
     !!(options && options.useSubgraph),
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
