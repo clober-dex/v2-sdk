@@ -13,8 +13,10 @@ import type { Depth } from './depth'
 
 export class Market {
   chainId: CHAIN_IDS
-  makerFee: number
-  takerFee: number
+  bidBookMakerFee: number
+  bidBookTakerFee: number
+  askBookMakerFee: number
+  askBookTakerFee: number
 
   id: string
   quote: Currency
@@ -48,15 +50,10 @@ export class Market {
       isAddressEqual(token.address, baseTokenAddress!),
     )!
 
-    if (
-      !bidBook.makerFeePolicy.equals(askBook.makerFeePolicy) ||
-      !bidBook.takerFeePolicy.equals(askBook.takerFeePolicy)
-    ) {
-      throw new Error('Invalid fee policy for market')
-    }
-
-    this.makerFee = (Number(bidBook.makerFeePolicy.rate) * 100) / 1e6
-    this.takerFee = (Number(bidBook.takerFeePolicy.rate) * 100) / 1e6
+    this.bidBookMakerFee = (Number(bidBook.makerFeePolicy.rate) * 100) / 1e6
+    this.bidBookTakerFee = (Number(bidBook.takerFeePolicy.rate) * 100) / 1e6
+    this.askBookMakerFee = (Number(askBook.makerFeePolicy.rate) * 100) / 1e6
+    this.askBookTakerFee = (Number(askBook.takerFeePolicy.rate) * 100) / 1e6
 
     this.bids = bidBook.depths.map(
       (depth) =>
@@ -155,8 +152,10 @@ export class Market {
       chainId: this.chainId,
       quote: this.quote,
       base: this.base,
-      makerFee: this.makerFee,
-      takerFee: this.takerFee,
+      bidBookMakerFee: this.bidBookMakerFee,
+      bidBookTakerFee: this.bidBookTakerFee,
+      askBookMakerFee: this.askBookMakerFee,
+      askBookTakerFee: this.askBookTakerFee,
       bids: this.bids.map(({ price, tick, baseAmount }) => ({
         price,
         tick: Number(tick),

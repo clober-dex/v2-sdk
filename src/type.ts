@@ -38,8 +38,10 @@ export type Market = {
   chainId: CHAIN_IDS
   quote: Currency
   base: Currency
-  makerFee: number
-  takerFee: number
+  bidBookMakerFee: number
+  bidBookTakerFee: number
+  askBookMakerFee: number
+  askBookTakerFee: number
   bids: Depth[]
   bidBook: Book
   asks: Depth[]
