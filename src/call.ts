@@ -219,8 +219,10 @@ export const limitOrder = async ({
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
     useSubgraph?: boolean
-    makerFeePolicy?: FeePolicy
-    takerFeePolicy?: FeePolicy
+    bidBookMakerFeePolicy?: FeePolicy
+    bidBookTakerFeePolicy?: FeePolicy
+    askBookMakerFeePolicy?: FeePolicy
+    askBookTakerFeePolicy?: FeePolicy
   } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction
@@ -245,22 +247,33 @@ export const limitOrder = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  const [makerFeePolicy, takerFeePolicy] = [
-    options && options.makerFeePolicy
-      ? options.makerFeePolicy
+  const [
+    bidBookMakerFeePolicy,
+    bidBookTakerFeePolicy,
+    askBookMakerFeePolicy,
+    askBookTakerFeePolicy,
+  ] = [
+    options && options.bidBookMakerFeePolicy
+      ? options.bidBookMakerFeePolicy
       : MAKER_DEFAULT_POLICY[chainId],
-    options && options.takerFeePolicy
-      ? options.takerFeePolicy
+    options && options.bidBookTakerFeePolicy
+      ? options.bidBookTakerFeePolicy
+      : TAKER_DEFAULT_POLICY[chainId],
+    options && options.askBookMakerFeePolicy
+      ? options.askBookMakerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
+    options && options.askBookTakerFeePolicy
+      ? options.askBookTakerFeePolicy
       : TAKER_DEFAULT_POLICY[chainId],
   ]
   const market = await fetchMarket(
     publicClient,
     chainId,
     [inputToken, outputToken],
-    makerFeePolicy,
-    takerFeePolicy,
-    makerFeePolicy,
-    takerFeePolicy,
+    bidBookMakerFeePolicy,
+    bidBookTakerFeePolicy,
+    askBookMakerFeePolicy,
+    askBookTakerFeePolicy,
     !!(options && options.useSubgraph),
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -303,6 +316,8 @@ export const limitOrder = async ({
         options: {
           ...options,
           limitPrice: price,
+          makerFeePolicy: isBid ? askBookMakerFeePolicy : bidBookMakerFeePolicy,
+          takerFeePolicy: isBid ? askBookTakerFeePolicy : bidBookTakerFeePolicy,
         },
       }),
     ])
@@ -311,8 +326,8 @@ export const limitOrder = async ({
     id: toBookId(
       inputToken,
       outputToken,
-      makerFeePolicy,
-      takerFeePolicy,
+      isBid ? bidBookMakerFeePolicy : askBookMakerFeePolicy,
+      isBid ? bidBookTakerFeePolicy : askBookTakerFeePolicy,
       unitSize,
     ),
     tick: options?.makeTick
