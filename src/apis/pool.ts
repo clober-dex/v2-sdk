@@ -13,6 +13,7 @@ import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
 import { CHART_LOG_INTERVALS, Market } from '../type'
 import { Subgraph } from '../constants/subgraph'
 import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
+import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../constants/fee'
 
 import { fetchMarket } from './market'
 
@@ -68,7 +69,16 @@ export async function fetchPool(
   }
   if (!market) {
     market = (
-      await fetchMarket(publicClient, chainId, tokenAddresses, useSubgraph)
+      await fetchMarket(
+        publicClient,
+        chainId,
+        tokenAddresses,
+        MAKER_DEFAULT_POLICY[chainId],
+        TAKER_DEFAULT_POLICY[chainId],
+        MAKER_DEFAULT_POLICY[chainId],
+        TAKER_DEFAULT_POLICY[chainId],
+        useSubgraph,
+      )
     ).toJson()
   }
   const poolKey = toPoolKey(

@@ -4,9 +4,8 @@ import { getMarketId } from '../utils/market'
 import { CHAIN_IDS } from '../constants/chain'
 import { invertTick, toPrice } from '../utils/tick'
 import { formatPrice } from '../utils/prices'
-import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../constants/fee'
 import { quoteToBase } from '../utils/decimals'
-import { Market as MarketType } from '../type'
+import { FeePolicy, Market as MarketType } from '../type'
 
 import { Book } from './book'
 import type { Currency } from './currency'
@@ -14,8 +13,10 @@ import type { Depth } from './depth'
 
 export class Market {
   chainId: CHAIN_IDS
-  makerFee: number
-  takerFee: number
+  bidBookMakerFeePolicy: FeePolicy
+  bidBookTakerFeePolicy: FeePolicy
+  askBookMakerFeePolicy: FeePolicy
+  askBookTakerFeePolicy: FeePolicy
 
   id: string
   quote: Currency
@@ -49,8 +50,10 @@ export class Market {
       isAddressEqual(token.address, baseTokenAddress!),
     )!
 
-    this.makerFee = (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) / 1e6
-    this.takerFee = (Number(TAKER_DEFAULT_POLICY[chainId].rate) * 100) / 1e6
+    this.bidBookMakerFeePolicy = bidBook.makerFeePolicy
+    this.bidBookTakerFeePolicy = bidBook.takerFeePolicy
+    this.askBookMakerFeePolicy = askBook.makerFeePolicy
+    this.askBookTakerFeePolicy = askBook.takerFeePolicy
 
     this.bids = bidBook.depths.map(
       (depth) =>
@@ -149,8 +152,6 @@ export class Market {
       chainId: this.chainId,
       quote: this.quote,
       base: this.base,
-      makerFee: this.makerFee,
-      takerFee: this.takerFee,
       bids: this.bids.map(({ price, tick, baseAmount }) => ({
         price,
         tick: Number(tick),
@@ -162,6 +163,16 @@ export class Market {
         unitSize: this.bidBook.unitSize.toString(),
         quote: this.bidBook.quote,
         isOpened: this.bidBook.isOpened,
+        makerFee: {
+          fee: (Number(this.bidBook.makerFeePolicy.rate) * 100) / 1e6,
+          rate: Number(this.bidBook.makerFeePolicy.rate),
+          usesQuote: this.bidBook.makerFeePolicy.usesQuote,
+        },
+        takerFee: {
+          fee: (Number(this.bidBook.takerFeePolicy.rate) * 100) / 1e6,
+          rate: Number(this.bidBook.takerFeePolicy.rate),
+          usesQuote: this.bidBook.takerFeePolicy.usesQuote,
+        },
       },
       asks: this.asks.map(({ price, tick, baseAmount }) => ({
         price,
@@ -174,6 +185,16 @@ export class Market {
         unitSize: this.askBook.unitSize.toString(),
         quote: this.askBook.quote,
         isOpened: this.askBook.isOpened,
+        makerFee: {
+          fee: (Number(this.askBook.makerFeePolicy.rate) * 100) / 1e6,
+          rate: Number(this.askBook.makerFeePolicy.rate),
+          usesQuote: this.askBook.makerFeePolicy.usesQuote,
+        },
+        takerFee: {
+          fee: (Number(this.askBook.takerFeePolicy.rate) * 100) / 1e6,
+          rate: Number(this.askBook.takerFeePolicy.rate),
+          usesQuote: this.askBook.takerFeePolicy.usesQuote,
+        },
       },
     }
   }

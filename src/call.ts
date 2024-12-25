@@ -48,6 +48,7 @@ import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
 import { STRATEGY_ABI } from './abis/rebalancer/strategy-abi'
 import { ELECTION_GOVERNOR_ABI } from './abis/governance/election-governor-abi'
 import { VCLOB_ABI } from './abis/governance/vclob-abi'
+import { FeePolicy } from './model/fee-policy'
 
 /**
  * Build a transaction to open a market.
@@ -81,16 +82,30 @@ export const openMarket = async ({
   outputToken: `0x${string}`
   options?: DefaultWriteContractOptions & {
     useSubgraph?: boolean
+    makerFeePolicy?: FeePolicy
+    takerFeePolicy?: FeePolicy
   }
 }): Promise<Transaction | undefined> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
+  const [makerFeePolicy, takerFeePolicy] = [
+    options && options.makerFeePolicy
+      ? options.makerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
+    options && options.takerFeePolicy
+      ? options.takerFeePolicy
+      : TAKER_DEFAULT_POLICY[chainId],
+  ]
   const market = await fetchMarket(
     publicClient,
     chainId,
     [inputToken, outputToken],
+    makerFeePolicy,
+    takerFeePolicy,
+    makerFeePolicy,
+    takerFeePolicy,
     !!(options && options.useSubgraph),
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -118,9 +133,9 @@ export const openMarket = async ({
                 base: outputToken,
                 unitSize,
                 quote: inputToken,
-                makerPolicy: MAKER_DEFAULT_POLICY[chainId].value,
+                makerPolicy: makerFeePolicy.value,
                 hooks: zeroAddress,
-                takerPolicy: TAKER_DEFAULT_POLICY[chainId].value,
+                takerPolicy: takerFeePolicy.value,
               },
               hookData: zeroHash,
             },
@@ -204,6 +219,10 @@ export const limitOrder = async ({
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
     useSubgraph?: boolean
+    bidBookMakerFeePolicy?: FeePolicy
+    bidBookTakerFeePolicy?: FeePolicy
+    askBookMakerFeePolicy?: FeePolicy
+    askBookTakerFeePolicy?: FeePolicy
   } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction
@@ -228,10 +247,33 @@ export const limitOrder = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
+  const [
+    bidBookMakerFeePolicy,
+    bidBookTakerFeePolicy,
+    askBookMakerFeePolicy,
+    askBookTakerFeePolicy,
+  ] = [
+    options && options.bidBookMakerFeePolicy
+      ? options.bidBookMakerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
+    options && options.bidBookTakerFeePolicy
+      ? options.bidBookTakerFeePolicy
+      : TAKER_DEFAULT_POLICY[chainId],
+    options && options.askBookMakerFeePolicy
+      ? options.askBookMakerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
+    options && options.askBookTakerFeePolicy
+      ? options.askBookTakerFeePolicy
+      : TAKER_DEFAULT_POLICY[chainId],
+  ]
   const market = await fetchMarket(
     publicClient,
     chainId,
     [inputToken, outputToken],
+    bidBookMakerFeePolicy,
+    bidBookTakerFeePolicy,
+    askBookMakerFeePolicy,
+    askBookTakerFeePolicy,
     !!(options && options.useSubgraph),
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -274,12 +316,20 @@ export const limitOrder = async ({
         options: {
           ...options,
           limitPrice: price,
+          makerFeePolicy: isBid ? askBookMakerFeePolicy : bidBookMakerFeePolicy,
+          takerFeePolicy: isBid ? askBookTakerFeePolicy : bidBookTakerFeePolicy,
         },
       }),
     ])
   const isETH = isAddressEqual(inputToken, zeroAddress)
   const makeParam = {
-    id: toBookId(chainId, inputToken, outputToken, unitSize),
+    id: toBookId(
+      inputToken,
+      outputToken,
+      isBid ? bidBookMakerFeePolicy : askBookMakerFeePolicy,
+      isBid ? bidBookTakerFeePolicy : askBookTakerFeePolicy,
+      unitSize,
+    ),
     tick: options?.makeTick
       ? Number(options.makeTick)
       : Number(
@@ -477,6 +527,8 @@ export const marketOrder = async ({
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
     useSubgraph?: boolean
+    makerFeePolicy?: FeePolicy
+    takerFeePolicy?: FeePolicy
   } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction
@@ -504,10 +556,22 @@ export const marketOrder = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
+  const [makerFeePolicy, takerFeePolicy] = [
+    options && options.makerFeePolicy
+      ? options.makerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
+    options && options.takerFeePolicy
+      ? options.takerFeePolicy
+      : TAKER_DEFAULT_POLICY[chainId],
+  ]
   const market = await fetchMarket(
     publicClient,
     chainId,
     [inputToken, outputToken],
+    makerFeePolicy,
+    takerFeePolicy,
+    makerFeePolicy,
+    takerFeePolicy,
     !!(options && options.useSubgraph),
   )
   const isTakingBid = isAddressEqual(market.base.address, inputToken)
@@ -759,6 +823,7 @@ export const claimOrders = async ({
   ids: string[]
   options?: DefaultWriteContractOptions & {
     useSubgraph?: boolean
+    makerFeePolicy?: FeePolicy
   }
 }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
   const publicClient = createPublicClient({
@@ -787,6 +852,9 @@ export const claimOrders = async ({
       publicClient,
       chainId,
       ids.map((id) => BigInt(id)),
+      options && options.makerFeePolicy
+        ? options.makerFeePolicy
+        : MAKER_DEFAULT_POLICY[chainId],
       !!(options && options.useSubgraph),
     )
   ).filter(
@@ -920,6 +988,7 @@ export const cancelOrders = async ({
   ids: string[]
   options?: DefaultWriteContractOptions & {
     useSubgraph?: boolean
+    makerFeePolicy?: FeePolicy
   }
 }): Promise<{ transaction: Transaction; result: CurrencyFlow[] }> => {
   const publicClient = createPublicClient({
@@ -948,6 +1017,9 @@ export const cancelOrders = async ({
       publicClient,
       chainId,
       ids.map((id) => BigInt(id)),
+      options && options.makerFeePolicy
+        ? options.makerFeePolicy
+        : MAKER_DEFAULT_POLICY[chainId],
       !!(options && options.useSubgraph),
     )
   ).filter(
@@ -1033,6 +1105,8 @@ export const openPool = async ({
   salt: `0x${string}`
   options?: DefaultWriteContractOptions & {
     useSubgraph?: boolean
+    makerPolicy?: FeePolicy
+    takerPolicy?: FeePolicy
   }
 }): Promise<Transaction | undefined> => {
   const publicClient = createPublicClient({
@@ -1060,17 +1134,29 @@ export const openPool = async ({
             base: pool.market.bidBook.base.address,
             unitSize: pool.market.bidBook.unitSize,
             quote: pool.market.bidBook.quote.address,
-            makerPolicy: MAKER_DEFAULT_POLICY[chainId].value,
+            makerPolicy:
+              options && options.makerPolicy
+                ? options.makerPolicy
+                : MAKER_DEFAULT_POLICY[chainId].value,
             hooks: zeroAddress,
-            takerPolicy: TAKER_DEFAULT_POLICY[chainId].value,
+            takerPolicy:
+              options && options.takerPolicy
+                ? options.takerPolicy
+                : TAKER_DEFAULT_POLICY[chainId].value,
           },
           {
             base: pool.market.askBook.base.address,
             unitSize: pool.market.askBook.unitSize,
             quote: pool.market.askBook.quote.address,
-            makerPolicy: MAKER_DEFAULT_POLICY[chainId].value,
+            makerPolicy:
+              options && options.makerPolicy
+                ? options.makerPolicy
+                : MAKER_DEFAULT_POLICY[chainId].value,
             hooks: zeroAddress,
-            takerPolicy: TAKER_DEFAULT_POLICY[chainId].value,
+            takerPolicy:
+              options && options.takerPolicy
+                ? options.takerPolicy
+                : TAKER_DEFAULT_POLICY[chainId].value,
           },
           toBytes32(salt),
           CONTRACT_ADDRESSES[chainId]!.Strategy,

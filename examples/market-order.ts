@@ -17,7 +17,7 @@ const main = async () => {
 
   const {
     transaction,
-    result: { spend, take },
+    result: { spent, taken },
   } = await marketOrder({
     chainId: arbitrumSepolia.id,
     userAddress: walletClient.account.address,
@@ -30,8 +30,8 @@ const main = async () => {
     gasPrice: parseUnits('1', 9),
   })
   console.log(`market order hash: ${hash}`)
-  console.log(`spend: `, spend)
-  console.log(`take: `, take)
+  console.log(`spend: `, spent)
+  console.log(`taken: `, taken)
 
   const market = await getMarket({
     chainId: arbitrumSepolia.id,

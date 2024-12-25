@@ -4,6 +4,7 @@ import { CHAIN_IDS } from './constants/chain'
 import type { Currency, Currency6909 } from './model/currency'
 
 export { CHAIN_IDS } from './constants/chain'
+export { FeePolicy } from './model/fee-policy'
 export type { Currency } from './model/currency'
 export type { OpenOrder } from './model/open-order'
 
@@ -19,6 +20,16 @@ export type Book = {
   unitSize: string
   quote: Currency
   isOpened: boolean
+  makerFee: {
+    fee: number
+    rate: number
+    usesQuote: boolean
+  }
+  takerFee: {
+    fee: number
+    rate: number
+    usesQuote: boolean
+  }
 }
 
 export type LastRawAmounts = {
@@ -37,8 +48,6 @@ export type Market = {
   chainId: CHAIN_IDS
   quote: Currency
   base: Currency
-  makerFee: number
-  takerFee: number
   bids: Depth[]
   bidBook: Book
   asks: Depth[]
