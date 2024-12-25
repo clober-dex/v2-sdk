@@ -20,14 +20,6 @@ export class FeePolicy {
     this.value = (rate + FeePolicy.MAX_FEE_RATE) | mask
   }
 
-  public equals = (other: FeePolicy): boolean => {
-    return (
-      this.value === other.value &&
-      this.usesQuote === other.usesQuote &&
-      this.rate === other.rate
-    )
-  }
-
   public static from(value: bigint): FeePolicy {
     const usesQuote = value >> 23n > 0n
     return new FeePolicy(usesQuote, FeePolicy.getRateFromValue(value))

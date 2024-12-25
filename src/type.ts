@@ -20,6 +20,16 @@ export type Book = {
   unitSize: string
   quote: Currency
   isOpened: boolean
+  makerFee: {
+    fee: number
+    rate: number
+    usesQuote: boolean
+  }
+  takerFee: {
+    fee: number
+    rate: number
+    usesQuote: boolean
+  }
 }
 
 export type LastRawAmounts = {
@@ -38,10 +48,6 @@ export type Market = {
   chainId: CHAIN_IDS
   quote: Currency
   base: Currency
-  bidBookMakerFee: number
-  bidBookTakerFee: number
-  askBookMakerFee: number
-  askBookTakerFee: number
   bids: Depth[]
   bidBook: Book
   asks: Depth[]
