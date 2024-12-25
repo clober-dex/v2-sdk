@@ -311,12 +311,8 @@ export const limitOrder = async ({
     id: toBookId(
       inputToken,
       outputToken,
-      options && options.makerFeePolicy
-        ? options.makerFeePolicy
-        : MAKER_DEFAULT_POLICY[chainId],
-      options && options.takerFeePolicy
-        ? options.takerFeePolicy
-        : TAKER_DEFAULT_POLICY[chainId],
+      makerFeePolicy,
+      takerFeePolicy,
       unitSize,
     ),
     tick: options?.makeTick
