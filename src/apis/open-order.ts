@@ -9,8 +9,8 @@ import { invertTick, toPrice } from '../utils/tick'
 import type { OpenOrder, OpenOrderDto } from '../model/open-order'
 import { fetchCurrency } from '../utils/currency'
 import { applyPercent } from '../utils/bigint'
-import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { Subgraph } from '../constants/subgraph'
+import { FeePolicy } from '../model/fee-policy'
 
 const getOpenOrderFromSubgraph = async (
   chainId: CHAIN_IDS,
@@ -70,6 +70,7 @@ export async function fetchOpenOrdersByUserAddress(
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
+  makerFeePolicy: FeePolicy,
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
@@ -88,7 +89,7 @@ export async function fetchOpenOrdersByUserAddress(
       .map((address) => fetchCurrency(publicClient, chainId, address)),
   )
   return openOrders.map((openOrder) =>
-    toOpenOrder(chainId, currencies, openOrder),
+    toOpenOrder(chainId, currencies, openOrder, makerFeePolicy),
   )
 }
 
@@ -96,6 +97,7 @@ export async function fetchOpenOrder(
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   id: string,
+  makerFeePolicy: FeePolicy,
 ): Promise<OpenOrder> {
   const {
     data: { openOrder },
@@ -107,13 +109,14 @@ export async function fetchOpenOrder(
     fetchCurrency(publicClient, chainId, getAddress(openOrder.book.base.id)),
     fetchCurrency(publicClient, chainId, getAddress(openOrder.book.quote.id)),
   ])
-  return toOpenOrder(chainId, currencies, openOrder)
+  return toOpenOrder(chainId, currencies, openOrder, makerFeePolicy)
 }
 
 export async function fetchOpenOrders(
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   ids: string[],
+  makerFeePolicy: FeePolicy,
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
@@ -132,7 +135,7 @@ export async function fetchOpenOrders(
       .map((address) => fetchCurrency(publicClient, chainId, address)),
   )
   return openOrders.map((openOrder) =>
-    toOpenOrder(chainId, currencies, openOrder),
+    toOpenOrder(chainId, currencies, openOrder, makerFeePolicy),
   )
 }
 
@@ -140,6 +143,7 @@ const toOpenOrder = (
   chainId: CHAIN_IDS,
   currencies: Currency[],
   openOrder: OpenOrderDto,
+  makerFeePolicy: FeePolicy,
 ): OpenOrder => {
   const inputCurrency = currencies.find((c: Currency) =>
     isAddressEqual(c.address, getAddress(openOrder.book.quote.id)),
@@ -210,8 +214,8 @@ const toOpenOrder = (
         applyPercent(
           cancelable,
           100 +
-            (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) /
-              Number(MAKER_DEFAULT_POLICY[chainId].RATE_PRECISION),
+            (Number(makerFeePolicy.rate) * 100) /
+              Number(makerFeePolicy.RATE_PRECISION),
           6,
         ),
         inputCurrency.decimals,

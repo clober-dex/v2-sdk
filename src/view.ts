@@ -23,7 +23,7 @@ import type {
   StrategyPosition,
   VCLOB,
 } from './type'
-import { CHART_LOG_INTERVALS, ElectionCandidate } from './type'
+import { CHART_LOG_INTERVALS, ElectionCandidate, FeePolicy } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
 import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
 import { OpenOrder } from './model/open-order'
@@ -49,6 +49,7 @@ import { fetchVCLOBList } from './apis/vclob'
 import { ELECTION_GOVERNOR_ABI } from './abis/governance/election-governor-abi'
 import { VCLOB_ABI } from './abis/governance/vclob-abi'
 import { KEEPERS_REGISTRY_ABI } from './abis/governance/keepers-registry-abi'
+import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
 
 /**
  * Get contract addresses by chain id
@@ -132,6 +133,8 @@ export const getMarket = async ({
   options?: {
     n?: number
     useSubgraph?: boolean
+    makerFeePolicy?: FeePolicy
+    takerFeePolicy?: FeePolicy
   } & DefaultReadContractOptions
 }): Promise<Market> => {
   if (isAddressEqual(token0, token1)) {
@@ -145,6 +148,12 @@ export const getMarket = async ({
     publicClient,
     chainId,
     [token0, token1],
+    options && options.makerFeePolicy
+      ? options.makerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
+    options && options.takerFeePolicy
+      ? options.takerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
     !!(options && options.useSubgraph),
     options?.n,
   )
@@ -831,6 +840,8 @@ export const getExpectedOutput = async ({
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
     useSubgraph?: boolean
+    makerFeePolicy?: FeePolicy
+    takerFeePolicy?: FeePolicy
   } & DefaultReadContractOptions
 }): Promise<{
   takenAmount: string
@@ -850,6 +861,12 @@ export const getExpectedOutput = async ({
     publicClient,
     chainId,
     [inputToken, outputToken],
+    options && options.makerFeePolicy
+      ? options.makerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
+    options && options.takerFeePolicy
+      ? options.takerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
     !!(options && options.useSubgraph),
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -949,6 +966,8 @@ export const getExpectedInput = async ({
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
     useSubgraph?: boolean
+    makerFeePolicy?: FeePolicy
+    takerFeePolicy?: FeePolicy
   } & DefaultReadContractOptions
 }): Promise<{
   takenAmount: string
@@ -968,6 +987,12 @@ export const getExpectedInput = async ({
     publicClient,
     chainId,
     [inputToken, outputToken],
+    options && options.makerFeePolicy
+      ? options.makerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
+    options && options.takerFeePolicy
+      ? options.takerFeePolicy
+      : TAKER_DEFAULT_POLICY[chainId],
     !!(options && options.useSubgraph),
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
@@ -1044,13 +1069,22 @@ export const getOpenOrder = async ({
 }: {
   chainId: CHAIN_IDS
   id: string
-  options?: DefaultReadContractOptions
+  options?: DefaultReadContractOptions & {
+    makerFeePolicy?: FeePolicy
+  }
 }): Promise<OpenOrder> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  return fetchOpenOrder(publicClient, chainId, id)
+  return fetchOpenOrder(
+    publicClient,
+    chainId,
+    id,
+    options && options.makerFeePolicy
+      ? options.makerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
+  )
 }
 /**
  * Retrieves open orders for the specified user on the given chain.
@@ -1074,13 +1108,22 @@ export const getOpenOrders = async ({
 }: {
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
-  options?: DefaultReadContractOptions
+  options?: DefaultReadContractOptions & {
+    makerFeePolicy?: FeePolicy
+  }
 }): Promise<OpenOrder[]> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  return fetchOpenOrdersByUserAddress(publicClient, chainId, userAddress)
+  return fetchOpenOrdersByUserAddress(
+    publicClient,
+    chainId,
+    userAddress,
+    options && options.makerFeePolicy
+      ? options.makerFeePolicy
+      : MAKER_DEFAULT_POLICY[chainId],
+  )
 }
 
 /**

@@ -4,7 +4,6 @@ import { getMarketId } from '../utils/market'
 import { CHAIN_IDS } from '../constants/chain'
 import { invertTick, toPrice } from '../utils/tick'
 import { formatPrice } from '../utils/prices'
-import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../constants/fee'
 import { quoteToBase } from '../utils/decimals'
 import { Market as MarketType } from '../type'
 
@@ -49,8 +48,15 @@ export class Market {
       isAddressEqual(token.address, baseTokenAddress!),
     )!
 
-    this.makerFee = (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) / 1e6
-    this.takerFee = (Number(TAKER_DEFAULT_POLICY[chainId].rate) * 100) / 1e6
+    if (
+      !bidBook.makerFeePolicy.equals(askBook.makerFeePolicy) ||
+      !bidBook.takerFeePolicy.equals(askBook.takerFeePolicy)
+    ) {
+      throw new Error('Invalid fee policy for market')
+    }
+
+    this.makerFee = (Number(bidBook.makerFeePolicy.rate) * 100) / 1e6
+    this.takerFee = (Number(bidBook.takerFeePolicy.rate) * 100) / 1e6
 
     this.bids = bidBook.depths.map(
       (depth) =>

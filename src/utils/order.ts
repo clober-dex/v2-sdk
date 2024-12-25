@@ -3,9 +3,9 @@ import { formatUnits, getAddress, isAddressEqual, PublicClient } from 'viem'
 import { CHAIN_IDS, getMarketPrice } from '../index'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { fetchOpenOrders } from '../apis/open-order'
-import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { BOOK_MANAGER_ABI } from '../abis/core/book-manager-abi'
 import { OnChainOpenOrder } from '../model/open-order'
+import { FeePolicy } from '../model/fee-policy'
 
 import { fetchCurrencyMap } from './currency'
 import { quoteToBase } from './decimals'
@@ -16,6 +16,7 @@ export const fetchOnChainOrders = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   orderIds: bigint[],
+  makerFeePolicy: FeePolicy,
   useSubgraph: boolean,
 ): Promise<OnChainOpenOrder[]> => {
   if (useSubgraph) {
@@ -23,6 +24,7 @@ export const fetchOnChainOrders = async (
       publicClient,
       chainId,
       orderIds.map((orderId) => orderId.toString()),
+      makerFeePolicy,
     )
     return openOrders.map(
       ({
@@ -102,8 +104,8 @@ export const fetchOnChainOrders = async (
     const cancelable = applyPercent(
       unitSize * order.open,
       100 +
-        (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) /
-          Number(MAKER_DEFAULT_POLICY[chainId].RATE_PRECISION),
+        (Number(makerFeePolicy.rate) * 100) /
+          Number(makerFeePolicy.RATE_PRECISION),
       6,
     )
     const claimable = quoteToBase(

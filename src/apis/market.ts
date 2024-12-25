@@ -12,6 +12,7 @@ import { BOOK_VIEWER_ABI } from '../abis/core/book-viewer-abi'
 import { fetchIsMarketOpened } from '../utils/open'
 import { fetchCurrency } from '../utils/currency'
 import { Subgraph } from '../constants/subgraph'
+import { FeePolicy } from '../model/fee-policy'
 
 const fetchBookFromSubgraph = async (chainId: CHAIN_IDS, bookId: string) => {
   return Subgraph.get<{
@@ -39,14 +40,17 @@ const getBook = async (
   chainId: CHAIN_IDS,
   quoteCurrency: Currency,
   baseCurrency: Currency,
+  makerFeePolicy: FeePolicy,
+  takerFeePolicy: FeePolicy,
   useSubgraph: boolean,
   n: number,
 ): Promise<Book> => {
   const unitSize = await calculateUnitSize(publicClient, chainId, quoteCurrency)
   const bookId = toBookId(
-    chainId,
     quoteCurrency.address,
     baseCurrency.address,
+    makerFeePolicy,
+    takerFeePolicy,
     unitSize,
   )
   if (useSubgraph) {
@@ -68,6 +72,8 @@ const getBook = async (
           )
         : [],
       isOpened: book !== null,
+      takerFeePolicy,
+      makerFeePolicy,
     })
   }
 
@@ -92,6 +98,8 @@ const getBook = async (
       unitAmount: depth,
     })),
     isOpened,
+    takerFeePolicy,
+    makerFeePolicy,
   })
 }
 
@@ -99,6 +107,8 @@ export async function fetchMarket(
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   tokenAddresses: `0x${string}`[],
+  makerFeePolicy: FeePolicy,
+  takerFeePolicy: FeePolicy,
   useSubgraph: boolean,
   n = 100,
 ): Promise<Market> {
@@ -116,8 +126,26 @@ export async function fetchMarket(
     fetchCurrency(publicClient, chainId, baseTokenAddress),
   ])
   const [bidBook, askBook] = await Promise.all([
-    getBook(publicClient, chainId, quoteCurrency, baseCurrency, useSubgraph, n),
-    getBook(publicClient, chainId, baseCurrency, quoteCurrency, useSubgraph, n),
+    getBook(
+      publicClient,
+      chainId,
+      quoteCurrency,
+      baseCurrency,
+      makerFeePolicy,
+      takerFeePolicy,
+      useSubgraph,
+      n,
+    ),
+    getBook(
+      publicClient,
+      chainId,
+      baseCurrency,
+      quoteCurrency,
+      makerFeePolicy,
+      takerFeePolicy,
+      useSubgraph,
+      n,
+    ),
   ])
 
   return new Market({

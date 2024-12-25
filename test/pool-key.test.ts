@@ -4,6 +4,10 @@ import { arbitrumSepolia } from 'viem/chains'
 
 import { toBookId } from '../src/utils/book-id'
 import { toPoolKey } from '../src/utils/pool-key'
+import {
+  MAKER_DEFAULT_POLICY,
+  TAKER_DEFAULT_POLICY,
+} from '../src/constants/fee'
 
 import { FORK_URL } from './utils/constants'
 
@@ -47,15 +51,17 @@ const publicClient = createPublicClient({
 })
 
 const BID_BOOK_ID = toBookId(
-  arbitrumSepolia.id,
   '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
   '0x0000000000000000000000000000000000000000',
+  MAKER_DEFAULT_POLICY[arbitrumSepolia.id],
+  TAKER_DEFAULT_POLICY[arbitrumSepolia.id],
   10n ** 12n,
 )
 const ASK_BID_ID = toBookId(
-  arbitrumSepolia.id,
   '0x0000000000000000000000000000000000000000',
   '0x447ad4a108b5540c220f9f7e83723ac87c0f8fd8',
+  MAKER_DEFAULT_POLICY[arbitrumSepolia.id],
+  TAKER_DEFAULT_POLICY[arbitrumSepolia.id],
   1n,
 )
 const SALT =
