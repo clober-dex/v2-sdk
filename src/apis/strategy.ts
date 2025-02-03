@@ -2,7 +2,7 @@ import { formatUnits, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { LastRawAmounts, Market, StrategyPosition } from '../type'
+import { LastAmounts, Market, StrategyPosition } from '../type'
 import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
 import { toPoolKey } from '../utils/pool-key'
 
@@ -47,14 +47,14 @@ export async function fetchStrategyPosition(
   }
 }
 
-export async function fetchLastRawAmounts(
+export async function fetchLastAmounts(
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   tokenAddresses: `0x${string}`[],
   salt: `0x${string}`,
   useSubgraph: boolean,
   market?: Market,
-): Promise<LastRawAmounts> {
+): Promise<LastAmounts> {
   let poolKey: `0x${string}` | undefined = undefined
   if (market) {
     poolKey = toPoolKey(
@@ -72,14 +72,14 @@ export async function fetchLastRawAmounts(
     )
     poolKey = pool.key
   }
-  const getLastRawAmount = await publicClient.readContract({
+  const getLastAmount = await publicClient.readContract({
     address: CONTRACT_ADDRESSES[chainId]!.Strategy,
     abi: STRATEGY_ABI,
-    functionName: 'getLastRawAmount',
+    functionName: 'getLastAmount',
     args: [poolKey],
   })
   return {
-    lastRawAmountA: BigInt(getLastRawAmount[0]),
-    lastRawAmountB: BigInt(getLastRawAmount[1]),
+    lastAmountA: BigInt(getLastAmount[0]),
+    lastAmountB: BigInt(getLastAmount[1]),
   }
 }

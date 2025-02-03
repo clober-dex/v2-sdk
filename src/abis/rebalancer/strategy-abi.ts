@@ -2,6 +2,30 @@ export const STRATEGY_ABI = [
   {
     inputs: [
       {
+        internalType: 'bytes32',
+        name: 'key',
+        type: 'bytes32',
+      },
+    ],
+    name: 'getLastAmount',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'contract IOracle',
         name: 'referenceOracle_',
         type: 'address',
@@ -467,30 +491,6 @@ export const STRATEGY_ABI = [
         internalType: 'struct ISimpleOracleStrategy.Config',
         name: '',
         type: 'tuple',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'key',
-        type: 'bytes32',
-      },
-    ],
-    name: 'getLastRawAmount',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
       },
     ],
     stateMutability: 'view',

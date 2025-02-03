@@ -16,7 +16,7 @@ import type {
   DefaultReadContractOptions,
   ElectionGovernorMetadata,
   ElectionRoundData,
-  LastRawAmounts,
+  LastAmounts,
   Market,
   Pool,
   PoolPerformanceData,
@@ -37,7 +37,7 @@ import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 import { fetchPool, fetchPoolPerformance } from './apis/pool'
-import { fetchLastRawAmounts, fetchStrategyPosition } from './apis/strategy'
+import { fetchLastAmounts, fetchStrategyPosition } from './apis/strategy'
 import { Subgraph } from './constants/subgraph'
 import { fillAndSortByTimestamp } from './utils/time-series'
 import {
@@ -397,7 +397,7 @@ export const getStrategyPrice = async ({
   )
 }
 
-export const getLastRawAmounts = async ({
+export const getLastAmounts = async ({
   chainId,
   token0,
   token1,
@@ -412,7 +412,7 @@ export const getLastRawAmounts = async ({
     market?: Market
     useSubgraph?: boolean
   }
-}): Promise<LastRawAmounts> => {
+}): Promise<LastAmounts> => {
   if (isAddressEqual(token0, token1)) {
     throw new Error('Token0 and token1 must be different')
   }
@@ -420,7 +420,7 @@ export const getLastRawAmounts = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  return fetchLastRawAmounts(
+  return fetchLastAmounts(
     publicClient,
     chainId,
     [token0, token1],
