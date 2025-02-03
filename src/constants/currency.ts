@@ -99,7 +99,6 @@ export const STABLE_COIN_ADDRESSES: {
     '0xb8f230Ea91516787F2cbB2c63b147Ec79988E3ED', // USDe
   ],
   [CHAIN_IDS.SONIC_MAINNET]: [
-    // TODO: add stable coin at day 1
     '0x29219dd400f2Bf60E5a23d13Be72B486D4038894', // USDC
   ],
   [CHAIN_IDS.ZKSYNC]: [
