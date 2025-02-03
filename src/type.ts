@@ -21,9 +21,9 @@ export type Book = {
   isOpened: boolean
 }
 
-export type LastRawAmounts = {
-  lastRawAmountA: bigint
-  lastRawAmountB: bigint
+export type LastAmounts = {
+  lastAmountA: bigint
+  lastAmountB: bigint
 }
 
 export type StrategyPosition = {
