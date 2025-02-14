@@ -25,6 +25,13 @@ export const MITO: Currency = {
   decimals: 18,
 }
 
+export const MON: Currency = {
+  address: zeroAddress,
+  name: 'Monad Token',
+  symbol: 'MON',
+  decimals: 18,
+}
+
 export const S: Currency = {
   address: zeroAddress,
   name: 'Sonic',
@@ -41,6 +48,7 @@ export const NATIVE_CURRENCY: {
   [CHAIN_IDS.BASE]: ETH,
   [CHAIN_IDS.BERACHAIN_TESTNET]: BERA,
   [CHAIN_IDS.MITOSIS_TESTNET]: MITO,
+  [CHAIN_IDS.MONAD_TESTNET]: MON,
   [CHAIN_IDS.SONIC_MAINNET]: S,
   [CHAIN_IDS.ZKSYNC]: ETH,
 }
@@ -61,6 +69,9 @@ export const WETH_ADDRESSES: {
   ],
   [CHAIN_IDS.MITOSIS_TESTNET]: [
     '0x8B71fD76b23721d0D73CA14Ea6464AAD70149B67', // WMITO
+  ],
+  [CHAIN_IDS.MONAD_TESTNET]: [
+    '0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701', // WMON
   ],
   [CHAIN_IDS.SONIC_MAINNET]: [
     '0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38', // wS
@@ -97,6 +108,9 @@ export const STABLE_COIN_ADDRESSES: {
   [CHAIN_IDS.MITOSIS_TESTNET]: [
     '0xCB0CedF61be0Bf4d5F6596b8ab296614b154db91', // USDT
     '0xb8f230Ea91516787F2cbB2c63b147Ec79988E3ED', // USDe
+  ],
+  [CHAIN_IDS.MONAD_TESTNET]: [
+    '0x43D614B1bA4bA469fAEAa4557AEAFdec039b8795', // USDC
   ],
   [CHAIN_IDS.SONIC_MAINNET]: [
     '0x29219dd400f2Bf60E5a23d13Be72B486D4038894', // USDC
