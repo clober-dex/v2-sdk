@@ -12,12 +12,12 @@ export const monadTestnet = /*#__PURE__*/ defineChain({
   rpcUrls: {
     default: {
       http: [
-        'https://testnet-rpc2.monad.xyz/52227f026fa8fac9e2014c58fbf5643369b3bfc6',
+        'https://side-cold-water.monad-testnet.quiknode.pro/cdca51dfe940664aca31fad3acaee682eee43c3b/',
       ],
     },
     public: {
       http: [
-        'https://testnet-rpc2.monad.xyz/52227f026fa8fac9e2014c58fbf5643369b3bfc6',
+        'https://side-cold-water.monad-testnet.quiknode.pro/cdca51dfe940664aca31fad3acaee682eee43c3b/',
       ],
     },
   },
