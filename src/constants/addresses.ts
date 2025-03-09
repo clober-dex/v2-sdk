@@ -59,7 +59,7 @@ export const CONTRACT_ADDRESSES: {
     KeepersRegistry: getAddress('0x683E045f5b318d343d6f5E9fF83AF4BB0f6fd026'),
   },
   [CHAIN_IDS.BASE]: {
-    Controller: getAddress('0xe4AB03992e214acfdCD05ccFB5C5C16e3d0Ca371'),
+    Controller: getAddress('0xCe687cBF1a587691e495ce24eb7ad9F13Fc7be1D'),
     BookManager: getAddress('0x382CCccbD3b142D7DA063bF68cd0c89634767F76'),
     BookViewer: getAddress('0xbfb608D67340fa54bA31614C293750EeB573c795'),
     Rebalancer: getAddress('0xeA0E19fbca0D9D707f3dA10Ef846cC255B0aAdf3'),
@@ -95,7 +95,7 @@ export const CONTRACT_ADDRESSES: {
     KeepersRegistry: zeroAddress,
   },
   [CHAIN_IDS.MONAD_TESTNET]: {
-    Controller: getAddress('0xE64aCE1bF550E57461cd4e24706633d7faC9D7b0'),
+    Controller: getAddress('0x7792669BEb769c4035bdFcA4F3d794d55922B954'),
     BookManager: getAddress('0xAA9575d63dFC224b9583fC303dB3188C08d5C85A'),
     BookViewer: getAddress('0x3e22d091F90ae759733B7CB06a6f7b440d84a425'),
     Rebalancer: zeroAddress,
@@ -107,7 +107,7 @@ export const CONTRACT_ADDRESSES: {
     KeepersRegistry: zeroAddress,
   },
   [CHAIN_IDS.SONIC_MAINNET]: {
-    Controller: getAddress('0xADc0CC0c3Ea12e57b8BcB7d7C8ac03222487E337'),
+    Controller: getAddress('0xcA6c15B7B03Ca69087B85B8EA690ED44A92eadd1'),
     BookManager: getAddress('0xD4aD5Ed9E1436904624b6dB8B1BE31f36317C636'),
     BookViewer: getAddress('0xe81e78f946e34d13Dcb6fd46a78713E0FFDA5613'),
     Rebalancer: getAddress('0x46107Ec44112675689053b96aea2127fD952bd47'),
