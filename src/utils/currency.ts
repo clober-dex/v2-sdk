@@ -90,7 +90,9 @@ export const fetchCurrencyMap = async (
     .filter((currency) => currency !== undefined) as Currency[]
   const uncachedAddresses = addresses.filter(
     (address) =>
-      !cachedCurrencies.some((currency) => currency.address === address),
+      !cachedCurrencies.some((currency) =>
+        isAddressEqual(currency.address, address),
+      ),
   )
   const uncachedCurrencies = await fetchCurrencyMapInner(
     publicClient,
@@ -200,11 +202,14 @@ const fetchCurrencyMapInner = async (
       const decimals = result[index + addresses.length * 2].result as
         | number
         | undefined
+      if (!name || !symbol || !decimals) {
+        throw new Error(`Failed to fetch currency: ${address}`)
+      }
       return {
         address,
-        name: name ?? 'Unknown',
-        symbol: symbol ?? 'Unknown',
-        decimals: decimals ?? 18,
+        name,
+        symbol,
+        decimals,
       }
     })
     .reduce(
