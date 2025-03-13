@@ -1115,12 +1115,6 @@ export const addLiquidity = async ({
     lpCurrency: Currency6909Flow
   }
 }> => {
-  if (
-    isAddressEqual(token0, zeroAddress) ||
-    isAddressEqual(token1, zeroAddress)
-  ) {
-    throw new Error('ETH is not supported for adding liquidity')
-  }
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
