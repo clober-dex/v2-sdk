@@ -1314,6 +1314,11 @@ export const addLiquidity = async ({
         },
         swapParams,
       ],
+      value: isAddressEqual(token0, zeroAddress)
+        ? amountAOrigin
+        : isAddressEqual(token1, zeroAddress)
+          ? amountBOrigin
+          : undefined,
     },
     options?.gasLimit,
   )
