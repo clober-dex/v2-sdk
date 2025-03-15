@@ -67,26 +67,37 @@ const getOpenOrdersByUserAddressFromSubgraph = async (
 }
 
 export async function fetchOpenOrdersByUserAddress(
-  publicClient: PublicClient,
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
   } = await getOpenOrdersByUserAddressFromSubgraph(chainId, userAddress)
-  const addresses = openOrders
-    .map((openOrder) => [
-      getAddress(openOrder.book.base.id),
-      getAddress(openOrder.book.quote.id),
-    ])
+  const currencies: Currency[] = openOrders
+    .map((openOrder) => {
+      return [
+        {
+          address: getAddress(openOrder.book.base.id),
+          name: openOrder.book.base.name,
+          symbol: openOrder.book.base.symbol,
+          decimals: Number(openOrder.book.base.decimals),
+        },
+        {
+          address: getAddress(openOrder.book.quote.id),
+          name: openOrder.book.quote.name,
+          symbol: openOrder.book.quote.symbol,
+          decimals: Number(openOrder.book.quote.decimals),
+        },
+      ]
+    })
     .flat()
     .filter(
-      (address, index, self) =>
-        self.findIndex((c) => isAddressEqual(c, address)) === index,
+      (currency, index, self) =>
+        self.findIndex((c) => isAddressEqual(c.address, currency.address)) ===
+        index,
     )
-  const currencyMap = await fetchCurrencyMap(publicClient, chainId, addresses)
   return openOrders.map((openOrder) =>
-    toOpenOrder(chainId, Object.values(currencyMap), openOrder),
+    toOpenOrder(chainId, currencies, openOrder),
   )
 }
 

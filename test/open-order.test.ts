@@ -37,14 +37,9 @@ afterEach(async () => {
 })
 
 test('get open orders by user address', async () => {
-  const { publicClient } = clients[0] as any
-
   const openOrders = await getOpenOrders({
     chainId: cloberTestChain.id,
     userAddress: '0x000000000000000000000000000000000000dead',
-    options: {
-      rpcUrl: publicClient.transport.url!,
-    },
   })
   expect(openOrders.length).toBe(0) // TODO: check the actual length
 })

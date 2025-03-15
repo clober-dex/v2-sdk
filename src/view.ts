@@ -1070,17 +1070,11 @@ export const getOpenOrder = async ({
 export const getOpenOrders = async ({
   chainId,
   userAddress,
-  options,
 }: {
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
-  options?: DefaultReadContractOptions
 }): Promise<OpenOrder[]> => {
-  const publicClient = createPublicClient({
-    chain: CHAIN_MAP[chainId],
-    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-  })
-  return fetchOpenOrdersByUserAddress(publicClient, chainId, userAddress)
+  return fetchOpenOrdersByUserAddress(chainId, userAddress)
 }
 
 /**
