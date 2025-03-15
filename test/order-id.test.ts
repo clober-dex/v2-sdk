@@ -51,9 +51,6 @@ test('check fromOrderId function', async () => {
   const openOrders = await getOpenOrders({
     chainId: cloberTestChain.id,
     userAddress: '0x000000000000000000000000000000000000dead',
-    options: {
-      rpcUrl: publicClient.transport.url!,
-    },
   })
   for (const openOrder of openOrders) {
     const result = await publicClient.readContract({
