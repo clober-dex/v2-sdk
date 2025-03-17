@@ -1,4 +1,10 @@
-import { formatUnits, getAddress, isAddressEqual, PublicClient } from 'viem'
+import {
+  formatUnits,
+  getAddress,
+  isAddressEqual,
+  PublicClient,
+  zeroAddress,
+} from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
 import { getMarketId } from '../utils/market'
@@ -11,6 +17,7 @@ import { fetchCurrencyMap } from '../utils/currency'
 import { applyPercent } from '../utils/bigint'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { Subgraph } from '../constants/subgraph'
+import { NATIVE_CURRENCY } from '../constants/currency'
 
 const getOpenOrderFromSubgraph = async (
   chainId: CHAIN_IDS,
@@ -96,8 +103,9 @@ export async function fetchOpenOrdersByUserAddress(
         self.findIndex((c) => isAddressEqual(c.address, currency.address)) ===
         index,
     )
+    .filter((currency) => !isAddressEqual(currency.address, zeroAddress))
   return openOrders.map((openOrder) =>
-    toOpenOrder(chainId, currencies, openOrder),
+    toOpenOrder(chainId, [...currencies, NATIVE_CURRENCY[chainId]], openOrder),
   )
 }
 
