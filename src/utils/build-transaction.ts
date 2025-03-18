@@ -17,7 +17,7 @@ export const buildTransaction = async (
   const [gas, gasPrice] = await Promise.all([
     gasLimit ??
       publicClient.estimateGas({
-        account: args.account,
+        account: args.account!,
         data,
         to: args.address,
         value: args.value || 0n,
@@ -30,6 +30,6 @@ export const buildTransaction = async (
     data,
     value: args.value || 0n,
     to: args.address,
-    from: args.account,
+    from: args.account!,
   }
 }
