@@ -1,10 +1,4 @@
-import {
-  formatUnits,
-  getAddress,
-  isAddressEqual,
-  PublicClient,
-  zeroAddress,
-} from 'viem'
+import { formatUnits, getAddress, isAddressEqual, zeroAddress } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
 import { getMarketId } from '../utils/market'
@@ -13,7 +7,6 @@ import { baseToQuote, quoteToBase } from '../utils/decimals'
 import { formatPrice } from '../utils/prices'
 import { invertTick, toPrice } from '../utils/tick'
 import type { OpenOrder, OpenOrderDto } from '../model/open-order'
-import { fetchCurrencyMap } from '../utils/currency'
 import { applyPercent } from '../utils/bigint'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { Subgraph } from '../constants/subgraph'
@@ -66,88 +59,53 @@ const getOpenOrdersByUserAddressFromSubgraph = async (
   }>(
     chainId,
     'getOpenOrdersByUserAddress',
-    'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
+    'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }, first: 1000) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
     {
       userAddress: userAddress.toLowerCase(),
     },
   )
 }
 
-export async function fetchOpenOrdersByUserAddress(
+export async function fetchOpenOrdersByUserAddressFromSubgraph(
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
   } = await getOpenOrdersByUserAddressFromSubgraph(chainId, userAddress)
-  const currencies: Currency[] = openOrders
-    .map((openOrder) => {
-      return [
-        {
-          address: getAddress(openOrder.book.base.id),
-          name: openOrder.book.base.name,
-          symbol: openOrder.book.base.symbol,
-          decimals: Number(openOrder.book.base.decimals),
-        },
-        {
-          address: getAddress(openOrder.book.quote.id),
-          name: openOrder.book.quote.name,
-          symbol: openOrder.book.quote.symbol,
-          decimals: Number(openOrder.book.quote.decimals),
-        },
-      ]
-    })
-    .flat()
-    .filter(
-      (currency, index, self) =>
-        self.findIndex((c) => isAddressEqual(c.address, currency.address)) ===
-        index,
-    )
-    .filter((currency) => !isAddressEqual(currency.address, zeroAddress))
+  const currencies = getCurrenciesFromOpenOrderDtos(chainId, openOrders)
   return openOrders.map((openOrder) =>
-    toOpenOrder(chainId, [...currencies, NATIVE_CURRENCY[chainId]], openOrder),
+    toOpenOrder(chainId, currencies, openOrder),
   )
 }
 
-export async function fetchOpenOrder(
-  publicClient: PublicClient,
+export async function fetchOpenOrderByOrderIdFromSubgraph(
   chainId: CHAIN_IDS,
-  id: string,
+  orderId: string,
 ): Promise<OpenOrder> {
   const {
     data: { openOrder },
-  } = await getOpenOrderFromSubgraph(chainId, id)
+  } = await getOpenOrderFromSubgraph(chainId, orderId)
   if (!openOrder) {
-    throw new Error(`Open order not found: ${id}`)
+    throw new Error(`Open order not found: ${orderId}`)
   }
-  const currencyMap = await fetchCurrencyMap(publicClient, chainId, [
-    getAddress(openOrder.book.base.id),
-    getAddress(openOrder.book.quote.id),
-  ])
-  return toOpenOrder(chainId, Object.values(currencyMap), openOrder)
+  return toOpenOrder(
+    chainId,
+    getCurrenciesFromOpenOrderDtos(chainId, [openOrder]),
+    openOrder,
+  )
 }
 
-export async function fetchOpenOrders(
-  publicClient: PublicClient,
+export async function fetchOpenOrdersByOrderIdsFromSubgraph(
   chainId: CHAIN_IDS,
-  ids: string[],
+  orderIds: string[],
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
-  } = await getOpenOrdersFromSubgraph(chainId, ids)
-  const addresses = openOrders
-    .map((openOrder) => [
-      getAddress(openOrder.book.base.id),
-      getAddress(openOrder.book.quote.id),
-    ])
-    .flat()
-    .filter(
-      (address, index, self) =>
-        self.findIndex((c) => isAddressEqual(c, address)) === index,
-    )
-  const currencyMap = await fetchCurrencyMap(publicClient, chainId, addresses)
+  } = await getOpenOrdersFromSubgraph(chainId, orderIds)
+  const currencies = getCurrenciesFromOpenOrderDtos(chainId, openOrders)
   return openOrders.map((openOrder) =>
-    toOpenOrder(chainId, Object.values(currencyMap), openOrder),
+    toOpenOrder(chainId, currencies, openOrder),
   )
 }
 
@@ -233,4 +191,37 @@ const toOpenOrder = (
       ),
     },
   }
+}
+
+const getCurrenciesFromOpenOrderDtos = (
+  chainId: CHAIN_IDS,
+  openOrders: OpenOrderDto[],
+): Currency[] => {
+  const currencies = openOrders
+    .map((openOrder) => {
+      return [
+        {
+          address: getAddress(openOrder.book.base.id),
+          name: openOrder.book.base.name,
+          symbol: openOrder.book.base.symbol,
+          decimals: Number(openOrder.book.base.decimals),
+        },
+        {
+          address: getAddress(openOrder.book.quote.id),
+          name: openOrder.book.quote.name,
+          symbol: openOrder.book.quote.symbol,
+          decimals: Number(openOrder.book.quote.decimals),
+        },
+      ]
+    })
+    .flat()
+    // remove duplicates
+    .filter(
+      (currency, index, self) =>
+        self.findIndex((c) => isAddressEqual(c.address, currency.address)) ===
+        index,
+    )
+    // remove zero address
+    .filter((currency) => !isAddressEqual(currency.address, zeroAddress))
+  return [...currencies, NATIVE_CURRENCY[chainId]]
 }

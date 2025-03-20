@@ -15,6 +15,7 @@ import type {
   CurrencyFlow,
   DefaultWriteContractOptions,
   ERC20PermitParam,
+  OpenOrder,
   Pool,
   Transaction,
 } from './type'
@@ -48,6 +49,8 @@ import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
 import { STRATEGY_ABI } from './abis/rebalancer/strategy-abi'
 import { ELECTION_GOVERNOR_ABI } from './abis/governance/election-governor-abi'
 import { VCLOB_ABI } from './abis/governance/vclob-abi'
+import { fetchOpenOrdersByOrderIdsFromSubgraph } from './apis/open-order'
+import { OnChainOpenOrder } from './model/open-order'
 
 /**
  * Build a transaction to open a market.
@@ -782,13 +785,15 @@ export const claimOrders = async ({
     `)
   }
 
-  const orders = (
-    await fetchOnChainOrders(
-      publicClient,
-      chainId,
-      ids.map((id) => BigInt(id)),
-      !!(options && options.useSubgraph),
-    )
+  const useSubgraph = !!(options && options.useSubgraph)
+  const orders: (OpenOrder | OnChainOpenOrder)[] = (
+    useSubgraph
+      ? await fetchOpenOrdersByOrderIdsFromSubgraph(chainId, ids)
+      : await fetchOnChainOrders(
+          publicClient,
+          chainId,
+          ids.map((id) => BigInt(id)),
+        )
   ).filter(
     (order) =>
       isAddressEqual(order.user, userAddress) && order.claimable.value !== '0',
@@ -943,13 +948,15 @@ export const cancelOrders = async ({
     `)
   }
 
-  const orders = (
-    await fetchOnChainOrders(
-      publicClient,
-      chainId,
-      ids.map((id) => BigInt(id)),
-      !!(options && options.useSubgraph),
-    )
+  const useSubgraph = !!(options && options.useSubgraph)
+  const orders: (OpenOrder | OnChainOpenOrder)[] = (
+    useSubgraph
+      ? await fetchOpenOrdersByOrderIdsFromSubgraph(chainId, ids)
+      : await fetchOnChainOrders(
+          publicClient,
+          chainId,
+          ids.map((id) => BigInt(id)),
+        )
   ).filter(
     (order) =>
       isAddressEqual(order.user, userAddress) && order.cancelable.value !== '0',
