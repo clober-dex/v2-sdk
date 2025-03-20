@@ -7,7 +7,7 @@ export type Currency = {
 
 export type Currency6909 = {
   address: `0x${string}`
-  id: bigint
+  id: `0x${string}`
   name: string
   symbol: string
   decimals: number

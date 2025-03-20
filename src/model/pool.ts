@@ -105,7 +105,7 @@ export class Pool {
     }
     this.currencyLp = {
       address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
-      id: BigInt(poolKey),
+      id: poolKey,
       name: `${this.currencyA.symbol}-${this.currencyB.symbol} LP Token`,
       symbol: `${this.currencyA.symbol}-${this.currencyB.symbol}`,
       decimals: decimals,
