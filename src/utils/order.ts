@@ -2,7 +2,6 @@ import { formatUnits, getAddress, isAddressEqual, PublicClient } from 'viem'
 
 import { CHAIN_IDS, getMarketPrice } from '../index'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { fetchOpenOrders } from '../apis/open-order'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { BOOK_MANAGER_ABI } from '../abis/core/book-manager-abi'
 import { OnChainOpenOrder } from '../model/open-order'
@@ -16,43 +15,7 @@ export const fetchOnChainOrders = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   orderIds: bigint[],
-  useSubgraph: boolean,
 ): Promise<OnChainOpenOrder[]> => {
-  if (useSubgraph) {
-    const openOrders = await fetchOpenOrders(
-      publicClient,
-      chainId,
-      orderIds.map((orderId) => orderId.toString()),
-    )
-    return openOrders.map(
-      ({
-        id,
-        user,
-        isBid,
-        price,
-        tick,
-        orderIndex,
-        inputCurrency,
-        outputCurrency,
-        cancelable,
-        claimable,
-      }) => {
-        return {
-          id,
-          user,
-          isBid,
-          price,
-          tick,
-          orderIndex,
-          inputCurrency,
-          outputCurrency,
-          cancelable,
-          claimable,
-        }
-      },
-    )
-  }
-
   const result = await publicClient.multicall({
     contracts: [
       ...orderIds.map((orderId) => ({

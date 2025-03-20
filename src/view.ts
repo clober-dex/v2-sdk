@@ -25,7 +25,10 @@ import type {
 } from './type'
 import { CHART_LOG_INTERVALS, ElectionCandidate } from './type'
 import { formatPrice, parsePrice } from './utils/prices'
-import { fetchOpenOrder, fetchOpenOrdersByUserAddress } from './apis/open-order'
+import {
+  fetchOpenOrderByOrderIdFromSubgraph,
+  fetchOpenOrdersByUserAddressFromSubgraph,
+} from './apis/open-order'
 import { OpenOrder } from './model/open-order'
 import {
   CHART_LOG_INTERVAL_TIMESTAMP,
@@ -1040,17 +1043,11 @@ export const getExpectedInput = async ({
 export const getOpenOrder = async ({
   chainId,
   id,
-  options,
 }: {
   chainId: CHAIN_IDS
   id: string
-  options?: DefaultReadContractOptions
 }): Promise<OpenOrder> => {
-  const publicClient = createPublicClient({
-    chain: CHAIN_MAP[chainId],
-    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-  })
-  return fetchOpenOrder(publicClient, chainId, id)
+  return fetchOpenOrderByOrderIdFromSubgraph(chainId, id)
 }
 /**
  * Retrieves open orders for the specified user on the given chain.
@@ -1074,7 +1071,7 @@ export const getOpenOrders = async ({
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
 }): Promise<OpenOrder[]> => {
-  return fetchOpenOrdersByUserAddress(chainId, userAddress)
+  return fetchOpenOrdersByUserAddressFromSubgraph(chainId, userAddress)
 }
 
 /**
