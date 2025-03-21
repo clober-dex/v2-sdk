@@ -49,6 +49,15 @@ export const CONTRACT_ADDRESSES: {
     Minter: getAddress('0xafBd8d66cd96b7A8188E27c61C1ec059c465CE36'),
     Operator: getAddress('0x1BCD69Ff770B5A8dc4355d781F6a09515F2ea797'),
   },
+  [CHAIN_IDS.BERACHAIN_MAINNET]: {
+    Controller: getAddress('0xA9F92548491997eE0De26A03311535A4961EE8eb'),
+    BookManager: getAddress('0xDED58e263087f5B45d878BD9CF599B7A1a75D1E4'),
+    BookViewer: getAddress('0x4abb86f499f53e2b1F52302b2Ba7BbB0a90a49A8'),
+    Rebalancer: zeroAddress,
+    Strategy: zeroAddress,
+    Minter: zeroAddress,
+    Operator: zeroAddress,
+  },
   [CHAIN_IDS.BERACHAIN_TESTNET]: {
     Controller: getAddress('0xce3F3C90970C08Fe451998441b30879560AA6757'),
     BookManager: getAddress('0x874b1B795993653fbFC3f1c1fc0469214cC9F4A5'),

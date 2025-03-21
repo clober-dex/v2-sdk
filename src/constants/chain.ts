@@ -6,6 +6,7 @@ import {
   monadTestnet,
   sonic,
   zkSync,
+  berachain,
 } from 'viem/chains'
 
 import { cloberTestChain, cloberTestChain2 } from './test-chain'
@@ -17,6 +18,7 @@ export enum CHAIN_IDS {
   CLOBER_TESTNET_2 = cloberTestChain2.id,
   ARBITRUM_SEPOLIA = arbitrumSepolia.id,
   BASE = base.id,
+  BERACHAIN_MAINNET = berachain.id,
   BERACHAIN_TESTNET = berachainBartioTestnet.id,
   MITOSIS_TESTNET = mitosisTestnet.id,
   MONAD_TESTNET = monadTestnet.id,
@@ -31,6 +33,7 @@ export const CHAIN_MAP: {
   [CHAIN_IDS.CLOBER_TESTNET_2]: cloberTestChain2,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: arbitrumSepolia,
   [CHAIN_IDS.BASE]: base,
+  [CHAIN_IDS.BERACHAIN_MAINNET]: berachain,
   [CHAIN_IDS.BERACHAIN_TESTNET]: berachainBartioTestnet,
   [CHAIN_IDS.MITOSIS_TESTNET]: mitosisTestnet,
   [CHAIN_IDS.MONAD_TESTNET]: monadTestnet,
