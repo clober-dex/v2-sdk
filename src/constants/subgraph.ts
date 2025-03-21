@@ -13,6 +13,8 @@ const SUBGRAPH_URL: {
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph/api',
   [CHAIN_IDS.BASE]:
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-base/api',
+  [CHAIN_IDS.BERACHAIN_MAINNET]:
+    'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-berachain-mainnet/api',
   [CHAIN_IDS.BERACHAIN_TESTNET]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-berachain-bartio/v1.8.1/gn',
   [CHAIN_IDS.MITOSIS_TESTNET]:
@@ -21,7 +23,7 @@ const SUBGRAPH_URL: {
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-monad-testnet/v1.0.3/gn',
   [CHAIN_IDS.SONIC_MAINNET]:
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-sonic-mainnet/api',
-  [CHAIN_IDS.ZKSYNC]:
+  [CHAIN_IDS.ZKSYNC_ERA]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-zksync-era/v1.5.5/gn',
 }
 

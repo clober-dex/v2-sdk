@@ -11,9 +11,6 @@ export const CONTRACT_ADDRESSES: {
     Strategy: `0x${string}`
     Minter: `0x${string}`
     Operator: `0x${string}`
-    VoteLockedCloberToken: `0x${string}`
-    ElectionGovernor: `0x${string}`
-    KeepersRegistry: `0x${string}`
   }
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: {
@@ -24,11 +21,6 @@ export const CONTRACT_ADDRESSES: {
     Strategy: getAddress('0x8aDF62b0b6078EaE5a2D54e9e5DD2AA71F6748C4'),
     Minter: getAddress('0xF2f51B00C2e9b77F23fD66649bbabf8a025c39eF'),
     Operator: getAddress('0x33559576B062D08230b467ea7DC7Ce75aFcbdE92'),
-    VoteLockedCloberToken: getAddress(
-      '0xA8d4E6BC755b3ed8DCE2FaFE4104Bdad645763A5',
-    ),
-    ElectionGovernor: getAddress('0xE002A871B314Cc253d4e25E43Afca0557df9577f'),
-    KeepersRegistry: getAddress('0x683E045f5b318d343d6f5E9fF83AF4BB0f6fd026'),
   },
   [CHAIN_IDS.CLOBER_TESTNET_2]: {
     Controller: getAddress('0xE64aCE1bF550E57461cd4e24706633d7faC9D7b0'),
@@ -38,11 +30,6 @@ export const CONTRACT_ADDRESSES: {
     Strategy: getAddress('0x540488b54c8DE6e44Db7553c3A2C4ABEb09Fc69C'),
     Minter: getAddress('0x0b8361a2bbF853F5F6Aa0911a9d238d9CFDD9f1a'),
     Operator: getAddress('0xFa47E8dD8F04BF23b238900e754041123a6bc6e2'),
-    VoteLockedCloberToken: getAddress(
-      '0xA8d4E6BC755b3ed8DCE2FaFE4104Bdad645763A5',
-    ),
-    ElectionGovernor: getAddress('0xE002A871B314Cc253d4e25E43Afca0557df9577f'),
-    KeepersRegistry: getAddress('0x683E045f5b318d343d6f5E9fF83AF4BB0f6fd026'),
   },
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
     Controller: getAddress('0xE64aCE1bF550E57461cd4e24706633d7faC9D7b0'),
@@ -52,11 +39,6 @@ export const CONTRACT_ADDRESSES: {
     Strategy: getAddress('0x540488b54c8DE6e44Db7553c3A2C4ABEb09Fc69C'),
     Minter: getAddress('0x0b8361a2bbF853F5F6Aa0911a9d238d9CFDD9f1a'),
     Operator: getAddress('0xFa47E8dD8F04BF23b238900e754041123a6bc6e2'),
-    VoteLockedCloberToken: getAddress(
-      '0xA8d4E6BC755b3ed8DCE2FaFE4104Bdad645763A5',
-    ),
-    ElectionGovernor: getAddress('0xE002A871B314Cc253d4e25E43Afca0557df9577f'),
-    KeepersRegistry: getAddress('0x683E045f5b318d343d6f5E9fF83AF4BB0f6fd026'),
   },
   [CHAIN_IDS.BASE]: {
     Controller: getAddress('0xCe687cBF1a587691e495ce24eb7ad9F13Fc7be1D'),
@@ -66,9 +48,15 @@ export const CONTRACT_ADDRESSES: {
     Strategy: getAddress('0x44E550089da3A49488794B3CB761288821B7e5E0'),
     Minter: getAddress('0xafBd8d66cd96b7A8188E27c61C1ec059c465CE36'),
     Operator: getAddress('0x1BCD69Ff770B5A8dc4355d781F6a09515F2ea797'),
-    VoteLockedCloberToken: zeroAddress,
-    ElectionGovernor: zeroAddress,
-    KeepersRegistry: zeroAddress,
+  },
+  [CHAIN_IDS.BERACHAIN_MAINNET]: {
+    Controller: getAddress('0xA9F92548491997eE0De26A03311535A4961EE8eb'),
+    BookManager: getAddress('0xDED58e263087f5B45d878BD9CF599B7A1a75D1E4'),
+    BookViewer: getAddress('0x4abb86f499f53e2b1F52302b2Ba7BbB0a90a49A8'),
+    Rebalancer: zeroAddress,
+    Strategy: zeroAddress,
+    Minter: zeroAddress,
+    Operator: zeroAddress,
   },
   [CHAIN_IDS.BERACHAIN_TESTNET]: {
     Controller: getAddress('0xce3F3C90970C08Fe451998441b30879560AA6757'),
@@ -78,9 +66,6 @@ export const CONTRACT_ADDRESSES: {
     Strategy: zeroAddress,
     Minter: zeroAddress,
     Operator: zeroAddress,
-    VoteLockedCloberToken: zeroAddress,
-    ElectionGovernor: zeroAddress,
-    KeepersRegistry: zeroAddress,
   },
   [CHAIN_IDS.MITOSIS_TESTNET]: {
     Controller: getAddress('0x6ef1c5D4cB1ebcC24d4BD7eB1b4467F26B6F2C1e'),
@@ -90,9 +75,6 @@ export const CONTRACT_ADDRESSES: {
     Strategy: zeroAddress,
     Minter: zeroAddress,
     Operator: zeroAddress,
-    VoteLockedCloberToken: zeroAddress,
-    ElectionGovernor: zeroAddress,
-    KeepersRegistry: zeroAddress,
   },
   [CHAIN_IDS.MONAD_TESTNET]: {
     Controller: getAddress('0x7792669BEb769c4035bdFcA4F3d794d55922B954'),
@@ -102,9 +84,6 @@ export const CONTRACT_ADDRESSES: {
     Strategy: getAddress('0x9eE708876804F9416B3C1a1aad0c016dee9DD804'),
     Minter: getAddress('0xAF9Ca76F6BB5bd2B18964A14Fc095455E2C2a099'),
     Operator: getAddress('0x4BB54bB9a42Fe787D1D1A2AAcF91C70b02e5553E'),
-    VoteLockedCloberToken: zeroAddress,
-    ElectionGovernor: zeroAddress,
-    KeepersRegistry: zeroAddress,
   },
   [CHAIN_IDS.SONIC_MAINNET]: {
     Controller: getAddress('0xcA6c15B7B03Ca69087B85B8EA690ED44A92eadd1'),
@@ -114,11 +93,8 @@ export const CONTRACT_ADDRESSES: {
     Strategy: getAddress('0xdd30f831bEB51fBF33E3D579e5529d3B1495554f'),
     Minter: getAddress('0x466795C0EAe3C44A6dcbB6DB0534F7019E0803A7'),
     Operator: getAddress('0xF7E7285eBe537fDf1C1c4432aa1863721EaC9a09'),
-    VoteLockedCloberToken: zeroAddress,
-    ElectionGovernor: zeroAddress,
-    KeepersRegistry: zeroAddress,
   },
-  [CHAIN_IDS.ZKSYNC]: {
+  [CHAIN_IDS.ZKSYNC_ERA]: {
     Controller: getAddress('0x2Bd904F455928833F8E8C706d1cf01Eb5daaee7C'),
     BookManager: getAddress('0xAc6AdB2727F99C309acd511D942c0b2812e03614'),
     BookViewer: getAddress('0x6e717aA9BB48129aeDC408D435Cc54F79E8A747a'),
@@ -126,8 +102,5 @@ export const CONTRACT_ADDRESSES: {
     Strategy: zeroAddress,
     Minter: zeroAddress,
     Operator: zeroAddress,
-    VoteLockedCloberToken: zeroAddress,
-    ElectionGovernor: zeroAddress,
-    KeepersRegistry: zeroAddress,
   },
 }
