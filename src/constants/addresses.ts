@@ -118,7 +118,7 @@ export const CONTRACT_ADDRESSES: {
     ElectionGovernor: zeroAddress,
     KeepersRegistry: zeroAddress,
   },
-  [CHAIN_IDS.ZKSYNC]: {
+  [CHAIN_IDS.ZKSYNC_ERA]: {
     Controller: getAddress('0x2Bd904F455928833F8E8C706d1cf01Eb5daaee7C'),
     BookManager: getAddress('0xAc6AdB2727F99C309acd511D942c0b2812e03614'),
     BookViewer: getAddress('0x6e717aA9BB48129aeDC408D435Cc54F79E8A747a'),
