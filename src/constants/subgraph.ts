@@ -2,7 +2,7 @@ import axios from 'axios'
 
 import { CHAIN_IDS } from './chain'
 
-const SUBGRAPH_URL: {
+export const SUBGRAPH_URL: {
   [chain in CHAIN_IDS]: string
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]:

@@ -37,7 +37,7 @@ import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 import { fetchPool, fetchPoolPerformance } from './apis/pool'
 import { fetchLastAmounts, fetchStrategyPosition } from './apis/strategy'
-import { Subgraph } from './constants/subgraph'
+import { Subgraph, SUBGRAPH_URL } from './constants/subgraph'
 import { fillAndSortByTimestamp } from './utils/time-series'
 import {
   PoolSnapshotDto as ModelPoolSnapshot,
@@ -59,6 +59,22 @@ import {
  */
 export const getContractAddresses = ({ chainId }: { chainId: CHAIN_IDS }) => {
   return CONTRACT_ADDRESSES[chainId]
+}
+
+/**
+ * Get subgraph endpoint by chain id
+ * @param chainId - chain id from {@link CHAIN_IDS}
+ * @returns Subgraph endpoint
+ *
+ * @example
+ * import { getSubgraphEndpoint } from '@clober/v2-sdk'
+ *
+ * const endpoint = await getSubgraphEndpoint({
+ *   chainId: 421614,
+ * })
+ */
+export const getSubgraphEndpoint = ({ chainId }: { chainId: CHAIN_IDS }) => {
+  return SUBGRAPH_URL[chainId]
 }
 
 /**
