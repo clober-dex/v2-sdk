@@ -103,7 +103,7 @@ export const CONTRACT_ADDRESSES: {
     Minter: zeroAddress,
     Operator: zeroAddress,
   },
-  [CHAIN_IDS.RISE_TESTNET}: {
+  [CHAIN_IDS.RISE_TESTNET]: {
     Controller: getAddress('0x7792669BEb769c4035bdFcA4F3d794d55922B954'),
     BookManager: getAddress('0xBc6eaFe723723DED3a411b6a1089a63bc5d73568'),
     BookViewer: getAddress('0x3e22d091F90ae759733B7CB06a6f7b440d84a425'),
