@@ -25,7 +25,7 @@ export enum CHAIN_IDS {
   MONAD_TESTNET = monadTestnet.id,
   SONIC_MAINNET = sonic.id,
   ZKSYNC_ERA = zkSync.id,
-  RISE_SEPOLIA = 11155931,
+  RISE_SEPOLIA = riseSepolia.id,
 }
 
 export const CHAIN_MAP: {
