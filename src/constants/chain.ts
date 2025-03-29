@@ -11,6 +11,7 @@ import {
 
 import { cloberTestChain, cloberTestChain2 } from './test-chain'
 import { berachainBartioTestnet } from './bera-bartio-chain'
+import { riseSepolia } from './rise-sepolia'
 
 // follow the https://docs.alchemy.com/reference/supported-subgraph-chains
 export enum CHAIN_IDS {
@@ -24,6 +25,7 @@ export enum CHAIN_IDS {
   MONAD_TESTNET = monadTestnet.id,
   SONIC_MAINNET = sonic.id,
   ZKSYNC_ERA = zkSync.id,
+  RISE_SEPOLIA = riseSepolia.id,
 }
 
 export const CHAIN_MAP: {
@@ -39,6 +41,7 @@ export const CHAIN_MAP: {
   [CHAIN_IDS.MONAD_TESTNET]: monadTestnet,
   [CHAIN_IDS.SONIC_MAINNET]: sonic,
   [CHAIN_IDS.ZKSYNC_ERA]: zkSync,
+  [CHAIN_IDS.RISE_SEPOLIA]: riseSepolia,
 }
 
 export const isTestnetChain = (chainId: CHAIN_IDS): boolean =>
@@ -47,4 +50,5 @@ export const isTestnetChain = (chainId: CHAIN_IDS): boolean =>
   chainId === CHAIN_IDS.ARBITRUM_SEPOLIA ||
   chainId === CHAIN_IDS.BERACHAIN_TESTNET ||
   chainId === CHAIN_IDS.MITOSIS_TESTNET ||
-  chainId === CHAIN_IDS.MONAD_TESTNET
+  chainId === CHAIN_IDS.MONAD_TESTNET ||
+  chainId === CHAIN_IDS.RISE_SEPOLIA
