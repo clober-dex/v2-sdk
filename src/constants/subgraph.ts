@@ -22,7 +22,7 @@ export const SUBGRAPH_URL: {
   [CHAIN_IDS.MITOSIS_TESTNET]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-mitosis-testnet/v1.8.1/gn',
   [CHAIN_IDS.MONAD_TESTNET]:
-    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-monad-testnet/v1.0.3/gn',
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-monad-testnet/v1.0.5/gn',
   [CHAIN_IDS.SONIC_MAINNET]:
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-sonic-mainnet/api',
   [CHAIN_IDS.ZKSYNC_ERA]:
