@@ -49,6 +49,7 @@ import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
 import { STRATEGY_ABI } from './abis/rebalancer/strategy-abi'
 import { fetchOpenOrdersByOrderIdsFromSubgraph } from './apis/open-order'
 import { OnChainOpenOrder } from './model/open-order'
+import { quotes } from './utils/quotes'
 
 /**
  * Build a transaction to open a market.
@@ -1109,6 +1110,8 @@ export const addLiquidity = async ({
     disableSwap?: boolean
     token0PermitParams?: ERC20PermitParam
     token1PermitParams?: ERC20PermitParam
+    token0Price?: number
+    token1Price?: number
     testnetPrice?: number
     useSubgraph?: boolean
   } & DefaultWriteContractOptions
@@ -1176,7 +1179,7 @@ export const addLiquidity = async ({
   ) {
     disableSwap = true
   }
-  const slippageLimitPercent = options?.slippage ?? 2
+  const slippageLimitPercent = options?.slippage ?? 1.0
 
   const swapParams: {
     inCurrency: `0x${string}`
@@ -1202,15 +1205,41 @@ export const addLiquidity = async ({
         : Number(options.testnetPrice)
       : undefined
     const swapAmountA = parseUnits('1', pool.currencyA.decimals)
-    const { amountOut: swapAmountB } = await fetchQuote({
-      chainId,
-      amountIn: swapAmountA,
-      tokenIn: pool.currencyA,
-      tokenOut: pool.currencyB,
-      slippageLimitPercent: 20,
-      userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
-      testnetPrice: currencyBPerCurrencyA,
-    })
+    let swapAmountB = -1n
+    if (options && options.token0Price && options.token1Price) {
+      const tokenAPrice = isAddressEqual(
+        pool.currencyA.address,
+        getAddress(token0),
+      )
+        ? options.token0Price
+        : options.token1Price
+      const tokenBPrice = isAddressEqual(
+        pool.currencyA.address,
+        getAddress(token0),
+      )
+        ? options.token1Price
+        : options.token0Price
+      swapAmountB = quotes(
+        swapAmountA,
+        tokenAPrice,
+        tokenBPrice,
+        pool.currencyA.decimals,
+        pool.currencyB.decimals,
+      )
+    } else {
+      ;({ amountOut: swapAmountB } = await fetchQuote({
+        chainId,
+        amountIn: swapAmountA,
+        tokenIn: pool.currencyA,
+        tokenOut: pool.currencyB,
+        slippageLimitPercent: 1,
+        userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+        testnetPrice: currencyBPerCurrencyA,
+      }))
+    }
+    if (swapAmountB === -1n) {
+      throw new Error('Failed to fetch quote')
+    }
     const { deltaA, deltaB } = getIdealDelta(
       amountA,
       amountB,
