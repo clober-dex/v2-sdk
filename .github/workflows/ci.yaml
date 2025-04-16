@@ -10,7 +10,7 @@ on:
 jobs:
   tests:
     name: NPM Test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         node-version: [ '18.10' ]
@@ -51,7 +51,7 @@ jobs:
 
   check-lint:
     name: Check TS
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         node-version: [ '18.10' ]
