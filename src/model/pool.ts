@@ -8,7 +8,6 @@ import {
   Pool as PoolType,
 } from '../type'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { toPoolKey } from '../utils/pool-key'
 
 import { Currency6909 } from './currency'
 
@@ -42,7 +41,6 @@ export class Pool {
     isOpened,
     bookIdA,
     bookIdB,
-    salt,
     poolKey,
     totalSupply,
     decimals,
@@ -63,7 +61,6 @@ export class Pool {
     isOpened: boolean
     bookIdA: bigint
     bookIdB: bigint
-    salt: `0x${string}`
     poolKey: `0x${string}`
     totalSupply: bigint
     decimals: number
@@ -80,7 +77,7 @@ export class Pool {
     paused: boolean
   }) {
     this.chainId = chainId
-    this.key = toPoolKey(bookIdA, bookIdB, salt)
+    this.key = poolKey
     this.market = market
     this.isOpened = isOpened
     this.strategy = CONTRACT_ADDRESSES[chainId]!.Strategy
