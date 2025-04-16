@@ -214,6 +214,9 @@ export const getPool = async ({
     !!(options && options.useSubgraph),
     options?.market,
   )
+  if (!pool.isOpened) {
+    throw new Error('Pool is not opened')
+  }
   return pool.toJson()
 }
 

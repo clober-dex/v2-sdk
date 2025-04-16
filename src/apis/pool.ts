@@ -124,7 +124,6 @@ export async function fetchPool(
     isOpened: bookIdA > 0 && bookIdB > 0,
     bookIdA,
     bookIdB,
-    salt,
     poolKey,
     totalSupply: BigInt(totalSupply),
     decimals: 18,
