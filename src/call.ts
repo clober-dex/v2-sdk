@@ -100,8 +100,7 @@ export const openMarket = async ({
     (isBid && !market.bidBook.isOpened) ||
     (!isBid && !market.askBook.isOpened)
   ) {
-    const unitSize = await calculateUnitSize(
-      publicClient,
+    const unitSize = calculateUnitSize(
       chainId,
       isBid ? market.quote : market.base,
     )
@@ -265,20 +264,17 @@ export const limitOrder = async ({
     (address) => !isAddressEqual(address, zeroAddress),
   )
   const quoteAmount = parseUnits(amount, inputCurrency.decimals)
-  const [unitSize, { takenAmount, spentAmount, bookId, events }] =
-    await Promise.all([
-      calculateUnitSize(publicClient, chainId, inputCurrency),
-      getExpectedOutput({
-        chainId,
-        inputToken,
-        outputToken,
-        amountIn: amount,
-        options: {
-          ...options,
-          limitPrice: price,
-        },
-      }),
-    ])
+  const unitSize = calculateUnitSize(chainId, inputCurrency)
+  const { takenAmount, spentAmount, bookId, events } = await getExpectedOutput({
+    chainId,
+    inputToken,
+    outputToken,
+    amountIn: amount,
+    options: {
+      ...options,
+      limitPrice: price,
+    },
+  })
   const isETH = isAddressEqual(inputToken, zeroAddress)
   const makeParam = {
     id: toBookId(chainId, inputToken, outputToken, unitSize),
