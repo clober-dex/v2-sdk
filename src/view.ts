@@ -222,9 +222,9 @@ export const getPool = async ({
 
 export const getPoolPerformance = async ({
   chainId,
-  token0,
-  token1,
-  salt,
+  poolKey,
+  currencyA,
+  currencyB,
   volumeFromTimestamp,
   volumeToTimestamp,
   snapshotFromTimestamp,
@@ -232,12 +232,11 @@ export const getPoolPerformance = async ({
   snapshotIntervalType,
   spreadProfitFromTimestamp,
   spreadProfitToTimestamp,
-  options,
 }: {
   chainId: CHAIN_IDS
-  token0: `0x${string}`
-  token1: `0x${string}`
-  salt: `0x${string}`
+  poolKey: `0x${string}`
+  currencyA: Currency
+  currencyB: Currency
   volumeFromTimestamp: number
   volumeToTimestamp: number
   snapshotFromTimestamp: number
@@ -245,39 +244,13 @@ export const getPoolPerformance = async ({
   snapshotIntervalType: CHART_LOG_INTERVALS
   spreadProfitFromTimestamp: number
   spreadProfitToTimestamp: number
-  options?: {
-    pool?: Pool
-    useSubgraph?: boolean
-  } & DefaultReadContractOptions
 }): Promise<PoolPerformanceData> => {
-  if (isAddressEqual(token0, token1)) {
-    throw new Error('Token0 and token1 must be different')
-  }
-  if (!options?.useSubgraph) {
-    throw new Error('useSubgraph must be true')
-  }
-  let pool: Pool
-  if (options?.pool) {
-    pool = options.pool
-  } else {
-    const publicClient = createPublicClient({
-      chain: CHAIN_MAP[chainId],
-      transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
-    })
-    pool = (
-      await fetchPool(
-        publicClient,
-        chainId,
-        [token0, token1],
-        salt,
-        !!(options && options.useSubgraph),
-        undefined,
-      )
-    ).toJson()
+  if (isAddressEqual(currencyA.address, currencyB.address)) {
+    throw new Error('currencyA and currencyB must be different')
   }
   const poolPerformance = await fetchPoolPerformance(
     chainId,
-    pool.key,
+    poolKey,
     volumeFromTimestamp,
     snapshotFromTimestamp,
     snapshotIntervalType,
@@ -291,7 +264,7 @@ export const getPoolPerformance = async ({
     (timestamp: number) => {
       const emptyPoolVolume: ModelPoolVolume = {
         id: '',
-        poolKey: pool.key,
+        poolKey,
         intervalType: '5m',
         timestamp: BigInt(timestamp),
         currencyAVolume: 0n,
@@ -312,7 +285,7 @@ export const getPoolPerformance = async ({
     (timestamp: number, prev: ModelPoolSnapshot | null) => {
       const emptyPoolSnapshot: ModelPoolSnapshot = {
         id: '',
-        poolKey: pool.key,
+        poolKey,
         intervalType: snapshotIntervalType,
         timestamp: BigInt(timestamp),
         price: prev ? prev.price : 0n,
@@ -344,12 +317,12 @@ export const getPoolPerformance = async ({
       intervalType: poolVolume.intervalType,
       timestamp: Number(poolVolume.timestamp),
       currencyAVolume: {
-        currency: pool.currencyA,
-        value: formatUnits(poolVolume.currencyAVolume, pool.currencyA.decimals),
+        currency: currencyA,
+        value: formatUnits(poolVolume.currencyAVolume, currencyA.decimals),
       },
       currencyBVolume: {
-        currency: pool.currencyB,
-        value: formatUnits(poolVolume.currencyBVolume, pool.currencyB.decimals),
+        currency: currencyB,
+        value: formatUnits(poolVolume.currencyBVolume, currencyB.decimals),
       },
     })),
     poolSnapshots: poolSnapshots.map((poolSnapshot) => ({
@@ -358,16 +331,22 @@ export const getPoolPerformance = async ({
       timestamp: Number(poolSnapshot.timestamp),
       price: formatUnits(poolSnapshot.price, 18),
       liquidityA: {
-        currency: pool.currencyA,
-        value: formatUnits(poolSnapshot.liquidityA, pool.currencyA.decimals),
+        currency: currencyA,
+        value: formatUnits(poolSnapshot.liquidityA, currencyA.decimals),
       },
       liquidityB: {
-        currency: pool.currencyB,
-        value: formatUnits(poolSnapshot.liquidityB, pool.currencyB.decimals),
+        currency: currencyB,
+        value: formatUnits(poolSnapshot.liquidityB, currencyB.decimals),
       },
       totalSupply: {
-        currency: pool.currencyLp,
-        value: formatUnits(poolSnapshot.totalSupply, pool.currencyLp.decimals),
+        currency: {
+          address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
+          id: poolKey,
+          name: `${currencyA.symbol}-${currencyB.symbol} LP Token`,
+          symbol: `${currencyA.symbol}-${currencyB.symbol}`,
+          decimals: 18,
+        },
+        value: formatUnits(poolSnapshot.totalSupply, 18),
       },
     })),
     poolSpreadProfits: poolSpreadProfits.map((poolSpreadProfit) => ({
