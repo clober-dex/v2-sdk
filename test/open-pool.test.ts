@@ -38,17 +38,18 @@ test('try open pool', async () => {
       useSubgraph: false,
     },
   })
-  const beforePool = await getPool({
-    chainId: cloberTestChain2.id,
-    token0: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
-    token1: '0x0000000000000000000000000000000000000000',
-    salt: zeroHash,
-    options: {
-      rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
-    },
-  })
-  expect(beforePool.isOpened).toEqual(false)
+  await expect(() =>
+    getPool({
+      chainId: cloberTestChain2.id,
+      token0: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
+      token1: '0x0000000000000000000000000000000000000000',
+      salt: zeroHash,
+      options: {
+        rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
+      },
+    }),
+  ).rejects.toThrow()
 
   await walletClient.sendTransaction({
     ...transaction1!,
