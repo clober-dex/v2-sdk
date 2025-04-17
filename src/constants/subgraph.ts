@@ -18,7 +18,7 @@ export const SUBGRAPH_URL: {
   [CHAIN_IDS.BERACHAIN_TESTNET]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-berachain-bartio/v1.8.1/gn',
   [CHAIN_IDS.RISE_SEPOLIA]:
-    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-rise-sepolia/v1.0.0/gn',
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-rise-sepolia/v1.0.1/gn',
   [CHAIN_IDS.MITOSIS_TESTNET]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-mitosis-testnet/v1.8.1/gn',
   [CHAIN_IDS.MONAD_TESTNET]:

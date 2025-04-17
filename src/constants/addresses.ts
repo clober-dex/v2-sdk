@@ -107,9 +107,9 @@ export const CONTRACT_ADDRESSES: {
     Controller: getAddress('0x7792669BEb769c4035bdFcA4F3d794d55922B954'),
     BookManager: getAddress('0xBc6eaFe723723DED3a411b6a1089a63bc5d73568'),
     BookViewer: getAddress('0x3e22d091F90ae759733B7CB06a6f7b440d84a425'),
-    Rebalancer: zeroAddress,
-    Strategy: zeroAddress,
-    Minter: zeroAddress,
-    Operator: zeroAddress,
+    Rebalancer: getAddress('0x552E53700042e0446C896b1803d9399ba846cF83'),
+    Strategy: getAddress('0xa3CC662732e4ae2a2e0156859B7Fbcd57936723c'),
+    Minter: getAddress('0x30a5460B801CA79F74e2A4D3b83A34af5D45c6b3'),
+    Operator: getAddress('0x8E6983D1fb8E953135413Ee538afF53F4D098eD7'),
   },
 }
