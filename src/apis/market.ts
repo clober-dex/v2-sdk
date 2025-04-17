@@ -42,7 +42,7 @@ const getBook = async (
   useSubgraph: boolean,
   n: number,
 ): Promise<Book> => {
-  const unitSize = await calculateUnitSize(publicClient, chainId, quoteCurrency)
+  const unitSize = calculateUnitSize(chainId, quoteCurrency)
   const bookId = toBookId(
     chainId,
     quoteCurrency.address,
