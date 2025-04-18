@@ -16,9 +16,9 @@ export const SUBGRAPH_URL: {
   [CHAIN_IDS.BERACHAIN_MAINNET]:
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-berachain-mainnet/api',
   [CHAIN_IDS.RISE_SEPOLIA]:
-    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-rise-sepolia/v1.0.1/gn',
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-rise-sepolia/latest/gn',
   [CHAIN_IDS.MONAD_TESTNET]:
-    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-monad-testnet/v1.0.5/gn',
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-core-subgraph-monad-testnet/latest/gn',
   [CHAIN_IDS.SONIC_MAINNET]:
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-sonic-mainnet/api',
 }
