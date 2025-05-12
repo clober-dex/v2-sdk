@@ -4,7 +4,7 @@ import type { Currency } from './currency'
 
 export type OpenOrderDto = {
   id: string
-  user: string
+  owner: string
   book: {
     id: string
     base: {
@@ -22,12 +22,14 @@ export type OpenOrderDto = {
     unitSize: string
   }
   tick: string
-  txHash: string
-  createdAt: string
+  transaction: {
+    id: string
+  }
+  timestamp: string
   unitAmount: string
-  unitFilledAmount: string
-  unitClaimedAmount: string
-  unitClaimableAmount: string
+  filledUnitAmount: string
+  claimedUnitAmount: string
+  claimableUnitAmount: string
   orderIndex: string
 }
 
