@@ -26,24 +26,14 @@ import {
   fetchOpenOrdersByUserAddressFromSubgraph,
 } from './apis/open-order'
 import { OpenOrder } from './model/open-order'
-import {
-  CHART_LOG_INTERVAL_TIMESTAMP,
-  fetchChartLogs,
-  fetchLatestChartLog,
-} from './apis/chart-logs'
+import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
 import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
-import { fetchPool, fetchPoolPerformance } from './apis/pool'
+import { fetchPool, fetchPoolPerformanceFromSubgraph } from './apis/pool'
 import { fetchLastAmounts, fetchStrategyPosition } from './apis/strategy'
 import { Subgraph, SUBGRAPH_URL } from './constants/subgraph'
-import { fillAndSortByTimestamp } from './utils/time-series'
-import {
-  PoolSnapshotDto as ModelPoolSnapshot,
-  PoolSpreadProfitDto as ModelPoolSpreadProfit,
-  PoolVolumeDto as ModelPoolVolume,
-} from './model/pool'
 
 /**
  * Get contract addresses by chain id
@@ -225,138 +215,18 @@ export const getPool = async ({
 export const getPoolPerformance = async ({
   chainId,
   poolKey,
-  currencyA,
-  currencyB,
-  volumeFromTimestamp,
-  volumeToTimestamp,
-  snapshotFromTimestamp,
-  snapshotToTimestamp,
-  snapshotIntervalType,
-  spreadProfitFromTimestamp,
-  spreadProfitToTimestamp,
 }: {
   chainId: CHAIN_IDS
   poolKey: `0x${string}`
-  currencyA: Currency
-  currencyB: Currency
-  volumeFromTimestamp: number
-  volumeToTimestamp: number
-  snapshotFromTimestamp: number
-  snapshotToTimestamp: number
-  snapshotIntervalType: CHART_LOG_INTERVALS
-  spreadProfitFromTimestamp: number
-  spreadProfitToTimestamp: number
 }): Promise<PoolPerformanceData> => {
-  if (isAddressEqual(currencyA.address, currencyB.address)) {
-    throw new Error('currencyA and currencyB must be different')
-  }
-  const poolPerformance = await fetchPoolPerformance(
+  const poolPerformanceData = await fetchPoolPerformanceFromSubgraph(
     chainId,
     poolKey,
-    volumeFromTimestamp,
-    snapshotFromTimestamp,
-    snapshotIntervalType,
-    spreadProfitFromTimestamp,
   )
-  const poolVolumes = fillAndSortByTimestamp(
-    poolPerformance.poolVolumes,
-    300,
-    volumeFromTimestamp,
-    volumeToTimestamp,
-    (timestamp: number) => {
-      const emptyPoolVolume: ModelPoolVolume = {
-        id: '',
-        poolKey,
-        intervalType: '5m',
-        timestamp: BigInt(timestamp),
-        currencyAVolume: 0n,
-        currencyBVolume: 0n,
-        bookACurrencyAVolume: 0n,
-        bookACurrencyBVolume: 0n,
-        bookBCurrencyAVolume: 0n,
-        bookBCurrencyBVolume: 0n,
-      }
-      return emptyPoolVolume
-    },
-  )
-  const poolSnapshots = fillAndSortByTimestamp(
-    poolPerformance.poolSnapshots,
-    CHART_LOG_INTERVAL_TIMESTAMP[snapshotIntervalType],
-    snapshotFromTimestamp,
-    snapshotToTimestamp,
-    (timestamp: number, prev: ModelPoolSnapshot | null) => {
-      const emptyPoolSnapshot: ModelPoolSnapshot = {
-        id: '',
-        poolKey,
-        intervalType: snapshotIntervalType,
-        timestamp: BigInt(timestamp),
-        price: prev ? prev.price : 0n,
-        liquidityA: prev ? prev.liquidityA : 0n,
-        liquidityB: prev ? prev.liquidityB : 0n,
-        totalSupply: prev ? prev.totalSupply : 0n,
-      }
-      return emptyPoolSnapshot
-    },
-  )
-  const poolSpreadProfits = fillAndSortByTimestamp(
-    poolPerformance.poolSpreadProfits,
-    300,
-    spreadProfitFromTimestamp,
-    spreadProfitToTimestamp,
-    (timestamp: number) => {
-      const emptyPoolSpreadProfit: ModelPoolSpreadProfit = {
-        id: '',
-        intervalType: '5m',
-        timestamp: BigInt(timestamp),
-        accumulatedProfitInUsd: '0',
-      }
-      return emptyPoolSpreadProfit
-    },
-  )
-  return {
-    poolVolumes: poolVolumes.map((poolVolume) => ({
-      poolKey: poolVolume.poolKey,
-      intervalType: poolVolume.intervalType,
-      timestamp: Number(poolVolume.timestamp),
-      currencyAVolume: {
-        currency: currencyA,
-        value: formatUnits(poolVolume.currencyAVolume, currencyA.decimals),
-      },
-      currencyBVolume: {
-        currency: currencyB,
-        value: formatUnits(poolVolume.currencyBVolume, currencyB.decimals),
-      },
-    })),
-    poolSnapshots: poolSnapshots.map((poolSnapshot) => ({
-      poolKey: poolSnapshot.poolKey,
-      intervalType: poolSnapshot.intervalType,
-      timestamp: Number(poolSnapshot.timestamp),
-      price: formatUnits(poolSnapshot.price, 18),
-      liquidityA: {
-        currency: currencyA,
-        value: formatUnits(poolSnapshot.liquidityA, currencyA.decimals),
-      },
-      liquidityB: {
-        currency: currencyB,
-        value: formatUnits(poolSnapshot.liquidityB, currencyB.decimals),
-      },
-      totalSupply: {
-        currency: {
-          address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
-          id: poolKey,
-          name: `${currencyA.symbol}-${currencyB.symbol} LP Token`,
-          symbol: `${currencyA.symbol}-${currencyB.symbol}`,
-          decimals: 18,
-        },
-        value: formatUnits(poolSnapshot.totalSupply, 18),
-      },
-    })),
-    poolSpreadProfits: poolSpreadProfits.map((poolSpreadProfit) => ({
-      intervalType: poolSpreadProfit.intervalType,
-      timestamp: Number(poolSpreadProfit.timestamp),
-      accumulatedProfitInUsd: poolSpreadProfit.accumulatedProfitInUsd,
-    })),
+  if (!poolPerformanceData) {
+    throw new Error('Pool is not opened')
   }
+  return poolPerformanceData
 }
 
 export const getStrategyPrice = async ({

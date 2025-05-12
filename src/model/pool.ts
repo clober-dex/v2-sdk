@@ -1,12 +1,6 @@
 import { formatUnits } from 'viem'
 
-import {
-  CHAIN_IDS,
-  CHART_LOG_INTERVALS,
-  Currency,
-  Market,
-  Pool as PoolType,
-} from '../type'
+import { CHAIN_IDS, Currency, Market, Pool as PoolType } from '../type'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 
 import { Currency6909 } from './currency'
@@ -179,33 +173,35 @@ export class Pool {
   }
 }
 
-export type PoolVolumeDto = {
+export type PoolDto = {
   id: string
-  poolKey: `0x${string}`
-  intervalType: '5m'
-  timestamp: bigint
-  currencyAVolume: bigint
-  currencyBVolume: bigint
-  bookACurrencyAVolume: bigint
-  bookACurrencyBVolume: bigint
-  bookBCurrencyAVolume: bigint
-  bookBCurrencyBVolume: bigint
+  tokenA: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
+  }
+  tokenB: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
+  }
+  totalSupply: string
+  volumeUSD: string
+  lpPriceUSD: string
+  spreadProfitUSD: string
 }
 
-export type PoolSnapshotDto = {
-  id: string
-  poolKey: `0x${string}`
-  intervalType: CHART_LOG_INTERVALS
-  timestamp: bigint
-  price: bigint
-  liquidityA: bigint
-  liquidityB: bigint
-  totalSupply: bigint
-}
-
-export type PoolSpreadProfitDto = {
-  id: string
-  intervalType: '5m'
-  timestamp: bigint
-  accumulatedProfitInUsd: string
+export type PoolHourDataDto = {
+  date: number
+  totalSupply: string
+  spreadProfitUSD: string
+  lpPriceUSD: string
+  oraclePrice: string
+  priceA: string
+  priceB: string
+  volumeTokenA: string
+  volumeTokenB: string
+  volumeUSD: string
 }

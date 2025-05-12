@@ -72,6 +72,30 @@ export type Pool = {
   paused: boolean
 }
 
+export type PoolPerformanceData = {
+  chainId: CHAIN_IDS
+  key: `0x${string}`
+  currencyA: Currency
+  currencyB: Currency
+  currencyLp: Currency6909
+  volumeUSD24h: number
+  lpPriceUSD: number
+  totalTvlUSD: number
+  totalSpreadProfitUSD: number
+  performanceHistories: {
+    timestamp: number
+    spreadProfitUSD: number
+    tvlUSD: number
+    lpPriceUSD: number
+    oraclePrice: string
+    priceA: number
+    priceB: number
+    volumeA: number
+    volumeB: number
+    volumeUSD: number
+  }[]
+}
+
 export type Transaction = {
   data: `0x${string}`
   gas: bigint
@@ -143,33 +167,3 @@ export enum CHART_LOG_INTERVALS {
 
 export type CurrencyAmount = { currency: Currency; value: string }
 export type Currency6909Amount = { currency: Currency6909; value: string }
-
-export type PoolVolumeDto = {
-  poolKey: `0x${string}`
-  intervalType: '5m'
-  timestamp: number
-  currencyAVolume: CurrencyAmount
-  currencyBVolume: CurrencyAmount
-}
-
-export type PoolSnapshotDto = {
-  poolKey: `0x${string}`
-  intervalType: CHART_LOG_INTERVALS
-  timestamp: number
-  price: string
-  liquidityA: CurrencyAmount
-  liquidityB: CurrencyAmount
-  totalSupply: Currency6909Amount
-}
-
-export type PoolSpreadProfitDto = {
-  intervalType: '5m'
-  timestamp: number
-  accumulatedProfitInUsd: string
-}
-
-export type PoolPerformanceData = {
-  poolVolumes: PoolVolumeDto[]
-  poolSnapshots: PoolSnapshotDto[]
-  poolSpreadProfits: PoolSpreadProfitDto[]
-}

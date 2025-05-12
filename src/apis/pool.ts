@@ -1,12 +1,13 @@
-import { PublicClient } from 'viem'
+import { formatUnits, getAddress, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
-import { Pool } from '../model/pool'
+import { Pool, PoolDto, PoolHourDataDto } from '../model/pool'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
-import { Market } from '../type'
+import { Market, PoolPerformanceData } from '../type'
 import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
+import { Subgraph } from '../constants/subgraph'
 
 import { fetchMarket } from './market'
 
@@ -94,4 +95,72 @@ export async function fetchPool(
     orderListB: orderListB.map((id: bigint) => BigInt(id)),
     paused,
   })
+}
+
+export const fetchPoolPerformanceFromSubgraph = async (
+  chainId: CHAIN_IDS,
+  poolKey: `0x${string}`,
+): Promise<PoolPerformanceData | null> => {
+  const {
+    data: { pool, poolHourDatas },
+  } = await Subgraph.get<{
+    data: {
+      pool: PoolDto | null
+      poolHourDatas: PoolHourDataDto[]
+    }
+  }>(
+    chainId,
+    'getPoolPerformance',
+    'query getPoolPerformance($poolKey: ID!) { pool(id: $poolKey) { id tokenA { id name symbol decimals } tokenB { id name symbol decimals } totalSupply volumeUSD lpPriceUSD spreadProfitUSD } poolHourDatas( where: {pool: $poolKey, oraclePrice_gt: 0} orderBy: date orderDirection: desc first: 1000 ) { date spreadProfitUSD lpPriceUSD oraclePrice priceA priceB volumeTokenA volumeTokenB volumeUSD } }',
+    {
+      poolKey: poolKey.toLowerCase(),
+    },
+  )
+  if (!pool) {
+    return null
+  }
+  return {
+    chainId,
+    key: poolKey,
+    currencyA: {
+      address: getAddress(pool.tokenA.id),
+      name: pool.tokenA.name,
+      symbol: pool.tokenA.symbol,
+      decimals: Number(pool.tokenA.decimals),
+    },
+    currencyB: {
+      address: getAddress(pool.tokenB.id),
+      name: pool.tokenB.name,
+      symbol: pool.tokenB.symbol,
+      decimals: Number(pool.tokenB.decimals),
+    },
+    currencyLp: {
+      id: pool.id as `0x${string}`,
+      address: getAddress(pool.id),
+      name: pool.tokenA.name + '/' + pool.tokenB.name,
+      symbol: pool.tokenA.symbol + '/' + pool.tokenB.symbol,
+      decimals: Number(pool.tokenA.decimals),
+    },
+    volumeUSD24h: Number(pool.volumeUSD),
+    lpPriceUSD: Number(pool.lpPriceUSD),
+    totalTvlUSD:
+      Number(pool.lpPriceUSD) *
+      Number(formatUnits(BigInt(pool.totalSupply), 18)),
+    totalSpreadProfitUSD: Number(pool.spreadProfitUSD),
+    performanceHistories: poolHourDatas.map((poolHourData) => ({
+      timestamp: poolHourData.date,
+      spreadProfitUSD: Number(poolHourData.spreadProfitUSD),
+      tvlUSD:
+        // TODO: use poolHourData.totalValueLockedUSD instead of poolHourData.totalSupply * poolHourData.lpPriceUSD
+        Number(poolHourData.lpPriceUSD) *
+        Number(formatUnits(BigInt(poolHourData.totalSupply), 18)),
+      lpPriceUSD: Number(poolHourData.lpPriceUSD),
+      oraclePrice: poolHourData.oraclePrice,
+      priceA: Number(poolHourData.priceA),
+      priceB: Number(poolHourData.priceB),
+      volumeA: Number(poolHourData.volumeTokenA),
+      volumeB: Number(poolHourData.volumeTokenB),
+      volumeUSD: Number(poolHourData.volumeUSD),
+    })),
+  }
 }
