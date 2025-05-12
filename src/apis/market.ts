@@ -27,7 +27,7 @@ const fetchBookFromSubgraph = async (chainId: CHAIN_IDS, bookId: string) => {
   }>(
     chainId,
     'getBook',
-    'query getBook($bookId: ID!) { book(id: $bookId){ depths { tick unitAmount } } }',
+    'query getBook($bookId: ID!) { book(id: $bookId) { depths(where: {unitAmount_gt: 0}) { tick unitAmount } } }',
     {
       bookId,
     },

@@ -59,7 +59,7 @@ const getOpenOrdersByUserAddressFromSubgraph = async (
   }>(
     chainId,
     'getOpenOrdersByUserAddress',
-    'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: { user: $userAddress }, first: 1000) { id user book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick txHash createdAt unitAmount unitFilledAmount unitClaimedAmount unitClaimableAmount orderIndex } }',
+    'query getOpenOrdersByUserAddress($userAddress: String!) { openOrders(where: {owner: $userAddress}, first: 1000) { id owner book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick transaction { id } timestamp unitAmount filledUnitAmount claimedUnitAmount claimableUnitAmount orderIndex } }',
     {
       userAddress: userAddress.toLowerCase(),
     },
