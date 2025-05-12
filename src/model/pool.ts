@@ -187,6 +187,14 @@ export type PoolDto = {
     symbol: string
     decimals: string
   }
+  initialTotalSupply: string
+  initialTokenAAmount: string
+  initialTokenBAmount: string
+  initialLPPriceUSD: string
+  createdAtTimestamp: string
+  createdAtTransaction: {
+    id: string
+  }
   totalSupply: string
   volumeUSD: string
   lpPriceUSD: string

@@ -82,6 +82,14 @@ export type PoolPerformanceData = {
   lpPriceUSD: number
   totalTvlUSD: number
   totalSpreadProfitUSD: number
+  initialLPInfo: {
+    tokenAAmount: number
+    tokenBAmount: number
+    lpTokenAmount: number
+    lpPriceUSD: number
+    timestamp: number
+    txHash: `0x${string}`
+  }
   performanceHistories: {
     timestamp: number
     spreadProfitUSD: number

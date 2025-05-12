@@ -111,7 +111,7 @@ export const fetchPoolPerformanceFromSubgraph = async (
   }>(
     chainId,
     'getPoolPerformance',
-    'query getPoolPerformance($poolKey: ID!) { pool(id: $poolKey) { id tokenA { id name symbol decimals } tokenB { id name symbol decimals } totalSupply volumeUSD lpPriceUSD spreadProfitUSD } poolHourDatas( where: {pool: $poolKey, oraclePrice_gt: 0} orderBy: date orderDirection: desc first: 1000 ) { date spreadProfitUSD lpPriceUSD oraclePrice priceA priceB volumeTokenA volumeTokenB volumeUSD } }',
+    'query getPoolPerformance($poolKey: ID!) { pool(id: $poolKey) { id tokenA { id name symbol decimals } tokenB { id name symbol decimals } initialTotalSupply initialTokenAAmount initialTokenBAmount initialLPPriceUSD createdAtTimestamp createdAtTransaction { id } totalSupply volumeUSD lpPriceUSD spreadProfitUSD } poolHourDatas( where: {pool: $poolKey, oraclePrice_gt: 0} orderBy: date orderDirection: desc first: 1000 ) { date totalSupply spreadProfitUSD lpPriceUSD oraclePrice priceA priceB volumeTokenA volumeTokenB volumeUSD } }',
     {
       poolKey: poolKey.toLowerCase(),
     },
@@ -122,6 +122,24 @@ export const fetchPoolPerformanceFromSubgraph = async (
   return {
     chainId,
     key: poolKey,
+    initialLPInfo: {
+      tokenAAmount: Number(
+        formatUnits(
+          BigInt(pool.initialTokenAAmount),
+          Number(pool.tokenA.decimals),
+        ),
+      ),
+      tokenBAmount: Number(
+        formatUnits(
+          BigInt(pool.initialTokenBAmount),
+          Number(pool.tokenB.decimals),
+        ),
+      ),
+      lpTokenAmount: Number(formatUnits(BigInt(pool.initialTotalSupply), 18)),
+      lpPriceUSD: Number(pool.initialLPPriceUSD),
+      timestamp: Number(pool.createdAtTimestamp),
+      txHash: pool.createdAtTransaction.id as `0x${string}`,
+    },
     currencyA: {
       address: getAddress(pool.tokenA.id),
       name: pool.tokenA.name,
