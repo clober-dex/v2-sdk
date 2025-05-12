@@ -157,7 +157,7 @@ export const fetchPoolPerformanceFromSubgraph = async (
       address: getAddress(pool.id),
       name: pool.tokenA.name + '/' + pool.tokenB.name,
       symbol: pool.tokenA.symbol + '/' + pool.tokenB.symbol,
-      decimals: Number(pool.tokenA.decimals),
+      decimals: 18,
     },
     volumeUSD24h: Number(pool.volumeUSD),
     lpPriceUSD: Number(pool.lpPriceUSD),
