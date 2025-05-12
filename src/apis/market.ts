@@ -110,10 +110,12 @@ export async function fetchMarket(
     tokenAddresses[0]!,
     tokenAddresses[1]!,
   ])
-  const currencyMap = await fetchCurrencyMap(publicClient, chainId, [
-    quoteTokenAddress,
-    baseTokenAddress,
-  ])
+  const currencyMap = await fetchCurrencyMap(
+    publicClient,
+    chainId,
+    [quoteTokenAddress, baseTokenAddress],
+    useSubgraph,
+  )
   const [quoteCurrency, baseCurrency] = [
     currencyMap[quoteTokenAddress],
     currencyMap[baseTokenAddress],

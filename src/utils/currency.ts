@@ -3,6 +3,7 @@ import { getAddress, isAddressEqual, PublicClient, zeroAddress } from 'viem'
 import type { Currency } from '../model/currency'
 import { CHAIN_IDS } from '../constants/chain'
 import { ETH, NATIVE_CURRENCY } from '../constants/currency'
+import { Subgraph } from '../constants/subgraph'
 
 const _abi = [
   {
@@ -79,6 +80,7 @@ export const fetchCurrencyMap = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   addresses: `0x${string}`[],
+  useSubgraph: boolean,
 ): Promise<{
   [address: `0x${string}`]: Currency
 }> => {
@@ -96,7 +98,9 @@ export const fetchCurrencyMap = async (
   )
   const uncachedCurrencies = await fetchCurrencyMapInner(
     publicClient,
+    chainId,
     uncachedAddresses,
+    useSubgraph,
   )
   for (const currency of Object.values(uncachedCurrencies)) {
     setCurrencyToCache(chainId, currency.address, currency)
@@ -161,7 +165,9 @@ const fetchCurrencyInner = async (
 
 const fetchCurrencyMapInner = async (
   publicClient: PublicClient,
+  chainId: CHAIN_IDS,
   addresses: `0x${string}`[],
+  useSubgraph: boolean,
 ): Promise<{
   [address: `0x${string}`]: Currency
 }> => {
@@ -173,52 +179,87 @@ const fetchCurrencyMapInner = async (
     return {}
   }
 
-  const result = await publicClient.multicall({
-    contracts: [
-      ...addresses.map((address) => ({
-        address,
-        abi: _abi,
-        functionName: 'name',
-      })),
-      ...addresses.map((address) => ({
-        address,
-        abi: _abi,
-        functionName: 'symbol',
-      })),
-      ...addresses.map((address) => ({
-        address,
-        abi: _abi,
-        functionName: 'decimals',
-      })),
-    ],
-  })
-
-  return addresses
-    .map((address, index) => {
-      const name = result[index].result as string | undefined
-      const symbol = result[index + addresses.length].result as
-        | string
-        | undefined
-      const decimals = result[index + addresses.length * 2].result as
-        | number
-        | undefined
-      if (!name || !symbol || !decimals) {
-        throw new Error(`Failed to fetch currency: ${address}`)
+  if (useSubgraph) {
+    const {
+      data: { tokens },
+    } = await Subgraph.get<{
+      data: {
+        tokens: {
+          id: string
+          name: string
+          symbol: string
+          decimals: string
+        }[]
       }
-      return {
-        address,
-        name,
-        symbol,
-        decimals,
-      }
-    })
-    .reduce(
-      (acc, currency) => {
-        acc[getAddress(currency.address)] = currency
-        return acc
-      },
-      {} as {
-        [address: `0x${string}`]: Currency
+    }>(
+      chainId,
+      'getTokens',
+      'query getTokens($addresses: [Bytes!]!) { tokens(where: {id_in: $addresses}) { id name symbol decimals } }',
+      {
+        addresses: addresses.map((address) => address.toLowerCase()),
       },
     )
+    return Object.fromEntries(
+      tokens.map((token) => [
+        getAddress(token.id),
+        {
+          address: getAddress(token.id),
+          name: token.name,
+          symbol: token.symbol,
+          decimals: Number(token.decimals),
+        },
+      ]),
+    ) as {
+      [address: `0x${string}`]: Currency
+    }
+  } else {
+    const result = await publicClient.multicall({
+      contracts: [
+        ...addresses.map((address) => ({
+          address,
+          abi: _abi,
+          functionName: 'name',
+        })),
+        ...addresses.map((address) => ({
+          address,
+          abi: _abi,
+          functionName: 'symbol',
+        })),
+        ...addresses.map((address) => ({
+          address,
+          abi: _abi,
+          functionName: 'decimals',
+        })),
+      ],
+    })
+
+    return addresses
+      .map((address, index) => {
+        const name = result[index].result as string | undefined
+        const symbol = result[index + addresses.length].result as
+          | string
+          | undefined
+        const decimals = result[index + addresses.length * 2].result as
+          | number
+          | undefined
+        if (!name || !symbol || !decimals) {
+          throw new Error(`Failed to fetch currency: ${address}`)
+        }
+        return {
+          address,
+          name,
+          symbol,
+          decimals,
+        }
+      })
+      .reduce(
+        (acc, currency) => {
+          acc[getAddress(currency.address)] = currency
+          return acc
+        },
+        {} as {
+          [address: `0x${string}`]: Currency
+        },
+      )
+  }
 }

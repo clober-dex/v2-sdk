@@ -161,7 +161,12 @@ export const fetchOrders = async (
       return [base, quote]
     })
     .flat()
-  const currencyMap = await fetchCurrencyMap(publicClient, chainId, addresses)
+  const currencyMap = await fetchCurrencyMap(
+    publicClient,
+    chainId,
+    addresses,
+    false,
+  )
 
   return orderIds.map((orderId, index) => {
     const order = result[index].result as {
