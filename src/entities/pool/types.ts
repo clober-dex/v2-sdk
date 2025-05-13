@@ -1,4 +1,4 @@
-import { Currency, Currency6909 } from '../currency/model'
+import { Currency, Currency6909 } from '../currency/types'
 import {
   CHAIN_IDS,
   Currency6909Amount,

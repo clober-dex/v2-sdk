@@ -1,5 +1,5 @@
 import { CHAIN_IDS } from '../../constants/chain-configs/chain'
-import { Currency } from '../currency/model'
+import { Currency } from '../currency/types'
 import { Book, Depth } from '../book/types'
 
 export type Market = {

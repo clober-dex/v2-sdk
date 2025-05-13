@@ -8,7 +8,7 @@ import {
 } from '../../constants/chain-configs/fee'
 import { Market as MarketType } from '../../types'
 import { BookModel } from '../book/model'
-import type { Currency } from '../currency/model'
+import type { Currency } from '../currency/types'
 
 import { getMarketId } from './utils/market-id'
 

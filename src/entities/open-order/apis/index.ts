@@ -8,7 +8,7 @@ import {
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { getMarketId } from '../../market/utils/market-id'
-import type { Currency } from '../../currency/model'
+import type { Currency } from '../../currency/types'
 import {
   baseToQuote,
   quoteToBase,
@@ -25,8 +25,8 @@ import { CONTRACT_ADDRESSES } from '../../../constants/chain-configs/addresses'
 import { BOOK_MANAGER_ABI } from '../../../constants/abis/core/book-manager-abi'
 import { fetchCurrencyMap } from '../../currency/apis'
 import { fromOrderId } from '../utils/order-id'
-import { OnChainOpenOrder } from '../model'
-import type { OpenOrder } from '../model'
+import { OnChainOpenOrder } from '../types'
+import type { OpenOrder } from '../types'
 
 type OpenOrderDto = {
   id: string

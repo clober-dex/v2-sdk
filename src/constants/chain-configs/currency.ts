@@ -1,6 +1,6 @@
 import { zeroAddress } from 'viem'
 
-import { Currency } from '../../entities/currency/model'
+import { Currency } from '../../entities/currency/types'
 
 import { CHAIN_IDS } from './chain'
 

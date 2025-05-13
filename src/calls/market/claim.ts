@@ -14,7 +14,7 @@ import {
   Transaction,
 } from '../../types'
 import { fetchIsApprovedForAll } from '../../entities/currency/apis/approval'
-import { OnChainOpenOrder } from '../../entities/open-order/model'
+import { OnChainOpenOrder } from '../../entities/open-order/types'
 import {
   fetchOnChainOrders,
   fetchOpenOrdersByOrderIdsFromSubgraph,

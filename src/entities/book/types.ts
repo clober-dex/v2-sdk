@@ -1,4 +1,4 @@
-import { Currency } from '../currency/model'
+import { Currency } from '../currency/types'
 
 export type Depth = {
   price: string

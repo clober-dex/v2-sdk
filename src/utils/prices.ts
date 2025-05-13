@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
 
 import { MAX_PRICE, MIN_PRICE, PRICE_PRECISION } from '../constants/price'
-import { Currency } from '../entities/currency/model'
+import { Currency } from '../entities/currency/types'
 
 import { fromPrice, invertTick, toPrice } from './tick'
 import { max, min } from './bigint'

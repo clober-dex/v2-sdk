@@ -1,6 +1,6 @@
 import { isAddressEqual, zeroAddress } from 'viem'
 
-import { type Currency } from '../entities/currency/model'
+import { type Currency } from '../entities/currency/types'
 import { CHAIN_IDS } from '../constants/chain-configs/chain'
 import { WETH_ADDRESSES } from '../constants/chain-configs/currency'
 

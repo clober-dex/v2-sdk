@@ -8,9 +8,8 @@ export type {
   Currency6909Amount,
   CurrencyFlow,
   Currency6909Flow,
-} from '../entities/currency/model'
-export type { OpenOrder } from '../entities/open-order/model'
-
+} from '../entities/currency/types'
+export type { OpenOrder, OnChainOpenOrder } from '../entities/open-order/types'
 export type { Book, Depth } from '../entities/book/types'
 export type {
   Market,
