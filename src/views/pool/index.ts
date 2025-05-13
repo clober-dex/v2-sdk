@@ -1,17 +1,11 @@
 import { createPublicClient, http, isAddressEqual } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../constants/chain'
-import {
-  DefaultReadContractOptions,
-  Market,
-  Pool,
-  PoolSnapshot,
-} from '../types'
-import { fetchPool } from '../entities/pool/apis'
-import {
-  fetchPoolSnapshotFromSubgraph,
-  fetchPoolSnapshotsFromSubgraph,
-} from '../entities/pool/apis/snapshot'
+import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
+import { DefaultReadContractOptions, Market, Pool } from '../../types'
+import { fetchPool } from '../../entities/pool/apis'
+
+export { getStrategyPrice, getLastAmounts } from './market-making'
+export { getPoolSnapshot, getPoolSnapshots } from './snapshot'
 
 /**
  * Get pool information by chain id and token addresses
@@ -69,26 +63,4 @@ export const getPool = async ({
     throw new Error('Pool is not opened')
   }
   return pool.toJson()
-}
-
-export const getPoolSnapshot = async ({
-  chainId,
-  poolKey,
-}: {
-  chainId: CHAIN_IDS
-  poolKey: `0x${string}`
-}): Promise<PoolSnapshot> => {
-  const poolSnapshot = await fetchPoolSnapshotFromSubgraph(chainId, poolKey)
-  if (!poolSnapshot) {
-    throw new Error('Pool is not existed')
-  }
-  return poolSnapshot
-}
-
-export const getPoolSnapshots = async ({
-  chainId,
-}: {
-  chainId: CHAIN_IDS
-}): Promise<PoolSnapshot[]> => {
-  return fetchPoolSnapshotsFromSubgraph(chainId)
 }

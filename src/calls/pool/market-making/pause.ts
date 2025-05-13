@@ -1,13 +1,13 @@
 import { createPublicClient, http } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
-import { DefaultWriteContractOptions, Pool, Transaction } from '../../types'
-import { fetchPool } from '../../entities/pool/apis'
-import { buildTransaction } from '../../utils/build-transaction'
-import { CONTRACT_ADDRESSES } from '../../constants/addresses'
-import { REBALANCER_ABI } from '../../constants/abis/rebalancer/rebalancer-abi'
+import { CHAIN_IDS, CHAIN_MAP } from '../../../constants/chain'
+import { DefaultWriteContractOptions, Pool, Transaction } from '../../../types'
+import { fetchPool } from '../../../entities/pool/apis'
+import { buildTransaction } from '../../../utils/build-transaction'
+import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
+import { OPERATOR_ABI } from '../../../constants/abis/rebalancer/operator-abi'
 
-export const refillOrder = async ({
+export const pausePool = async ({
   chainId,
   userAddress,
   token0,
@@ -20,11 +20,11 @@ export const refillOrder = async ({
   token0: `0x${string}`
   token1: `0x${string}`
   salt: `0x${string}`
-  options?: DefaultWriteContractOptions & {
+  options?: {
     useSubgraph?: boolean
     pool?: Pool
-  }
-}): Promise<Transaction> => {
+  } & DefaultWriteContractOptions
+}): Promise<Transaction | undefined> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
@@ -42,7 +42,7 @@ export const refillOrder = async ({
       ).toJson()
   if (!pool.isOpened) {
     throw new Error(`
-       Open the pool before rebalancing pool.
+       Open the pool before trying pause.
        import { openPool } from '@clober/v2-sdk'
 
        const transaction = await openPool({
@@ -54,14 +54,18 @@ export const refillOrder = async ({
     `)
   }
 
+  if (pool.paused) {
+    return undefined
+  }
+
   return buildTransaction(
     publicClient,
     {
       chain: CHAIN_MAP[chainId],
       account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
-      abi: REBALANCER_ABI,
-      functionName: 'rebalance',
+      address: CONTRACT_ADDRESSES[chainId]!.Operator,
+      abi: OPERATOR_ABI,
+      functionName: 'pause',
       args: [pool.key],
     },
     options?.gasLimit,

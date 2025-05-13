@@ -1,6 +1,9 @@
-import { CHAIN_IDS } from '../constants/chain'
-import { CHART_LOG_INTERVALS, ChartLog } from '../types'
-import { fetchChartLogs, fetchLatestChartLog } from '../entities/chart/apis'
+import { CHAIN_IDS } from '../../constants/chain'
+import { CHART_LOG_INTERVALS, ChartLog } from '../../types'
+import {
+  fetchChartLogs,
+  fetchLatestChartLog,
+} from '../../entities/market/apis/chart-log'
 
 /**
  * Retrieves the latest chart log for a specific market.
@@ -54,7 +57,6 @@ export const getLatestChartLog = async ({
  *   to: 1713312000,
  * })
  */
-
 export const getChartLogs = async ({
   chainId,
   quote,

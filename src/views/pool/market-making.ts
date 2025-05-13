@@ -1,15 +1,15 @@
 import { createPublicClient, http } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
 import {
   DefaultReadContractOptions,
   LastAmounts,
   StrategyPosition,
-} from '../types'
+} from '../../types'
 import {
   fetchLastAmounts,
   fetchStrategyPosition,
-} from '../entities/pool/apis/strategy'
+} from '../../entities/pool/apis/strategy'
 
 export const getStrategyPrice = async ({
   chainId,

@@ -1,3 +1,6 @@
+import { CHAIN_IDS } from '../constants/chain'
+import { CONTRACT_ADDRESSES } from '../constants/addresses'
+
 /**
  * Get contract addresses by chain id
  * @param chainId - chain id from {@link CHAIN_IDS}

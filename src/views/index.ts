@@ -1,9 +1,19 @@
-export { getQuoteToken, getMarket, getMarketSnapshots } from './market'
-export { getPool, getPoolSnapshot, getPoolSnapshots } from './pool'
+export {
+  getMarket,
+  getChartLogs,
+  getLatestChartLog,
+  getExpectedOutput,
+  getExpectedInput,
+} from './market'
+export {
+  getPool,
+  getPoolSnapshot,
+  getPoolSnapshots,
+  getStrategyPrice,
+  getLastAmounts,
+} from './pool'
+
 export { getPriceNeighborhood } from './price'
-export { getExpectedOutput, getExpectedInput } from './quote'
-export { getChartLogs, getLatestChartLog } from './chart'
 export { getOpenOrder, getOpenOrders } from './open-order'
 export { getSubgraphEndpoint, getSubgraphBlockNumber } from './subgraph'
-export { getStrategyPrice, getLastAmounts } from './rebalancer'
 export { getContractAddresses } from './address'

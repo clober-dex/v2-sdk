@@ -1,13 +1,13 @@
 import { createPublicClient, http } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
-import { DefaultWriteContractOptions, Pool, Transaction } from '../../types'
-import { fetchPool } from '../../entities/pool/apis'
-import { buildTransaction } from '../../utils/build-transaction'
-import { CONTRACT_ADDRESSES } from '../../constants/addresses'
-import { OPERATOR_ABI } from '../../constants/abis/rebalancer/operator-abi'
+import { CHAIN_IDS, CHAIN_MAP } from '../../../constants/chain'
+import { DefaultWriteContractOptions, Pool, Transaction } from '../../../types'
+import { fetchPool } from '../../../entities/pool/apis'
+import { buildTransaction } from '../../../utils/build-transaction'
+import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
+import { STRATEGY_ABI } from '../../../constants/abis/rebalancer/strategy-abi'
 
-export const pausePool = async ({
+export const resumePool = async ({
   chainId,
   userAddress,
   token0,
@@ -42,7 +42,7 @@ export const pausePool = async ({
       ).toJson()
   if (!pool.isOpened) {
     throw new Error(`
-       Open the pool before trying pause.
+       Open the pool before trying resume.
        import { openPool } from '@clober/v2-sdk'
 
        const transaction = await openPool({
@@ -54,7 +54,7 @@ export const pausePool = async ({
     `)
   }
 
-  if (pool.paused) {
+  if (!pool.paused) {
     return undefined
   }
 
@@ -63,9 +63,9 @@ export const pausePool = async ({
     {
       chain: CHAIN_MAP[chainId],
       account: userAddress,
-      address: CONTRACT_ADDRESSES[chainId]!.Operator,
-      abi: OPERATOR_ABI,
-      functionName: 'pause',
+      address: CONTRACT_ADDRESSES[chainId]!.Strategy,
+      abi: STRATEGY_ABI,
+      functionName: 'unpause',
       args: [pool.key],
     },
     options?.gasLimit,
