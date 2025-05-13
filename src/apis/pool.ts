@@ -1,11 +1,11 @@
-import { formatUnits, getAddress, PublicClient } from 'viem'
+import { getAddress, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
 import { Pool, PoolDto, PoolHourDataDto } from '../model/pool'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
-import { Market, PoolPerformanceData } from '../type'
+import { Currency, Market, PoolPerformanceData } from '../type'
 import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
 import { Subgraph } from '../constants/subgraph'
 
@@ -119,61 +119,69 @@ export const fetchPoolPerformanceFromSubgraph = async (
   if (!pool) {
     return null
   }
+  const currencyA: Currency = {
+    address: getAddress(pool.tokenA.id),
+    name: pool.tokenA.name,
+    symbol: pool.tokenA.symbol,
+    decimals: Number(pool.tokenA.decimals),
+  }
+  const currencyB: Currency = {
+    address: getAddress(pool.tokenB.id),
+    name: pool.tokenB.name,
+    symbol: pool.tokenB.symbol,
+    decimals: Number(pool.tokenB.decimals),
+  }
+  const currencyLp = {
+    id: pool.id as `0x${string}`,
+    address: getAddress(pool.id),
+    name: pool.tokenA.name + '/' + pool.tokenB.name,
+    symbol: pool.tokenA.symbol + '/' + pool.tokenB.symbol,
+    decimals: 18,
+  }
   return {
     chainId,
     key: poolKey,
     initialLPInfo: {
-      tokenAAmount: Number(
-        formatUnits(
-          BigInt(pool.initialTokenAAmount),
-          Number(pool.tokenA.decimals),
-        ),
-      ),
-      tokenBAmount: Number(
-        formatUnits(
-          BigInt(pool.initialTokenBAmount),
-          Number(pool.tokenB.decimals),
-        ),
-      ),
-      lpTokenAmount: Number(formatUnits(BigInt(pool.initialTotalSupply), 18)),
-      lpPriceUSD: Number(pool.initialLPPriceUSD),
+      tokenA: {
+        currency: currencyA,
+        value: pool.initialTokenAAmount,
+      },
+      tokenB: {
+        currency: currencyB,
+        value: pool.initialTokenBAmount,
+      },
+      lpToken: {
+        currency: currencyLp,
+        value: pool.initialTotalSupply,
+      },
+      lpPriceUSD: pool.initialLPPriceUSD,
       timestamp: Number(pool.createdAtTimestamp),
       txHash: pool.createdAtTransaction.id as `0x${string}`,
     },
-    currencyA: {
-      address: getAddress(pool.tokenA.id),
-      name: pool.tokenA.name,
-      symbol: pool.tokenA.symbol,
-      decimals: Number(pool.tokenA.decimals),
-    },
-    currencyB: {
-      address: getAddress(pool.tokenB.id),
-      name: pool.tokenB.name,
-      symbol: pool.tokenB.symbol,
-      decimals: Number(pool.tokenB.decimals),
-    },
-    currencyLp: {
-      id: pool.id as `0x${string}`,
-      address: getAddress(pool.id),
-      name: pool.tokenA.name + '/' + pool.tokenB.name,
-      symbol: pool.tokenA.symbol + '/' + pool.tokenB.symbol,
-      decimals: 18,
-    },
-    volumeUSD24h: Number(pool.volumeUSD),
-    lpPriceUSD: Number(pool.lpPriceUSD),
-    totalTvlUSD: Number(pool.totalValueLockedUSD),
-    totalSpreadProfitUSD: Number(pool.spreadProfitUSD),
+    currencyA,
+    currencyB,
+    currencyLp,
+    volumeUSD24h: pool.volumeUSD,
+    lpPriceUSD: pool.lpPriceUSD,
+    totalTvlUSD: pool.totalValueLockedUSD,
+    totalSpreadProfitUSD: pool.spreadProfitUSD,
     performanceHistories: poolHourDatas.map((poolHourData) => ({
       timestamp: poolHourData.date,
-      spreadProfitUSD: Number(poolHourData.spreadProfitUSD),
-      tvlUSD: Number(poolHourData.totalValueLockedUSD),
-      lpPriceUSD: Number(poolHourData.lpPriceUSD),
+      spreadProfitUSD: poolHourData.spreadProfitUSD,
+      tvlUSD: poolHourData.totalValueLockedUSD,
+      lpPriceUSD: poolHourData.lpPriceUSD,
       oraclePrice: poolHourData.oraclePrice,
-      priceA: Number(poolHourData.priceA),
-      priceB: Number(poolHourData.priceB),
-      volumeA: Number(poolHourData.volumeTokenA),
-      volumeB: Number(poolHourData.volumeTokenB),
-      volumeUSD: Number(poolHourData.volumeUSD),
+      priceA: poolHourData.priceA,
+      priceB: poolHourData.priceB,
+      volumeA: {
+        currency: currencyA,
+        value: poolHourData.volumeTokenA,
+      },
+      volumeB: {
+        currency: currencyB,
+        value: poolHourData.volumeTokenB,
+      },
+      volumeUSD: poolHourData.volumeUSD,
     })),
   }
 }

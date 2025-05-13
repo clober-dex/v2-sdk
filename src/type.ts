@@ -78,29 +78,29 @@ export type PoolPerformanceData = {
   currencyA: Currency
   currencyB: Currency
   currencyLp: Currency6909
-  volumeUSD24h: number
-  lpPriceUSD: number
-  totalTvlUSD: number
-  totalSpreadProfitUSD: number
+  volumeUSD24h: string
+  lpPriceUSD: string
+  totalTvlUSD: string
+  totalSpreadProfitUSD: string
   initialLPInfo: {
-    tokenAAmount: number
-    tokenBAmount: number
-    lpTokenAmount: number
-    lpPriceUSD: number
+    tokenA: CurrencyAmount
+    tokenB: CurrencyAmount
+    lpToken: Currency6909Amount
+    lpPriceUSD: string
     timestamp: number
     txHash: `0x${string}`
   }
   performanceHistories: {
     timestamp: number
-    spreadProfitUSD: number
-    tvlUSD: number
-    lpPriceUSD: number
+    spreadProfitUSD: string
+    tvlUSD: string
+    lpPriceUSD: string
     oraclePrice: string
-    priceA: number
-    priceB: number
-    volumeA: number
-    volumeB: number
-    volumeUSD: number
+    priceA: string
+    priceB: string
+    volumeA: CurrencyAmount
+    volumeB: CurrencyAmount
+    volumeUSD: string
   }[]
 }
 
