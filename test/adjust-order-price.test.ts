@@ -9,7 +9,7 @@ import {
 import { zeroHash } from 'viem'
 import BigNumber from 'bignumber.js'
 
-import { cloberTestChain2 } from '../src/constants/test-chain'
+import { cloberTestChain2 } from '../src/constants/chains/test-chain'
 import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
 
 import { account, FORK_URL } from './utils/constants'

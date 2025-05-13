@@ -7,8 +7,8 @@ import {
   sonic,
 } from 'viem/chains'
 
-import { cloberTestChain, cloberTestChain2 } from './test-chain'
-import { riseSepolia } from './rise-sepolia'
+import { cloberTestChain, cloberTestChain2 } from './chains/test-chain'
+import { riseSepolia } from './chains/rise-sepolia'
 
 // follow the https://docs.alchemy.com/reference/supported-subgraph-chains
 export enum CHAIN_IDS {
@@ -34,10 +34,3 @@ export const CHAIN_MAP: {
   [CHAIN_IDS.SONIC_MAINNET]: sonic,
   [CHAIN_IDS.RISE_SEPOLIA]: riseSepolia,
 }
-
-export const isTestnetChain = (chainId: CHAIN_IDS): boolean =>
-  chainId === CHAIN_IDS.CLOBER_TESTNET ||
-  chainId === CHAIN_IDS.CLOBER_TESTNET_2 ||
-  chainId === CHAIN_IDS.ARBITRUM_SEPOLIA ||
-  chainId === CHAIN_IDS.MONAD_TESTNET ||
-  chainId === CHAIN_IDS.RISE_SEPOLIA

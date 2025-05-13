@@ -3,7 +3,7 @@ import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
 import { getMarket, getQuoteToken } from '@clober/v2-sdk'
 
-import { cloberTestChain } from '../src/constants/test-chain'
+import { cloberTestChain } from '../src/constants/chains/test-chain'
 
 import { createProxyClients } from './utils/utils'
 
