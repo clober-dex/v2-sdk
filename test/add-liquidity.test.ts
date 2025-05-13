@@ -3,7 +3,7 @@ import { addLiquidity, getPool, openPool } from '@clober/v2-sdk'
 import { formatUnits, zeroHash } from 'viem'
 
 import { cloberTestChain2 } from '../src/constants/networks/test-chain'
-import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
+import { CONTRACT_ADDRESSES } from '../src/constants/chain-configs/addresses'
 
 import { FORK_URL } from './utils/constants'
 import { createProxyClients2 } from './utils/utils'

@@ -7,8 +7,8 @@ import {
   sonic,
 } from 'viem/chains'
 
-import { cloberTestChain, cloberTestChain2 } from './networks/test-chain'
-import { riseSepolia } from './networks/rise-sepolia'
+import { cloberTestChain, cloberTestChain2 } from '../networks/test-chain'
+import { riseSepolia } from '../networks/rise-sepolia'
 
 // follow the https://docs.alchemy.com/reference/supported-subgraph-chains
 export enum CHAIN_IDS {

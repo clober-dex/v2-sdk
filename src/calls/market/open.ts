@@ -6,13 +6,16 @@ import {
   zeroHash,
 } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import { DefaultWriteContractOptions, Transaction } from '../../types'
 import { fetchMarket } from '../../entities/market/apis'
 import { calculateUnitSize } from '../../utils/unit-size'
-import { CONTRACT_ADDRESSES } from '../../constants/addresses'
+import { CONTRACT_ADDRESSES } from '../../constants/chain-configs/addresses'
 import { CONTROLLER_ABI } from '../../constants/abis/core/controller-abi'
-import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../../constants/fee'
+import {
+  MAKER_DEFAULT_POLICY,
+  TAKER_DEFAULT_POLICY,
+} from '../../constants/chain-configs/fee'
 import { getDeadlineTimestampInSeconds } from '../../utils/time'
 import { buildTransaction } from '../../utils/build-transaction'
 

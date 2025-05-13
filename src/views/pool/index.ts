@@ -1,6 +1,6 @@
 import { createPublicClient, http, isAddressEqual } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import { DefaultReadContractOptions, Market, Pool } from '../../types'
 import { fetchPool } from '../../entities/pool/apis'
 

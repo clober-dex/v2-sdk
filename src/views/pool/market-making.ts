@@ -1,6 +1,6 @@
 import { createPublicClient, http } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import {
   DefaultReadContractOptions,
   LastAmounts,

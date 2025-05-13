@@ -1,7 +1,7 @@
 import { PublicClient } from 'viem'
 
-import { CHAIN_IDS } from '../../../constants/chain'
-import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
+import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
+import { CONTRACT_ADDRESSES } from '../../../constants/chain-configs/addresses'
 import { REBALANCER_ABI } from '../../../constants/abis/rebalancer/rebalancer-abi'
 import { Market } from '../../../types'
 import { STRATEGY_ABI } from '../../../constants/abis/rebalancer/strategy-abi'

@@ -1,7 +1,7 @@
 // @dev: Withdraw amount calculation logic is based on the contract code.
 import { createPublicClient, formatUnits, http, parseUnits } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import {
   Currency6909Flow,
   CurrencyFlow,
@@ -11,7 +11,7 @@ import {
 import { fetchPool } from '../../entities/pool/apis'
 import { applyPercent } from '../../utils/bigint'
 import { buildTransaction } from '../../utils/build-transaction'
-import { CONTRACT_ADDRESSES } from '../../constants/addresses'
+import { CONTRACT_ADDRESSES } from '../../constants/chain-configs/addresses'
 import { REBALANCER_ABI } from '../../constants/abis/rebalancer/rebalancer-abi'
 
 export const removeLiquidity = async ({

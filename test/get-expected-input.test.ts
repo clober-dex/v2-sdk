@@ -10,7 +10,7 @@ import {
 
 import { parsePrice } from '../src/utils/prices'
 import { invertTick } from '../src/utils/tick'
-import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
+import { CONTRACT_ADDRESSES } from '../src/constants/chain-configs/addresses'
 import { BOOK_VIEWER_ABI } from '../src/constants/abis/core/book-viewer-abi'
 import { cloberTestChain } from '../src/constants/networks/test-chain'
 

@@ -10,7 +10,7 @@ import { zeroHash } from 'viem'
 import BigNumber from 'bignumber.js'
 
 import { cloberTestChain2 } from '../src/constants/networks/test-chain'
-import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
+import { CONTRACT_ADDRESSES } from '../src/constants/chain-configs/addresses'
 
 import { account, FORK_URL } from './utils/constants'
 import { createProxyClients2 } from './utils/utils'

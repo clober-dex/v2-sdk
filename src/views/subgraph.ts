@@ -1,5 +1,5 @@
-import { CHAIN_IDS } from '../constants/chain'
-import { Subgraph, SUBGRAPH_URL } from '../constants/subgraph'
+import { CHAIN_IDS } from '../constants/chain-configs/chain'
+import { Subgraph, SUBGRAPH_URL } from '../constants/chain-configs/subgraph'
 
 /**
  * Get subgraph endpoint by chain id

@@ -1,9 +1,9 @@
 import { getAddress, isAddressEqual, PublicClient, zeroAddress } from 'viem'
 
 import type { Currency } from '../model'
-import { CHAIN_IDS } from '../../../constants/chain'
-import { ETH, NATIVE_CURRENCY } from '../../../constants/currency'
-import { Subgraph } from '../../../constants/subgraph'
+import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
+import { ETH, NATIVE_CURRENCY } from '../../../constants/chain-configs/currency'
+import { Subgraph } from '../../../constants/chain-configs/subgraph'
 
 const abi = [
   {

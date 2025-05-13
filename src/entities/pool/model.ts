@@ -1,7 +1,7 @@
 import { formatUnits } from 'viem'
 
 import { CHAIN_IDS, Currency, Market, Pool as PoolType } from '../../types'
-import { CONTRACT_ADDRESSES } from '../../constants/addresses'
+import { CONTRACT_ADDRESSES } from '../../constants/chain-configs/addresses'
 import { Currency6909 } from '../currency/model'
 
 export class Pool {

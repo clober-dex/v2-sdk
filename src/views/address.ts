@@ -1,5 +1,5 @@
-import { CHAIN_IDS } from '../constants/chain'
-import { CONTRACT_ADDRESSES } from '../constants/addresses'
+import { CHAIN_IDS } from '../constants/chain-configs/chain'
+import { CONTRACT_ADDRESSES } from '../constants/chain-configs/addresses'
 
 /**
  * Get contract addresses by chain id

@@ -1,12 +1,15 @@
 import { createPublicClient, http, zeroAddress } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import { DefaultWriteContractOptions, Transaction } from '../../types'
 import { fetchPool } from '../../entities/pool/apis'
 import { buildTransaction } from '../../utils/build-transaction'
-import { CONTRACT_ADDRESSES } from '../../constants/addresses'
+import { CONTRACT_ADDRESSES } from '../../constants/chain-configs/addresses'
 import { REBALANCER_ABI } from '../../constants/abis/rebalancer/rebalancer-abi'
-import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../../constants/fee'
+import {
+  MAKER_DEFAULT_POLICY,
+  TAKER_DEFAULT_POLICY,
+} from '../../constants/chain-configs/fee'
 import { toBytes32 } from '../../entities/pool/utils/mint'
 
 /**

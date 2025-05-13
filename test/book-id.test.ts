@@ -6,7 +6,7 @@ import { toBookId } from '../src/entities/book/utils/book-id'
 import {
   MAKER_DEFAULT_POLICY,
   TAKER_DEFAULT_POLICY,
-} from '../src/constants/fee'
+} from '../src/constants/chain-configs/fee'
 
 import { FORK_URL } from './utils/constants'
 

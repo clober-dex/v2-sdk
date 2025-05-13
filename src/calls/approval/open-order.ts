@@ -1,9 +1,9 @@
 import { createPublicClient, http, WalletClient } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import { DefaultWriteContractOptions } from '../../types'
 import { fetchIsApprovedForAll } from '../../entities/currency/apis/approval'
-import { CONTRACT_ADDRESSES } from '../../constants/addresses'
+import { CONTRACT_ADDRESSES } from '../../constants/chain-configs/addresses'
 
 /**
  * @dev This function relates with `viem` dependency

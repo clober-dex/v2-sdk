@@ -1,4 +1,4 @@
-import { CHAIN_IDS } from '../../constants/chain'
+import { CHAIN_IDS } from '../../constants/chain-configs/chain'
 import { CHART_LOG_INTERVALS, ChartLog } from '../../types'
 import {
   fetchChartLogs,

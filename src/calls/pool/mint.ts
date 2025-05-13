@@ -8,7 +8,7 @@ import {
   zeroAddress,
 } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import {
   Currency6909Flow,
   CurrencyFlow,
@@ -25,7 +25,7 @@ import {
 } from '../../entities/pool/utils/mint'
 import { applyPercent } from '../../utils/bigint'
 import { buildTransaction } from '../../utils/build-transaction'
-import { CONTRACT_ADDRESSES } from '../../constants/addresses'
+import { CONTRACT_ADDRESSES } from '../../constants/chain-configs/addresses'
 import { MINTER_ABI } from '../../constants/abis/rebalancer/minter-abi'
 import { abs } from '../../utils/math'
 

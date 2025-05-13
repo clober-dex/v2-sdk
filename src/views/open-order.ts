@@ -1,4 +1,4 @@
-import { CHAIN_IDS } from '../constants/chain'
+import { CHAIN_IDS } from '../constants/chain-configs/chain'
 import { OpenOrder } from '../entities/open-order/model'
 import {
   fetchOpenOrderByOrderIdFromSubgraph,

@@ -1,6 +1,6 @@
 import { getAddress } from 'viem'
 
-import { CHAIN_IDS } from '../../constants/chain'
+import { CHAIN_IDS } from '../../constants/chain-configs/chain'
 import { getMarketId } from '../../entities/market/utils/market-id'
 
 /**

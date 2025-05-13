@@ -1,6 +1,6 @@
 import { isAddressEqual } from 'viem'
 
-import { CHAIN_IDS } from '../constants/chain'
+import { CHAIN_IDS } from '../constants/chain-configs/chain'
 import { Currency } from '../entities/currency/model'
 import { formatPrice, invertTick, parsePrice, toPrice } from '../utils'
 

@@ -1,7 +1,7 @@
 import { PublicClient } from 'viem'
 
-import { CHAIN_IDS } from '../../../constants/chain'
-import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
+import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
+import { CONTRACT_ADDRESSES } from '../../../constants/chain-configs/addresses'
 
 const buildBookCacheKey = (chainId: CHAIN_IDS, bookId: bigint) =>
   `${chainId}:${bookId}`
