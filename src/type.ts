@@ -5,7 +5,7 @@ import type { Currency, Currency6909 } from './model/currency'
 
 export { CHAIN_IDS } from './constants/chain'
 export type { Currency } from './model/currency'
-export type { OpenOrder } from './model/open-order'
+export type { OpenOrder } from './entities/open-order/model'
 
 export type Depth = {
   price: string

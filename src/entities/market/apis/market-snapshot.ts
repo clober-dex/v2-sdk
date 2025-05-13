@@ -24,31 +24,6 @@ type TakeSampleDto = {
   outputAmount: string
 }
 
-type BookDayDataDTO = {
-  volumeUSD: string
-  book: {
-    id: string
-    volumeUSD: string
-    price: string
-    inversePrice: string
-    latestTaken: TakeSampleDto[]
-    firstTaken: TakeSampleDto[]
-    base: {
-      id: string
-      name: string
-      symbol: string
-      decimals: string
-    }
-    quote: {
-      id: string
-      name: string
-      symbol: string
-      decimals: string
-    }
-    createdAtTimestamp: string
-  }
-}
-
 const calculate24hPriceChange = (
   chainId: CHAIN_IDS,
   firstTakenList: TakeSampleDto[],
@@ -96,7 +71,32 @@ export const fetchMarketSnapshots = async (
   const {
     data: { bookDayDatas },
   } = await Subgraph.get<{
-    data: { bookDayDatas: BookDayDataDTO[] }
+    data: {
+      bookDayDatas: {
+        volumeUSD: string
+        book: {
+          id: string
+          volumeUSD: string
+          price: string
+          inversePrice: string
+          latestTaken: TakeSampleDto[]
+          firstTaken: TakeSampleDto[]
+          base: {
+            id: string
+            name: string
+            symbol: string
+            decimals: string
+          }
+          quote: {
+            id: string
+            name: string
+            symbol: string
+            decimals: string
+          }
+          createdAtTimestamp: string
+        }
+      }[]
+    }
   }>(
     chainId,
     'getTopMarketSnapshots',

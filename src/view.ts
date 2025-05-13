@@ -24,8 +24,8 @@ import { formatPrice, parsePrice } from './utils/prices'
 import {
   fetchOpenOrderByOrderIdFromSubgraph,
   fetchOpenOrdersByUserAddressFromSubgraph,
-} from './apis/open-order'
-import { OpenOrder } from './model/open-order'
+} from './entities/open-order/api'
+import { OpenOrder } from './entities/open-order/model'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
 import { getMarketId } from './entities/market/utils'
 import { CONTRACT_ADDRESSES } from './constants/addresses'

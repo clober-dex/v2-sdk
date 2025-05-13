@@ -48,8 +48,8 @@ import { STRATEGY_ABI } from './abis/rebalancer/strategy-abi'
 import {
   fetchOnChainOrders,
   fetchOpenOrdersByOrderIdsFromSubgraph,
-} from './apis/open-order'
-import { OnChainOpenOrder } from './model/open-order'
+} from './entities/open-order/api'
+import { OnChainOpenOrder } from './entities/open-order/model'
 import { quotes } from './utils/quotes'
 import { fetchMarket } from './entities/market/apis/market'
 

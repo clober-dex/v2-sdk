@@ -6,23 +6,171 @@ import {
   zeroAddress,
 } from 'viem'
 
-import { CHAIN_IDS } from '../constants/chain'
-import { getMarketId } from '../entities/market/utils'
-import type { Currency } from '../model/currency'
-import { baseToQuote, quoteToBase } from '../utils/decimals'
-import { formatPrice, getMarketPrice } from '../utils/prices'
-import { invertTick, toPrice } from '../utils/tick'
-import type { OpenOrder, OpenOrderDto } from '../model/open-order'
-import { applyPercent } from '../utils/bigint'
-import { MAKER_DEFAULT_POLICY } from '../constants/fee'
-import { Subgraph } from '../constants/subgraph'
-import { NATIVE_CURRENCY } from '../constants/currency'
-import { OnChainOpenOrder } from '../model/open-order'
-import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { BOOK_MANAGER_ABI } from '../abis/core/book-manager-abi'
-import { fromOrderId } from '../utils/order'
+import { CHAIN_IDS } from '../../constants/chain'
+import { getMarketId } from '../market/utils'
+import type { Currency } from '../../model/currency'
+import { baseToQuote, quoteToBase } from '../../utils/decimals'
+import { formatPrice, getMarketPrice } from '../../utils/prices'
+import { invertTick, toPrice } from '../../utils/tick'
+import { applyPercent } from '../../utils/bigint'
+import { MAKER_DEFAULT_POLICY } from '../../constants/fee'
+import { Subgraph } from '../../constants/subgraph'
+import { NATIVE_CURRENCY } from '../../constants/currency'
+import { CONTRACT_ADDRESSES } from '../../constants/addresses'
+import { BOOK_MANAGER_ABI } from '../../abis/core/book-manager-abi'
+import { fromOrderId } from '../../utils/order'
+import { fetchCurrencyMap } from '../../apis/currency'
 
-import { fetchCurrencyMap } from './currency'
+import { OnChainOpenOrder } from './model'
+import type { OpenOrder } from './model'
+
+type OpenOrderDto = {
+  id: string
+  owner: string
+  book: {
+    id: string
+    base: {
+      id: string
+      name: string
+      symbol: string
+      decimals: string
+    }
+    quote: {
+      id: string
+      name: string
+      symbol: string
+      decimals: string
+    }
+    unitSize: string
+  }
+  tick: string
+  transaction: {
+    id: string
+  }
+  timestamp: string
+  unitAmount: string
+  filledUnitAmount: string
+  claimedUnitAmount: string
+  claimableUnitAmount: string
+  orderIndex: string
+}
+
+const toOpenOrder = (
+  chainId: CHAIN_IDS,
+  currencies: Currency[],
+  openOrder: OpenOrderDto,
+): OpenOrder => {
+  const inputCurrency = currencies.find((c: Currency) =>
+    isAddressEqual(c.address, getAddress(openOrder.book.quote.id)),
+  )!
+  const outputCurrency = currencies.find((c: Currency) =>
+    isAddressEqual(c.address, getAddress(openOrder.book.base.id)),
+  )!
+  const { quoteTokenAddress } = getMarketId(chainId, [
+    inputCurrency.address,
+    outputCurrency.address,
+  ])
+  const isBid = isAddressEqual(quoteTokenAddress, inputCurrency.address)
+  const quote = isBid ? inputCurrency : outputCurrency
+  const base = isBid ? outputCurrency : inputCurrency
+  const tick = BigInt(openOrder.tick)
+  const unitAmount = BigInt(openOrder.unitAmount)
+  const filledUnitAmount = BigInt(openOrder.filledUnitAmount)
+  const unitSize = BigInt(openOrder.book.unitSize)
+  const claimedUnitAmount = BigInt(openOrder.claimedUnitAmount)
+  const claimableUnitAmount = BigInt(openOrder.claimableUnitAmount)
+
+  // base amount type
+  const amount = isBid
+    ? quoteToBase(tick, unitSize * unitAmount, false)
+    : unitSize * unitAmount
+  const filled = isBid
+    ? quoteToBase(tick, unitSize * filledUnitAmount, false)
+    : unitSize * filledUnitAmount
+
+  // each currency amount type
+  const invertedTick = invertTick(tick)
+  const claimed = isBid
+    ? quoteToBase(tick, unitSize * claimedUnitAmount, false)
+    : baseToQuote(invertedTick, unitSize * claimedUnitAmount, false)
+  const claimable = isBid
+    ? quoteToBase(tick, unitSize * claimableUnitAmount, false)
+    : baseToQuote(invertedTick, unitSize * claimableUnitAmount, false)
+
+  const cancelable = unitSize * (unitAmount - filledUnitAmount) // same current open amount
+  return {
+    id: openOrder.id,
+    user: getAddress(openOrder.owner),
+    isBid,
+    inputCurrency,
+    outputCurrency,
+    txHash: openOrder.transaction.id as `0x${string}`,
+    createdAt: Number(openOrder.timestamp),
+    price: formatPrice(
+      toPrice(isBid ? tick : invertTick(tick)),
+      quote.decimals,
+      base.decimals,
+    ),
+    tick: Number(tick),
+    orderIndex: openOrder.orderIndex,
+    amount: { currency: base, value: formatUnits(amount, base.decimals) },
+    filled: { currency: base, value: formatUnits(filled, base.decimals) },
+    claimed: {
+      currency: outputCurrency,
+      value: formatUnits(claimed, outputCurrency.decimals),
+    },
+    claimable: {
+      currency: outputCurrency,
+      value: formatUnits(claimable, outputCurrency.decimals),
+    },
+    cancelable: {
+      currency: inputCurrency,
+      value: formatUnits(
+        applyPercent(
+          cancelable,
+          100 +
+            (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) /
+              Number(MAKER_DEFAULT_POLICY[chainId].RATE_PRECISION),
+          6,
+        ),
+        inputCurrency.decimals,
+      ),
+    },
+  }
+}
+
+const extractCurrenciesFromOpenOrders = (
+  chainId: CHAIN_IDS,
+  openOrders: OpenOrderDto[],
+): Currency[] => {
+  const currencies = openOrders
+    .map((openOrder) => {
+      return [
+        {
+          address: getAddress(openOrder.book.base.id),
+          name: openOrder.book.base.name,
+          symbol: openOrder.book.base.symbol,
+          decimals: Number(openOrder.book.base.decimals),
+        },
+        {
+          address: getAddress(openOrder.book.quote.id),
+          name: openOrder.book.quote.name,
+          symbol: openOrder.book.quote.symbol,
+          decimals: Number(openOrder.book.quote.decimals),
+        },
+      ]
+    })
+    .flat()
+    // remove duplicates
+    .filter(
+      (currency, index, self) =>
+        self.findIndex((c) => isAddressEqual(c.address, currency.address)) ===
+        index,
+    )
+    // remove zero address
+    .filter((currency) => !isAddressEqual(currency.address, zeroAddress))
+  return [...currencies, NATIVE_CURRENCY[chainId]]
+}
 
 export async function fetchOpenOrdersByUserAddressFromSubgraph(
   chainId: CHAIN_IDS,
@@ -205,121 +353,4 @@ export const fetchOnChainOrders = async (
       },
     }
   })
-}
-
-const toOpenOrder = (
-  chainId: CHAIN_IDS,
-  currencies: Currency[],
-  openOrder: OpenOrderDto,
-): OpenOrder => {
-  const inputCurrency = currencies.find((c: Currency) =>
-    isAddressEqual(c.address, getAddress(openOrder.book.quote.id)),
-  )!
-  const outputCurrency = currencies.find((c: Currency) =>
-    isAddressEqual(c.address, getAddress(openOrder.book.base.id)),
-  )!
-  const { quoteTokenAddress } = getMarketId(chainId, [
-    inputCurrency.address,
-    outputCurrency.address,
-  ])
-  const isBid = isAddressEqual(quoteTokenAddress, inputCurrency.address)
-  const quote = isBid ? inputCurrency : outputCurrency
-  const base = isBid ? outputCurrency : inputCurrency
-  const tick = BigInt(openOrder.tick)
-  const unitAmount = BigInt(openOrder.unitAmount)
-  const filledUnitAmount = BigInt(openOrder.filledUnitAmount)
-  const unitSize = BigInt(openOrder.book.unitSize)
-  const claimedUnitAmount = BigInt(openOrder.claimedUnitAmount)
-  const claimableUnitAmount = BigInt(openOrder.claimableUnitAmount)
-
-  // base amount type
-  const amount = isBid
-    ? quoteToBase(tick, unitSize * unitAmount, false)
-    : unitSize * unitAmount
-  const filled = isBid
-    ? quoteToBase(tick, unitSize * filledUnitAmount, false)
-    : unitSize * filledUnitAmount
-
-  // each currency amount type
-  const invertedTick = invertTick(tick)
-  const claimed = isBid
-    ? quoteToBase(tick, unitSize * claimedUnitAmount, false)
-    : baseToQuote(invertedTick, unitSize * claimedUnitAmount, false)
-  const claimable = isBid
-    ? quoteToBase(tick, unitSize * claimableUnitAmount, false)
-    : baseToQuote(invertedTick, unitSize * claimableUnitAmount, false)
-
-  const cancelable = unitSize * (unitAmount - filledUnitAmount) // same current open amount
-  return {
-    id: openOrder.id,
-    user: getAddress(openOrder.owner),
-    isBid,
-    inputCurrency,
-    outputCurrency,
-    txHash: openOrder.transaction.id as `0x${string}`,
-    createdAt: Number(openOrder.timestamp),
-    price: formatPrice(
-      toPrice(isBid ? tick : invertTick(tick)),
-      quote.decimals,
-      base.decimals,
-    ),
-    tick: Number(tick),
-    orderIndex: openOrder.orderIndex,
-    amount: { currency: base, value: formatUnits(amount, base.decimals) },
-    filled: { currency: base, value: formatUnits(filled, base.decimals) },
-    claimed: {
-      currency: outputCurrency,
-      value: formatUnits(claimed, outputCurrency.decimals),
-    },
-    claimable: {
-      currency: outputCurrency,
-      value: formatUnits(claimable, outputCurrency.decimals),
-    },
-    cancelable: {
-      currency: inputCurrency,
-      value: formatUnits(
-        applyPercent(
-          cancelable,
-          100 +
-            (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) /
-              Number(MAKER_DEFAULT_POLICY[chainId].RATE_PRECISION),
-          6,
-        ),
-        inputCurrency.decimals,
-      ),
-    },
-  }
-}
-
-const extractCurrenciesFromOpenOrders = (
-  chainId: CHAIN_IDS,
-  openOrders: OpenOrderDto[],
-): Currency[] => {
-  const currencies = openOrders
-    .map((openOrder) => {
-      return [
-        {
-          address: getAddress(openOrder.book.base.id),
-          name: openOrder.book.base.name,
-          symbol: openOrder.book.base.symbol,
-          decimals: Number(openOrder.book.base.decimals),
-        },
-        {
-          address: getAddress(openOrder.book.quote.id),
-          name: openOrder.book.quote.name,
-          symbol: openOrder.book.quote.symbol,
-          decimals: Number(openOrder.book.quote.decimals),
-        },
-      ]
-    })
-    .flat()
-    // remove duplicates
-    .filter(
-      (currency, index, self) =>
-        self.findIndex((c) => isAddressEqual(c.address, currency.address)) ===
-        index,
-    )
-    // remove zero address
-    .filter((currency) => !isAddressEqual(currency.address, zeroAddress))
-  return [...currencies, NATIVE_CURRENCY[chainId]]
 }
