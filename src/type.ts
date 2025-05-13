@@ -160,15 +160,6 @@ export type Currency6909Flow = {
   direction: 'in' | 'out'
 }
 
-export type ChartLog = {
-  timestamp: number
-  open: string
-  high: string
-  low: string
-  close: string
-  volume: string
-}
-
 export enum CHART_LOG_INTERVALS {
   oneMinute = '1m',
   threeMinutes = '3m',

@@ -1,7 +1,17 @@
-import { CHAIN_IDS } from '../constants/chain'
-import { CHART_LOG_INTERVALS, ChartLog } from '../type'
-import { ChartLogDto } from '../model/chart-log'
-import { Subgraph } from '../constants/subgraph'
+import { CHAIN_IDS } from '../../constants/chain'
+import { CHART_LOG_INTERVALS } from '../../type'
+import { Subgraph } from '../../constants/subgraph'
+
+import { ChartLog } from './model'
+
+type ChartLogDto = {
+  timestamp: string
+  open: string
+  high: string
+  low: string
+  close: string
+  baseVolume: string
+}
 
 export const CHART_LOG_INTERVAL_TIMESTAMP: {
   [key in CHART_LOG_INTERVALS]: number

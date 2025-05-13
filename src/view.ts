@@ -9,7 +9,6 @@ import {
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type {
-  ChartLog,
   Currency,
   DefaultReadContractOptions,
   LastAmounts,
@@ -26,7 +25,7 @@ import {
   fetchOpenOrdersByUserAddressFromSubgraph,
 } from './entities/open-order/api'
 import { OpenOrder } from './entities/open-order/model'
-import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
+import { fetchChartLogs, fetchLatestChartLog } from './entities/chart/api'
 import { getMarketId } from './entities/market/utils/market-id'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
@@ -40,6 +39,7 @@ import {
   fetchPoolSnapshotFromSubgraph,
   fetchPoolSnapshotsFromSubgraph,
 } from './entities/pool/apis/snapshot'
+import { ChartLog } from './entities/chart/model'
 
 /**
  * Get contract addresses by chain id
