@@ -1,3 +1,6 @@
+import { CHAIN_IDS } from '../constants/chain'
+import { Subgraph, SUBGRAPH_URL } from '../constants/subgraph'
+
 /**
  * Get subgraph endpoint by chain id
  * @param chainId - chain id from {@link CHAIN_IDS}
