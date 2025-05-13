@@ -9,6 +9,7 @@ import {
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type {
+  ChartLog,
   Currency,
   DefaultReadContractOptions,
   LastAmounts,
@@ -42,7 +43,6 @@ import {
   fetchPoolSnapshotFromSubgraph,
   fetchPoolSnapshotsFromSubgraph,
 } from './entities/pool/apis/snapshot'
-import { ChartLog } from './entities/chart/model'
 
 /**
  * Get contract addresses by chain id
