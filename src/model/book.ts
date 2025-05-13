@@ -5,7 +5,7 @@ import { CHAIN_IDS } from '../constants/chain'
 import { MIN_TICK } from '../constants/tick'
 
 import type { Currency } from './currency'
-import type { DepthDto } from './depth'
+import type { RawDepth } from './depth'
 
 export type TakeSampleDto = {
   timestamp: string
@@ -56,7 +56,7 @@ export class Book {
   base: Currency
   unitSize: bigint
   quote: Currency
-  depths: DepthDto[]
+  depths: RawDepth[]
   isOpened: boolean
 
   constructor({
@@ -73,7 +73,7 @@ export class Book {
     base: Currency
     quote: Currency
     unitSize: bigint
-    depths: DepthDto[]
+    depths: RawDepth[]
     isOpened: boolean
   }) {
     this.chainId = chainId
