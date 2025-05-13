@@ -32,10 +32,9 @@ export const convertHumanReadablePriceToRawPrice = (
     .times(new BigNumber(2).pow(PRICE_PRECISION.toString()))
     .times(new BigNumber(10).pow(quoteDecimals))
     .div(new BigNumber(10).pow(baseDecimals))
-  const rawPrice = BigInt(
+  return BigInt(
     value.isInteger() ? value.toFixed() : value.integerValue().toFixed(),
   )
-  return rawPrice
 }
 
 export const parsePrice = (
