@@ -1,4 +1,5 @@
 import { encodePacked, keccak256 } from 'viem'
+import BigNumber from 'bignumber.js'
 
 import { Currency } from '../../model/currency'
 
@@ -123,4 +124,23 @@ export function getIdealDelta(
       deltaB,
     }
   }
+}
+
+export const getQuoteAmountFromPrices = (
+  amountIn: bigint,
+  inputCurrencyPrice: number,
+  outputCurrencyPrice: number,
+  inputCurrencyDecimals: number,
+  outputCurrencyDecimals: number,
+): bigint => {
+  const priceA = BigInt(
+    new BigNumber(inputCurrencyPrice).times(10 ** 18).toFixed(0),
+  )
+  const priceB = BigInt(
+    new BigNumber(outputCurrencyPrice).times(10 ** 18).toFixed(0),
+  )
+  return (
+    (amountIn * priceA * 10n ** BigInt(outputCurrencyDecimals)) /
+    (priceB * 10n ** BigInt(inputCurrencyDecimals))
+  )
 }

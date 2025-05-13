@@ -44,6 +44,7 @@ import { abs } from './utils/math'
 import {
   getExpectedMintResult,
   getIdealDelta,
+  getQuoteAmountFromPrices,
   toBytes32,
 } from './entities/pool/utils'
 import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
@@ -53,7 +54,6 @@ import {
   fetchOpenOrdersByOrderIdsFromSubgraph,
 } from './entities/open-order/api'
 import { OnChainOpenOrder } from './entities/open-order/model'
-import { quotes } from './utils/quotes'
 import { fetchMarket } from './entities/market/apis/market'
 
 /**
@@ -1220,7 +1220,7 @@ export const addLiquidity = async ({
       )
         ? options.token1Price
         : options.token0Price
-      swapAmountB = quotes(
+      swapAmountB = getQuoteAmountFromPrices(
         swapAmountA,
         tokenAPrice,
         tokenBPrice,
