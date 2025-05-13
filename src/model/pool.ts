@@ -195,6 +195,7 @@ export type PoolDto = {
   createdAtTransaction: {
     id: string
   }
+  totalValueLockedUSD: string
   totalSupply: string
   volumeUSD: string
   lpPriceUSD: string
@@ -203,6 +204,7 @@ export type PoolDto = {
 
 export type PoolHourDataDto = {
   date: number
+  totalValueLockedUSD: string
   totalSupply: string
   spreadProfitUSD: string
   lpPriceUSD: string

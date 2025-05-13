@@ -111,7 +111,7 @@ export const fetchPoolPerformanceFromSubgraph = async (
   }>(
     chainId,
     'getPoolPerformance',
-    'query getPoolPerformance($poolKey: ID!) { pool(id: $poolKey) { id tokenA { id name symbol decimals } tokenB { id name symbol decimals } initialTotalSupply initialTokenAAmount initialTokenBAmount initialLPPriceUSD createdAtTimestamp createdAtTransaction { id } totalSupply volumeUSD lpPriceUSD spreadProfitUSD } poolHourDatas( where: {pool: $poolKey, oraclePrice_gt: 0} orderBy: date orderDirection: desc first: 1000 ) { date totalSupply spreadProfitUSD lpPriceUSD oraclePrice priceA priceB volumeTokenA volumeTokenB volumeUSD } }',
+    'query getPoolPerformance($poolKey: ID!) { pool(id: $poolKey) { id tokenA { id name symbol decimals } tokenB { id name symbol decimals } initialTotalSupply initialTokenAAmount initialTokenBAmount initialLPPriceUSD createdAtTimestamp createdAtTransaction { id } totalValueLockedUSD totalSupply volumeUSD lpPriceUSD spreadProfitUSD } poolHourDatas( where: {pool: $poolKey, oraclePrice_gt: 0} orderBy: date orderDirection: desc first: 1000 ) { date totalValueLockedUSD totalSupply spreadProfitUSD lpPriceUSD oraclePrice priceA priceB volumeTokenA volumeTokenB volumeUSD } }',
     {
       poolKey: poolKey.toLowerCase(),
     },
@@ -161,17 +161,12 @@ export const fetchPoolPerformanceFromSubgraph = async (
     },
     volumeUSD24h: Number(pool.volumeUSD),
     lpPriceUSD: Number(pool.lpPriceUSD),
-    totalTvlUSD:
-      Number(pool.lpPriceUSD) *
-      Number(formatUnits(BigInt(pool.totalSupply), 18)),
+    totalTvlUSD: Number(pool.totalValueLockedUSD),
     totalSpreadProfitUSD: Number(pool.spreadProfitUSD),
     performanceHistories: poolHourDatas.map((poolHourData) => ({
       timestamp: poolHourData.date,
       spreadProfitUSD: Number(poolHourData.spreadProfitUSD),
-      tvlUSD:
-        // TODO: use poolHourData.totalValueLockedUSD instead of poolHourData.totalSupply * poolHourData.lpPriceUSD
-        Number(poolHourData.lpPriceUSD) *
-        Number(formatUnits(BigInt(poolHourData.totalSupply), 18)),
+      tvlUSD: Number(poolHourData.totalValueLockedUSD),
       lpPriceUSD: Number(poolHourData.lpPriceUSD),
       oraclePrice: poolHourData.oraclePrice,
       priceA: Number(poolHourData.priceA),
