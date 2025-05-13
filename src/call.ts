@@ -31,13 +31,12 @@ import {
   parsePrice,
 } from './utils/prices'
 import { invertTick, toPrice } from './utils/tick'
-import { getExpectedInput, getExpectedOutput, getQuoteToken } from './view'
+import { getExpectedInput, getExpectedOutput } from './view'
 import { toBookId } from './entities/book/utils/book-id'
 import { fetchIsApprovedForAll } from './apis/approval'
 import { applyPercent } from './utils/bigint'
 import { fetchPool } from './entities/pool/apis'
 import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
-import { fetchCallData, fetchQuote } from './apis/odos'
 import { MINTER_ABI } from './abis/rebalancer/minter-abi'
 import { emptyERC20PermitParams } from './constants/permit'
 import { abs } from './utils/math'
@@ -1160,7 +1159,7 @@ export const addLiquidity = async ({
         parseUnits(amount1 ?? '0', pool.currencyA.decimals),
         parseUnits(amount0 ?? '0', pool.currencyB.decimals),
       ]
-  let [amountA, amountB] = [amountAOrigin, amountBOrigin]
+  const [amountA, amountB] = [amountAOrigin, amountBOrigin]
   const tokenAPermitParams = isAddressEqual(
     pool.currencyA.address,
     getAddress(token0),
@@ -1193,18 +1192,18 @@ export const addLiquidity = async ({
   }
 
   if (!disableSwap) {
-    const currencyBPerCurrencyA = options?.testnetPrice
-      ? isAddressEqual(
-          getQuoteToken({
-            chainId,
-            token0,
-            token1,
-          }),
-          pool.currencyA.address,
-        )
-        ? 1 / Number(options.testnetPrice)
-        : Number(options.testnetPrice)
-      : undefined
+    // const currencyBPerCurrencyA = options?.testnetPrice
+    //   ? isAddressEqual(
+    //       getQuoteToken({
+    //         chainId,
+    //         token0,
+    //         token1,
+    //       }),
+    //       pool.currencyA.address,
+    //     )
+    //     ? 1 / Number(options.testnetPrice)
+    //     : Number(options.testnetPrice)
+    //   : undefined
     const swapAmountA = parseUnits('1', pool.currencyA.decimals)
     let swapAmountB = -1n
     if (options && options.token0Price && options.token1Price) {
@@ -1228,15 +1227,16 @@ export const addLiquidity = async ({
         pool.currencyB.decimals,
       )
     } else {
-      ;({ amountOut: swapAmountB } = await fetchQuote({
-        chainId,
-        amountIn: swapAmountA,
-        tokenIn: pool.currencyA,
-        tokenOut: pool.currencyB,
-        slippageLimitPercent: 1,
-        userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
-        testnetPrice: currencyBPerCurrencyA,
-      }))
+      // ;({ amountOut: swapAmountB } = await fetchOdosQuote({
+      //   chainId,
+      //   amountIn: swapAmountA,
+      //   tokenIn: pool.currencyA,
+      //   tokenOut: pool.currencyB,
+      //   slippageLimitPercent: 1,
+      //   userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+      //   testnetPrice: currencyBPerCurrencyA,
+      // }))
+      throw new Error('external aggregator is not supported yet')
     }
     if (swapAmountB === -1n) {
       throw new Error('Failed to fetch quote')
@@ -1251,37 +1251,41 @@ export const addLiquidity = async ({
     )
 
     if (deltaA < 0n) {
-      swapParams.inCurrency = pool.currencyA.address
-      swapParams.amount = -deltaA
-      const { amountOut: actualDeltaB, data: calldata } = await fetchCallData({
-        chainId,
-        amountIn: swapParams.amount,
-        tokenIn: pool.currencyA,
-        tokenOut: pool.currencyB,
-        slippageLimitPercent,
-        userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
-        testnetPrice: currencyBPerCurrencyA,
-      })
-      swapParams.data = calldata
-      amountA += deltaA
-      amountB += actualDeltaB
+      throw new Error('external aggregator is not supported yet: deltaA < 0')
+      // swapParams.inCurrency = pool.currencyA.address
+      // swapParams.amount = -deltaA
+      // const { amountOut: actualDeltaB, data: calldata } =
+      //   await fetchOdosCallData({
+      //     chainId,
+      //     amountIn: swapParams.amount,
+      //     tokenIn: pool.currencyA,
+      //     tokenOut: pool.currencyB,
+      //     slippageLimitPercent,
+      //     userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+      //     testnetPrice: currencyBPerCurrencyA,
+      //   })
+      // swapParams.data = calldata
+      // amountA += deltaA
+      // amountB += actualDeltaB
     } else if (deltaB < 0n) {
-      swapParams.inCurrency = pool.currencyB.address
-      swapParams.amount = -deltaB
-      const { amountOut: actualDeltaA, data: calldata } = await fetchCallData({
-        chainId,
-        amountIn: swapParams.amount,
-        tokenIn: pool.currencyB,
-        tokenOut: pool.currencyA,
-        slippageLimitPercent,
-        userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
-        testnetPrice: currencyBPerCurrencyA
-          ? 1 / currencyBPerCurrencyA
-          : undefined,
-      })
-      swapParams.data = calldata
-      amountA += actualDeltaA
-      amountB += deltaB
+      throw new Error('external aggregator is not supported yet: deltaB < 0')
+      // swapParams.inCurrency = pool.currencyB.address
+      // swapParams.amount = -deltaB
+      // const { amountOut: actualDeltaA, data: calldata } =
+      //   await fetchOdosCallData({
+      //     chainId,
+      //     amountIn: swapParams.amount,
+      //     tokenIn: pool.currencyB,
+      //     tokenOut: pool.currencyA,
+      //     slippageLimitPercent,
+      //     userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+      //     testnetPrice: currencyBPerCurrencyA
+      //       ? 1 / currencyBPerCurrencyA
+      //       : undefined,
+      //   })
+      // swapParams.data = calldata
+      // amountA += actualDeltaA
+      // amountB += deltaB
     }
   }
 
