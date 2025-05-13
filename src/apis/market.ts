@@ -266,16 +266,16 @@ export const fetchMarketSnapshots = async (
     }),
     ...askBooks.map((askBook) => {
       const quoteCurrency = {
-        address: getAddress(askBook.book.quote.id),
-        name: askBook.book.quote.name,
-        symbol: askBook.book.quote.symbol,
-        decimals: Number(askBook.book.quote.decimals),
-      }
-      const baseCurrency = {
         address: getAddress(askBook.book.base.id),
         name: askBook.book.base.name,
         symbol: askBook.book.base.symbol,
         decimals: Number(askBook.book.base.decimals),
+      }
+      const baseCurrency = {
+        address: getAddress(askBook.book.quote.id),
+        name: askBook.book.quote.name,
+        symbol: askBook.book.quote.symbol,
+        decimals: Number(askBook.book.quote.decimals),
       }
       const bidBook = bidBooks.find(
         (bidBook) =>
