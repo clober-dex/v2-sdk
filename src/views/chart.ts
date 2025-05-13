@@ -1,6 +1,6 @@
 import { CHAIN_IDS } from '../constants/chain'
 import { CHART_LOG_INTERVALS, ChartLog } from '../types'
-import { fetchChartLogs, fetchLatestChartLog } from '../entities/chart/api'
+import { fetchChartLogs, fetchLatestChartLog } from '../entities/chart/apis'
 
 /**
  * Retrieves the latest chart log for a specific market.

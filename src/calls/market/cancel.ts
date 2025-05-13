@@ -18,7 +18,7 @@ import { OnChainOpenOrder } from '../../entities/open-order/model'
 import {
   fetchOnChainOrders,
   fetchOpenOrdersByOrderIdsFromSubgraph,
-} from '../../entities/open-order/api'
+} from '../../entities/open-order/apis'
 import { buildTransaction } from '../../utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
 import { CONTROLLER_ABI } from '../../constants/abis/core/controller-abi'

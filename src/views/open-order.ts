@@ -3,7 +3,7 @@ import { OpenOrder } from '../entities/open-order/model'
 import {
   fetchOpenOrderByOrderIdFromSubgraph,
   fetchOpenOrdersByUserAddressFromSubgraph,
-} from '../entities/open-order/api'
+} from '../entities/open-order/apis'
 
 /**
  * Retrieves the open order with the specified ID on the given chain.
