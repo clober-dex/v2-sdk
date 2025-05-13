@@ -3,9 +3,9 @@ import { createPublicClient, http } from 'viem'
 import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
 import { DefaultWriteContractOptions, Pool, Transaction } from '../../type'
 import { fetchPool } from '../../entities/pool/apis'
-import { buildTransaction } from '../../utils/build-transaction'
+import { buildTransaction } from '../../entities/utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
-import { OPERATOR_ABI } from '../../abis/rebalancer/operator-abi'
+import { OPERATOR_ABI } from '../../constants/abis/rebalancer/operator-abi'
 
 export const pausePool = async ({
   chainId,

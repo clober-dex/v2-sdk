@@ -1,4 +1,13 @@
-export { formatPrice, parsePrice, getMarketPrice } from './utils/prices'
-export { toPrice, fromPrice, invertPrice, invertTick } from './utils/tick'
-export { baseToQuote, quoteToBase } from './utils/conversion'
+export {
+  formatPrice,
+  parsePrice,
+  getMarketPrice,
+} from './entities/utils/prices'
+export {
+  toPrice,
+  fromPrice,
+  invertPrice,
+  invertTick,
+} from './entities/utils/tick'
+export { baseToQuote, quoteToBase } from './entities/utils/conversion'
 export { getMarketId } from './entities/market/utils/market-id'

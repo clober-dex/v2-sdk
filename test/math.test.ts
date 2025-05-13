@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import { createPublicClient, getAddress, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
-import { lnWad } from '../src/utils/math'
+import { lnWad } from '../src/entities/utils/math'
 
 import { FORK_URL } from './utils/constants'
 

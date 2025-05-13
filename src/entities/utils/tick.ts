@@ -1,5 +1,5 @@
-import { MAX_PRICE, MIN_PRICE, PRICE_PRECISION } from '../constants/price'
-import { MAX_TICK, MIN_TICK } from '../constants/tick'
+import { MAX_PRICE, MIN_PRICE, PRICE_PRECISION } from '../../constants/price'
+import { MAX_TICK, MIN_TICK } from '../../constants/tick'
 
 import { lnWad } from './math'
 

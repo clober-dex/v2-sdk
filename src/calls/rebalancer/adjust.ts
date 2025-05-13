@@ -6,11 +6,11 @@ import { fetchPool } from '../../entities/pool/apis'
 import {
   convertHumanReadablePriceToRawPrice,
   parsePrice,
-} from '../../utils/prices'
-import { invertTick } from '../../utils/tick'
-import { buildTransaction } from '../../utils/build-transaction'
+} from '../../entities/utils/prices'
+import { invertTick } from '../../entities/utils/tick'
+import { buildTransaction } from '../../entities/utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
-import { OPERATOR_ABI } from '../../abis/rebalancer/operator-abi'
+import { OPERATOR_ABI } from '../../constants/abis/rebalancer/operator-abi'
 
 export const adjustOrderPrice = async ({
   chainId,

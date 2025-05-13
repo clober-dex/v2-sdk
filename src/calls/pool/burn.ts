@@ -9,10 +9,10 @@ import {
   Transaction,
 } from '../../type'
 import { fetchPool } from '../../entities/pool/apis'
-import { applyPercent } from '../../utils/bigint'
-import { buildTransaction } from '../../utils/build-transaction'
+import { applyPercent } from '../../entities/utils/bigint'
+import { buildTransaction } from '../../entities/utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
-import { REBALANCER_ABI } from '../../abis/rebalancer/rebalancer-abi'
+import { REBALANCER_ABI } from '../../constants/abis/rebalancer/rebalancer-abi'
 
 export const removeLiquidity = async ({
   chainId,

@@ -20,7 +20,7 @@ import type {
   StrategyPosition,
 } from './type'
 import { CHART_LOG_INTERVALS } from './type'
-import { formatPrice, parsePrice } from './utils/prices'
+import { formatPrice, parsePrice } from './entities/utils/prices'
 import {
   fetchOpenOrderByOrderIdFromSubgraph,
   fetchOpenOrdersByUserAddressFromSubgraph,
@@ -29,7 +29,7 @@ import { OpenOrder } from './entities/open-order/model'
 import { fetchChartLogs, fetchLatestChartLog } from './entities/chart/api'
 import { getMarketId } from './entities/market/utils/market-id'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
-import { invertTick, toPrice } from './utils/tick'
+import { invertTick, toPrice } from './entities/utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 import {
   fetchLastAmounts,

@@ -20,10 +20,10 @@ import {
   fetchOnChainOrders,
   fetchOpenOrdersByOrderIdsFromSubgraph,
 } from '../../entities/open-order/api'
-import { buildTransaction } from '../../utils/build-transaction'
+import { buildTransaction } from '../../entities/utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
-import { CONTROLLER_ABI } from '../../abis/core/controller-abi'
-import { getDeadlineTimestampInSeconds } from '../../utils/time'
+import { CONTROLLER_ABI } from '../../constants/abis/core/controller-abi'
+import { getDeadlineTimestampInSeconds } from '../../entities/utils/time'
 
 /**
  * Claims specified open order for settlement.

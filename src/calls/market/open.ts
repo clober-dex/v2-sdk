@@ -9,12 +9,12 @@ import {
 import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
 import { DefaultWriteContractOptions, Transaction } from '../../type'
 import { fetchMarket } from '../../entities/market/apis'
-import { calculateUnitSize } from '../../utils/unit-size'
+import { calculateUnitSize } from '../../entities/utils/unit-size'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
-import { CONTROLLER_ABI } from '../../abis/core/controller-abi'
+import { CONTROLLER_ABI } from '../../constants/abis/core/controller-abi'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../../constants/fee'
-import { getDeadlineTimestampInSeconds } from '../../utils/time'
-import { buildTransaction } from '../../utils/build-transaction'
+import { getDeadlineTimestampInSeconds } from '../../entities/utils/time'
+import { buildTransaction } from '../../entities/utils/build-transaction'
 
 /**
  * Build a transaction to open a market.

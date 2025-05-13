@@ -12,3 +12,6 @@ export { refillOrder } from './calls/rebalancer/refill'
 export { pausePool } from './calls/rebalancer/pause'
 export { resumePool } from './calls/rebalancer/resume'
 export { setStrategyConfig } from './calls/rebalancer/strategy'
+
+export { setApprovalOfOpenOrdersForAll } from './calls/approval/open-order'
+export { approveERC20 } from './calls/approval/token'

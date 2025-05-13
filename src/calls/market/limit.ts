@@ -16,15 +16,15 @@ import {
   Transaction,
 } from '../../type'
 import { fetchMarket } from '../../entities/market/apis'
-import { formatPrice, parsePrice } from '../../utils/prices'
-import { calculateUnitSize } from '../../utils/unit-size'
+import { formatPrice, parsePrice } from '../../entities/utils/prices'
+import { calculateUnitSize } from '../../entities/utils/unit-size'
 import { getExpectedOutput } from '../../view'
 import { toBookId } from '../../entities/book/utils/book-id'
-import { invertTick, toPrice } from '../../utils/tick'
-import { buildTransaction } from '../../utils/build-transaction'
+import { invertTick, toPrice } from '../../entities/utils/tick'
+import { buildTransaction } from '../../entities/utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
-import { CONTROLLER_ABI } from '../../abis/core/controller-abi'
-import { getDeadlineTimestampInSeconds } from '../../utils/time'
+import { CONTROLLER_ABI } from '../../constants/abis/core/controller-abi'
+import { getDeadlineTimestampInSeconds } from '../../entities/utils/time'
 
 /**
  * Places a limit order on the specified chain for trading tokens.

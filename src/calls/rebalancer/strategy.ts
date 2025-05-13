@@ -3,9 +3,9 @@ import { createPublicClient, http, parseUnits } from 'viem'
 import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
 import { DefaultWriteContractOptions, Transaction } from '../../type'
 import { fetchPool } from '../../entities/pool/apis'
-import { buildTransaction } from '../../utils/build-transaction'
+import { buildTransaction } from '../../entities/utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
-import { STRATEGY_ABI } from '../../abis/rebalancer/strategy-abi'
+import { STRATEGY_ABI } from '../../constants/abis/rebalancer/strategy-abi'
 
 export const setStrategyConfig = async ({
   chainId,

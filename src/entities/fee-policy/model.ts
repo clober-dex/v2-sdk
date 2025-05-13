@@ -1,4 +1,4 @@
-import { divide } from '../../utils/math'
+import { divide } from '../utils/math'
 
 export class FeePolicy {
   static readonly MAX_FEE_RATE = 500000n
