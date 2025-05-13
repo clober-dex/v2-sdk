@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js'
 
-import { Currency } from '../../../model/currency'
+import { Currency } from '../../currency/model'
 
 export const toBytes32 = (value: `0x${string}`): `0x${string}` => {
   return `0x${value.slice(2, 66).padStart(64, '0')}`

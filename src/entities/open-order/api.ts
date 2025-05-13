@@ -8,7 +8,7 @@ import {
 
 import { CHAIN_IDS } from '../../constants/chain'
 import { getMarketId } from '../market/utils/market-id'
-import type { Currency } from '../../model/currency'
+import type { Currency } from '../currency/model'
 import { baseToQuote, quoteToBase } from '../../utils/decimals'
 import { formatPrice, getMarketPrice } from '../../utils/prices'
 import { invertTick, toPrice } from '../../utils/tick'

@@ -3,7 +3,7 @@ import { divide } from '../../utils/math'
 import { baseToQuote, quoteToBase } from '../../utils/decimals'
 import { CHAIN_IDS } from '../../constants/chain'
 import { MIN_TICK } from '../../constants/tick'
-import type { Currency } from '../../model/currency'
+import type { Currency } from '../currency/model'
 
 type RawDepth = {
   tick: bigint

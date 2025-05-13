@@ -1,10 +1,10 @@
 import type { Account } from 'viem'
 
 import { CHAIN_IDS } from './constants/chain'
-import type { Currency, Currency6909 } from './model/currency'
+import type { Currency, Currency6909 } from './entities/currency/model'
 
 export { CHAIN_IDS } from './constants/chain'
-export type { Currency } from './model/currency'
+export type { Currency } from './entities/currency/model'
 export type { OpenOrder } from './entities/open-order/model'
 
 export type Depth = {

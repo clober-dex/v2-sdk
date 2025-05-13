@@ -7,7 +7,7 @@ import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../../constants/fee'
 import { quoteToBase } from '../../utils/decimals'
 import { Market as MarketType } from '../../type'
 import { Book } from '../book/model'
-import type { Currency } from '../../model/currency'
+import type { Currency } from '../currency/model'
 
 import { getMarketId } from './utils/market-id'
 

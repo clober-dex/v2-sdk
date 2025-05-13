@@ -1,6 +1,6 @@
 import { getAddress, isAddressEqual, PublicClient, zeroAddress } from 'viem'
 
-import type { Currency } from '../model/currency'
+import type { Currency } from '../entities/currency/model'
 import { CHAIN_IDS } from '../constants/chain'
 import { ETH, NATIVE_CURRENCY } from '../constants/currency'
 import { Subgraph } from '../constants/subgraph'
