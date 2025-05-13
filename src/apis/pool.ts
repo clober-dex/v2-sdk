@@ -186,3 +186,18 @@ export const fetchPoolSnapshotFromSubgraph = async (
     })),
   }
 }
+
+export const fetchPoolKeys = async (
+  chainId: CHAIN_IDS,
+): Promise<`0x${string}`[]> => {
+  const {
+    data: { pools },
+  } = await Subgraph.get<{
+    data: {
+      pools: {
+        id: string
+      }[]
+    }
+  }>(chainId, 'getPoolKeys', 'query getPoolKeys { pools { id } }', {})
+  return pools.map((pool) => pool.id as `0x${string}`)
+}
