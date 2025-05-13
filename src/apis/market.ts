@@ -141,10 +141,13 @@ const calculate24hPriceChange = (
   firstTakenList: TakeSampleDto[],
   latestTakenList: TakeSampleDto[],
 ): number => {
-  const taken = [...firstTakenList, ...latestTakenList]
-    .filter(
-      (take) => BigInt(take.inputAmount) > 0n && BigInt(take.outputAmount) > 0n,
-    )
+  const filteredTakenList = [...firstTakenList, ...latestTakenList].filter(
+    (take) => BigInt(take.inputAmount) > 0n && BigInt(take.outputAmount) > 0n,
+  )
+  if (filteredTakenList.length === 0) {
+    return 0
+  }
+  const takenList = filteredTakenList
     .map((take) => {
       const inputAmount = Number(
         formatUnits(BigInt(take.inputAmount), Number(take.inputToken.decimals)),
@@ -170,15 +173,17 @@ const calculate24hPriceChange = (
       }
     })
     .sort((a, b) => a.timestamp - b.timestamp)
-  return (taken[taken.length - 1].price / taken[0].price - 1) * 100
+  return (takenList[takenList.length - 1].price / takenList[0].price - 1) * 100
 }
 
 export const fetchTopMarketSnapshots = async (
   chainId: CHAIN_IDS,
 ): Promise<MarketSnapshot[]> => {
   const dayID = Math.floor(currentTimestampInSeconds() / 86400)
-  const { data: books } = await Subgraph.get<{
-    data: BookDayDataDTO[]
+  const {
+    data: { bookDayDatas },
+  } = await Subgraph.get<{
+    data: { bookDayDatas: BookDayDataDTO[] }
   }>(
     chainId,
     'getTopMarketSnapshots',
@@ -187,7 +192,7 @@ export const fetchTopMarketSnapshots = async (
       date: dayID,
     },
   )
-  const bidBooks = books.filter(({ book: { quote, base } }) =>
+  const bidBooks = bookDayDatas.filter(({ book: { quote, base } }) =>
     isAddressEqual(
       getAddress(quote.id),
       getQuoteToken({
@@ -197,7 +202,7 @@ export const fetchTopMarketSnapshots = async (
       }),
     ),
   )
-  const askBooks = books.filter(({ book: { quote, base } }) =>
+  const askBooks = bookDayDatas.filter(({ book: { quote, base } }) =>
     isAddressEqual(
       getAddress(base.id),
       getQuoteToken({
