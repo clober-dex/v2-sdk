@@ -2,8 +2,8 @@ import { expect, test } from 'vitest'
 import { createPublicClient, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
-import { toBookId } from '../src/entities/book/utils'
-import { toPoolKey } from '../src/entities/pool/utils'
+import { toBookId } from '../src/entities/book/utils/book-id'
+import { toPoolKey } from '../src/entities/pool/utils/pool-key'
 
 import { FORK_URL } from './utils/constants'
 

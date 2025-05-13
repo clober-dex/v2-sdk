@@ -32,10 +32,10 @@ import {
 } from './utils/prices'
 import { invertTick, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput, getQuoteToken } from './view'
-import { toBookId } from './entities/book/utils'
+import { toBookId } from './entities/book/utils/book-id'
 import { fetchIsApprovedForAll } from './apis/approval'
 import { applyPercent } from './utils/bigint'
-import { fetchPool } from './entities/pool/apis/pool'
+import { fetchPool } from './entities/pool/apis'
 import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
 import { fetchCallData, fetchQuote } from './apis/odos'
 import { MINTER_ABI } from './abis/rebalancer/minter-abi'
@@ -46,7 +46,7 @@ import {
   getIdealDelta,
   getQuoteAmountFromPrices,
   toBytes32,
-} from './entities/pool/utils'
+} from './entities/pool/utils/mint'
 import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
 import { STRATEGY_ABI } from './abis/rebalancer/strategy-abi'
 import {
@@ -54,7 +54,7 @@ import {
   fetchOpenOrdersByOrderIdsFromSubgraph,
 } from './entities/open-order/api'
 import { OnChainOpenOrder } from './entities/open-order/model'
-import { fetchMarket } from './entities/market/apis/market'
+import { fetchMarket } from './entities/market/apis'
 
 /**
  * Build a transaction to open a market.

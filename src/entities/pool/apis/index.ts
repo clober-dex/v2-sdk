@@ -2,12 +2,12 @@ import { PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain'
 import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
-import { toPoolKey } from '../utils'
 import { REBALANCER_ABI } from '../../../abis/rebalancer/rebalancer-abi'
 import { Market } from '../../../type'
 import { STRATEGY_ABI } from '../../../abis/rebalancer/strategy-abi'
-import { fetchMarket } from '../../market/apis/market'
+import { fetchMarket } from '../../market/apis'
 import { Pool } from '../model'
+import { toPoolKey } from '../utils/pool-key'
 
 export async function fetchPool(
   publicClient: PublicClient,

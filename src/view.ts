@@ -27,15 +27,15 @@ import {
 } from './entities/open-order/api'
 import { OpenOrder } from './entities/open-order/model'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
-import { getMarketId } from './entities/market/utils'
+import { getMarketId } from './entities/market/utils/market-id'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
 import { fetchLastAmounts, fetchStrategyPosition } from './apis/strategy'
 import { Subgraph, SUBGRAPH_URL } from './constants/subgraph'
-import { fetchMarket } from './entities/market/apis/market'
+import { fetchMarket } from './entities/market/apis'
 import { fetchMarketSnapshots } from './entities/market/apis/market-snapshot'
-import { fetchPool } from './entities/pool/apis/pool'
+import { fetchPool } from './entities/pool/apis'
 import {
   fetchPoolSnapshotFromSubgraph,
   fetchPoolSnapshotsFromSubgraph,

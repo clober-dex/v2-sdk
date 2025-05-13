@@ -6,7 +6,7 @@ import { calculateUnitSize } from '../../../utils/unit-size'
 import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
 import { BOOK_VIEWER_ABI } from '../../../abis/core/book-viewer-abi'
 import { Subgraph } from '../../../constants/subgraph'
-import { toBookId } from '../utils'
+import { toBookId } from '../utils/book-id'
 import { Book } from '../model'
 
 import { fetchIsMarketOpened } from './open'

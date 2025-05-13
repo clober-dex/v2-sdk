@@ -9,7 +9,7 @@ import { Market as MarketType } from '../../type'
 import { Book } from '../book/model'
 import type { Currency } from '../../model/currency'
 
-import { getMarketId } from './utils'
+import { getMarketId } from './utils/market-id'
 
 type Depth = {
   price: string

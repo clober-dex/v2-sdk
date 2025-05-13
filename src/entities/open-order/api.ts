@@ -7,7 +7,7 @@ import {
 } from 'viem'
 
 import { CHAIN_IDS } from '../../constants/chain'
-import { getMarketId } from '../market/utils'
+import { getMarketId } from '../market/utils/market-id'
 import type { Currency } from '../../model/currency'
 import { baseToQuote, quoteToBase } from '../../utils/decimals'
 import { formatPrice, getMarketPrice } from '../../utils/prices'
@@ -20,7 +20,7 @@ import { CONTRACT_ADDRESSES } from '../../constants/addresses'
 import { BOOK_MANAGER_ABI } from '../../abis/core/book-manager-abi'
 import { fetchCurrencyMap } from '../../apis/currency'
 
-import { fromOrderId } from './utils'
+import { fromOrderId } from './utils/order-id'
 import { OnChainOpenOrder } from './model'
 import type { OpenOrder } from './model'
 
