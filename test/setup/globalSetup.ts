@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv'
 import {
   cloberTestChain,
   cloberTestChain2,
-} from '../../src/constants/chains/test-chain.ts'
+} from '../../src/constants/networks/test-chain.ts'
 import { DEV_MNEMONIC_SEED, FORK_BLOCK_NUMBER } from '../utils/constants'
 
 dotenv.config()

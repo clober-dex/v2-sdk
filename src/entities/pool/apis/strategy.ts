@@ -1,6 +1,6 @@
 import { formatUnits, PublicClient } from 'viem'
 
-import { CHAIN_IDS } from '../../../constants/chains'
+import { CHAIN_IDS } from '../../../constants/chain'
 import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
 import { LastAmounts, StrategyPosition } from '../../../type'
 import { STRATEGY_ABI } from '../../../abis/rebalancer/strategy-abi'

@@ -4,7 +4,7 @@ import {
   MAKER_DEFAULT_POLICY,
   TAKER_DEFAULT_POLICY,
 } from '../../../constants/fee'
-import { CHAIN_IDS } from '../../../constants/chains'
+import { CHAIN_IDS } from '../../../constants/chain'
 
 export const toBookId = (
   chainId: CHAIN_IDS,

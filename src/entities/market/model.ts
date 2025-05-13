@@ -1,6 +1,6 @@
 import { formatUnits, isAddressEqual } from 'viem'
 
-import { CHAIN_IDS } from '../../constants/chains'
+import { CHAIN_IDS } from '../../constants/chain'
 import { invertTick, toPrice } from '../../utils/tick'
 import { formatPrice } from '../../utils/prices'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../../constants/fee'

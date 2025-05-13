@@ -3,7 +3,7 @@ import { approveERC20, getMarket, limitOrder, openMarket } from '@clober/v2-sdk'
 import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
 
-import { cloberTestChain } from '../src/constants/chains/test-chain'
+import { cloberTestChain } from '../src/constants/networks/test-chain'
 
 import { fetchTokenBalance } from './utils/currency'
 import { getSize } from './utils/depth'

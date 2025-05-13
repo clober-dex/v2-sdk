@@ -11,7 +11,7 @@ import {
 } from '@clober/v2-sdk'
 import { zeroHash } from 'viem'
 
-import { cloberTestChain2 } from '../src/constants/chains/test-chain'
+import { cloberTestChain2 } from '../src/constants/networks/test-chain'
 import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
 
 import { account, FORK_URL } from './utils/constants'

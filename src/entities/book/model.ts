@@ -1,7 +1,7 @@
 import { TAKER_DEFAULT_POLICY } from '../../constants/fee'
 import { divide } from '../../utils/math'
 import { baseToQuote, quoteToBase } from '../../utils/conversion'
-import { CHAIN_IDS } from '../../constants/chains'
+import { CHAIN_IDS } from '../../constants/chain'
 import { MIN_TICK } from '../../constants/tick'
 import type { Currency } from '../currency/model'
 

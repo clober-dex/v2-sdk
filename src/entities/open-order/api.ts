@@ -6,7 +6,7 @@ import {
   zeroAddress,
 } from 'viem'
 
-import { CHAIN_IDS } from '../../constants/chains'
+import { CHAIN_IDS } from '../../constants/chain'
 import { getMarketId } from '../market/utils/market-id'
 import type { Currency } from '../currency/model'
 import { baseToQuote, quoteToBase } from '../../utils/conversion'

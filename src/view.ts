@@ -7,7 +7,7 @@ import {
   parseUnits,
 } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from './constants/chains'
+import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type {
   Currency,
   DefaultReadContractOptions,

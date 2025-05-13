@@ -1,4 +1,4 @@
-import { CHAIN_IDS } from '../../constants/chains'
+import { CHAIN_IDS } from '../../constants/chain'
 import { CHART_LOG_INTERVALS, ChartLog } from '../../type'
 import { Subgraph } from '../../constants/subgraph'
 

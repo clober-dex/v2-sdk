@@ -1,6 +1,6 @@
 import { PublicClient } from 'viem'
 
-import { CHAIN_IDS } from '../../../constants/chains'
+import { CHAIN_IDS } from '../../../constants/chain'
 import { Currency } from '../../currency/model'
 import { calculateUnitSize } from '../../../utils/unit-size'
 import { CONTRACT_ADDRESSES } from '../../../constants/addresses'

@@ -1,6 +1,6 @@
 import { formatUnits, getAddress, isAddressEqual } from 'viem'
 
-import { CHAIN_IDS } from '../../../constants/chains'
+import { CHAIN_IDS } from '../../../constants/chain'
 import { MarketSnapshot } from '../../../type'
 import { currentTimestampInSeconds } from '../../../utils/time'
 import { Subgraph } from '../../../constants/subgraph'

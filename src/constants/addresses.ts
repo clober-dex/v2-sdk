@@ -1,6 +1,6 @@
 import { getAddress, zeroAddress } from 'viem'
 
-import { CHAIN_IDS } from './chains'
+import { CHAIN_IDS } from './chain'
 
 export const CONTRACT_ADDRESSES: {
   [chain in CHAIN_IDS]: {
