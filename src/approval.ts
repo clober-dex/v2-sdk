@@ -2,10 +2,10 @@ import { createPublicClient, http, parseUnits, WalletClient } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
-import { fetchIsApprovedForAll } from './utils/approval'
+import { fetchIsApprovedForAll } from './apis/approval'
 import type { DefaultWriteContractOptions } from './type'
-import { fetchAllowance } from './utils/allowance'
-import { fetchCurrency } from './utils/currency'
+import { fetchAllowance } from './apis/allowance'
+import { fetchCurrency } from './apis/currency'
 
 /**
  * @dev This function relates with `viem` dependency

@@ -9,12 +9,13 @@ import { calculateUnitSize } from '../utils/unit-size'
 import type { Currency } from '../model/currency'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { BOOK_VIEWER_ABI } from '../abis/core/book-viewer-abi'
-import { fetchIsMarketOpened } from '../utils/open'
-import { fetchCurrencyMap } from '../utils/currency'
 import { Subgraph } from '../constants/subgraph'
 import { MarketSnapshot } from '../type'
 import { getQuoteToken } from '../view'
 import { currentTimestampInSeconds } from '../utils/time'
+
+import { fetchCurrencyMap } from './currency'
+import { fetchIsMarketOpened } from './open'
 
 const fetchBookFromSubgraph = async (chainId: CHAIN_IDS, bookId: string) => {
   return Subgraph.get<{
@@ -37,7 +38,7 @@ const fetchBookFromSubgraph = async (chainId: CHAIN_IDS, bookId: string) => {
   )
 }
 
-const getBook = async (
+const fetchBook = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   quoteCurrency: Currency,
@@ -124,8 +125,22 @@ export async function fetchMarket(
     currencyMap[baseTokenAddress],
   ]
   const [bidBook, askBook] = await Promise.all([
-    getBook(publicClient, chainId, quoteCurrency, baseCurrency, useSubgraph, n),
-    getBook(publicClient, chainId, baseCurrency, quoteCurrency, useSubgraph, n),
+    fetchBook(
+      publicClient,
+      chainId,
+      quoteCurrency,
+      baseCurrency,
+      useSubgraph,
+      n,
+    ),
+    fetchBook(
+      publicClient,
+      chainId,
+      baseCurrency,
+      quoteCurrency,
+      useSubgraph,
+      n,
+    ),
   ])
 
   return new Market({

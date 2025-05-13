@@ -34,8 +34,7 @@ import {
 import { invertTick, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput, getQuoteToken } from './view'
 import { toBookId } from './utils/book-id'
-import { fetchIsApprovedForAll } from './utils/approval'
-import { fetchOnChainOrders } from './utils/order'
+import { fetchIsApprovedForAll } from './apis/approval'
 import { applyPercent } from './utils/bigint'
 import { fetchPool } from './apis/pool'
 import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
@@ -47,7 +46,10 @@ import { abs } from './utils/math'
 import { toBytes32 } from './utils/pool-key'
 import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
 import { STRATEGY_ABI } from './abis/rebalancer/strategy-abi'
-import { fetchOpenOrdersByOrderIdsFromSubgraph } from './apis/open-order'
+import {
+  fetchOnChainOrders,
+  fetchOpenOrdersByOrderIdsFromSubgraph,
+} from './apis/open-order'
 import { OnChainOpenOrder } from './model/open-order'
 import { quotes } from './utils/quotes'
 

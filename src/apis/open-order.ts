@@ -1,58 +1,36 @@
-import { formatUnits, getAddress, isAddressEqual, zeroAddress } from 'viem'
+import {
+  formatUnits,
+  getAddress,
+  isAddressEqual,
+  PublicClient,
+  zeroAddress,
+} from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
 import { getMarketId } from '../utils/market'
 import type { Currency } from '../model/currency'
 import { baseToQuote, quoteToBase } from '../utils/decimals'
-import { formatPrice } from '../utils/prices'
+import { formatPrice, getMarketPrice } from '../utils/prices'
 import { invertTick, toPrice } from '../utils/tick'
 import type { OpenOrder, OpenOrderDto } from '../model/open-order'
 import { applyPercent } from '../utils/bigint'
 import { MAKER_DEFAULT_POLICY } from '../constants/fee'
 import { Subgraph } from '../constants/subgraph'
 import { NATIVE_CURRENCY } from '../constants/currency'
+import { OnChainOpenOrder } from '../model/open-order'
+import { CONTRACT_ADDRESSES } from '../constants/addresses'
+import { BOOK_MANAGER_ABI } from '../abis/core/book-manager-abi'
+import { fromOrderId } from '../utils/order'
 
-const getOpenOrderFromSubgraph = async (
-  chainId: CHAIN_IDS,
-  orderId: string,
-) => {
-  return Subgraph.get<{
-    data: {
-      openOrder: OpenOrderDto | null
-    }
-  }>(
-    chainId,
-    'getOpenOrder',
-    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id owner book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick transaction { id } timestamp unitAmount filledUnitAmount claimedUnitAmount claimableUnitAmount orderIndex } }',
-    {
-      orderId,
-    },
-  )
-}
+import { fetchCurrencyMap } from './currency'
 
-const getOpenOrdersFromSubgraph = async (
-  chainId: CHAIN_IDS,
-  orderIds: string[],
-) => {
-  return Subgraph.get<{
-    data: {
-      openOrders: OpenOrderDto[]
-    }
-  }>(
-    chainId,
-    'getOpenOrders',
-    'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id owner book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick transaction { id } timestamp unitAmount filledUnitAmount claimedUnitAmount claimableUnitAmount orderIndex } }',
-    {
-      orderIds,
-    },
-  )
-}
-
-const getOpenOrdersByUserAddressFromSubgraph = async (
+export async function fetchOpenOrdersByUserAddressFromSubgraph(
   chainId: CHAIN_IDS,
   userAddress: `0x${string}`,
-) => {
-  return Subgraph.get<{
+): Promise<OpenOrder[]> {
+  const {
+    data: { openOrders },
+  } = await Subgraph.get<{
     data: {
       openOrders: OpenOrderDto[]
     }
@@ -64,16 +42,7 @@ const getOpenOrdersByUserAddressFromSubgraph = async (
       userAddress: userAddress.toLowerCase(),
     },
   )
-}
-
-export async function fetchOpenOrdersByUserAddressFromSubgraph(
-  chainId: CHAIN_IDS,
-  userAddress: `0x${string}`,
-): Promise<OpenOrder[]> {
-  const {
-    data: { openOrders },
-  } = await getOpenOrdersByUserAddressFromSubgraph(chainId, userAddress)
-  const currencies = getCurrenciesFromOpenOrderDtos(chainId, openOrders)
+  const currencies = extractCurrenciesFromOpenOrders(chainId, openOrders)
   return openOrders.map((openOrder) =>
     toOpenOrder(chainId, currencies, openOrder),
   )
@@ -85,13 +54,24 @@ export async function fetchOpenOrderByOrderIdFromSubgraph(
 ): Promise<OpenOrder> {
   const {
     data: { openOrder },
-  } = await getOpenOrderFromSubgraph(chainId, orderId)
+  } = await Subgraph.get<{
+    data: {
+      openOrder: OpenOrderDto | null
+    }
+  }>(
+    chainId,
+    'getOpenOrder',
+    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id owner book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick transaction { id } timestamp unitAmount filledUnitAmount claimedUnitAmount claimableUnitAmount orderIndex } }',
+    {
+      orderId,
+    },
+  )
   if (!openOrder) {
     throw new Error(`Open order not found: ${orderId}`)
   }
   return toOpenOrder(
     chainId,
-    getCurrenciesFromOpenOrderDtos(chainId, [openOrder]),
+    extractCurrenciesFromOpenOrders(chainId, [openOrder]),
     openOrder,
   )
 }
@@ -102,11 +82,129 @@ export async function fetchOpenOrdersByOrderIdsFromSubgraph(
 ): Promise<OpenOrder[]> {
   const {
     data: { openOrders },
-  } = await getOpenOrdersFromSubgraph(chainId, orderIds)
-  const currencies = getCurrenciesFromOpenOrderDtos(chainId, openOrders)
+  } = await Subgraph.get<{
+    data: {
+      openOrders: OpenOrderDto[]
+    }
+  }>(
+    chainId,
+    'getOpenOrders',
+    'query getOpenOrders($orderIds: [ID!]!) { openOrders(where: {id_in: $orderIds}) { id owner book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick transaction { id } timestamp unitAmount filledUnitAmount claimedUnitAmount claimableUnitAmount orderIndex } }',
+    {
+      orderIds,
+    },
+  )
+  const currencies = extractCurrenciesFromOpenOrders(chainId, openOrders)
   return openOrders.map((openOrder) =>
     toOpenOrder(chainId, currencies, openOrder),
   )
+}
+
+export const fetchOnChainOrders = async (
+  publicClient: PublicClient,
+  chainId: CHAIN_IDS,
+  orderIds: bigint[],
+): Promise<OnChainOpenOrder[]> => {
+  const result = await publicClient.multicall({
+    contracts: [
+      ...orderIds.map((orderId) => ({
+        address: CONTRACT_ADDRESSES[chainId]!.BookManager,
+        abi: BOOK_MANAGER_ABI,
+        functionName: 'getOrder',
+        args: [orderId],
+      })),
+      ...orderIds.map((orderId) => ({
+        address: CONTRACT_ADDRESSES[chainId]!.BookManager,
+        abi: BOOK_MANAGER_ABI,
+        functionName: 'ownerOf',
+        args: [orderId],
+      })),
+      ...orderIds.map((orderId) => ({
+        address: CONTRACT_ADDRESSES[chainId]!.BookManager,
+        abi: BOOK_MANAGER_ABI,
+        functionName: 'getBookKey',
+        args: [fromOrderId(orderId).bookId],
+      })),
+    ],
+  })
+  const addresses = orderIds
+    .map((_, index) => {
+      const { base, quote } = result[index + orderIds.length * 2].result as {
+        base: `0x${string}`
+        quote: `0x${string}`
+      }
+      return [base, quote]
+    })
+    .flat()
+  const currencyMap = await fetchCurrencyMap(
+    publicClient,
+    chainId,
+    addresses,
+    false,
+  )
+
+  return orderIds.map((orderId, index) => {
+    const order = result[index].result as {
+      provider: `0x${string}`
+      open: bigint
+      claimable: bigint
+    }
+    const owner = result[index + orderIds.length].result as `0x${string}`
+    const { base, quote, unitSize } = result[index + orderIds.length * 2]
+      .result as {
+      base: `0x${string}`
+      quote: `0x${string}`
+      unitSize: bigint
+    }
+    const cancelable = applyPercent(
+      unitSize * order.open,
+      100 +
+        (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) /
+          Number(MAKER_DEFAULT_POLICY[chainId].RATE_PRECISION),
+      6,
+    )
+    const claimable = quoteToBase(
+      fromOrderId(orderId).tick,
+      unitSize * order.claimable,
+      false,
+    )
+    const isBid = isAddressEqual(
+      quote,
+      getMarketId(chainId, [base, quote]).quoteTokenAddress,
+    )
+    const { tick, index: orderIndex } = fromOrderId(orderId)
+    const [quoteCurrency, baseCurrency] = isBid
+      ? [currencyMap[quote], currencyMap[base]]
+      : [currencyMap[base], currencyMap[quote]]
+    return {
+      id: orderId.toString(),
+      user: owner,
+      isBid,
+      price: isBid
+        ? getMarketPrice({
+            marketQuoteCurrency: quoteCurrency,
+            marketBaseCurrency: baseCurrency,
+            bidTick: tick,
+          })
+        : getMarketPrice({
+            marketQuoteCurrency: quoteCurrency,
+            marketBaseCurrency: baseCurrency,
+            askTick: tick,
+          }),
+      tick: Number(tick),
+      orderIndex: orderIndex.toString(),
+      inputCurrency: currencyMap[getAddress(quote)],
+      outputCurrency: currencyMap[getAddress(base)],
+      cancelable: {
+        currency: currencyMap[getAddress(quote)],
+        value: formatUnits(cancelable, currencyMap[getAddress(quote)].decimals),
+      },
+      claimable: {
+        currency: currencyMap[getAddress(base)],
+        value: formatUnits(claimable, currencyMap[getAddress(base)].decimals),
+      },
+    }
+  })
 }
 
 const toOpenOrder = (
@@ -193,7 +291,7 @@ const toOpenOrder = (
   }
 }
 
-const getCurrenciesFromOpenOrderDtos = (
+const extractCurrenciesFromOpenOrders = (
   chainId: CHAIN_IDS,
   openOrders: OpenOrderDto[],
 ): Currency[] => {
