@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest'
 
-import { getQuoteAmountFromPrices } from '../src/utils/quotes'
+import { getQuoteAmountFromPrices } from '../src/entities/pool/utils/mint'
+
 test('quotes', async () => {
   expect(getQuoteAmountFromPrices(1000000n, 0.9999, 1847.11, 6, 18)).toEqual(
     541332135065047n,
