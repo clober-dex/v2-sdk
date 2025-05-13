@@ -6,6 +6,8 @@ import { fetchMarket } from '../../entities/market/apis'
 
 export { getExpectedOutput, getExpectedInput } from './quote'
 export { getChartLogs, getLatestChartLog } from './chart-log'
+export { getMarketSnapshots } from './snapshot'
+export { getQuoteToken } from './token'
 
 /**
  * Get market information by chain id and token addresses

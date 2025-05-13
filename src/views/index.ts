@@ -4,6 +4,8 @@ export {
   getLatestChartLog,
   getExpectedOutput,
   getExpectedInput,
+  getMarketSnapshots,
+  getQuoteToken,
 } from './market'
 export {
   getPool,
