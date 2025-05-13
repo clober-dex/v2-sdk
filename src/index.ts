@@ -1,4 +1,4 @@
-export * from './type'
-export * from './view'
-export * from './call'
+export * from './types'
+export * from './views'
+export * from './calls'
 export * from './utils'

@@ -1,9 +1,9 @@
 import { getAddress } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain'
-import { Currency, PoolSnapshot } from '../../../type'
+import { Currency, PoolSnapshot } from '../../../types'
 import { Subgraph } from '../../../constants/subgraph'
-import { getContractAddresses } from '../../../view'
+import { getContractAddresses } from '../../../views'
 
 type PoolDto = {
   id: string

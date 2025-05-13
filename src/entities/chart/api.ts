@@ -1,5 +1,5 @@
 import { CHAIN_IDS } from '../../constants/chain'
-import { CHART_LOG_INTERVALS, ChartLog } from '../../type'
+import { CHART_LOG_INTERVALS, ChartLog } from '../../types'
 import { Subgraph } from '../../constants/subgraph'
 
 type ChartLogDto = {

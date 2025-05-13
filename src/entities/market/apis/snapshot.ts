@@ -1,10 +1,10 @@
 import { formatUnits, getAddress, isAddressEqual } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain'
-import { MarketSnapshot } from '../../../type'
-import { currentTimestampInSeconds } from '../../utils/time'
+import { MarketSnapshot } from '../../../types'
+import { currentTimestampInSeconds } from '../../../utils/time'
 import { Subgraph } from '../../../constants/subgraph'
-import { getQuoteToken } from '../../../view'
+import { getQuoteToken } from '../../../views'
 
 type TakeSampleDto = {
   timestamp: string

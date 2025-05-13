@@ -7,7 +7,7 @@ import {
   parseUnits,
 } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from '../constants/chain'
 import type {
   ChartLog,
   Currency,
@@ -18,31 +18,31 @@ import type {
   Pool,
   PoolSnapshot,
   StrategyPosition,
-} from './type'
-import { CHART_LOG_INTERVALS } from './type'
-import { formatPrice, parsePrice } from './entities/utils/prices'
+} from '../types'
+import { CHART_LOG_INTERVALS } from '../types'
+import { formatPrice, parsePrice } from '../utils/prices'
 import {
   fetchOpenOrderByOrderIdFromSubgraph,
   fetchOpenOrdersByUserAddressFromSubgraph,
-} from './entities/open-order/api'
-import { OpenOrder } from './entities/open-order/model'
-import { fetchChartLogs, fetchLatestChartLog } from './entities/chart/api'
-import { getMarketId } from './entities/market/utils/market-id'
-import { CONTRACT_ADDRESSES } from './constants/addresses'
-import { invertTick, toPrice } from './entities/utils/tick'
-import { MAX_TICK, MIN_TICK } from './constants/tick'
+} from '../entities/open-order/api'
+import { OpenOrder } from '../entities/open-order/model'
+import { fetchChartLogs, fetchLatestChartLog } from '../entities/chart/api'
+import { getMarketId } from '../entities/market/utils/market-id'
+import { CONTRACT_ADDRESSES } from '../constants/addresses'
+import { invertTick, toPrice } from '../utils/tick'
+import { MAX_TICK, MIN_TICK } from '../constants/tick'
 import {
   fetchLastAmounts,
   fetchStrategyPosition,
-} from './entities/pool/apis/strategy'
-import { Subgraph, SUBGRAPH_URL } from './constants/subgraph'
-import { fetchMarket } from './entities/market/apis'
-import { fetchMarketSnapshots } from './entities/market/apis/snapshot'
-import { fetchPool } from './entities/pool/apis'
+} from '../entities/pool/apis/strategy'
+import { Subgraph, SUBGRAPH_URL } from '../constants/subgraph'
+import { fetchMarket } from '../entities/market/apis'
+import { fetchMarketSnapshots } from '../entities/market/apis/snapshot'
+import { fetchPool } from '../entities/pool/apis'
 import {
   fetchPoolSnapshotFromSubgraph,
   fetchPoolSnapshotsFromSubgraph,
-} from './entities/pool/apis/snapshot'
+} from '../entities/pool/apis/snapshot'
 
 /**
  * Get contract addresses by chain id

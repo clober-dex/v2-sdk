@@ -1,6 +1,6 @@
 import { formatUnits } from 'viem'
 
-import { CHAIN_IDS, Currency, Market, Pool as PoolType } from '../../type'
+import { CHAIN_IDS, Currency, Market, Pool as PoolType } from '../../types'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
 import { Currency6909 } from '../currency/model'
 

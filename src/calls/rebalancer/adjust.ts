@@ -1,14 +1,14 @@
 import { createPublicClient, http, parseUnits } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
-import { DefaultWriteContractOptions, Pool, Transaction } from '../../type'
+import { DefaultWriteContractOptions, Pool, Transaction } from '../../types'
 import { fetchPool } from '../../entities/pool/apis'
 import {
   convertHumanReadablePriceToRawPrice,
   parsePrice,
-} from '../../entities/utils/prices'
-import { invertTick } from '../../entities/utils/tick'
-import { buildTransaction } from '../../entities/utils/build-transaction'
+} from '../../utils/prices'
+import { invertTick } from '../../utils/tick'
+import { buildTransaction } from '../../utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
 import { OPERATOR_ABI } from '../../constants/abis/rebalancer/operator-abi'
 

@@ -15,7 +15,7 @@ import {
   DefaultWriteContractOptions,
   ERC20PermitParam,
   Transaction,
-} from '../../type'
+} from '../../types'
 import { fetchPool } from '../../entities/pool/apis'
 import { EMPTY_ERC20_PERMIT_PARAMS } from '../../constants/permit'
 import {
@@ -23,11 +23,11 @@ import {
   getIdealDelta,
   getQuoteAmountFromPrices,
 } from '../../entities/pool/utils/mint'
-import { applyPercent } from '../../entities/utils/bigint'
-import { buildTransaction } from '../../entities/utils/build-transaction'
+import { applyPercent } from '../../utils/bigint'
+import { buildTransaction } from '../../utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
 import { MINTER_ABI } from '../../constants/abis/rebalancer/minter-abi'
-import { abs } from '../../entities/utils/math'
+import { abs } from '../../utils/math'
 
 export const addLiquidity = async ({
   chainId,

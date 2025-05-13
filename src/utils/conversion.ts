@@ -1,4 +1,4 @@
-import { PRICE_PRECISION } from '../../constants/price'
+import { PRICE_PRECISION } from '../constants/price'
 
 import { divide } from './math'
 import { toPrice } from './tick'

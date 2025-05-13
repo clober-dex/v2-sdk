@@ -1,4 +1,4 @@
-import { CurrencyAmount } from '../../type'
+import { CurrencyAmount } from '../../types'
 import type { Currency } from '../currency/model'
 
 export type OnChainOpenOrder = {

@@ -2,7 +2,7 @@ import { PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain'
 import { Currency } from '../../currency/model'
-import { calculateUnitSize } from '../../utils/unit-size'
+import { calculateUnitSize } from '../../../utils/unit-size'
 import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
 import { BOOK_VIEWER_ABI } from '../../../constants/abis/core/book-viewer-abi'
 import { Subgraph } from '../../../constants/subgraph'

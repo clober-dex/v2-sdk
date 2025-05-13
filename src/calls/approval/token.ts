@@ -1,7 +1,7 @@
 import { createPublicClient, http, parseUnits, WalletClient } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain'
-import { DefaultWriteContractOptions } from '../../type'
+import { DefaultWriteContractOptions } from '../../types'
 import { fetchCurrency } from '../../entities/currency/apis'
 import { fetchAllowance } from '../../entities/currency/apis/allowance'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'

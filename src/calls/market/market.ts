@@ -13,14 +13,14 @@ import {
   DefaultWriteContractOptions,
   ERC20PermitParam,
   Transaction,
-} from '../../type'
+} from '../../types'
 import { fetchMarket } from '../../entities/market/apis'
-import { getExpectedInput, getExpectedOutput } from '../../view'
-import { buildTransaction } from '../../entities/utils/build-transaction'
+import { getExpectedInput, getExpectedOutput } from '../../views'
+import { buildTransaction } from '../../utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
 import { CONTROLLER_ABI } from '../../constants/abis/core/controller-abi'
-import { applyPercent } from '../../entities/utils/bigint'
-import { getDeadlineTimestampInSeconds } from '../../entities/utils/time'
+import { applyPercent } from '../../utils/bigint'
+import { getDeadlineTimestampInSeconds } from '../../utils/time'
 
 /**
  * Executes a market order on the specified chain for trading tokens.

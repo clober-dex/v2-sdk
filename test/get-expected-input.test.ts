@@ -8,8 +8,8 @@ import {
   zeroHash,
 } from 'viem'
 
-import { parsePrice } from '../src/entities/utils/prices'
-import { invertTick } from '../src/entities/utils/tick'
+import { parsePrice } from '../src/utils/prices'
+import { invertTick } from '../src/utils/tick'
 import { CONTRACT_ADDRESSES } from '../src/constants/addresses'
 import { BOOK_VIEWER_ABI } from '../src/constants/abis/core/book-viewer-abi'
 import { cloberTestChain } from '../src/constants/networks/test-chain'
