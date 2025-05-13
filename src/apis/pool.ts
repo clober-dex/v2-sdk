@@ -5,7 +5,7 @@ import { Pool, PoolDto, PoolHourDataDto } from '../model/pool'
 import { CONTRACT_ADDRESSES } from '../constants/addresses'
 import { toPoolKey } from '../utils/pool-key'
 import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
-import { Currency, Market, PoolPerformanceData } from '../type'
+import { Currency, Market, PoolSnapshot } from '../type'
 import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
 import { Subgraph } from '../constants/subgraph'
 import { getContractAddresses } from '../view'
@@ -98,10 +98,10 @@ export async function fetchPool(
   })
 }
 
-export const fetchPoolPerformanceFromSubgraph = async (
+export const fetchPoolSnapshotFromSubgraph = async (
   chainId: CHAIN_IDS,
   poolKey: `0x${string}`,
-): Promise<PoolPerformanceData | null> => {
+): Promise<PoolSnapshot | null> => {
   const {
     data: { pool, poolHourDatas },
   } = await Subgraph.get<{

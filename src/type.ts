@@ -83,7 +83,7 @@ export type Pool = {
   paused: boolean
 }
 
-export type PoolPerformanceData = {
+export type PoolSnapshot = {
   chainId: CHAIN_IDS
   key: `0x${string}`
   currencyA: Currency

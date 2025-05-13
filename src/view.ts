@@ -7,7 +7,7 @@ import {
   parseUnits,
 } from 'viem'
 
-import { fetchMarket, fetchTopMarketSnapshots } from './apis/market'
+import { fetchMarket, fetchMarketSnapshots } from './apis/market'
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type {
   ChartLog,
@@ -17,7 +17,7 @@ import type {
   Market,
   MarketSnapshot,
   Pool,
-  PoolPerformanceData,
+  PoolSnapshot,
   StrategyPosition,
 } from './type'
 import { CHART_LOG_INTERVALS } from './type'
@@ -32,7 +32,7 @@ import { getMarketId } from './utils/market'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
-import { fetchPool, fetchPoolPerformanceFromSubgraph } from './apis/pool'
+import { fetchPool, fetchPoolSnapshotFromSubgraph } from './apis/pool'
 import { fetchLastAmounts, fetchStrategyPosition } from './apis/strategy'
 import { Subgraph, SUBGRAPH_URL } from './constants/subgraph'
 
@@ -155,12 +155,12 @@ export const getMarket = async ({
   return market.toJson()
 }
 
-export const getTopMarketSnapshots = async ({
+export const getMarketSnapshots = async ({
   chainId,
 }: {
   chainId: CHAIN_IDS
 }): Promise<MarketSnapshot[]> => {
-  return fetchTopMarketSnapshots(chainId)
+  return fetchMarketSnapshots(chainId)
 }
 
 /**
@@ -221,21 +221,18 @@ export const getPool = async ({
   return pool.toJson()
 }
 
-export const getPoolPerformance = async ({
+export const getPoolSnapshot = async ({
   chainId,
   poolKey,
 }: {
   chainId: CHAIN_IDS
   poolKey: `0x${string}`
-}): Promise<PoolPerformanceData> => {
-  const poolPerformanceData = await fetchPoolPerformanceFromSubgraph(
-    chainId,
-    poolKey,
-  )
-  if (!poolPerformanceData) {
-    throw new Error('Pool is not opened')
+}): Promise<PoolSnapshot> => {
+  const poolSnapshot = await fetchPoolSnapshotFromSubgraph(chainId, poolKey)
+  if (!poolSnapshot) {
+    throw new Error('Pool is not existed')
   }
-  return poolPerformanceData
+  return poolSnapshot
 }
 
 export const getStrategyPrice = async ({

@@ -176,7 +176,7 @@ const calculate24hPriceChange = (
   return (takenList[takenList.length - 1].price / takenList[0].price - 1) * 100
 }
 
-export const fetchTopMarketSnapshots = async (
+export const fetchMarketSnapshots = async (
   chainId: CHAIN_IDS,
 ): Promise<MarketSnapshot[]> => {
   const dayID = Math.floor(currentTimestampInSeconds() / 86400)
