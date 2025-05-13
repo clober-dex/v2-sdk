@@ -11,28 +11,8 @@ import { fetchPool } from './pool'
 export async function fetchStrategyPosition(
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
-  tokenAddresses: `0x${string}`[],
-  salt: `0x${string}`,
-  useSubgraph: boolean,
-  market?: Market,
+  poolKey: `0x${string}`,
 ): Promise<StrategyPosition> {
-  let poolKey: `0x${string}` | undefined = undefined
-  if (market) {
-    poolKey = toPoolKey(
-      BigInt(market.bidBook.id),
-      BigInt(market.askBook.id),
-      salt,
-    )
-  } else {
-    const pool = await fetchPool(
-      publicClient,
-      chainId,
-      tokenAddresses,
-      salt,
-      useSubgraph,
-    )
-    poolKey = pool.key
-  }
   const getPriceResult = await publicClient.readContract({
     address: CONTRACT_ADDRESSES[chainId]!.Strategy,
     abi: STRATEGY_ABI,
