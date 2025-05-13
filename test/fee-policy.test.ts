@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import { createPublicClient, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
-import { FeePolicy } from '../src/model/fee-policy'
+import { FeePolicy } from '../src/entities/fee-policy/model'
 import {
   MAKER_DEFAULT_POLICY,
   TAKER_DEFAULT_POLICY,

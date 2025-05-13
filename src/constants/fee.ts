@@ -1,4 +1,4 @@
-import { FeePolicy } from '../model/fee-policy'
+import { FeePolicy } from '../entities/fee-policy/model'
 
 import { CHAIN_IDS } from './chain'
 
