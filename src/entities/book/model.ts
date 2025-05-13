@@ -10,7 +10,7 @@ type RawDepth = {
   unitAmount: bigint
 }
 
-export class Book {
+export class BookModel {
   chainId: CHAIN_IDS
   id: bigint
   base: Currency

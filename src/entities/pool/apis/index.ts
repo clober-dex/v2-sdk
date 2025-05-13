@@ -6,7 +6,7 @@ import { REBALANCER_ABI } from '../../../constants/abis/rebalancer/rebalancer-ab
 import { Market } from '../../../types'
 import { STRATEGY_ABI } from '../../../constants/abis/rebalancer/strategy-abi'
 import { fetchMarket } from '../../market/apis'
-import { Pool } from '../model'
+import { PoolModel } from '../model'
 import { toPoolKey } from '../utils/pool-key'
 
 export async function fetchPool(
@@ -16,7 +16,7 @@ export async function fetchPool(
   salt: `0x${string}`,
   useSubgraph: boolean,
   market?: Market,
-): Promise<Pool> {
+): Promise<PoolModel> {
   if (tokenAddresses.length !== 2) {
     throw new Error('Invalid token pair')
   }
@@ -72,7 +72,7 @@ export async function fetchPool(
     totalLiquidityB.reserve +
     totalLiquidityB.cancelable +
     totalLiquidityB.claimable
-  return new Pool({
+  return new PoolModel({
     chainId,
     market,
     isOpened: bookIdA > 0 && bookIdB > 0,

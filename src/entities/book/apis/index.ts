@@ -7,7 +7,7 @@ import { CONTRACT_ADDRESSES } from '../../../constants/chain-configs/addresses'
 import { BOOK_VIEWER_ABI } from '../../../constants/abis/core/book-viewer-abi'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { toBookId } from '../utils/book-id'
-import { Book } from '../model'
+import { BookModel } from '../model'
 
 import { fetchIsMarketOpened } from './open'
 
@@ -18,7 +18,7 @@ export const fetchBook = async (
   baseCurrency: Currency,
   useSubgraph: boolean,
   n: number,
-): Promise<Book> => {
+): Promise<BookModel> => {
   const unitSize = calculateUnitSize(chainId, quoteCurrency)
   const bookId = toBookId(
     chainId,
@@ -47,7 +47,7 @@ export const fetchBook = async (
         bookId,
       },
     )
-    return new Book({
+    return new BookModel({
       chainId,
       id: bookId,
       base: baseCurrency,
@@ -75,7 +75,7 @@ export const fetchBook = async (
     fetchIsMarketOpened(publicClient, chainId, bookId),
   ])
 
-  return new Book({
+  return new BookModel({
     chainId,
     id: bookId,
     base: baseCurrency,

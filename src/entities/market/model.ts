@@ -7,7 +7,7 @@ import {
   TAKER_DEFAULT_POLICY,
 } from '../../constants/chain-configs/fee'
 import { Market as MarketType } from '../../types'
-import { Book } from '../book/model'
+import { BookModel } from '../book/model'
 import type { Currency } from '../currency/model'
 
 import { getMarketId } from './utils/market-id'
@@ -18,7 +18,7 @@ type Depth = {
   baseAmount: bigint
 }
 
-export class Market {
+export class MarketModel {
   chainId: CHAIN_IDS
   makerFee: number
   takerFee: number
@@ -28,8 +28,8 @@ export class Market {
   base: Currency
   bids: Depth[]
   asks: Depth[]
-  bidBook: Book
-  askBook: Book
+  bidBook: BookModel
+  askBook: BookModel
 
   constructor({
     chainId,
@@ -39,8 +39,8 @@ export class Market {
   }: {
     chainId: CHAIN_IDS
     tokens: [Currency, Currency]
-    bidBook: Book
-    askBook: Book
+    bidBook: BookModel
+    askBook: BookModel
   }) {
     this.chainId = chainId
     const { marketId, quoteTokenAddress, baseTokenAddress } = getMarketId(

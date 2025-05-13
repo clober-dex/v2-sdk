@@ -1,7 +1,7 @@
 import { PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
-import { Market } from '../model'
+import { MarketModel } from '../model'
 import { getMarketId } from '../utils/market-id'
 import { fetchCurrencyMap } from '../../currency/apis'
 import { fetchBook } from '../../book/apis'
@@ -12,7 +12,7 @@ export async function fetchMarket(
   tokenAddresses: `0x${string}`[],
   useSubgraph: boolean,
   n = 100,
-): Promise<Market> {
+): Promise<MarketModel> {
   if (tokenAddresses.length !== 2) {
     throw new Error('Invalid token pair')
   }
@@ -50,7 +50,7 @@ export async function fetchMarket(
     ),
   ])
 
-  return new Market({
+  return new MarketModel({
     chainId,
     tokens: [quoteCurrency, baseCurrency],
     bidBook,
