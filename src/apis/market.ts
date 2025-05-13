@@ -212,6 +212,16 @@ export const fetchMarketSnapshots = async (
       }),
     ),
   )
+  const tokenAddresses = [
+    ...new Set(
+      bookDayDatas
+        .map(({ book: { base, quote } }) => [
+          getAddress(base.id),
+          getAddress(quote.id),
+        ])
+        .flat(),
+    ),
+  ]
 
   const {
     data: { tokenDayDatas },
@@ -225,20 +235,11 @@ export const fetchMarketSnapshots = async (
     }
   }>(
     chainId,
-    'getTokensPrice',
-    'query getTokensPrice($date: Int!, $tokenAddresses: [Bytes!]!) { tokenDayDatas(where: {token_in: $tokenAddresses, date: $date}) { token { id } date priceUSD } }',
+    'getTokenUSDPrices',
+    'query getTokenUSDPrices($date: Int!, $tokenAddresses: [Bytes!]!) { tokenDayDatas(where: {token_in: $tokenAddresses, date: $date}) { token { id } date priceUSD } }',
     {
       date: dayID,
-      tokenAddresses: [
-        ...new Set(
-          bookDayDatas
-            .map(({ book: { base, quote } }) => [
-              base.id.toLowerCase(),
-              quote.id.toLowerCase(),
-            ])
-            .flat(),
-        ),
-      ],
+      tokenAddresses: tokenAddresses.map((address) => address.toLowerCase()),
     },
   )
   const priceUSDMap = tokenDayDatas.reduce(
