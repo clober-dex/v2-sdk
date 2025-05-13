@@ -50,7 +50,7 @@ export type MarketSnapshot = {
   marketId: string
   base: Currency
   quote: Currency
-  price: number
+  priceUSD: number
   volume24hUSD: number
   priceChange24h: number
   createdAtTimestamp: number

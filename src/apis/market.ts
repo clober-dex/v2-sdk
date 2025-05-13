@@ -13,8 +13,8 @@ import { fetchIsMarketOpened } from '../utils/open'
 import { fetchCurrencyMap } from '../utils/currency'
 import { Subgraph } from '../constants/subgraph'
 import { MarketSnapshot } from '../type'
-import { currentTimestampInSeconds } from '../utils/time'
 import { getQuoteToken } from '../view'
+import { currentTimestampInSeconds } from '../utils/time'
 
 const fetchBookFromSubgraph = async (chainId: CHAIN_IDS, bookId: string) => {
   return Subgraph.get<{
@@ -213,6 +213,41 @@ export const fetchMarketSnapshots = async (
     ),
   )
 
+  const {
+    data: { tokenDayDatas },
+  } = await Subgraph.get<{
+    data: {
+      tokenDayDatas: {
+        token: { id: string }
+        date: number
+        priceUSD: string
+      }[]
+    }
+  }>(
+    chainId,
+    'getTokensPrice',
+    'query getTokensPrice($date: Int!, $tokenAddresses: [Bytes!]!) { tokenDayDatas(where: {token_in: $tokenAddresses, date: $date}) { token { id } date priceUSD } }',
+    {
+      date: dayID,
+      tokenAddresses: [
+        ...new Set(
+          bookDayDatas
+            .map(({ book: { base, quote } }) => [
+              base.id.toLowerCase(),
+              quote.id.toLowerCase(),
+            ])
+            .flat(),
+        ),
+      ],
+    },
+  )
+  const priceUSDMap = tokenDayDatas.reduce(
+    (acc, { token, priceUSD }) => {
+      acc[getAddress(token.id)] = Number(priceUSD)
+      return acc
+    },
+    {} as Record<`0x${string}`, number>,
+  )
   const mergedBooks = [
     ...bidBooks.map((bidBook) => {
       const quoteCurrency = {
@@ -243,7 +278,9 @@ export const fetchMarketSnapshots = async (
         marketId: `${baseCurrency.symbol}/${quoteCurrency.symbol}`,
         base: baseCurrency,
         quote: quoteCurrency,
-        price: Number(bidBook.book.price),
+        priceUSD:
+          Number(bidBook.book.price) *
+          Number(priceUSDMap[quoteCurrency.address] ?? 0),
         volume24hUSD: askBook
           ? Number(askBook.book.volumeUSD) + Number(bidBook.book.volumeUSD)
           : Number(bidBook.book.volumeUSD),
@@ -293,7 +330,9 @@ export const fetchMarketSnapshots = async (
         marketId: `${baseCurrency.symbol}/${quoteCurrency.symbol}`,
         base: baseCurrency,
         quote: quoteCurrency,
-        price: Number(askBook.book.inversePrice),
+        priceUSD:
+          Number(askBook.book.inversePrice) *
+          Number(priceUSDMap[quoteCurrency.address] ?? 0),
         volume24hUSD: bidBook
           ? Number(askBook.book.volumeUSD) + Number(bidBook.book.volumeUSD)
           : Number(askBook.book.volumeUSD),
