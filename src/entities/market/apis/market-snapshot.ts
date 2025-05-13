@@ -1,154 +1,52 @@
-import { formatUnits, getAddress, isAddressEqual, PublicClient } from 'viem'
+import { formatUnits, getAddress, isAddressEqual } from 'viem'
 
-import { CHAIN_IDS } from '../constants/chain'
-import { Market } from '../model/market'
-import { Book, BookDayDataDTO, TakeSampleDto } from '../model/book'
-import { getMarketId } from '../utils/market'
-import { toBookId } from '../utils/book-id'
-import { calculateUnitSize } from '../utils/unit-size'
-import type { Currency } from '../model/currency'
-import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { BOOK_VIEWER_ABI } from '../abis/core/book-viewer-abi'
-import { Subgraph } from '../constants/subgraph'
-import { MarketSnapshot } from '../type'
-import { getQuoteToken } from '../view'
-import { currentTimestampInSeconds } from '../utils/time'
+import { CHAIN_IDS } from '../../../constants/chain'
+import { MarketSnapshot } from '../../../type'
+import { currentTimestampInSeconds } from '../../../utils/time'
+import { Subgraph } from '../../../constants/subgraph'
+import { getQuoteToken } from '../../../view'
 
-import { fetchCurrencyMap } from './currency'
-import { fetchIsMarketOpened } from './open'
+type TakeSampleDto = {
+  timestamp: string
+  inputToken: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
+  }
+  outputToken: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
+  }
+  inputAmount: string
+  outputAmount: string
+}
 
-const fetchBookFromSubgraph = async (chainId: CHAIN_IDS, bookId: string) => {
-  return Subgraph.get<{
-    data: {
-      book: {
-        depths: {
-          tick: string
-          price: string
-          unitAmount: string
-        }[]
-      } | null
+type BookDayDataDTO = {
+  volumeUSD: string
+  book: {
+    id: string
+    volumeUSD: string
+    price: string
+    inversePrice: string
+    latestTaken: TakeSampleDto[]
+    firstTaken: TakeSampleDto[]
+    base: {
+      id: string
+      name: string
+      symbol: string
+      decimals: string
     }
-  }>(
-    chainId,
-    'getBook',
-    'query getBook($bookId: ID!) { book(id: $bookId) { depths(where: {unitAmount_gt: 0}) { tick unitAmount } } }',
-    {
-      bookId,
-    },
-  )
-}
-
-const fetchBook = async (
-  publicClient: PublicClient,
-  chainId: CHAIN_IDS,
-  quoteCurrency: Currency,
-  baseCurrency: Currency,
-  useSubgraph: boolean,
-  n: number,
-): Promise<Book> => {
-  const unitSize = calculateUnitSize(chainId, quoteCurrency)
-  const bookId = toBookId(
-    chainId,
-    quoteCurrency.address,
-    baseCurrency.address,
-    unitSize,
-  )
-  if (useSubgraph) {
-    const {
-      data: { book },
-    } = await fetchBookFromSubgraph(chainId, bookId.toString())
-    return new Book({
-      chainId,
-      id: bookId,
-      base: baseCurrency,
-      quote: quoteCurrency,
-      unitSize,
-      depths: book
-        ? book.depths.map(
-            ({ tick, unitAmount }: { tick: string; unitAmount: string }) => ({
-              tick: BigInt(tick),
-              unitAmount: BigInt(unitAmount),
-            }),
-          )
-        : [],
-      isOpened: book !== null,
-    })
+    quote: {
+      id: string
+      name: string
+      symbol: string
+      decimals: string
+    }
+    createdAtTimestamp: string
   }
-
-  const [depths, isOpened] = await Promise.all([
-    publicClient.readContract({
-      address: CONTRACT_ADDRESSES[chainId]!.BookViewer,
-      abi: BOOK_VIEWER_ABI,
-      functionName: 'getLiquidity',
-      args: [bookId, Number(2n ** 19n - 1n), BigInt(n)],
-    }),
-    fetchIsMarketOpened(publicClient, chainId, bookId),
-  ])
-
-  return new Book({
-    chainId,
-    id: bookId,
-    base: baseCurrency,
-    quote: quoteCurrency,
-    unitSize,
-    depths: depths.map(({ tick, depth }: { tick: number; depth: bigint }) => ({
-      tick: BigInt(tick),
-      unitAmount: depth,
-    })),
-    isOpened,
-  })
-}
-
-export async function fetchMarket(
-  publicClient: PublicClient,
-  chainId: CHAIN_IDS,
-  tokenAddresses: `0x${string}`[],
-  useSubgraph: boolean,
-  n = 100,
-): Promise<Market> {
-  if (tokenAddresses.length !== 2) {
-    throw new Error('Invalid token pair')
-  }
-
-  const { quoteTokenAddress, baseTokenAddress } = getMarketId(chainId, [
-    tokenAddresses[0]!,
-    tokenAddresses[1]!,
-  ])
-  const currencyMap = await fetchCurrencyMap(
-    publicClient,
-    chainId,
-    [quoteTokenAddress, baseTokenAddress],
-    useSubgraph,
-  )
-  const [quoteCurrency, baseCurrency] = [
-    currencyMap[quoteTokenAddress],
-    currencyMap[baseTokenAddress],
-  ]
-  const [bidBook, askBook] = await Promise.all([
-    fetchBook(
-      publicClient,
-      chainId,
-      quoteCurrency,
-      baseCurrency,
-      useSubgraph,
-      n,
-    ),
-    fetchBook(
-      publicClient,
-      chainId,
-      baseCurrency,
-      quoteCurrency,
-      useSubgraph,
-      n,
-    ),
-  ])
-
-  return new Market({
-    chainId,
-    tokens: [quoteCurrency, baseCurrency],
-    bidBook,
-    askBook,
-  })
 }
 
 const calculate24hPriceChange = (

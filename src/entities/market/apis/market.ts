@@ -1,0 +1,59 @@
+import { PublicClient } from 'viem'
+
+import { CHAIN_IDS } from '../../../constants/chain'
+import { Market } from '../model'
+import { getMarketId } from '../utils'
+import { fetchCurrencyMap } from '../../../apis/currency'
+import { fetchBook } from '../../book/api'
+
+export async function fetchMarket(
+  publicClient: PublicClient,
+  chainId: CHAIN_IDS,
+  tokenAddresses: `0x${string}`[],
+  useSubgraph: boolean,
+  n = 100,
+): Promise<Market> {
+  if (tokenAddresses.length !== 2) {
+    throw new Error('Invalid token pair')
+  }
+
+  const { quoteTokenAddress, baseTokenAddress } = getMarketId(chainId, [
+    tokenAddresses[0]!,
+    tokenAddresses[1]!,
+  ])
+  const currencyMap = await fetchCurrencyMap(
+    publicClient,
+    chainId,
+    [quoteTokenAddress, baseTokenAddress],
+    useSubgraph,
+  )
+  const [quoteCurrency, baseCurrency] = [
+    currencyMap[quoteTokenAddress],
+    currencyMap[baseTokenAddress],
+  ]
+  const [bidBook, askBook] = await Promise.all([
+    fetchBook(
+      publicClient,
+      chainId,
+      quoteCurrency,
+      baseCurrency,
+      useSubgraph,
+      n,
+    ),
+    fetchBook(
+      publicClient,
+      chainId,
+      baseCurrency,
+      quoteCurrency,
+      useSubgraph,
+      n,
+    ),
+  ])
+
+  return new Market({
+    chainId,
+    tokens: [quoteCurrency, baseCurrency],
+    bidBook,
+    askBook,
+  })
+}

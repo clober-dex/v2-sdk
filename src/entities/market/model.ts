@@ -1,16 +1,21 @@
 import { formatUnits, isAddressEqual } from 'viem'
 
-import { getMarketId } from '../utils/market'
-import { CHAIN_IDS } from '../constants/chain'
-import { invertTick, toPrice } from '../utils/tick'
-import { formatPrice } from '../utils/prices'
-import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../constants/fee'
-import { quoteToBase } from '../utils/decimals'
-import { Market as MarketType } from '../type'
+import { CHAIN_IDS } from '../../constants/chain'
+import { invertTick, toPrice } from '../../utils/tick'
+import { formatPrice } from '../../utils/prices'
+import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../../constants/fee'
+import { quoteToBase } from '../../utils/decimals'
+import { Market as MarketType } from '../../type'
+import { Book } from '../book/model'
+import type { Currency } from '../../model/currency'
 
-import { Book } from './book'
-import type { Currency } from './currency'
-import type { Depth } from './depth'
+import { getMarketId } from './utils'
+
+type Depth = {
+  price: string
+  tick: bigint
+  baseAmount: bigint
+}
 
 export class Market {
   chainId: CHAIN_IDS

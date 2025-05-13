@@ -7,7 +7,6 @@ import {
   parseUnits,
 } from 'viem'
 
-import { fetchMarket, fetchMarketSnapshots } from './apis/market'
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type {
   ChartLog,
@@ -28,7 +27,7 @@ import {
 } from './apis/open-order'
 import { OpenOrder } from './model/open-order'
 import { fetchChartLogs, fetchLatestChartLog } from './apis/chart-logs'
-import { getMarketId } from './utils/market'
+import { getMarketId } from './entities/market/utils'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
@@ -39,6 +38,8 @@ import {
 } from './apis/pool'
 import { fetchLastAmounts, fetchStrategyPosition } from './apis/strategy'
 import { Subgraph, SUBGRAPH_URL } from './constants/subgraph'
+import { fetchMarket } from './entities/market/apis/market'
+import { fetchMarketSnapshots } from './entities/market/apis/market-snapshot'
 
 /**
  * Get contract addresses by chain id

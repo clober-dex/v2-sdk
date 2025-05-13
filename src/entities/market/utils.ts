@@ -1,7 +1,7 @@
 import { getAddress, isAddressEqual, zeroAddress } from 'viem'
 
-import { STABLE_COIN_ADDRESSES, WETH_ADDRESSES } from '../constants/currency'
-import { CHAIN_IDS } from '../constants/chain'
+import { STABLE_COIN_ADDRESSES, WETH_ADDRESSES } from '../../constants/currency'
+import { CHAIN_IDS } from '../../constants/chain'
 
 export const getMarketId = (
   chainId: CHAIN_IDS,

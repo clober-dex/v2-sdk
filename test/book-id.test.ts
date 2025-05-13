@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import { createPublicClient, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
-import { toBookId } from '../src/utils/book-id'
+import { toBookId } from '../src/entities/book/utils'
 import {
   MAKER_DEFAULT_POLICY,
   TAKER_DEFAULT_POLICY,

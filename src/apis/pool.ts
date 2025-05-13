@@ -9,8 +9,7 @@ import { Currency, Market, PoolSnapshot } from '../type'
 import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
 import { Subgraph } from '../constants/subgraph'
 import { getContractAddresses } from '../view'
-
-import { fetchMarket } from './market'
+import { fetchMarket } from '../entities/market/apis/market'
 
 export async function fetchPool(
   publicClient: PublicClient,

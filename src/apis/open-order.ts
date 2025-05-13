@@ -7,7 +7,7 @@ import {
 } from 'viem'
 
 import { CHAIN_IDS } from '../constants/chain'
-import { getMarketId } from '../utils/market'
+import { getMarketId } from '../entities/market/utils'
 import type { Currency } from '../model/currency'
 import { baseToQuote, quoteToBase } from '../utils/decimals'
 import { formatPrice, getMarketPrice } from '../utils/prices'

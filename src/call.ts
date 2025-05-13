@@ -25,7 +25,6 @@ import { getDeadlineTimestampInSeconds } from './utils/time'
 import { buildTransaction } from './utils/build-transaction'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from './constants/fee'
-import { fetchMarket } from './apis/market'
 import {
   convertHumanReadablePriceToRawPrice,
   formatPrice,
@@ -33,7 +32,7 @@ import {
 } from './utils/prices'
 import { invertTick, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput, getQuoteToken } from './view'
-import { toBookId } from './utils/book-id'
+import { toBookId } from './entities/book/utils'
 import { fetchIsApprovedForAll } from './apis/approval'
 import { applyPercent } from './utils/bigint'
 import { fetchPool } from './apis/pool'
@@ -52,6 +51,7 @@ import {
 } from './apis/open-order'
 import { OnChainOpenOrder } from './model/open-order'
 import { quotes } from './utils/quotes'
+import { fetchMarket } from './entities/market/apis/market'
 
 /**
  * Build a transaction to open a market.
