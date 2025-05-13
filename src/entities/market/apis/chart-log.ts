@@ -1,6 +1,7 @@
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
-import { CHART_LOG_INTERVALS, ChartLog } from '../types'
+import { ChartLog } from '../types'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
+import { CHART_LOG_INTERVALS } from '../../../types'
 
 type ChartLogDto = {
   timestamp: string
