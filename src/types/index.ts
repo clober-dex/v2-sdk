@@ -1,5 +1,3 @@
-import type { Account } from 'viem'
-
 export { CHAIN_IDS } from '../constants/chain-configs/chain'
 export type {
   Currency,
@@ -11,48 +9,32 @@ export type {
 } from '../entities/currency/types'
 export type { OpenOrder, OnChainOpenOrder } from '../entities/open-order/types'
 export type { Book, Depth } from '../entities/book/types'
-export type {
-  Market,
-  MarketSnapshot,
-  ChartLog,
-  CHART_LOG_INTERVALS,
-} from '../entities/market/types'
+export type { Market, MarketSnapshot, ChartLog } from '../entities/market/types'
 export type {
   Pool,
   PoolSnapshot,
   LastAmounts,
   StrategyPosition,
 } from '../entities/pool/types'
+export type {
+  DefaultReadContractOptions,
+  DefaultWriteContractOptions,
+} from './default-options'
 
-export type Transaction = {
-  data: `0x${string}`
-  gas: bigint
-  gasPrice: bigint
-  value: bigint
-  to: `0x${string}`
-  from: `0x${string}` | Account | undefined
-}
+export type { Transaction } from './transaction'
+export type { PermitSignature, ERC20PermitParam } from './permit'
 
-export type PermitSignature = {
-  deadline: bigint
-  v: number
-  r: `0x${string}`
-  s: `0x${string}`
-}
-
-export type ERC20PermitParam = {
-  token: `0x${string}`
-  permitAmount: bigint
-  signature: PermitSignature
-}
-
-type DefaultOptions = {
-  rpcUrl?: string
-}
-
-export type DefaultReadContractOptions = DefaultOptions
-
-export type DefaultWriteContractOptions = DefaultOptions & {
-  gasLimit?: bigint
-  gasPriceLimit?: bigint
+export enum CHART_LOG_INTERVALS {
+  oneMinute = '1m',
+  threeMinutes = '3m',
+  fiveMinutes = '5m',
+  tenMinutes = '10m',
+  fifteenMinutes = '15m',
+  thirtyMinutes = '30m',
+  oneHour = '1h',
+  twoHours = '2h',
+  fourHours = '4h',
+  sixHours = '6h',
+  oneDay = '1d',
+  oneWeek = '1w',
 }

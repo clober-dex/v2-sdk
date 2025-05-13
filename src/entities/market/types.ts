@@ -33,18 +33,3 @@ export type ChartLog = {
   close: string
   volume: string
 }
-
-export enum CHART_LOG_INTERVALS {
-  oneMinute = '1m',
-  threeMinutes = '3m',
-  fiveMinutes = '5m',
-  tenMinutes = '10m',
-  fifteenMinutes = '15m',
-  thirtyMinutes = '30m',
-  oneHour = '1h',
-  twoHours = '2h',
-  fourHours = '4h',
-  sixHours = '6h',
-  oneDay = '1d',
-  oneWeek = '1w',
-}
