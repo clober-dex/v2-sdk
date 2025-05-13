@@ -45,6 +45,17 @@ export type Market = {
   askBook: Book
 }
 
+export type MarketSnapshot = {
+  chainId: CHAIN_IDS
+  marketId: string
+  base: Currency
+  quote: Currency
+  price: number
+  volume24hUSD: number
+  priceChange24h: number
+  createdAtTimestamp: number
+}
+
 export type Pool = {
   chainId: CHAIN_IDS
   key: `0x${string}`

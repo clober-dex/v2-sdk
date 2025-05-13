@@ -1,4 +1,4 @@
-const currentTimestampInSeconds = (): number =>
+export const currentTimestampInSeconds = (): number =>
   Math.floor(new Date().getTime() / 1000)
 
 export const getDeadlineTimestampInSeconds = (): bigint => {

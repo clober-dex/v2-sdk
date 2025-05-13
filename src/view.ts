@@ -7,7 +7,7 @@ import {
   parseUnits,
 } from 'viem'
 
-import { fetchMarket } from './apis/market'
+import { fetchMarket, fetchTopMarketSnapshots } from './apis/market'
 import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
 import type {
   ChartLog,
@@ -15,6 +15,7 @@ import type {
   DefaultReadContractOptions,
   LastAmounts,
   Market,
+  MarketSnapshot,
   Pool,
   PoolPerformanceData,
   StrategyPosition,
@@ -152,6 +153,14 @@ export const getMarket = async ({
     options?.n,
   )
   return market.toJson()
+}
+
+export const getTopMarketSnapshots = async ({
+  chainId,
+}: {
+  chainId: CHAIN_IDS
+}): Promise<MarketSnapshot[]> => {
+  return fetchTopMarketSnapshots(chainId)
 }
 
 /**

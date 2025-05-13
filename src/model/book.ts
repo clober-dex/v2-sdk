@@ -7,6 +7,49 @@ import { MIN_TICK } from '../constants/tick'
 import type { Currency } from './currency'
 import type { DepthDto } from './depth'
 
+export type TakeSampleDto = {
+  timestamp: string
+  inputToken: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
+  }
+  outputToken: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
+  }
+  inputAmount: string
+  outputAmount: string
+}
+
+export type BookDayDataDTO = {
+  volumeUSD: string
+  book: {
+    id: string
+    volumeUSD: string
+    price: string
+    inversePrice: string
+    latestTaken: TakeSampleDto[]
+    firstTaken: TakeSampleDto[]
+    base: {
+      id: string
+      name: string
+      symbol: string
+      decimals: string
+    }
+    quote: {
+      id: string
+      name: string
+      symbol: string
+      decimals: string
+    }
+    createdAtTimestamp: string
+  }
+}
+
 export class Book {
   chainId: CHAIN_IDS
   id: bigint
