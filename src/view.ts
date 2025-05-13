@@ -247,35 +247,18 @@ export const getStrategyPrice = async ({
 
 export const getLastAmounts = async ({
   chainId,
-  token0,
-  token1,
-  salt,
+  poolKey,
   options,
 }: {
   chainId: CHAIN_IDS
-  token0: `0x${string}`
-  token1: `0x${string}`
-  salt: `0x${string}`
-  options?: DefaultReadContractOptions & {
-    market?: Market
-    useSubgraph?: boolean
-  }
+  poolKey: `0x${string}`
+  options?: DefaultReadContractOptions
 }): Promise<LastAmounts> => {
-  if (isAddressEqual(token0, token1)) {
-    throw new Error('Token0 and token1 must be different')
-  }
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  return fetchLastAmounts(
-    publicClient,
-    chainId,
-    [token0, token1],
-    salt,
-    !!(options && options.useSubgraph),
-    options?.market,
-  )
+  return fetchLastAmounts(publicClient, chainId, poolKey)
 }
 
 /**
