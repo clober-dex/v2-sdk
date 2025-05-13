@@ -13,6 +13,15 @@ export type Depth = {
   baseAmount: string
 }
 
+export type ChartLog = {
+  timestamp: number
+  open: string
+  high: string
+  low: string
+  close: string
+  volume: string
+}
+
 export type Book = {
   id: string
   base: Currency
