@@ -9,9 +9,14 @@ import {
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { getMarketId } from '../../market/utils/market-id'
 import type { Currency } from '../../currency/model'
-import { baseToQuote, quoteToBase } from '../../../utils/conversion'
-import { formatPrice, getMarketPrice } from '../../../utils/prices'
-import { invertTick, toPrice } from '../../../utils/tick'
+import {
+  baseToQuote,
+  quoteToBase,
+  formatPrice,
+  getMarketPrice,
+  invertTick,
+  toPrice,
+} from '../../../utils'
 import { applyPercent } from '../../../utils/bigint'
 import { MAKER_DEFAULT_POLICY } from '../../../constants/chain-configs/fee'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'

@@ -1,6 +1,6 @@
 import { TAKER_DEFAULT_POLICY } from '../../constants/chain-configs/fee'
 import { divide } from '../../utils/math'
-import { baseToQuote, quoteToBase } from '../../utils/conversion'
+import { baseToQuote, quoteToBase } from '../../utils'
 import { CHAIN_IDS } from '../../constants/chain-configs/chain'
 import { MIN_TICK } from '../../constants/tick'
 import type { Currency } from '../currency/model'
