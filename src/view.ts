@@ -34,12 +34,12 @@ import { MAX_TICK, MIN_TICK } from './constants/tick'
 import { fetchLastAmounts, fetchStrategyPosition } from './apis/strategy'
 import { Subgraph, SUBGRAPH_URL } from './constants/subgraph'
 import { fetchMarket } from './entities/market/apis'
-import { fetchMarketSnapshots } from './entities/market/apis/market-snapshot'
+import { fetchMarketSnapshots } from './entities/market/apis/snapshot'
 import { fetchPool } from './entities/pool/apis'
 import {
   fetchPoolSnapshotFromSubgraph,
   fetchPoolSnapshotsFromSubgraph,
-} from './entities/pool/apis/pool-snapshot'
+} from './entities/pool/apis/snapshot'
 
 /**
  * Get contract addresses by chain id
