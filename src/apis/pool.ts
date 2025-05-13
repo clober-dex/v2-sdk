@@ -8,6 +8,7 @@ import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
 import { Currency, Market, PoolPerformanceData } from '../type'
 import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
 import { Subgraph } from '../constants/subgraph'
+import { getContractAddresses } from '../view'
 
 import { fetchMarket } from './market'
 
@@ -133,7 +134,7 @@ export const fetchPoolPerformanceFromSubgraph = async (
   }
   const currencyLp = {
     id: pool.id as `0x${string}`,
-    address: getAddress(pool.id),
+    address: getContractAddresses({ chainId }).Rebalancer,
     name: pool.tokenA.name + '/' + pool.tokenB.name,
     symbol: pool.tokenA.symbol + '/' + pool.tokenB.symbol,
     decimals: 18,
