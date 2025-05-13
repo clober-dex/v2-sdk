@@ -2,7 +2,7 @@ import { zeroAddress } from 'viem'
 
 import { Currency } from '../entities/currency/model'
 
-import { CHAIN_IDS } from './chain'
+import { CHAIN_IDS } from './chains'
 
 export const ETH: Currency = {
   address: zeroAddress,

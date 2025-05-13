@@ -1,6 +1,6 @@
 import { PublicClient } from 'viem'
 
-import { CHAIN_IDS } from '../../../constants/chain'
+import { CHAIN_IDS } from '../../../constants/chains'
 import { Market } from '../model'
 import { getMarketId } from '../utils/market-id'
 import { fetchCurrencyMap } from '../../currency/apis'

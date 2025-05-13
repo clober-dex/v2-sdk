@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { CHAIN_IDS } from './chain'
+import { CHAIN_IDS } from './chains'
 
 export const SUBGRAPH_URL: {
   [chain in CHAIN_IDS]: string

@@ -6,10 +6,10 @@ import {
   zeroAddress,
 } from 'viem'
 
-import { CHAIN_IDS } from '../../constants/chain'
+import { CHAIN_IDS } from '../../constants/chains'
 import { getMarketId } from '../market/utils/market-id'
 import type { Currency } from '../currency/model'
-import { baseToQuote, quoteToBase } from '../../utils/decimals'
+import { baseToQuote, quoteToBase } from '../../utils/conversion'
 import { formatPrice, getMarketPrice } from '../../utils/prices'
 import { invertTick, toPrice } from '../../utils/tick'
 import { applyPercent } from '../../utils/bigint'

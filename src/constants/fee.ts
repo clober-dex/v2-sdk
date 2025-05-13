@@ -1,6 +1,6 @@
 import { FeePolicy } from '../entities/fee-policy/model'
 
-import { CHAIN_IDS } from './chain'
+import { CHAIN_IDS } from './chains'
 
 export const MAKER_DEFAULT_POLICY: {
   [chain in CHAIN_IDS]: FeePolicy

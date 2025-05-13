@@ -4,7 +4,7 @@ import {
   STABLE_COIN_ADDRESSES,
   WETH_ADDRESSES,
 } from '../../../constants/currency'
-import { CHAIN_IDS } from '../../../constants/chain'
+import { CHAIN_IDS } from '../../../constants/chains'
 
 export const getMarketId = (
   chainId: CHAIN_IDS,

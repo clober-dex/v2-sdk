@@ -1,6 +1,6 @@
 import { PublicClient } from 'viem'
 
-import { CHAIN_IDS } from '../../../constants/chain'
+import { CHAIN_IDS } from '../../../constants/chains'
 import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
 
 export async function fetchIsApprovedForAll(

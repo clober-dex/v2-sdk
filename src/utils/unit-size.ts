@@ -1,7 +1,7 @@
 import { isAddressEqual, zeroAddress } from 'viem'
 
 import { type Currency } from '../entities/currency/model'
-import { CHAIN_IDS } from '../constants/chain'
+import { CHAIN_IDS } from '../constants/chains'
 import { WETH_ADDRESSES } from '../constants/currency'
 
 export const calculateUnitSize = (chainId: CHAIN_IDS, quote: Currency) => {

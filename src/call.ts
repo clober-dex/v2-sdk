@@ -9,7 +9,7 @@ import {
   zeroHash,
 } from 'viem'
 
-import { CHAIN_IDS, CHAIN_MAP } from './constants/chain'
+import { CHAIN_IDS, CHAIN_MAP } from './constants/chains'
 import type {
   Currency6909Flow,
   CurrencyFlow,
@@ -38,7 +38,7 @@ import { applyPercent } from './utils/bigint'
 import { fetchPool } from './entities/pool/apis'
 import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
 import { MINTER_ABI } from './abis/rebalancer/minter-abi'
-import { emptyERC20PermitParams } from './constants/permit'
+import { EMPTY_ERC20_PERMIT_PARAMS } from './constants/permit'
 import { abs } from './utils/math'
 import {
   getExpectedMintResult,
@@ -1164,14 +1164,14 @@ export const addLiquidity = async ({
     pool.currencyA.address,
     getAddress(token0),
   )
-    ? options?.token0PermitParams ?? emptyERC20PermitParams
-    : options?.token1PermitParams ?? emptyERC20PermitParams
+    ? options?.token0PermitParams ?? EMPTY_ERC20_PERMIT_PARAMS
+    : options?.token1PermitParams ?? EMPTY_ERC20_PERMIT_PARAMS
   const tokenBPermitParams = isAddressEqual(
     pool.currencyA.address,
     getAddress(token0),
   )
-    ? options?.token1PermitParams ?? emptyERC20PermitParams
-    : options?.token0PermitParams ?? emptyERC20PermitParams
+    ? options?.token1PermitParams ?? EMPTY_ERC20_PERMIT_PARAMS
+    : options?.token0PermitParams ?? EMPTY_ERC20_PERMIT_PARAMS
   let disableSwap = !!(options && options.disableSwap)
   if (
     pool.totalSupply === 0n ||

@@ -1,10 +1,10 @@
 import { formatUnits, isAddressEqual } from 'viem'
 
-import { CHAIN_IDS } from '../../constants/chain'
+import { CHAIN_IDS } from '../../constants/chains'
 import { invertTick, toPrice } from '../../utils/tick'
 import { formatPrice } from '../../utils/prices'
 import { MAKER_DEFAULT_POLICY, TAKER_DEFAULT_POLICY } from '../../constants/fee'
-import { quoteToBase } from '../../utils/decimals'
+import { quoteToBase } from '../../utils/conversion'
 import { Market as MarketType } from '../../type'
 import { Book } from '../book/model'
 import type { Currency } from '../currency/model'
