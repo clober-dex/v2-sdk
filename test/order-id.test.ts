@@ -3,8 +3,8 @@ import { createPublicClient, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 import { getOpenOrders } from '@clober/v2-sdk'
 
-import { fromOrderId } from '../src/utils/order'
 import { cloberTestChain } from '../src/constants/test-chain'
+import { fromOrderId } from '../src/entities/open-order/utils/order-id'
 
 import { FORK_URL } from './utils/constants'
 

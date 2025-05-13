@@ -5,8 +5,6 @@ import {
   cancelOrders,
   claimOrder,
   claimOrders,
-  getOpenOrder,
-  getOpenOrders,
   limitOrder,
   setApprovalOfOpenOrdersForAll,
 } from '@clober/v2-sdk'
