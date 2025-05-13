@@ -3,7 +3,7 @@ import { createPublicClient, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
 import { toBookId } from '../src/entities/book/utils'
-import { toPoolKey } from '../src/utils/pool-key'
+import { toPoolKey } from '../src/entities/pool/utils'
 
 import { FORK_URL } from './utils/constants'
 

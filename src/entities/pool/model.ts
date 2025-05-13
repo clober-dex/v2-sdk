@@ -1,9 +1,8 @@
 import { formatUnits } from 'viem'
 
-import { CHAIN_IDS, Currency, Market, Pool as PoolType } from '../type'
-import { CONTRACT_ADDRESSES } from '../constants/addresses'
-
-import { Currency6909 } from './currency'
+import { CHAIN_IDS, Currency, Market, Pool as PoolType } from '../../type'
+import { CONTRACT_ADDRESSES } from '../../constants/addresses'
+import { Currency6909 } from '../../model/currency'
 
 export class Pool {
   chainId: CHAIN_IDS
@@ -171,47 +170,4 @@ export class Pool {
       paused: this.paused,
     }
   }
-}
-
-export type PoolDto = {
-  id: string
-  tokenA: {
-    id: string
-    name: string
-    symbol: string
-    decimals: string
-  }
-  tokenB: {
-    id: string
-    name: string
-    symbol: string
-    decimals: string
-  }
-  initialTotalSupply: string
-  initialTokenAAmount: string
-  initialTokenBAmount: string
-  initialLPPriceUSD: string
-  createdAtTimestamp: string
-  createdAtTransaction: {
-    id: string
-  }
-  totalValueLockedUSD: string
-  totalSupply: string
-  volumeUSD: string
-  lpPriceUSD: string
-  spreadProfitUSD: string
-}
-
-export type PoolHourDataDto = {
-  date: number
-  totalValueLockedUSD: string
-  totalSupply: string
-  spreadProfitUSD: string
-  lpPriceUSD: string
-  oraclePrice: string
-  priceA: string
-  priceB: string
-  volumeTokenA: string
-  volumeTokenB: string
-  volumeUSD: string
 }

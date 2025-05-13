@@ -31,15 +31,15 @@ import { getMarketId } from './entities/market/utils'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
-import {
-  fetchPool,
-  fetchPoolKeys,
-  fetchPoolSnapshotFromSubgraph,
-} from './apis/pool'
 import { fetchLastAmounts, fetchStrategyPosition } from './apis/strategy'
 import { Subgraph, SUBGRAPH_URL } from './constants/subgraph'
 import { fetchMarket } from './entities/market/apis/market'
 import { fetchMarketSnapshots } from './entities/market/apis/market-snapshot'
+import { fetchPool } from './entities/pool/apis/pool'
+import {
+  fetchPoolSnapshotFromSubgraph,
+  fetchPoolSnapshotsFromSubgraph,
+} from './entities/pool/apis/pool-snapshot'
 
 /**
  * Get contract addresses by chain id
@@ -245,10 +245,7 @@ export const getPoolSnapshots = async ({
 }: {
   chainId: CHAIN_IDS
 }): Promise<PoolSnapshot[]> => {
-  const poolKeys = await fetchPoolKeys(chainId)
-  return Promise.all(
-    poolKeys.map((poolKey) => getPoolSnapshot({ chainId, poolKey })),
-  )
+  return fetchPoolSnapshotsFromSubgraph(chainId)
 }
 
 export const getStrategyPrice = async ({

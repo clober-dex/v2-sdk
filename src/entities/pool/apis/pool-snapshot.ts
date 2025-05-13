@@ -1,100 +1,51 @@
-import { getAddress, PublicClient } from 'viem'
+import { getAddress } from 'viem'
 
-import { CHAIN_IDS } from '../constants/chain'
-import { Pool, PoolDto, PoolHourDataDto } from '../model/pool'
-import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { toPoolKey } from '../utils/pool-key'
-import { REBALANCER_ABI } from '../abis/rebalancer/rebalancer-abi'
-import { Currency, Market, PoolSnapshot } from '../type'
-import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
-import { Subgraph } from '../constants/subgraph'
-import { getContractAddresses } from '../view'
-import { fetchMarket } from '../entities/market/apis/market'
+import { CHAIN_IDS } from '../../../constants/chain'
+import { Currency, PoolSnapshot } from '../../../type'
+import { Subgraph } from '../../../constants/subgraph'
+import { getContractAddresses } from '../../../view'
 
-export async function fetchPool(
-  publicClient: PublicClient,
-  chainId: CHAIN_IDS,
-  tokenAddresses: `0x${string}`[],
-  salt: `0x${string}`,
-  useSubgraph: boolean,
-  market?: Market,
-): Promise<Pool> {
-  if (tokenAddresses.length !== 2) {
-    throw new Error('Invalid token pair')
+type PoolDto = {
+  id: string
+  tokenA: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
   }
-  if (!market) {
-    market = (
-      await fetchMarket(publicClient, chainId, tokenAddresses, useSubgraph)
-    ).toJson()
+  tokenB: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
   }
-  const poolKey = toPoolKey(
-    BigInt(market.bidBook.id),
-    BigInt(market.askBook.id),
-    salt,
-  )
-  const [
-    { bookIdA, bookIdB, reserveA, reserveB, orderListA, orderListB },
-    totalSupply,
-    [totalLiquidityA, totalLiquidityB],
-    paused,
-  ] = await publicClient.multicall({
-    allowFailure: false,
-    contracts: [
-      {
-        address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
-        abi: REBALANCER_ABI,
-        functionName: 'getPool',
-        args: [poolKey],
-      },
-      {
-        address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
-        abi: REBALANCER_ABI,
-        functionName: 'totalSupply',
-        args: [BigInt(poolKey)],
-      },
-      {
-        address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
-        abi: REBALANCER_ABI,
-        functionName: 'getLiquidity',
-        args: [poolKey],
-      },
-      {
-        address: CONTRACT_ADDRESSES[chainId]!.Strategy,
-        abi: STRATEGY_ABI,
-        functionName: 'isPaused',
-        args: [poolKey],
-      },
-    ],
-  })
-  const liquidityA =
-    totalLiquidityA.reserve +
-    totalLiquidityA.cancelable +
-    totalLiquidityA.claimable
-  const liquidityB =
-    totalLiquidityB.reserve +
-    totalLiquidityB.cancelable +
-    totalLiquidityB.claimable
-  return new Pool({
-    chainId,
-    market,
-    isOpened: bookIdA > 0 && bookIdB > 0,
-    bookIdA,
-    bookIdB,
-    poolKey,
-    totalSupply: BigInt(totalSupply),
-    decimals: 18,
-    liquidityA: BigInt(liquidityA),
-    liquidityB: BigInt(liquidityB),
-    cancelableA: BigInt(totalLiquidityA.cancelable),
-    cancelableB: BigInt(totalLiquidityB.cancelable),
-    claimableA: BigInt(totalLiquidityA.claimable),
-    claimableB: BigInt(totalLiquidityB.claimable),
-    reserveA: BigInt(reserveA),
-    reserveB: BigInt(reserveB),
-    orderListA: orderListA.map((id: bigint) => BigInt(id)),
-    orderListB: orderListB.map((id: bigint) => BigInt(id)),
-    paused,
-  })
+  initialTotalSupply: string
+  initialTokenAAmount: string
+  initialTokenBAmount: string
+  initialLPPriceUSD: string
+  createdAtTimestamp: string
+  createdAtTransaction: {
+    id: string
+  }
+  totalValueLockedUSD: string
+  totalSupply: string
+  volumeUSD: string
+  lpPriceUSD: string
+  spreadProfitUSD: string
+}
+
+type PoolHourDataDto = {
+  date: number
+  totalValueLockedUSD: string
+  totalSupply: string
+  spreadProfitUSD: string
+  lpPriceUSD: string
+  oraclePrice: string
+  priceA: string
+  priceB: string
+  volumeTokenA: string
+  volumeTokenB: string
+  volumeUSD: string
 }
 
 export const fetchPoolSnapshotFromSubgraph = async (
@@ -186,9 +137,9 @@ export const fetchPoolSnapshotFromSubgraph = async (
   }
 }
 
-export const fetchPoolKeys = async (
+export const fetchPoolSnapshotsFromSubgraph = async (
   chainId: CHAIN_IDS,
-): Promise<`0x${string}`[]> => {
+): Promise<PoolSnapshot[]> => {
   const {
     data: { pools },
   } = await Subgraph.get<{
@@ -198,5 +149,9 @@ export const fetchPoolKeys = async (
       }[]
     }
   }>(chainId, 'getPoolKeys', 'query getPoolKeys { pools { id } }', {})
-  return pools.map((pool) => pool.id as `0x${string}`)
+  return Promise.all(
+    pools.map(async (pool) => {
+      return fetchPoolSnapshotFromSubgraph(chainId, pool.id as `0x${string}`)
+    }),
+  ) as Promise<PoolSnapshot[]>
 }

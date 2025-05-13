@@ -35,14 +35,17 @@ import { getExpectedInput, getExpectedOutput, getQuoteToken } from './view'
 import { toBookId } from './entities/book/utils'
 import { fetchIsApprovedForAll } from './apis/approval'
 import { applyPercent } from './utils/bigint'
-import { fetchPool } from './apis/pool'
+import { fetchPool } from './entities/pool/apis/pool'
 import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
-import { getExpectedMintResult, getIdealDelta } from './utils/pool'
 import { fetchCallData, fetchQuote } from './apis/odos'
 import { MINTER_ABI } from './abis/rebalancer/minter-abi'
 import { emptyERC20PermitParams } from './constants/permit'
 import { abs } from './utils/math'
-import { toBytes32 } from './utils/pool-key'
+import {
+  getExpectedMintResult,
+  getIdealDelta,
+  toBytes32,
+} from './entities/pool/utils'
 import { OPERATOR_ABI } from './abis/rebalancer/operator-abi'
 import { STRATEGY_ABI } from './abis/rebalancer/strategy-abi'
 import {
