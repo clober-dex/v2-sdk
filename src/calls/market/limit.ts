@@ -16,11 +16,10 @@ import {
   Transaction,
 } from '../../types'
 import { fetchMarket } from '../../entities/market/apis'
-import { formatPrice, parsePrice } from '../../utils/prices'
+import { formatPrice, parsePrice, invertTick, toPrice } from '../../utils'
 import { calculateUnitSize } from '../../utils/unit-size'
 import { getExpectedOutput } from '../../views'
 import { toBookId } from '../../entities/book/utils/book-id'
-import { invertTick, toPrice } from '../../utils/tick'
 import { buildTransaction } from '../../utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/chain-configs/addresses'
 import { CONTROLLER_ABI } from '../../constants/abis/core/controller-abi'
