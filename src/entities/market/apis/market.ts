@@ -4,7 +4,7 @@ import { CHAIN_IDS } from '../../../constants/chain'
 import { Market } from '../model'
 import { getMarketId } from '../utils'
 import { fetchCurrencyMap } from '../../../apis/currency'
-import { fetchBook } from '../../book/api'
+import { fetchBook } from '../../book/apis'
 
 export async function fetchMarket(
   publicClient: PublicClient,

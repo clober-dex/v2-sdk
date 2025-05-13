@@ -1,15 +1,15 @@
 import { PublicClient } from 'viem'
 
-import { CHAIN_IDS } from '../../constants/chain'
-import { Currency } from '../../model/currency'
-import { calculateUnitSize } from '../../utils/unit-size'
-import { CONTRACT_ADDRESSES } from '../../constants/addresses'
-import { BOOK_VIEWER_ABI } from '../../abis/core/book-viewer-abi'
-import { fetchIsMarketOpened } from '../../apis/open'
-import { Subgraph } from '../../constants/subgraph'
+import { CHAIN_IDS } from '../../../constants/chain'
+import { Currency } from '../../../model/currency'
+import { calculateUnitSize } from '../../../utils/unit-size'
+import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
+import { BOOK_VIEWER_ABI } from '../../../abis/core/book-viewer-abi'
+import { Subgraph } from '../../../constants/subgraph'
+import { toBookId } from '../utils'
+import { Book } from '../model'
 
-import { toBookId } from './utils'
-import { Book } from './model'
+import { fetchIsMarketOpened } from './open'
 
 export const fetchBook = async (
   publicClient: PublicClient,
