@@ -1,11 +1,11 @@
 import { getAddress, isAddressEqual, PublicClient, zeroAddress } from 'viem'
 
-import type { Currency } from '../entities/currency/model'
-import { CHAIN_IDS } from '../constants/chain'
-import { ETH, NATIVE_CURRENCY } from '../constants/currency'
-import { Subgraph } from '../constants/subgraph'
+import type { Currency } from '../model'
+import { CHAIN_IDS } from '../../../constants/chain'
+import { ETH, NATIVE_CURRENCY } from '../../../constants/currency'
+import { Subgraph } from '../../../constants/subgraph'
 
-const _abi = [
+const abi = [
   {
     inputs: [],
     name: 'name',
@@ -137,17 +137,17 @@ const fetchCurrencyInner = async (
       contracts: [
         {
           address,
-          abi: _abi,
+          abi,
           functionName: 'name',
         },
         {
           address,
-          abi: _abi,
+          abi,
           functionName: 'symbol',
         },
         {
           address,
-          abi: _abi,
+          abi,
           functionName: 'decimals',
         },
       ],
@@ -217,17 +217,17 @@ const fetchCurrencyMapInner = async (
       contracts: [
         ...addresses.map((address) => ({
           address,
-          abi: _abi,
+          abi,
           functionName: 'name',
         })),
         ...addresses.map((address) => ({
           address,
-          abi: _abi,
+          abi,
           functionName: 'symbol',
         })),
         ...addresses.map((address) => ({
           address,
-          abi: _abi,
+          abi,
           functionName: 'decimals',
         })),
       ],

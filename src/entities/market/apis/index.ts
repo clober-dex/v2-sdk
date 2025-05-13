@@ -3,7 +3,7 @@ import { PublicClient } from 'viem'
 import { CHAIN_IDS } from '../../../constants/chain'
 import { Market } from '../model'
 import { getMarketId } from '../utils/market-id'
-import { fetchCurrencyMap } from '../../../apis/currency'
+import { fetchCurrencyMap } from '../../currency/apis'
 import { fetchBook } from '../../book/apis'
 
 export async function fetchMarket(

@@ -18,7 +18,7 @@ import { Subgraph } from '../../constants/subgraph'
 import { NATIVE_CURRENCY } from '../../constants/currency'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
 import { BOOK_MANAGER_ABI } from '../../abis/core/book-manager-abi'
-import { fetchCurrencyMap } from '../../apis/currency'
+import { fetchCurrencyMap } from '../currency/apis'
 
 import { fromOrderId } from './utils/order-id'
 import { OnChainOpenOrder } from './model'

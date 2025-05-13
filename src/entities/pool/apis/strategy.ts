@@ -1,9 +1,9 @@
 import { formatUnits, PublicClient } from 'viem'
 
-import { CHAIN_IDS } from '../constants/chain'
-import { CONTRACT_ADDRESSES } from '../constants/addresses'
-import { LastAmounts, StrategyPosition } from '../type'
-import { STRATEGY_ABI } from '../abis/rebalancer/strategy-abi'
+import { CHAIN_IDS } from '../../../constants/chain'
+import { CONTRACT_ADDRESSES } from '../../../constants/addresses'
+import { LastAmounts, StrategyPosition } from '../../../type'
+import { STRATEGY_ABI } from '../../../abis/rebalancer/strategy-abi'
 
 export async function fetchStrategyPosition(
   publicClient: PublicClient,

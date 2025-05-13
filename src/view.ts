@@ -30,7 +30,10 @@ import { getMarketId } from './entities/market/utils/market-id'
 import { CONTRACT_ADDRESSES } from './constants/addresses'
 import { invertTick, toPrice } from './utils/tick'
 import { MAX_TICK, MIN_TICK } from './constants/tick'
-import { fetchLastAmounts, fetchStrategyPosition } from './apis/strategy'
+import {
+  fetchLastAmounts,
+  fetchStrategyPosition,
+} from './entities/pool/apis/strategy'
 import { Subgraph, SUBGRAPH_URL } from './constants/subgraph'
 import { fetchMarket } from './entities/market/apis'
 import { fetchMarketSnapshots } from './entities/market/apis/snapshot'

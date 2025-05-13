@@ -33,7 +33,7 @@ import {
 import { invertTick, toPrice } from './utils/tick'
 import { getExpectedInput, getExpectedOutput } from './view'
 import { toBookId } from './entities/book/utils/book-id'
-import { fetchIsApprovedForAll } from './apis/approval'
+import { fetchIsApprovedForAll } from './entities/currency/apis/approval'
 import { applyPercent } from './utils/bigint'
 import { fetchPool } from './entities/pool/apis'
 import { REBALANCER_ABI } from './abis/rebalancer/rebalancer-abi'
