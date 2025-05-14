@@ -110,15 +110,15 @@ export const fetchMarketSnapshots = async (
     }
   }>(
     chainId,
-    'getPreviousDayUSDPrice',
-    'query getPreviousDayUSDPrice($date: Int!, $tokenAddresses: [Bytes!]!) { tokenDayDatas(where: {token_in: $tokenAddresses, date: $date}) { token { id } date priceUSD } }',
+    'getYesterdayUSDPrice',
+    'query getYesterdayUSDPrice($date: Int!, $tokenAddresses: [Bytes!]!) { tokenDayDatas(where: {token_in: $tokenAddresses, date: $date}) { token { id } date priceUSD } }',
     {
-      date: dayStartTimestamp,
+      date: dayStartTimestamp - 86400,
       tokenAddresses: tokenAddresses.map((address) => address.toLowerCase()),
     },
   )
 
-  const previousDayPriceMap = tokenDayDatas.reduce(
+  const yesterDayPriceMap = tokenDayDatas.reduce(
     (acc, { token, priceUSD }) => {
       acc[getAddress(token.id)] = Number(priceUSD)
       return acc
@@ -314,7 +314,10 @@ export const fetchMarketSnapshots = async (
 
   return mergedBooks
     .map((book) => {
-      if (!currentPriceMap[book.base.address]) {
+      if (
+        !currentPriceMap[book.base.address] ||
+        !yesterDayPriceMap[book.base.address]
+      ) {
         return null
       }
       return {
@@ -326,7 +329,7 @@ export const fetchMarketSnapshots = async (
         priceUSD: currentPriceMap[book.base.address],
         priceChange24h:
           (currentPriceMap[book.base.address] /
-            previousDayPriceMap[book.base.address] -
+            yesterDayPriceMap[book.base.address] -
             1) *
           100,
         volume24hUSD: book.volume24hUSD,
