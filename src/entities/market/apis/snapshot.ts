@@ -1,24 +1,15 @@
-import {
-  formatUnits,
-  getAddress,
-  isAddressEqual,
-  PublicClient,
-  zeroAddress,
-} from 'viem'
+import { formatUnits, getAddress, isAddressEqual, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { MarketSnapshot } from '../types'
-import { currentTimestampInSeconds } from '../../../utils/time'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { getQuoteToken } from '../../../views'
 import { fetchTotalSupplyMap } from '../../currency/apis/total-supply'
-import {
-  STABLE_COIN_ADDRESSES,
-  WETH_ADDRESS,
-} from '../../../constants/chain-configs/currency'
 
 type BookDayDataDto = {
   volumeUSD: string
+  close: string
+  open: string
   book: {
     id: string
     totalValueLockedUSD: string
@@ -29,28 +20,25 @@ type BookDayDataDto = {
       name: string
       symbol: string
       decimals: string
+      priceUSD: string
     }
     quote: {
       id: string
       name: string
       symbol: string
       decimals: string
+      priceUSD: string
     }
     createdAtTimestamp: string
   }
 }
 
-type TokenDayDataDto = {
-  token: { id: string }
-  date: number
-  priceUSD: string
-}
-
 export const fetchMarketSnapshots = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
+  timestampInSeconds: number,
 ): Promise<MarketSnapshot[]> => {
-  const dayID = Math.floor(currentTimestampInSeconds() / 86400)
+  const dayID = Math.floor(timestampInSeconds / 86400)
   const dayStartTimestamp = dayID * 86400
   const {
     data: { bookDayDatas },
@@ -61,7 +49,7 @@ export const fetchMarketSnapshots = async (
   }>(
     chainId,
     'getTopMarketSnapshots',
-    'query getMarkets($date: Int!) { bookDayDatas( first: 200 orderBy: volumeUSD orderDirection: desc where: {date: $date} ) { volumeUSD book { id totalValueLockedUSD price inversePrice base { id name symbol decimals } quote { id name symbol decimals } createdAtTimestamp } } }',
+    'query getMarkets($date: Int!) { bookDayDatas( first: 200 orderBy: volumeUSD orderDirection: desc where: {date: $date} ) { volumeUSD open close book { id totalValueLockedUSD price inversePrice base { id name symbol decimals priceUSD } quote { id name symbol decimals priceUSD } createdAtTimestamp } } }',
     {
       date: dayStartTimestamp,
     },
@@ -102,34 +90,7 @@ export const fetchMarketSnapshots = async (
     tokenAddresses,
   )
 
-  const {
-    data: { tokenDayDatas },
-  } = await Subgraph.get<{
-    data: {
-      tokenDayDatas: TokenDayDataDto[]
-    }
-  }>(
-    chainId,
-    'getYesterdayUSDPrice',
-    'query getYesterdayUSDPrice($date: Int!, $tokenAddresses: [Bytes!]!) { tokenDayDatas(where: {token_in: $tokenAddresses, date: $date}) { token { id } date priceUSD } }',
-    {
-      date: dayStartTimestamp - 86400,
-      tokenAddresses: tokenAddresses.map((address) => address.toLowerCase()),
-    },
-  )
-
-  const yesterDayPriceMap = tokenDayDatas.reduce(
-    (acc, { token, priceUSD }) => {
-      acc[getAddress(token.id)] = Number(priceUSD)
-      return acc
-    },
-    {} as Record<`0x${string}`, number>,
-  )
-  const stableCoinAddresses = new Set(
-    STABLE_COIN_ADDRESSES[chainId].map((address) => getAddress(address)),
-  )
-
-  const mergedBooks = [
+  return [
     ...bidBookDayDataList.map((bidBook) => {
       const quoteCurrency = {
         address: getAddress(bidBook.book.quote.id),
@@ -166,6 +127,9 @@ export const fetchMarketSnapshots = async (
         base: baseCurrency,
         quote: quoteCurrency,
         price: Number(bidBook.book.price),
+        priceUSD: Number(bidBook.book.base.priceUSD),
+        priceChange24h:
+          (Number(bidBook.close) / Number(bidBook.open) - 1) * 100,
         volume24hUSD: askBookDayData
           ? Number(askBookDayData.volumeUSD) + Number(bidBook.volumeUSD)
           : Number(bidBook.volumeUSD),
@@ -179,7 +143,7 @@ export const fetchMarketSnapshots = async (
               Number(askBookDayData.book.createdAtTimestamp),
             )
           : Number(bidBook.book.createdAtTimestamp),
-        baseTotalSupply,
+        fdv: baseTotalSupply * Number(bidBook.book.base.priceUSD),
       }
     }),
     ...askBookDayDataList.map((askBook) => {
@@ -218,6 +182,8 @@ export const fetchMarketSnapshots = async (
         base: baseCurrency,
         quote: quoteCurrency,
         price: Number(askBook.book.inversePrice),
+        priceUSD: Number(askBook.book.quote.priceUSD),
+        priceChange24h: Number(askBook.open) / Number(askBook.close) - 1,
         volume24hUSD: bidBook
           ? Number(askBook.volumeUSD) + Number(bidBook.volumeUSD)
           : Number(askBook.volumeUSD),
@@ -231,112 +197,13 @@ export const fetchMarketSnapshots = async (
               Number(bidBook.book.createdAtTimestamp),
             )
           : Number(askBook.book.createdAtTimestamp),
-        baseTotalSupply,
+        fdv: baseTotalSupply * Number(askBook.book.quote.priceUSD),
       }
     }),
-  ].filter(
-    (market, index, self) =>
-      self.findIndex((m) => m.marketId === market.marketId) === index,
-  )
-
-  const currentPriceMap: Record<`0x${string}`, number> = {
-    ...Object.fromEntries(
-      STABLE_COIN_ADDRESSES[chainId].map((addr) => [getAddress(addr), 1]),
-    ),
-  }
-  const priceSourceTVL: Record<`0x${string}`, number> = {
-    ...Object.fromEntries(
-      STABLE_COIN_ADDRESSES[chainId].map((addr) => [
-        getAddress(addr),
-        Number.MAX_SAFE_INTEGER,
-      ]),
-    ),
-  }
-
-  // Step 1: find best stablecoin-ETH pair (highest TVL)
-  const ethAnchors = mergedBooks
+  ]
+    .filter(({ priceUSD }) => priceUSD > 0)
     .filter(
-      (book) =>
-        stableCoinAddresses.has(book.quote.address) &&
-        (isAddressEqual(book.base.address, zeroAddress) ||
-          isAddressEqual(book.base.address, WETH_ADDRESS[chainId])),
+      (market, index, self) =>
+        self.findIndex((m) => m.marketId === market.marketId) === index,
     )
-    .sort((a, b) => b.totalValueLockedUSD - a.totalValueLockedUSD)
-
-  if (ethAnchors.length > 0) {
-    const ethBook = ethAnchors[0]
-    currentPriceMap[ethBook.base.address] = ethBook.price
-    priceSourceTVL[ethBook.base.address] = ethBook.totalValueLockedUSD
-  }
-
-  // Step 2: propagate prices via BFS
-  const queue = Object.entries(currentPriceMap).map(([token, priceUSD]) => ({
-    token,
-    priceUSD,
-  }))
-
-  while (queue.length > 0) {
-    const { token, priceUSD } = queue.shift()!
-
-    mergedBooks.forEach((book) => {
-      if (book.totalValueLockedUSD < 100) {
-        return
-      }
-
-      const base = getAddress(book.base.address)
-      const quote = getAddress(book.quote.address)
-
-      if (isAddressEqual(quote, getAddress(token))) {
-        const basePriceUSD = priceUSD * book.price
-        const prevTVL = priceSourceTVL[base] ?? 0
-        if (
-          book.totalValueLockedUSD > prevTVL ||
-          currentPriceMap[base] === undefined
-        ) {
-          currentPriceMap[base] = basePriceUSD
-          priceSourceTVL[base] = book.totalValueLockedUSD
-          queue.push({ token: base, priceUSD: basePriceUSD })
-        }
-      } else if (isAddressEqual(base, getAddress(token))) {
-        const quotePriceUSD = priceUSD * book.price
-        const prevTVL = priceSourceTVL[quote] ?? 0
-        if (
-          book.totalValueLockedUSD > prevTVL ||
-          currentPriceMap[quote] === undefined
-        ) {
-          currentPriceMap[quote] = quotePriceUSD
-          priceSourceTVL[quote] = book.totalValueLockedUSD
-          queue.push({ token: quote, priceUSD: quotePriceUSD })
-        }
-      }
-    })
-  }
-
-  return mergedBooks
-    .map((book) => {
-      if (
-        !currentPriceMap[book.base.address] ||
-        !yesterDayPriceMap[book.base.address]
-      ) {
-        return null
-      }
-      return {
-        chainId: book.chainId,
-        marketId: book.marketId,
-        base: book.base,
-        quote: book.quote,
-        price: book.price,
-        priceUSD: currentPriceMap[book.base.address],
-        priceChange24h:
-          (currentPriceMap[book.base.address] /
-            yesterDayPriceMap[book.base.address] -
-            1) *
-          100,
-        volume24hUSD: book.volume24hUSD,
-        totalValueLockedUSD: book.totalValueLockedUSD,
-        createdAtTimestamp: book.createdAtTimestamp,
-        fdv: book.baseTotalSupply * currentPriceMap[book.base.address],
-      }
-    })
-    .filter((market): market is MarketSnapshot => market !== null)
 }
