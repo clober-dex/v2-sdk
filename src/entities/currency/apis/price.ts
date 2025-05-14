@@ -2,6 +2,7 @@ import { getAddress } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
+import { getDailyStartTimestampInSeconds } from '../../../utils/time'
 
 export const fetchCurrentPriceMap = async (
   chainId: CHAIN_IDS,
@@ -41,27 +42,31 @@ export const fetchDailyPriceMapAtTimestamp = async (
 ): Promise<{
   [address: `0x${string}`]: number
 }> => {
+  const dayStartTimestamp = getDailyStartTimestampInSeconds(timestampInSeconds)
+
   const {
-    data: { tokens },
+    data: { tokenDayDatas },
   } = await Subgraph.get<{
     data: {
-      tokens: {
-        id: string
+      tokenDayDatas: {
+        token: {
+          id: string
+        }
         priceUSD: string
       }[]
     }
   }>(
     chainId,
-    'getCurrentTokenPrice',
-    `query getCurrentTokenPrices($timestampInSeconds: Int!) { tokens(where: {priceUSD_gt: 0}) { id priceUSD } }`,
+    'getDailyPriceMap',
+    `query getDailyPriceMap($date: Int!) { tokenDayDatas(where: {date: $date, priceUSD_gt: 0}) { token { id } priceUSD } }`,
     {
-      timestampInSeconds,
+      date: dayStartTimestamp,
     },
   )
 
-  return tokens.reduce(
-    (acc, token) => {
-      acc[getAddress(token.id)] = parseFloat(token.priceUSD)
+  return tokenDayDatas.reduce(
+    (acc, { token, priceUSD }) => {
+      acc[getAddress(token.id)] = parseFloat(priceUSD)
       return acc
     },
     {} as {

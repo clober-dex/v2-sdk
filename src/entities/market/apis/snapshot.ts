@@ -5,6 +5,7 @@ import { MarketSnapshot } from '../types'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { getQuoteToken } from '../../../views'
 import { fetchTotalSupplyMap } from '../../currency/apis/total-supply'
+import { getDailyStartTimestampInSeconds } from '../../../utils/time'
 
 type BookDayDataDto = {
   volumeUSD: string
@@ -40,8 +41,7 @@ export const fetchMarketSnapshot = async (
   token1: `0x${string}`,
   timestampInSeconds: number,
 ): Promise<MarketSnapshot> => {
-  const dayID = Math.floor(timestampInSeconds / 86400)
-  const dayStartTimestamp = dayID * 86400
+  const dayStartTimestamp = getDailyStartTimestampInSeconds(timestampInSeconds)
 
   const {
     data: { bookDayDatas },
@@ -202,8 +202,7 @@ export const fetchMarketSnapshots = async (
   chainId: CHAIN_IDS,
   timestampInSeconds: number,
 ): Promise<MarketSnapshot[]> => {
-  const dayID = Math.floor(timestampInSeconds / 86400)
-  const dayStartTimestamp = dayID * 86400
+  const dayStartTimestamp = getDailyStartTimestampInSeconds(timestampInSeconds)
   const {
     data: { bookDayDatas },
   } = await Subgraph.get<{
