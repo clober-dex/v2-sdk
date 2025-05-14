@@ -5,6 +5,7 @@ export {
   getExpectedOutput,
   getExpectedInput,
   getMarketSnapshots,
+  getMarketSnapshot,
   getQuoteToken,
 } from './market'
 export {
@@ -15,7 +16,7 @@ export {
   getLastAmounts,
 } from './pool'
 
-export { getPriceNeighborhood } from './price'
+export { getPriceNeighborhood } from './tick'
 export { getOpenOrder, getOpenOrders } from './open-order'
 export { getSubgraphEndpoint, getSubgraphBlockNumber } from './subgraph'
 export { getContractAddresses, getReferenceTokenAddress } from './address'
