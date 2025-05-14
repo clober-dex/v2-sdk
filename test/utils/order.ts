@@ -3,7 +3,7 @@ import { getAddress, PublicClient } from 'viem'
 import { CHAIN_IDS, Currency } from '../../src'
 import { CONTRACT_ADDRESSES } from '../../src/constants/chain-configs/addresses'
 import { fetchCurrencyMap } from '../../src/entities/currency/apis'
-import { fromOrderId } from '../../src/entities/open-order/utils/order-id.ts'
+import { fromOrderId } from '../../src/entities/open-order/utils/order-id'
 
 const _abi = [
   {
