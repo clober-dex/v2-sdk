@@ -41,7 +41,7 @@ export class Subgraph {
         operationName,
       },
       {
-        timeout: 2000, // TODO: pass with option
+        timeout: 5000, // TODO: pass with option
       },
     )
 
