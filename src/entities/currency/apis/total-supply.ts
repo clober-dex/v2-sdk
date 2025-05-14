@@ -10,7 +10,7 @@ const abi = [
   },
 ] as const
 
-const MOCK_ZERO_TOTAL_SUPPLY = 120_000_000n
+const MOCK_ZERO_TOTAL_SUPPLY = 120000000000000000000000000n // 120M
 const totalSupplyCache = new Map<string, bigint>()
 
 const buildCacheKey = (chainId: number, address: `0x${string}`) =>
