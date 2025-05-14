@@ -6,7 +6,10 @@ import {
   fetchMarketSnapshot,
   fetchMarketSnapshots,
 } from '../../entities/market/apis/snapshot'
-import { currentTimestampInSeconds } from '../../utils/time'
+import {
+  currentTimestampInSeconds,
+  getDailyStartTimestampInSeconds,
+} from '../../utils/time'
 
 export const getMarketSnapshot = async ({
   chainId,
@@ -29,7 +32,7 @@ export const getMarketSnapshot = async ({
     token0,
     token1,
     options && options.timestampInSeconds
-      ? options.timestampInSeconds
+      ? getDailyStartTimestampInSeconds(options.timestampInSeconds)
       : currentTimestampInSeconds(),
   )
 }
@@ -49,7 +52,7 @@ export const getMarketSnapshots = async ({
     publicClient,
     chainId,
     options && options.timestampInSeconds
-      ? options.timestampInSeconds
+      ? getDailyStartTimestampInSeconds(options.timestampInSeconds)
       : currentTimestampInSeconds(),
   )
 }
