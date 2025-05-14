@@ -1,6 +1,8 @@
 import { CHAIN_IDS } from '../constants/chain-configs/chain'
 import { NATIVE_CURRENCY } from '../constants/chain-configs/currency'
 import { Currency } from '../entities/currency/types'
+import { fetchCurrentPriceMap } from '../entities/currency/apis/price'
+import { DefaultReadContractOptions } from '../types'
 
 /**
  * Get native currency for a given chain id
@@ -20,4 +22,12 @@ export const getNativeCurrency = ({
   chainId: CHAIN_IDS
 }): Currency => {
   return NATIVE_CURRENCY[chainId]
+}
+
+export const getLatestPriceMap = async ({
+  chainId,
+}: {
+  chainId: CHAIN_IDS
+}): Promise<{ [address: `0x${string}`]: number }> => {
+  return fetchCurrentPriceMap(chainId)
 }
