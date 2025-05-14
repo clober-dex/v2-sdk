@@ -1,10 +1,11 @@
-import { formatUnits, getAddress, isAddressEqual } from 'viem'
+import { formatUnits, getAddress, isAddressEqual, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { MarketSnapshot } from '../types'
 import { currentTimestampInSeconds } from '../../../utils/time'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { getQuoteToken } from '../../../views'
+import { fetchTotalSupplyMap } from '../../currency/apis/total-supply'
 
 type TakeSampleDto = {
   timestamp: string
@@ -22,6 +23,31 @@ type TakeSampleDto = {
   }
   inputAmount: string
   outputAmount: string
+}
+
+type BookDayDataDto = {
+  volumeUSD: string
+  book: {
+    id: string
+    volumeUSD: string
+    price: string
+    inversePrice: string
+    latestTaken: TakeSampleDto[]
+    firstTaken: TakeSampleDto[]
+    base: {
+      id: string
+      name: string
+      symbol: string
+      decimals: string
+    }
+    quote: {
+      id: string
+      name: string
+      symbol: string
+      decimals: string
+    }
+    createdAtTimestamp: string
+  }
 }
 
 const calculate24hPriceChange = (
@@ -65,6 +91,7 @@ const calculate24hPriceChange = (
 }
 
 export const fetchMarketSnapshots = async (
+  publicClient: PublicClient,
   chainId: CHAIN_IDS,
 ): Promise<MarketSnapshot[]> => {
   const dayID = Math.floor(currentTimestampInSeconds() / 86400)
@@ -72,30 +99,7 @@ export const fetchMarketSnapshots = async (
     data: { bookDayDatas },
   } = await Subgraph.get<{
     data: {
-      bookDayDatas: {
-        volumeUSD: string
-        book: {
-          id: string
-          volumeUSD: string
-          price: string
-          inversePrice: string
-          latestTaken: TakeSampleDto[]
-          firstTaken: TakeSampleDto[]
-          base: {
-            id: string
-            name: string
-            symbol: string
-            decimals: string
-          }
-          quote: {
-            id: string
-            name: string
-            symbol: string
-            decimals: string
-          }
-          createdAtTimestamp: string
-        }
-      }[]
+      bookDayDatas: BookDayDataDto[]
     }
   }>(
     chainId,
@@ -135,6 +139,11 @@ export const fetchMarketSnapshots = async (
         .flat(),
     ),
   ]
+  const totalSupplyMap = await fetchTotalSupplyMap(
+    publicClient,
+    chainId,
+    tokenAddresses,
+  )
 
   const {
     data: { tokenDayDatas },
@@ -187,14 +196,20 @@ export const fetchMarketSnapshots = async (
             quoteCurrency.address,
           ),
       )
+      const baseTotalSupply = Number(
+        formatUnits(
+          BigInt(totalSupplyMap[baseCurrency.address] ?? 0n),
+          baseCurrency.decimals,
+        ),
+      )
+      const basePriceUSD = Number(priceUSDMap[baseCurrency.address] ?? 0)
+      const quotePriceUSD = Number(priceUSDMap[quoteCurrency.address] ?? 0)
       return {
         chainId,
         marketId: `${baseCurrency.symbol}/${quoteCurrency.symbol}`,
         base: baseCurrency,
         quote: quoteCurrency,
-        priceUSD:
-          Number(bidBook.book.price) *
-          Number(priceUSDMap[quoteCurrency.address] ?? 0),
+        priceUSD: Number(bidBook.book.price) * quotePriceUSD,
         volume24hUSD: askBook
           ? Number(askBook.book.volumeUSD) + Number(bidBook.book.volumeUSD)
           : Number(bidBook.book.volumeUSD),
@@ -213,6 +228,7 @@ export const fetchMarketSnapshots = async (
               Number(askBook.book.createdAtTimestamp),
             )
           : Number(bidBook.book.createdAtTimestamp),
+        fdv: baseTotalSupply * basePriceUSD,
       }
     }),
     ...askBooks.map((askBook) => {
@@ -239,14 +255,20 @@ export const fetchMarketSnapshots = async (
             baseCurrency.address,
           ),
       )
+      const baseTotalSupply = Number(
+        formatUnits(
+          BigInt(totalSupplyMap[baseCurrency.address] ?? 0n),
+          baseCurrency.decimals,
+        ),
+      )
+      const basePriceUSD = Number(priceUSDMap[baseCurrency.address] ?? 0)
+      const quotePriceUSD = Number(priceUSDMap[quoteCurrency.address] ?? 0)
       return {
         chainId,
         marketId: `${baseCurrency.symbol}/${quoteCurrency.symbol}`,
         base: baseCurrency,
         quote: quoteCurrency,
-        priceUSD:
-          Number(askBook.book.inversePrice) *
-          Number(priceUSDMap[quoteCurrency.address] ?? 0),
+        priceUSD: Number(askBook.book.inversePrice) * quotePriceUSD,
         volume24hUSD: bidBook
           ? Number(askBook.book.volumeUSD) + Number(bidBook.book.volumeUSD)
           : Number(askBook.book.volumeUSD),
@@ -265,6 +287,7 @@ export const fetchMarketSnapshots = async (
               Number(bidBook.book.createdAtTimestamp),
             )
           : Number(askBook.book.createdAtTimestamp),
+        fdv: baseTotalSupply * basePriceUSD,
       }
     }),
   ]

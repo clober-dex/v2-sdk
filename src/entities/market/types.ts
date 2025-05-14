@@ -23,6 +23,7 @@ export type MarketSnapshot = {
   volume24hUSD: number
   priceChange24h: number
   createdAtTimestamp: number
+  fdv: number
 }
 
 export type ChartLog = {
