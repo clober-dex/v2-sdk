@@ -66,9 +66,9 @@ export const fetchCurrency = async (
   chainId: CHAIN_IDS,
   address: `0x${string}`,
 ): Promise<Currency> => {
-  const cachedCurrency = getCurrencyFromCache(chainId, address)
-  if (cachedCurrency) {
-    return cachedCurrency
+  const cached = getCurrencyFromCache(chainId, address)
+  if (cached) {
+    return cached
   }
 
   const currency = await fetchCurrencyInner(publicClient, address)
@@ -81,43 +81,34 @@ export const fetchCurrencyMap = async (
   chainId: CHAIN_IDS,
   addresses: `0x${string}`[],
   useSubgraph: boolean,
-): Promise<{
-  [address: `0x${string}`]: Currency
-}> => {
-  addresses = addresses
-    .filter((address) => !isAddressEqual(address, zeroAddress))
-    .filter((address, index, self) => self.indexOf(address) === index)
-  const cachedCurrencies = addresses
-    .map((address) => getCurrencyFromCache(chainId, address))
-    .filter((currency) => currency !== undefined) as Currency[]
-  const uncachedAddresses = addresses.filter(
-    (address) =>
-      !cachedCurrencies.some((currency) =>
-        isAddressEqual(currency.address, address),
-      ),
+): Promise<Record<`0x${string}`, Currency>> => {
+  const unique = Array.from(
+    new Set(addresses.filter((a) => !isAddressEqual(a, zeroAddress))),
   )
-  const uncachedCurrencies = await fetchCurrencyMapInner(
+
+  const cached = unique
+    .map((address) => getCurrencyFromCache(chainId, address))
+    .filter((c): c is Currency => c !== undefined)
+
+  const uncached = unique.filter(
+    (a) => !cached.some((c) => isAddressEqual(c.address, a)),
+  )
+
+  const fetched = await fetchCurrencyMapInner(
     publicClient,
     chainId,
-    uncachedAddresses,
+    uncached,
     useSubgraph,
   )
-  for (const currency of Object.values(uncachedCurrencies)) {
+
+  for (const currency of fetched) {
     setCurrencyToCache(chainId, currency.address, currency)
   }
 
   return {
-    ...cachedCurrencies.reduce(
-      (acc, currency) => {
-        acc[getAddress(currency.address)] = currency
-        return acc
-      },
-      {} as {
-        [address: `0x${string}`]: Currency
-      },
-    ),
-    ...uncachedCurrencies,
-    [zeroAddress as `0x${string}`]: NATIVE_CURRENCY[chainId],
+    ...Object.fromEntries(cached.map((c) => [getAddress(c.address), c])),
+    ...Object.fromEntries(fetched.map((c) => [getAddress(c.address), c])),
+    [zeroAddress]: NATIVE_CURRENCY[chainId],
   }
 }
 
@@ -126,41 +117,21 @@ const fetchCurrencyInner = async (
   address: `0x${string}`,
 ): Promise<Currency> => {
   if (isAddressEqual(address, zeroAddress)) {
-    if (!publicClient.chain) {
-      return ETH
-    }
-    return NATIVE_CURRENCY[publicClient.chain.id]
+    return publicClient.chain ? NATIVE_CURRENCY[publicClient.chain.id] : ETH
   }
 
   const [{ result: name }, { result: symbol }, { result: decimals }] =
     await publicClient.multicall({
       contracts: [
-        {
-          address,
-          abi,
-          functionName: 'name',
-        },
-        {
-          address,
-          abi,
-          functionName: 'symbol',
-        },
-        {
-          address,
-          abi,
-          functionName: 'decimals',
-        },
+        { address, abi, functionName: 'name' },
+        { address, abi, functionName: 'symbol' },
+        { address, abi, functionName: 'decimals' },
       ],
     })
   if (!name || !symbol || !decimals) {
     throw new Error(`Failed to fetch currency: ${address}`)
   }
-  return {
-    address,
-    name,
-    symbol,
-    decimals,
-  }
+  return { address, name, symbol, decimals }
 }
 
 const fetchCurrencyMapInner = async (
@@ -168,15 +139,13 @@ const fetchCurrencyMapInner = async (
   chainId: CHAIN_IDS,
   addresses: `0x${string}`[],
   useSubgraph: boolean,
-): Promise<{
-  [address: `0x${string}`]: Currency
-}> => {
-  addresses = addresses
-    .filter((address) => !isAddressEqual(address, zeroAddress))
-    .filter((address, index, self) => self.indexOf(address) === index)
+): Promise<Currency[]> => {
+  const unique = Array.from(
+    new Set(addresses.filter((a) => !isAddressEqual(a, zeroAddress))),
+  )
 
-  if (addresses.length === 0) {
-    return {}
+  if (unique.length === 0) {
+    return []
   }
 
   if (useSubgraph) {
@@ -196,70 +165,35 @@ const fetchCurrencyMapInner = async (
       'getTokens',
       'query getTokens($addresses: [Bytes!]!) { tokens(where: {id_in: $addresses}) { id name symbol decimals } }',
       {
-        addresses: addresses.map((address) => address.toLowerCase()),
+        addresses: unique.map((a) => a.toLowerCase()),
       },
     )
-    return Object.fromEntries(
-      tokens.map((token) => [
-        getAddress(token.id),
-        {
-          address: getAddress(token.id),
-          name: token.name,
-          symbol: token.symbol,
-          decimals: Number(token.decimals),
-        },
-      ]),
-    ) as {
-      [address: `0x${string}`]: Currency
-    }
-  } else {
-    const result = await publicClient.multicall({
-      contracts: [
-        ...addresses.map((address) => ({
-          address,
-          abi,
-          functionName: 'name',
-        })),
-        ...addresses.map((address) => ({
-          address,
-          abi,
-          functionName: 'symbol',
-        })),
-        ...addresses.map((address) => ({
-          address,
-          abi,
-          functionName: 'decimals',
-        })),
-      ],
-    })
 
-    return addresses
-      .map((address, index) => {
-        const name = result[index].result as string | undefined
-        const symbol = result[index + addresses.length].result as
-          | string
-          | undefined
-        const decimals = result[index + addresses.length * 2].result as
-          | number
-          | undefined
-        if (!name || !symbol || !decimals) {
-          throw new Error(`Failed to fetch currency: ${address}`)
-        }
-        return {
-          address,
-          name,
-          symbol,
-          decimals,
-        }
-      })
-      .reduce(
-        (acc, currency) => {
-          acc[getAddress(currency.address)] = currency
-          return acc
-        },
-        {} as {
-          [address: `0x${string}`]: Currency
-        },
-      )
+    return tokens.map((token) => ({
+      address: getAddress(token.id),
+      name: token.name,
+      symbol: token.symbol,
+      decimals: Number(token.decimals),
+    }))
   }
+
+  const result = await publicClient.multicall({
+    contracts: [
+      ...unique.map((a) => ({ address: a, abi, functionName: 'name' })),
+      ...unique.map((a) => ({ address: a, abi, functionName: 'symbol' })),
+      ...unique.map((a) => ({ address: a, abi, functionName: 'decimals' })),
+    ],
+  })
+
+  return unique.map((address, i) => {
+    const name = result[i].result as string | undefined
+    const symbol = result[i + unique.length].result as string | undefined
+    const decimals = result[i + unique.length * 2].result as number | undefined
+
+    if (!name || !symbol || !decimals) {
+      throw new Error(`Failed to fetch currency: ${address}`)
+    }
+
+    return { address, name, symbol, decimals }
+  })
 }
