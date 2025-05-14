@@ -1,4 +1,4 @@
-import { getAddress, zeroAddress } from 'viem'
+import { getAddress } from 'viem'
 
 import { CHAIN_IDS } from './chain'
 
@@ -40,24 +40,24 @@ export const CONTRACT_ADDRESSES: {
     Minter: getAddress('0x0b8361a2bbF853F5F6Aa0911a9d238d9CFDD9f1a'),
     Operator: getAddress('0xFa47E8dD8F04BF23b238900e754041123a6bc6e2'),
   },
-  [CHAIN_IDS.BASE]: {
-    Controller: getAddress('0xCe687cBF1a587691e495ce24eb7ad9F13Fc7be1D'),
-    BookManager: getAddress('0x382CCccbD3b142D7DA063bF68cd0c89634767F76'),
-    BookViewer: getAddress('0xbfb608D67340fa54bA31614C293750EeB573c795'),
-    Rebalancer: getAddress('0xeA0E19fbca0D9D707f3dA10Ef846cC255B0aAdf3'),
-    Strategy: getAddress('0x44E550089da3A49488794B3CB761288821B7e5E0'),
-    Minter: getAddress('0xafBd8d66cd96b7A8188E27c61C1ec059c465CE36'),
-    Operator: getAddress('0x1BCD69Ff770B5A8dc4355d781F6a09515F2ea797'),
-  },
-  [CHAIN_IDS.BERACHAIN_MAINNET]: {
-    Controller: getAddress('0xA9F92548491997eE0De26A03311535A4961EE8eb'),
-    BookManager: getAddress('0xDED58e263087f5B45d878BD9CF599B7A1a75D1E4'),
-    BookViewer: getAddress('0x4abb86f499f53e2b1F52302b2Ba7BbB0a90a49A8'),
-    Rebalancer: zeroAddress,
-    Strategy: zeroAddress,
-    Minter: zeroAddress,
-    Operator: zeroAddress,
-  },
+  // [CHAIN_IDS.BASE]: {
+  //   Controller: getAddress('0xCe687cBF1a587691e495ce24eb7ad9F13Fc7be1D'),
+  //   BookManager: getAddress('0x382CCccbD3b142D7DA063bF68cd0c89634767F76'),
+  //   BookViewer: getAddress('0xbfb608D67340fa54bA31614C293750EeB573c795'),
+  //   Rebalancer: getAddress('0xeA0E19fbca0D9D707f3dA10Ef846cC255B0aAdf3'),
+  //   Strategy: getAddress('0x44E550089da3A49488794B3CB761288821B7e5E0'),
+  //   Minter: getAddress('0xafBd8d66cd96b7A8188E27c61C1ec059c465CE36'),
+  //   Operator: getAddress('0x1BCD69Ff770B5A8dc4355d781F6a09515F2ea797'),
+  // },
+  // [CHAIN_IDS.BERACHAIN_MAINNET]: {
+  //   Controller: getAddress('0xA9F92548491997eE0De26A03311535A4961EE8eb'),
+  //   BookManager: getAddress('0xDED58e263087f5B45d878BD9CF599B7A1a75D1E4'),
+  //   BookViewer: getAddress('0x4abb86f499f53e2b1F52302b2Ba7BbB0a90a49A8'),
+  //   Rebalancer: zeroAddress,
+  //   Strategy: zeroAddress,
+  //   Minter: zeroAddress,
+  //   Operator: zeroAddress,
+  // },
   [CHAIN_IDS.MONAD_TESTNET]: {
     Controller: getAddress('0x7792669BEb769c4035bdFcA4F3d794d55922B954'),
     BookManager: getAddress('0xAA9575d63dFC224b9583fC303dB3188C08d5C85A'),
@@ -67,15 +67,15 @@ export const CONTRACT_ADDRESSES: {
     Minter: getAddress('0xAF9Ca76F6BB5bd2B18964A14Fc095455E2C2a099'),
     Operator: getAddress('0x4BB54bB9a42Fe787D1D1A2AAcF91C70b02e5553E'),
   },
-  [CHAIN_IDS.SONIC_MAINNET]: {
-    Controller: getAddress('0xcA6c15B7B03Ca69087B85B8EA690ED44A92eadd1'),
-    BookManager: getAddress('0xD4aD5Ed9E1436904624b6dB8B1BE31f36317C636'),
-    BookViewer: getAddress('0xe81e78f946e34d13Dcb6fd46a78713E0FFDA5613'),
-    Rebalancer: getAddress('0x46107Ec44112675689053b96aea2127fD952bd47'),
-    Strategy: getAddress('0xdd30f831bEB51fBF33E3D579e5529d3B1495554f'),
-    Minter: getAddress('0x466795C0EAe3C44A6dcbB6DB0534F7019E0803A7'),
-    Operator: getAddress('0xF7E7285eBe537fDf1C1c4432aa1863721EaC9a09'),
-  },
+  // [CHAIN_IDS.SONIC_MAINNET]: {
+  //   Controller: getAddress('0xcA6c15B7B03Ca69087B85B8EA690ED44A92eadd1'),
+  //   BookManager: getAddress('0xD4aD5Ed9E1436904624b6dB8B1BE31f36317C636'),
+  //   BookViewer: getAddress('0xe81e78f946e34d13Dcb6fd46a78713E0FFDA5613'),
+  //   Rebalancer: getAddress('0x46107Ec44112675689053b96aea2127fD952bd47'),
+  //   Strategy: getAddress('0xdd30f831bEB51fBF33E3D579e5529d3B1495554f'),
+  //   Minter: getAddress('0x466795C0EAe3C44A6dcbB6DB0534F7019E0803A7'),
+  //   Operator: getAddress('0xF7E7285eBe537fDf1C1c4432aa1863721EaC9a09'),
+  // },
   [CHAIN_IDS.RISE_SEPOLIA]: {
     Controller: getAddress('0x7792669BEb769c4035bdFcA4F3d794d55922B954'),
     BookManager: getAddress('0xBc6eaFe723723DED3a411b6a1089a63bc5d73568'),
