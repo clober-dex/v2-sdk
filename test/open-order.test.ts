@@ -5,6 +5,8 @@ import {
   cancelOrders,
   claimOrder,
   claimOrders,
+  getOpenOrder,
+  getOpenOrders,
   limitOrder,
   setApprovalOfOpenOrdersForAll,
 } from '@clober/v2-sdk'
@@ -34,29 +36,22 @@ afterEach(async () => {
   )
 })
 
-// TODO: when arbitrum testnet subgraph is ready, we can use it to test
-// test('get open orders by user address', async () => {
-//   const openOrders = await getOpenOrders({
-//     chainId: cloberTestChain.id,
-//     userAddress: '0x000000000000000000000000000000000000dead',
-//   })
-//   expect(openOrders.length).toBe(0) // TODO: check the actual length
-// })
+test('get open orders by user address', async () => {
+  const openOrders = await getOpenOrders({
+    chainId: cloberTestChain.id,
+    userAddress: '0x000000000000000000000000000000000000dead',
+  })
+  expect(openOrders.length).toBe(0) // TODO: check the actual length
+})
 
-// TODO: when arbitrum testnet subgraph is ready, we can use it to test
-// test('get undefined open orders', async () => {
-//   const { publicClient } = clients[1] as any
-//
-//   expect(
-//     await getOpenOrder({
-//       chainId: cloberTestChain.id,
-//       id: '200',
-//       options: {
-//         rpcUrl: publicClient.transport.url!,
-//       },
-//     }).catch((e) => e.message),
-//   ).toEqual('Open order not found: 200')
-// })
+test('get undefined open orders', async () => {
+  expect(
+    await getOpenOrder({
+      chainId: cloberTestChain.id,
+      id: '200',
+    }).catch((e) => e.message),
+  ).toEqual('Open order not found: 200')
+})
 
 test('claim ask order', async () => {
   const { publicClient, walletClient } = clients[2] as any
