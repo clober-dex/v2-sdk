@@ -6,9 +6,9 @@ export const SUBGRAPH_URL: {
   [chain in CHAIN_IDS]: string
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]:
-    'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-arbitrum-sepolia/api',
+    'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-subgraph-arbitrum-sepolia/api',
   [CHAIN_IDS.CLOBER_TESTNET_2]:
-    'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-arbitrum-sepolia/api',
+    'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-subgraph-arbitrum-sepolia/api',
   [CHAIN_IDS.ARBITRUM_SEPOLIA]:
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-subgraph-arbitrum-sepolia/api',
   // [CHAIN_IDS.BASE]:
