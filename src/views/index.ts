@@ -25,3 +25,4 @@ export {
   getLatestPriceMap,
   getDailyClosePriceMap,
 } from './currency'
+export { getProtocolAnalytics, getUserDailyVolumes } from './analytics'

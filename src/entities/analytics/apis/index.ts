@@ -2,7 +2,7 @@ import { getAddress } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
-import { AnalyticsSummary, TransactionType } from '../types'
+import { AnalyticsSummary, TransactionType, UserVolumeSnapshot } from '../types'
 
 type TokenDayDataDto = {
   volumeUSD: string
@@ -25,6 +25,19 @@ type CloberDayDataDTO = {
     txCount: string
   }[]
   tokenDayData: TokenDayDataDto[]
+}
+
+type UserDayDatasDTO = {
+  date: number
+  volumes: {
+    volumeUSD: string
+    token: {
+      id: string
+      name: string
+      symbol: string
+      decimals: number
+    }
+  }[]
 }
 
 const FUNCTION_SIG_MAP: Record<string, TransactionType> = {
@@ -150,4 +163,46 @@ export async function fetchProtocolAnalytics(
     ),
     analyticsSnapshots,
   }
+}
+
+export async function fetchUserVolumeSnapshots(
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+): Promise<UserVolumeSnapshot[]> {
+  const {
+    data: { userDayDatas },
+  } = await Subgraph.get<{
+    data: {
+      userDayDatas: UserDayDatasDTO[]
+    }
+  }>(
+    chainId,
+    'getDailyUserSnapshot',
+    'query getDailyUserSnapshot($user: Bytes!) { userDayDatas(where: {user: $user}) { date volumes { volumeUSD token { id name symbol decimals } } } }',
+    {
+      user: userAddress.toLowerCase(),
+    },
+  )
+
+  return userDayDatas.map((item) => ({
+    timestamp: item.date,
+    volume24hUSD: item.volumes.reduce(
+      (acc, volume) => acc + Number(volume.volumeUSD),
+      0,
+    ),
+    volume24hUSDMap: Object.fromEntries(
+      item.volumes.map((volume) => [
+        getAddress(volume.token.id),
+        {
+          currency: {
+            address: getAddress(volume.token.id),
+            name: volume.token.name,
+            symbol: volume.token.symbol,
+            decimals: Number(volume.token.decimals),
+          },
+          usd: Number(volume.volumeUSD),
+        },
+      ]),
+    ),
+  }))
 }

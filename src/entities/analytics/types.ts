@@ -32,6 +32,12 @@ export type AnalyticsSnapshot = {
   >
 }
 
+export type UserVolumeSnapshot = {
+  timestamp: number
+  volume24hUSD: number
+  volume24hUSDMap: Record<`0x${string}`, { currency: Currency; usd: number }>
+}
+
 export type AnalyticsSummary = {
   accumulatedUniqueUsers: number
   accumulatedUniqueTransactions: number
