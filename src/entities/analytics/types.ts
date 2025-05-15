@@ -43,6 +43,5 @@ export type AnalyticsSummary = {
   accumulatedUniqueTransactions: number
   accumulatedVolumeUSD: number
   accumulatedProtocolFeesUSD: number
-  accumulatedTotalValueLockedUSD: number
   analyticsSnapshots: AnalyticsSnapshot[]
 }
