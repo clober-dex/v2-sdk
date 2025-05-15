@@ -4,25 +4,14 @@ import { Currency } from '../../entities/currency/types'
 
 import { CHAIN_IDS } from './chain'
 
-export const ETH: Currency = {
+export const ETH: Currency & {
+  totalSupply: bigint
+} = {
   address: zeroAddress,
   name: 'Ethereum',
   symbol: 'ETH',
   decimals: 18,
-}
-
-export const BERA: Currency = {
-  address: zeroAddress,
-  name: 'BERA Token',
-  symbol: 'BERA',
-  decimals: 18,
-}
-
-export const MON: Currency = {
-  address: zeroAddress,
-  name: 'Monad Token',
-  symbol: 'MON',
-  decimals: 18,
+  totalSupply: 120000000000000000000000000n, // 120M
 }
 
 // export const S: Currency = {
@@ -33,7 +22,7 @@ export const MON: Currency = {
 // }
 
 export const NATIVE_CURRENCY: {
-  [chain in CHAIN_IDS]: Currency
+  [chain in CHAIN_IDS]: Currency & { totalSupply: bigint }
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: ETH,
   [CHAIN_IDS.CLOBER_TESTNET_2]: ETH,
@@ -41,7 +30,13 @@ export const NATIVE_CURRENCY: {
   // [CHAIN_IDS.BASE]: ETH,
   // [CHAIN_IDS.BERACHAIN_MAINNET]: BERA,
   [CHAIN_IDS.RISE_SEPOLIA]: ETH,
-  [CHAIN_IDS.MONAD_TESTNET]: MON,
+  [CHAIN_IDS.MONAD_TESTNET]: {
+    address: zeroAddress,
+    name: 'Monad Token',
+    symbol: 'MON',
+    decimals: 18,
+    totalSupply: 10000000000000000000000000000n, // 10B
+  },
   // [CHAIN_IDS.SONIC_MAINNET]: S,
 }
 

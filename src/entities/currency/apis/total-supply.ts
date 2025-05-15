@@ -1,5 +1,7 @@
 import { PublicClient, zeroAddress, isAddressEqual } from 'viem'
 
+import { NATIVE_CURRENCY } from '../../../constants/chain-configs/currency'
+
 const abi = [
   {
     name: 'totalSupply',
@@ -10,7 +12,6 @@ const abi = [
   },
 ] as const
 
-const MOCK_ZERO_TOTAL_SUPPLY = 120000000000000000000000000n // 120M
 const totalSupplyCache = new Map<string, bigint>()
 
 const buildCacheKey = (chainId: number, address: `0x${string}`) =>
@@ -28,7 +29,7 @@ export const fetchTotalSupply = async (
   address: `0x${string}`,
 ): Promise<bigint> => {
   if (isAddressEqual(address, zeroAddress)) {
-    return MOCK_ZERO_TOTAL_SUPPLY
+    return NATIVE_CURRENCY[chainId].totalSupply
   }
 
   const cached = getFromCache(chainId, address)
@@ -92,6 +93,6 @@ export const fetchTotalSupplyMap = async (
   return {
     ...cached,
     ...fetched,
-    [zeroAddress as `0x${string}`]: MOCK_ZERO_TOTAL_SUPPLY,
+    [zeroAddress as `0x${string}`]: NATIVE_CURRENCY[chainId].totalSupply,
   }
 }
