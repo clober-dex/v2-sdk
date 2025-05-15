@@ -19,9 +19,10 @@ export {
 export { getPriceNeighborhood } from './tick'
 export { getOpenOrder, getOpenOrders } from './open-order'
 export { getSubgraphEndpoint, getSubgraphBlockNumber } from './subgraph'
-export { getContractAddresses, getReferenceTokenAddress } from './address'
+export { getContractAddresses } from './address'
 export {
   getNativeCurrency,
+  getReferenceCurrency,
   getCurrencies,
   getLatestPriceMap,
   getDailyClosePriceMap,

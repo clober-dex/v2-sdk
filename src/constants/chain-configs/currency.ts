@@ -1,4 +1,4 @@
-import { zeroAddress } from 'viem'
+import { getAddress, zeroAddress } from 'viem'
 
 import { Currency } from '../../entities/currency/types'
 
@@ -40,16 +40,46 @@ export const NATIVE_CURRENCY: {
   // [CHAIN_IDS.SONIC_MAINNET]: S,
 }
 
-export const WETH_ADDRESS: {
-  [chain in CHAIN_IDS]: `0x${string}`
+export const REFERENCE_CURRENCY: {
+  [chain in CHAIN_IDS]: Currency & { totalSupply: bigint }
 } = {
-  [CHAIN_IDS.CLOBER_TESTNET]: zeroAddress,
-  [CHAIN_IDS.CLOBER_TESTNET_2]: '0xF2e615A933825De4B39b497f6e6991418Fb31b78', // Mock WETH
-  [CHAIN_IDS.ARBITRUM_SEPOLIA]: '0xF2e615A933825De4B39b497f6e6991418Fb31b78', // Mock WETH
+  [CHAIN_IDS.CLOBER_TESTNET]: {
+    address: getAddress('0xF2e615A933825De4B39b497f6e6991418Fb31b78'), // Mock WETH
+    symbol: 'WETH',
+    name: 'Wrapped Ether',
+    decimals: 18,
+    totalSupply: 120000000000000000000000000n, // 120M
+  },
+  [CHAIN_IDS.CLOBER_TESTNET_2]: {
+    address: getAddress('0xF2e615A933825De4B39b497f6e6991418Fb31b78'), // Mock WETH
+    symbol: 'WETH',
+    name: 'Wrapped Ether',
+    decimals: 18,
+    totalSupply: 120000000000000000000000000n, // 120M
+  },
+  [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
+    address: getAddress('0xF2e615A933825De4B39b497f6e6991418Fb31b78'), // Mock WETH
+    symbol: 'WETH',
+    name: 'Wrapped Ether',
+    decimals: 18,
+    totalSupply: 120000000000000000000000000n, // 120M
+  },
   // [CHAIN_IDS.BASE]: '0x4200000000000000000000000000000000000006',
   // [CHAIN_IDS.BERACHAIN_MAINNET]: '0x6969696969696969696969696969696969696969', // WBERA
-  [CHAIN_IDS.RISE_SEPOLIA]: '0x4200000000000000000000000000000000000006', // WETH
-  [CHAIN_IDS.MONAD_TESTNET]: '0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701', // WMON
+  [CHAIN_IDS.RISE_SEPOLIA]: {
+    address: getAddress('0x4200000000000000000000000000000000000006'), // Mock WETH
+    symbol: 'WETH',
+    name: 'Wrapped Ether',
+    decimals: 18,
+    totalSupply: 120000000000000000000000000n, // 120M
+  },
+  [CHAIN_IDS.MONAD_TESTNET]: {
+    address: getAddress('0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701'), // WMON
+    symbol: 'WMON',
+    name: 'Wrapped Monad',
+    decimals: 18,
+    totalSupply: 10000000000000000000000000000n, // 10B
+  },
   // [CHAIN_IDS.SONIC_MAINNET]: '0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38', // wS
 }
 
