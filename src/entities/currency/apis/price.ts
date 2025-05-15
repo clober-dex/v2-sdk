@@ -3,7 +3,35 @@ import { getAddress } from 'viem'
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { getDailyStartTimestampInSeconds } from '../../../utils/time'
+import { Currency } from '../types'
 
+export const fetchCurrencies = async (
+  chainId: CHAIN_IDS,
+): Promise<Currency[]> => {
+  const {
+    data: { tokens },
+  } = await Subgraph.get<{
+    data: {
+      tokens: {
+        id: string
+        name: string
+        symbol: string
+        decimals: number
+      }[]
+    }
+  }>(
+    chainId,
+    'getCurrencies',
+    'query getCurrencies { tokens { id name symbol decimals } }',
+    {},
+  )
+  return tokens.map((token) => ({
+    address: getAddress(token.id),
+    name: token.name,
+    symbol: token.symbol,
+    decimals: Number(token.decimals),
+  }))
+}
 export const fetchCurrentPriceMap = async (
   chainId: CHAIN_IDS,
 ): Promise<{

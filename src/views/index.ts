@@ -22,6 +22,7 @@ export { getSubgraphEndpoint, getSubgraphBlockNumber } from './subgraph'
 export { getContractAddresses, getReferenceTokenAddress } from './address'
 export {
   getNativeCurrency,
+  getCurrencies,
   getLatestPriceMap,
   getDailyClosePriceMap,
 } from './currency'
