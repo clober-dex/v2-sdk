@@ -2,7 +2,7 @@ import { getAddress, isAddressEqual, zeroAddress } from 'viem'
 
 import {
   STABLE_COIN_ADDRESSES,
-  WETH_ADDRESS,
+  REFERENCE_CURRENCY,
 } from '../../../constants/chain-configs/currency'
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 
@@ -53,7 +53,7 @@ export const getMarketId = (
 
   // include weth
   const weth = tokenAddresses.find((address) =>
-    isAddressEqual(address, WETH_ADDRESS[chainId]!),
+    isAddressEqual(address, REFERENCE_CURRENCY[chainId].address),
   )
   if (weth) {
     const other = tokenAddresses.find(

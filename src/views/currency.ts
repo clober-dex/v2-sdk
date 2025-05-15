@@ -1,5 +1,8 @@
 import { CHAIN_IDS } from '../constants/chain-configs/chain'
-import { NATIVE_CURRENCY } from '../constants/chain-configs/currency'
+import {
+  NATIVE_CURRENCY,
+  REFERENCE_CURRENCY,
+} from '../constants/chain-configs/currency'
 import { Currency } from '../entities/currency/types'
 import {
   fetchCurrencies,
@@ -23,8 +26,28 @@ export const getNativeCurrency = ({
   chainId,
 }: {
   chainId: CHAIN_IDS
-}): Currency => {
+}): Currency & { totalSupply: bigint } => {
   return NATIVE_CURRENCY[chainId]
+}
+
+/**
+ * Get Reference currency for a given chain id
+ * @param chainId - chain id from {@link CHAIN_IDS}
+ * @returns Reference currency
+ *
+ * @example
+ * import { getReferenceCurrency } from '@clober/v2-sdk'
+ *
+ * const address = await getReferenceCurrency({
+ *   chainId: 421614,
+ * })
+ */
+export const getReferenceCurrency = ({
+  chainId,
+}: {
+  chainId: CHAIN_IDS
+}): Currency & { totalSupply: bigint } => {
+  return REFERENCE_CURRENCY[chainId]
 }
 
 export const getCurrencies = ({
