@@ -5,7 +5,7 @@ import {
   type WriteContractParameters,
 } from 'viem'
 
-import { type Transaction } from '../type'
+import { type Transaction } from '../types'
 
 export const buildTransaction = async (
   publicClient: PublicClient,

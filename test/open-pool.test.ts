@@ -2,7 +2,7 @@ import { beforeEach, expect, test } from 'vitest'
 import { getPool, openPool } from '@clober/v2-sdk'
 import { zeroHash } from 'viem'
 
-import { cloberTestChain2 } from '../src/constants/test-chain'
+import { cloberTestChain2 } from '../src/constants/networks/test-chain'
 
 import { FORK_URL } from './utils/constants'
 import { createProxyClients2 } from './utils/utils'

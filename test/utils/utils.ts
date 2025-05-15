@@ -8,7 +8,7 @@ import {
 import {
   cloberTestChain,
   cloberTestChain2,
-} from '../../src/constants/test-chain'
+} from '../../src/constants/networks/test-chain'
 
 import { account } from './constants'
 

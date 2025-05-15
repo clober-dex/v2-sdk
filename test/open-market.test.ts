@@ -1,7 +1,7 @@
 import { afterEach, expect, test } from 'vitest'
 import { getMarket, openMarket } from '@clober/v2-sdk'
 
-import { cloberTestChain } from '../src/constants/test-chain'
+import { cloberTestChain } from '../src/constants/networks/test-chain'
 
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
 import { createProxyClients } from './utils/utils'

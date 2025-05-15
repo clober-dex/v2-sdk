@@ -1,7 +1,7 @@
 import { PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../src'
-import { CONTRACT_ADDRESSES } from '../../src/constants/addresses'
+import { CONTRACT_ADDRESSES } from '../../src/constants/chain-configs/addresses'
 
 const _abi = [
   {

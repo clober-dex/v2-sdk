@@ -1,6 +1,6 @@
 import { zeroHash } from 'viem'
 
-export const emptyERC20PermitParams = {
+export const EMPTY_ERC20_PERMIT_PARAMS = {
   permitAmount: 0n,
   signature: {
     deadline: 0n,

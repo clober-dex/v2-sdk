@@ -2,7 +2,7 @@ import { afterEach, expect, test } from 'vitest'
 import { approveERC20, getMarket, marketOrder } from '@clober/v2-sdk'
 import { getAddress } from 'viem'
 
-import { cloberTestChain } from '../src/constants/test-chain'
+import { cloberTestChain } from '../src/constants/networks/test-chain'
 
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
 import { createProxyClients } from './utils/utils'

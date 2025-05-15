@@ -12,7 +12,7 @@ import {
 } from '@clober/v2-sdk'
 import { getAddress } from 'viem'
 
-import { cloberTestChain } from '../src/constants/test-chain'
+import { cloberTestChain } from '../src/constants/networks/test-chain'
 
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
 import { createProxyClients } from './utils/utils'
@@ -45,15 +45,10 @@ test('get open orders by user address', async () => {
 })
 
 test('get undefined open orders', async () => {
-  const { publicClient } = clients[1] as any
-
   expect(
     await getOpenOrder({
       chainId: cloberTestChain.id,
       id: '200',
-      options: {
-        rpcUrl: publicClient.transport.url!,
-      },
     }).catch((e) => e.message),
   ).toEqual('Open order not found: 200')
 })

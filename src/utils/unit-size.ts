@@ -1,13 +1,13 @@
 import { isAddressEqual, zeroAddress } from 'viem'
 
-import { type Currency } from '../model/currency'
-import { CHAIN_IDS } from '../constants/chain'
-import { WETH_ADDRESSES } from '../constants/currency'
+import { type Currency } from '../entities/currency/types'
+import { CHAIN_IDS } from '../constants/chain-configs/chain'
+import { WETH_ADDRESS } from '../constants/chain-configs/currency'
 
 export const calculateUnitSize = (chainId: CHAIN_IDS, quote: Currency) => {
   if (
     isAddressEqual(quote.address, zeroAddress) ||
-    WETH_ADDRESSES[chainId].includes(quote.address)
+    isAddressEqual(quote.address, WETH_ADDRESS[chainId]!)
   ) {
     return 10n ** 12n
   }

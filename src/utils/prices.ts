@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
 
 import { MAX_PRICE, MIN_PRICE, PRICE_PRECISION } from '../constants/price'
-import { Currency } from '../model/currency'
+import { Currency } from '../entities/currency/types'
 
 import { fromPrice, invertTick, toPrice } from './tick'
 import { max, min } from './bigint'
@@ -32,10 +32,9 @@ export const convertHumanReadablePriceToRawPrice = (
     .times(new BigNumber(2).pow(PRICE_PRECISION.toString()))
     .times(new BigNumber(10).pow(quoteDecimals))
     .div(new BigNumber(10).pow(baseDecimals))
-  const rawPrice = BigInt(
+  return BigInt(
     value.isInteger() ? value.toFixed() : value.integerValue().toFixed(),
   )
-  return rawPrice
 }
 
 export const parsePrice = (

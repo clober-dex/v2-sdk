@@ -1,7 +1,6 @@
-import { Depth } from '@clober/v2-sdk'
 import BigNumber from 'bignumber.js'
 
-export const getSize = (depth: Depth[], from: number, to: number) => {
+export const getSize = (depth: any[], from: number, to: number) => {
   return new BigNumber(
     (
       depth.find(
