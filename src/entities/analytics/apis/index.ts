@@ -157,10 +157,6 @@ export async function fetchProtocolAnalytics(
       (acc, item) => acc + item.protocolFees24hUSD,
       0,
     ),
-    accumulatedTotalValueLockedUSD: analyticsSnapshots.reduce(
-      (acc, item) => acc + item.totalValueLockedUSD,
-      0,
-    ),
     analyticsSnapshots,
   }
 }
