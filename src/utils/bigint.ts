@@ -1,3 +1,5 @@
+import { formatUnits } from 'viem'
+
 export const max = (...args: bigint[]) =>
   args.reduce((m, e) => (e > m ? e : m), 0n)
 export const min = (...args: bigint[]) =>
@@ -13,3 +15,6 @@ export const applyPercent = (
     BigInt(100 * 10 ** decimal)
   )
 }
+
+export const convertTokenToDecimal = (value: bigint, decimals: number) =>
+  Number(formatUnits(value, decimals))
