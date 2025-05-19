@@ -24,7 +24,7 @@ type CloberDayDataDTO = {
     type: string
     txCount: string
   }[]
-  tokenDayData: TokenDayDataDto[]
+  tokenDayDatas: TokenDayDataDto[]
 }
 
 type UserDayDatasDTO = {
@@ -66,7 +66,7 @@ export async function fetchProtocolAnalytics(
   }>(
     chainId,
     'getDailyCloberSnapshot',
-    'query getDailyCloberSnapshot { cloberDayDatas(orderBy: date, orderDirection: asc) { date walletCount newWalletCount transactionTypes { type txCount } tokenDayData { volumeUSD totalValueLockedUSD protocolFeesUSD token { id name symbol decimals priceUSD } } } }',
+    'query getDailyCloberSnapshot { cloberDayDatas(orderBy: date, orderDirection: asc) { date walletCount newWalletCount transactionTypes { type txCount } tokenDayDatas { volumeUSD totalValueLockedUSD protocolFeesUSD token { id name symbol decimals priceUSD } } } }',
     {},
   )
 
@@ -80,12 +80,12 @@ export async function fetchProtocolAnalytics(
         Number(transactionType.txCount),
       ]),
     ) as Record<TransactionType, number>,
-    volume24hUSD: item.tokenDayData.reduce(
+    volume24hUSD: item.tokenDayDatas.reduce(
       (acc, token) => acc + Number(token.volumeUSD),
       0,
     ),
     volume24hUSDMap: Object.fromEntries(
-      item.tokenDayData.map((token) => [
+      item.tokenDayDatas.map((token) => [
         getAddress(token.token.id),
         {
           currency: {
@@ -98,12 +98,12 @@ export async function fetchProtocolAnalytics(
         },
       ]),
     ),
-    protocolFees24hUSD: item.tokenDayData.reduce(
+    protocolFees24hUSD: item.tokenDayDatas.reduce(
       (acc, token) => acc + Number(token.protocolFeesUSD),
       0,
     ),
     protocolFees24hUSDMap: Object.fromEntries(
-      item.tokenDayData.map((token) => [
+      item.tokenDayDatas.map((token) => [
         getAddress(token.token.id),
         {
           currency: {
@@ -116,12 +116,12 @@ export async function fetchProtocolAnalytics(
         },
       ]),
     ),
-    totalValueLockedUSD: item.tokenDayData.reduce(
+    totalValueLockedUSD: item.tokenDayDatas.reduce(
       (acc, token) => acc + Number(token.totalValueLockedUSD),
       0,
     ),
     totalValueLockedUSDMap: Object.fromEntries(
-      item.tokenDayData.map((token) => [
+      item.tokenDayDatas.map((token) => [
         getAddress(token.token.id),
         {
           currency: {
