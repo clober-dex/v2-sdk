@@ -9,8 +9,6 @@ import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { toBookId } from '../utils/book-id'
 import { BookModel } from '../model'
 
-import { fetchIsMarketOpened } from './open'
-
 export const fetchBook = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
@@ -64,16 +62,43 @@ export const fetchBook = async (
       isOpened: book !== null,
     })
   }
-
-  const [depths, isOpened] = await Promise.all([
-    publicClient.readContract({
-      address: CONTRACT_ADDRESSES[chainId]!.BookViewer,
-      abi: BOOK_VIEWER_ABI,
-      functionName: 'getLiquidity',
-      args: [bookId, Number(2n ** 19n - 1n), BigInt(n)],
-    }),
-    fetchIsMarketOpened(publicClient, chainId, bookId),
-  ])
+  const [{ result: depths }, { result: isOpened }] =
+    await publicClient.multicall({
+      contracts: [
+        {
+          address: CONTRACT_ADDRESSES[chainId]!.BookViewer,
+          abi: BOOK_VIEWER_ABI,
+          functionName: 'getLiquidity',
+          args: [bookId, Number(2n ** 19n - 1n), BigInt(n)],
+        },
+        {
+          address: CONTRACT_ADDRESSES[chainId]!.BookManager,
+          abi: [
+            {
+              inputs: [
+                {
+                  internalType: 'BookId',
+                  name: 'id',
+                  type: 'uint192',
+                },
+              ],
+              name: 'isOpened',
+              outputs: [
+                {
+                  internalType: 'bool',
+                  name: '',
+                  type: 'bool',
+                },
+              ],
+              stateMutability: 'view',
+              type: 'function',
+            },
+          ] as const,
+          functionName: 'isOpened',
+          args: [bookId],
+        },
+      ],
+    })
 
   return new BookModel({
     chainId,
@@ -81,10 +106,12 @@ export const fetchBook = async (
     base: baseCurrency,
     quote: quoteCurrency,
     unitSize,
-    depths: depths.map(({ tick, depth }: { tick: number; depth: bigint }) => ({
-      tick: BigInt(tick),
-      unitAmount: depth,
-    })),
-    isOpened,
+    depths: (depths ?? []).map(
+      ({ tick, depth }: { tick: number; depth: bigint }) => ({
+        tick: BigInt(tick),
+        unitAmount: depth,
+      }),
+    ),
+    isOpened: isOpened ?? false,
   })
 }
