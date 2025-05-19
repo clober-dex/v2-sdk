@@ -409,7 +409,7 @@ export const fetchMarketSnapshots = async (
       }
     }),
   ]
-    .filter(({ price }) => price > 0)
+    .filter(({ priceUSD }) => priceUSD > 0)
     .filter(
       (market, index, self) =>
         self.findIndex((m) => m.marketId === market.marketId) === index,
