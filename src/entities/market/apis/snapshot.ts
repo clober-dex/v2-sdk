@@ -1,4 +1,4 @@
-import { formatUnits, getAddress, isAddressEqual, PublicClient } from 'viem'
+import { getAddress, isAddressEqual, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { MarketSnapshot } from '../types'
@@ -6,6 +6,7 @@ import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { getQuoteToken } from '../../../views'
 import { fetchTotalSupplyMap } from '../../currency/apis/total-supply'
 import { getDailyStartTimestampInSeconds } from '../../../utils/time'
+import { convertTokenToDecimal } from '../../../utils/bigint'
 
 type BookDayDataDto = {
   volumeUSD: string
@@ -16,6 +17,7 @@ type BookDayDataDto = {
     totalValueLockedUSD: string
     price: string
     inversePrice: string
+    lastTakenTimestamp: string
     base: {
       id: string
       name: string
@@ -52,7 +54,7 @@ export const fetchMarketSnapshot = async (
   }>(
     chainId,
     'getTopMarketSnapshot',
-    'query getMarkets($date: Int!, $bases: [String!]!, $quotes: [String!]!) { bookDayDatas( first: 200 orderBy: volumeUSD orderDirection: desc where: {date: $date, book_: {base_in: $bases, quote_in: $quotes}} ) { volumeUSD open close book { id totalValueLockedUSD price inversePrice base { id name symbol decimals priceUSD } quote { id name symbol decimals priceUSD } createdAtTimestamp } } }',
+    'query getMarkets($date: Int!, $bases: [String!]!, $quotes: [String!]!) { bookDayDatas( first: 200 orderBy: volumeUSD orderDirection: desc where: {date: $date, book_: {base_in: $bases, quote_in: $quotes}} ) { volumeUSD open close book { id totalValueLockedUSD price inversePrice lastTakenTimestamp base { id name symbol decimals priceUSD } quote { id name symbol decimals priceUSD } createdAtTimestamp } } }',
     {
       date: dayStartTimestamp,
       bases: [token0, token1].map((address) => address.toLowerCase()),
@@ -61,7 +63,9 @@ export const fetchMarketSnapshot = async (
   )
   if (bookDayDatas.length >= 3) {
     // TODO: check fee policy if needed
-    throw new Error('Too many bookDayDatas')
+    console.warn(
+      `[fetchMarketSnapshot] too many bookDayDatas for ${token0}/${token1}`,
+    )
   }
 
   const totalSupplyMap = await fetchTotalSupplyMap(
@@ -91,12 +95,13 @@ export const fetchMarketSnapshot = async (
     ),
   )
   if (bidBook && askBook) {
-    const baseTotalSupply = Number(
-      formatUnits(
-        BigInt(totalSupplyMap[getAddress(bidBook.book.base.id)] ?? 0n),
-        Number(bidBook.book.base.decimals),
-      ),
+    const baseTotalSupply = convertTokenToDecimal(
+      BigInt(totalSupplyMap[getAddress(bidBook.book.base.id)] ?? 0n),
+      Number(bidBook.book.base.decimals),
     )
+    const isBidNewer =
+      Number(bidBook.book.lastTakenTimestamp) >=
+      Number(askBook.book.lastTakenTimestamp)
     return {
       chainId,
       marketId: `${bidBook.book.base.symbol}/${bidBook.book.quote.symbol}`,
@@ -112,32 +117,40 @@ export const fetchMarketSnapshot = async (
         symbol: bidBook.book.quote.symbol,
         decimals: Number(bidBook.book.quote.decimals),
       },
-      price:
-        Number(bidBook.book.price) || Number(askBook.book.inversePrice) || 0,
-      priceUSD:
-        Number(bidBook.book.base.priceUSD) ||
-        Number(askBook.book.quote.priceUSD) ||
-        0,
+      price: isBidNewer
+        ? Number(bidBook.book.price)
+        : Number(askBook.book.inversePrice),
+      priceUSD: isBidNewer
+        ? Number(bidBook.book.base.priceUSD)
+        : Number(askBook.book.quote.priceUSD),
       volume24hUSD: Number(bidBook.volumeUSD) + Number(askBook.volumeUSD),
       totalValueLockedUSD:
         Number(bidBook.book.totalValueLockedUSD) +
         Number(askBook.book.totalValueLockedUSD),
       priceChange24h:
-        (Number(bidBook.close) / Number(bidBook.open) - 1) * 100 ||
-        (Number(askBook.open) / Number(askBook.close) - 1) * 100 ||
-        0,
+        isBidNewer && Number(bidBook.open) > 0
+          ? Number(bidBook.close) / Number(bidBook.open) - 1
+          : !isBidNewer && Number(askBook.close) > 0
+            ? Number(askBook.open) / Number(askBook.close) - 1
+            : 0,
       createdAtTimestamp: Math.min(
         Number(bidBook.book.createdAtTimestamp),
         Number(askBook.book.createdAtTimestamp),
       ),
-      fdv: baseTotalSupply * Number(bidBook.book.base.priceUSD),
+      fdv:
+        baseTotalSupply *
+        (isBidNewer
+          ? Number(bidBook.book.base.priceUSD)
+          : Number(askBook.book.quote.priceUSD)),
+      lastUpdatedAtTimestamp: Math.max(
+        Number(bidBook.book.lastTakenTimestamp),
+        Number(askBook.book.lastTakenTimestamp),
+      ),
     }
   } else if (bidBook) {
-    const baseTotalSupply = Number(
-      formatUnits(
-        BigInt(totalSupplyMap[getAddress(bidBook.book.base.id)] ?? 0n),
-        Number(bidBook.book.base.decimals),
-      ),
+    const baseTotalSupply = convertTokenToDecimal(
+      BigInt(totalSupplyMap[getAddress(bidBook.book.base.id)] ?? 0n),
+      Number(bidBook.book.base.decimals),
     )
     return {
       chainId,
@@ -159,16 +172,17 @@ export const fetchMarketSnapshot = async (
       volume24hUSD: Number(bidBook.volumeUSD) || 0,
       totalValueLockedUSD: Number(bidBook.book.totalValueLockedUSD) || 0,
       priceChange24h:
-        (Number(bidBook.close) / Number(bidBook.open) - 1) * 100 || 0,
+        Number(bidBook.open) > 0
+          ? Number(bidBook.close) / Number(bidBook.open) - 1
+          : 0,
       createdAtTimestamp: Number(bidBook.book.createdAtTimestamp) || 0,
       fdv: baseTotalSupply * Number(bidBook.book.base.priceUSD) || 0,
+      lastUpdatedAtTimestamp: Number(bidBook.book.lastTakenTimestamp) || 0,
     }
   } else if (askBook) {
-    const baseTotalSupply = Number(
-      formatUnits(
-        BigInt(totalSupplyMap[getAddress(askBook.book.quote.id)] ?? 0n),
-        Number(askBook.book.quote.decimals),
-      ),
+    const baseTotalSupply = convertTokenToDecimal(
+      BigInt(totalSupplyMap[getAddress(askBook.book.quote.id)] ?? 0n),
+      Number(askBook.book.quote.decimals),
     )
     return {
       chainId,
@@ -189,9 +203,13 @@ export const fetchMarketSnapshot = async (
       priceUSD: Number(askBook.book.quote.priceUSD) || 0,
       volume24hUSD: Number(askBook.volumeUSD) || 0,
       totalValueLockedUSD: Number(askBook.book.totalValueLockedUSD) || 0,
-      priceChange24h: Number(askBook.open) / Number(askBook.close) - 1 || 0,
+      priceChange24h:
+        Number(askBook.close) > 0
+          ? Number(askBook.open) / Number(askBook.close) - 1
+          : 0,
       createdAtTimestamp: Number(askBook.book.createdAtTimestamp) || 0,
       fdv: baseTotalSupply * Number(askBook.book.quote.priceUSD) || 0,
+      lastUpdatedAtTimestamp: Number(askBook.book.lastTakenTimestamp) || 0,
     }
   }
   throw new Error('No bookDayDatas found')
@@ -212,7 +230,7 @@ export const fetchMarketSnapshots = async (
   }>(
     chainId,
     'getTopMarketSnapshots',
-    'query getMarkets($date: Int!) { bookDayDatas( first: 200 orderBy: volumeUSD orderDirection: desc where: {date: $date} ) { volumeUSD open close book { id totalValueLockedUSD price inversePrice base { id name symbol decimals priceUSD } quote { id name symbol decimals priceUSD } createdAtTimestamp } } }',
+    'query getMarkets($date: Int!) { bookDayDatas( first: 200 orderBy: volumeUSD orderDirection: desc where: {date: $date} ) { volumeUSD open close book { id totalValueLockedUSD price inversePrice lastTakenTimestamp base { id name symbol decimals priceUSD } quote { id name symbol decimals priceUSD } createdAtTimestamp } } }',
     {
       date: dayStartTimestamp,
     },
@@ -267,7 +285,7 @@ export const fetchMarketSnapshots = async (
         symbol: bidBook.book.base.symbol,
         decimals: Number(bidBook.book.base.decimals),
       }
-      const askBookDayData = askBookDayDataList.find(
+      const askBook = askBookDayDataList.find(
         (askBook) =>
           isAddressEqual(
             getAddress(askBook.book.quote.id),
@@ -278,35 +296,50 @@ export const fetchMarketSnapshots = async (
             quoteCurrency.address,
           ),
       )
-      const baseTotalSupply = Number(
-        formatUnits(
-          BigInt(totalSupplyMap[baseCurrency.address] ?? 0n),
-          baseCurrency.decimals,
-        ),
+      const baseTotalSupply = convertTokenToDecimal(
+        BigInt(totalSupplyMap[baseCurrency.address] ?? 0n),
+        baseCurrency.decimals,
       )
+      const isBidNewer =
+        Number(bidBook.book.lastTakenTimestamp) >=
+        Number(askBook?.book.lastTakenTimestamp ?? 0)
       return {
         chainId,
         marketId: `${baseCurrency.symbol}/${quoteCurrency.symbol}`,
         base: baseCurrency,
         quote: quoteCurrency,
-        price: Number(bidBook.book.price),
-        priceUSD: Number(bidBook.book.base.priceUSD),
+        price: isBidNewer
+          ? Number(bidBook.book.price)
+          : Number(askBook?.book.inversePrice),
+        priceUSD: isBidNewer
+          ? Number(bidBook.book.base.priceUSD)
+          : Number(askBook?.book.quote.priceUSD),
         priceChange24h:
-          (Number(bidBook.close) / Number(bidBook.open) - 1) * 100,
-        volume24hUSD: askBookDayData
-          ? Number(askBookDayData.volumeUSD) + Number(bidBook.volumeUSD)
+          isBidNewer && Number(bidBook.open) > 0
+            ? Number(bidBook.close) / Number(bidBook.open) - 1
+            : !isBidNewer && askBook && Number(askBook.close) > 0
+              ? Number(askBook.open) / Number(askBook.close) - 1
+              : 0,
+        volume24hUSD: askBook
+          ? Number(askBook.volumeUSD) + Number(bidBook.volumeUSD)
           : Number(bidBook.volumeUSD),
-        totalValueLockedUSD: askBookDayData
-          ? Number(askBookDayData.book.totalValueLockedUSD) +
+        totalValueLockedUSD: askBook
+          ? Number(askBook.book.totalValueLockedUSD) +
             Number(bidBook.book.totalValueLockedUSD)
           : Number(bidBook.book.totalValueLockedUSD),
-        createdAtTimestamp: askBookDayData
+        createdAtTimestamp: askBook
           ? Math.min(
               Number(bidBook.book.createdAtTimestamp),
-              Number(askBookDayData.book.createdAtTimestamp),
+              Number(askBook.book.createdAtTimestamp),
             )
           : Number(bidBook.book.createdAtTimestamp),
-        fdv: baseTotalSupply * Number(bidBook.book.base.priceUSD),
+        fdv: isBidNewer
+          ? baseTotalSupply * Number(bidBook.book.base.priceUSD)
+          : baseTotalSupply * Number(askBook?.book.quote.priceUSD),
+        lastUpdatedAtTimestamp: Math.max(
+          Number(bidBook.book.lastTakenTimestamp),
+          Number(askBook?.book.lastTakenTimestamp ?? 0),
+        ),
       }
     }),
     ...askBookDayDataList.map((askBook) => {
@@ -333,20 +366,30 @@ export const fetchMarketSnapshots = async (
             baseCurrency.address,
           ),
       )
-      const baseTotalSupply = Number(
-        formatUnits(
-          BigInt(totalSupplyMap[baseCurrency.address] ?? 0n),
-          baseCurrency.decimals,
-        ),
+      const baseTotalSupply = convertTokenToDecimal(
+        BigInt(totalSupplyMap[baseCurrency.address] ?? 0n),
+        baseCurrency.decimals,
       )
+      const isBidNewer =
+        Number(bidBook?.book.lastTakenTimestamp ?? 0) >=
+        Number(askBook.book.lastTakenTimestamp)
       return {
         chainId,
         marketId: `${baseCurrency.symbol}/${quoteCurrency.symbol}`,
         base: baseCurrency,
         quote: quoteCurrency,
-        price: Number(askBook.book.inversePrice),
-        priceUSD: Number(askBook.book.quote.priceUSD),
-        priceChange24h: Number(askBook.open) / Number(askBook.close) - 1,
+        price: isBidNewer
+          ? Number(bidBook?.book.price)
+          : Number(askBook.book.inversePrice),
+        priceUSD: isBidNewer
+          ? Number(bidBook?.book.base.priceUSD)
+          : Number(askBook.book.quote.priceUSD),
+        priceChange24h:
+          isBidNewer && bidBook && Number(bidBook.open) > 0
+            ? Number(bidBook.close) / Number(bidBook.open) - 1
+            : !isBidNewer && Number(askBook.close) > 0
+              ? Number(askBook.open) / Number(askBook.close) - 1
+              : 0,
         volume24hUSD: bidBook
           ? Number(askBook.volumeUSD) + Number(bidBook.volumeUSD)
           : Number(askBook.volumeUSD),
@@ -360,7 +403,13 @@ export const fetchMarketSnapshots = async (
               Number(bidBook.book.createdAtTimestamp),
             )
           : Number(askBook.book.createdAtTimestamp),
-        fdv: baseTotalSupply * Number(askBook.book.quote.priceUSD),
+        fdv: isBidNewer
+          ? baseTotalSupply * Number(bidBook?.book.base.priceUSD)
+          : baseTotalSupply * Number(askBook.book.quote.priceUSD),
+        lastUpdatedAtTimestamp: Math.max(
+          Number(askBook.book.lastTakenTimestamp),
+          Number(bidBook?.book.lastTakenTimestamp ?? 0),
+        ),
       }
     }),
   ]
