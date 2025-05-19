@@ -25,7 +25,8 @@ export type MarketSnapshot = {
   totalValueLockedUSD: number
   priceChange24h: number
   createdAtTimestamp: number
-  lastUpdatedAtTimestamp: number
+  bidBookUpdatedAt: number
+  askBookUpdatedAt: number
   fdv: number
 }
 

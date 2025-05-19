@@ -142,10 +142,8 @@ export const fetchMarketSnapshot = async (
         (isBidNewer
           ? Number(bidBook.book.base.priceUSD)
           : Number(askBook.book.quote.priceUSD)),
-      lastUpdatedAtTimestamp: Math.max(
-        Number(bidBook.book.lastTakenTimestamp),
-        Number(askBook.book.lastTakenTimestamp),
-      ),
+      bidBookUpdatedAt: Number(bidBook.book.lastTakenTimestamp),
+      askBookUpdatedAt: Number(askBook.book.lastTakenTimestamp),
     }
   } else if (bidBook) {
     const baseTotalSupply = convertTokenToDecimal(
@@ -177,7 +175,8 @@ export const fetchMarketSnapshot = async (
           : 0,
       createdAtTimestamp: Number(bidBook.book.createdAtTimestamp) || 0,
       fdv: baseTotalSupply * Number(bidBook.book.base.priceUSD) || 0,
-      lastUpdatedAtTimestamp: Number(bidBook.book.lastTakenTimestamp) || 0,
+      bidBookUpdatedAt: Number(bidBook.book.lastTakenTimestamp) || 0,
+      askBookUpdatedAt: 0,
     }
   } else if (askBook) {
     const baseTotalSupply = convertTokenToDecimal(
@@ -209,7 +208,8 @@ export const fetchMarketSnapshot = async (
           : 0,
       createdAtTimestamp: Number(askBook.book.createdAtTimestamp) || 0,
       fdv: baseTotalSupply * Number(askBook.book.quote.priceUSD) || 0,
-      lastUpdatedAtTimestamp: Number(askBook.book.lastTakenTimestamp) || 0,
+      bidBookUpdatedAt: 0,
+      askBookUpdatedAt: Number(askBook.book.lastTakenTimestamp) || 0,
     }
   }
   throw new Error('No bookDayDatas found')
@@ -336,10 +336,8 @@ export const fetchMarketSnapshots = async (
         fdv: isBidNewer
           ? baseTotalSupply * Number(bidBook.book.base.priceUSD)
           : baseTotalSupply * Number(askBook?.book.quote.priceUSD),
-        lastUpdatedAtTimestamp: Math.max(
-          Number(bidBook.book.lastTakenTimestamp),
-          Number(askBook?.book.lastTakenTimestamp ?? 0),
-        ),
+        bidBookUpdatedAt: Number(bidBook.book.lastTakenTimestamp),
+        askBookUpdatedAt: Number(askBook?.book.lastTakenTimestamp ?? 0),
       }
     }),
     ...askBookDayDataList.map((askBook) => {
@@ -406,10 +404,8 @@ export const fetchMarketSnapshots = async (
         fdv: isBidNewer
           ? baseTotalSupply * Number(bidBook?.book.base.priceUSD)
           : baseTotalSupply * Number(askBook.book.quote.priceUSD),
-        lastUpdatedAtTimestamp: Math.max(
-          Number(askBook.book.lastTakenTimestamp),
-          Number(bidBook?.book.lastTakenTimestamp ?? 0),
-        ),
+        bidBookUpdatedAt: Number(bidBook?.book.lastTakenTimestamp ?? 0),
+        askBookUpdatedAt: Number(askBook.book.lastTakenTimestamp),
       }
     }),
   ]
