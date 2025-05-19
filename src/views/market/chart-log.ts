@@ -31,7 +31,7 @@ export const getLatestChartLog = async ({
   quote: `0x${string}`
   base: `0x${string}`
 }): Promise<ChartLog> => {
-  return fetchLatestChartLog(chainId, `${base}/${quote}`)
+  return fetchLatestChartLog(chainId, `${base}-${quote}`)
 }
 
 /**
@@ -72,5 +72,5 @@ export const getChartLogs = async ({
   from: number
   to: number
 }): Promise<ChartLog[]> => {
-  return fetchChartLogs(chainId, `${base}/${quote}`, intervalType, from, to)
+  return fetchChartLogs(chainId, `${base}-${quote}`, intervalType, from, to)
 }
