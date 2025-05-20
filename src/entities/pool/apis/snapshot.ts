@@ -132,17 +132,11 @@ export const fetchPoolSnapshotFromSubgraph = async (
       priceB: poolHourData.priceB,
       volumeA: {
         currency: currencyA,
-        value: formatUnits(
-          BigInt(poolHourData.volumeTokenA),
-          Number(pool.tokenA.decimals),
-        ),
+        value: poolHourData.volumeTokenA,
       },
       volumeB: {
         currency: currencyB,
-        value: formatUnits(
-          BigInt(poolHourData.volumeTokenB),
-          Number(pool.tokenB.decimals),
-        ),
+        value: poolHourData.volumeTokenB,
       },
       volumeUSD: poolHourData.volumeUSD,
     })),
