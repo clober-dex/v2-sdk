@@ -42,7 +42,7 @@ export const fetchBook = async (
       'getBook',
       'query getBook($bookId: ID!) { book(id: $bookId) { depths(where: {unitAmount_gt: 0}) { tick unitAmount } } }',
       {
-        bookId,
+        bookId: bookId.toString(),
       },
     )
     return new BookModel({
