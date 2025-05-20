@@ -1,4 +1,4 @@
-import { getAddress } from 'viem'
+import { formatUnits, getAddress } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { Currency, PoolSnapshot } from '../../../types'
@@ -95,15 +95,21 @@ export const fetchPoolSnapshotFromSubgraph = async (
     initialLPInfo: {
       tokenA: {
         currency: currencyA,
-        value: pool.initialTokenAAmount,
+        value: formatUnits(
+          BigInt(pool.initialTokenAAmount),
+          Number(pool.tokenA.decimals),
+        ),
       },
       tokenB: {
         currency: currencyB,
-        value: pool.initialTokenBAmount,
+        value: formatUnits(
+          BigInt(pool.initialTokenBAmount),
+          Number(pool.tokenB.decimals),
+        ),
       },
       lpToken: {
         currency: currencyLp,
-        value: pool.initialTotalSupply,
+        value: formatUnits(BigInt(pool.initialTotalSupply), 18),
       },
       lpPriceUSD: pool.initialLPPriceUSD,
       timestamp: Number(pool.createdAtTimestamp),
@@ -126,11 +132,17 @@ export const fetchPoolSnapshotFromSubgraph = async (
       priceB: poolHourData.priceB,
       volumeA: {
         currency: currencyA,
-        value: poolHourData.volumeTokenA,
+        value: formatUnits(
+          BigInt(poolHourData.volumeTokenA),
+          Number(pool.tokenA.decimals),
+        ),
       },
       volumeB: {
         currency: currencyB,
-        value: poolHourData.volumeTokenB,
+        value: formatUnits(
+          BigInt(poolHourData.volumeTokenB),
+          Number(pool.tokenB.decimals),
+        ),
       },
       volumeUSD: poolHourData.volumeUSD,
     })),
