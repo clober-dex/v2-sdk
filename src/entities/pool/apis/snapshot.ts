@@ -12,12 +12,20 @@ type PoolDto = {
     name: string
     symbol: string
     decimals: string
+    tokenDayData: {
+      date: number
+      priceUSD: string
+    }[]
   }
   tokenB: {
     id: string
     name: string
     symbol: string
     decimals: string
+    tokenDayData: {
+      date: number
+      priceUSD: string
+    }[]
   }
   initialTotalSupply: string
   initialTokenAAmount: string
@@ -62,7 +70,7 @@ export const fetchPoolSnapshotFromSubgraph = async (
   }>(
     chainId,
     'getPoolSnapshot',
-    'query getPoolSnapshot($poolKey: ID!) { pool(id: $poolKey) { id tokenA { id name symbol decimals } tokenB { id name symbol decimals } initialTotalSupply initialTokenAAmount initialTokenBAmount initialLPPriceUSD createdAtTimestamp createdAtTransaction { id } totalValueLockedUSD totalSupply volumeUSD lpPriceUSD spreadProfitUSD } poolHourDatas( where: {pool: $poolKey, oraclePrice_gt: 0} orderBy: date orderDirection: desc first: 1000 ) { date totalValueLockedUSD totalSupply spreadProfitUSD lpPriceUSD oraclePrice priceA priceB volumeTokenA volumeTokenB volumeUSD } }',
+    'query getPoolSnapshot($poolKey: ID!) { pool(id: $poolKey) { id tokenA { id name symbol decimals tokenDayData(orderBy:date, orderDirection: asc) { date priceUSD } } tokenB { id name symbol decimals tokenDayData(orderBy:date, orderDirection: asc) { date priceUSD } } initialTotalSupply initialTokenAAmount initialTokenBAmount initialLPPriceUSD createdAtTimestamp createdAtTransaction { id } totalValueLockedUSD totalSupply volumeUSD lpPriceUSD spreadProfitUSD } poolHourDatas( where: {pool: $poolKey, oraclePrice_gt: 0} orderBy: date orderDirection: desc first: 1000 ) { date totalValueLockedUSD totalSupply spreadProfitUSD lpPriceUSD oraclePrice priceA priceB volumeTokenA volumeTokenB volumeUSD } }',
     {
       poolKey: poolKey.toLowerCase(),
     },
@@ -129,7 +137,15 @@ export const fetchPoolSnapshotFromSubgraph = async (
       lpPriceUSD: poolHourData.lpPriceUSD,
       oraclePrice: poolHourData.oraclePrice,
       priceA: poolHourData.priceA,
+      priceAUSD: Number(
+        pool.tokenA.tokenDayData.find(({ date }) => date === poolHourData.date)
+          ?.priceUSD ?? 0,
+      ),
       priceB: poolHourData.priceB,
+      priceBUSD: Number(
+        pool.tokenB.tokenDayData.find(({ date }) => date === poolHourData.date)
+          ?.priceUSD ?? 0,
+      ),
       volumeA: {
         currency: currencyA,
         value: poolHourData.volumeTokenA,
