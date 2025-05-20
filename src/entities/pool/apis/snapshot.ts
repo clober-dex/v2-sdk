@@ -42,7 +42,7 @@ type PoolDto = {
   spreadProfitUSD: string
 }
 
-type PoolHourDataDto = {
+type PoolDayDataDto = {
   date: number
   totalValueLockedUSD: string
   totalSupply: string
@@ -61,16 +61,16 @@ export const fetchPoolSnapshotFromSubgraph = async (
   poolKey: `0x${string}`,
 ): Promise<PoolSnapshot | null> => {
   const {
-    data: { pool, poolHourDatas },
+    data: { pool, poolDayDatas },
   } = await Subgraph.get<{
     data: {
       pool: PoolDto | null
-      poolHourDatas: PoolHourDataDto[]
+      poolDayDatas: PoolDayDataDto[]
     }
   }>(
     chainId,
     'getPoolSnapshot',
-    'query getPoolSnapshot($poolKey: ID!) { pool(id: $poolKey) { id tokenA { id name symbol decimals tokenDayData(orderBy:date, orderDirection: asc) { date priceUSD } } tokenB { id name symbol decimals tokenDayData(orderBy:date, orderDirection: asc) { date priceUSD } } initialTotalSupply initialTokenAAmount initialTokenBAmount initialLPPriceUSD createdAtTimestamp createdAtTransaction { id } totalValueLockedUSD totalSupply volumeUSD lpPriceUSD spreadProfitUSD } poolHourDatas( where: {pool: $poolKey, oraclePrice_gt: 0} orderBy: date orderDirection: desc first: 1000 ) { date totalValueLockedUSD totalSupply spreadProfitUSD lpPriceUSD oraclePrice priceA priceB volumeTokenA volumeTokenB volumeUSD } }',
+    'query getPoolSnapshot($poolKey: ID!) { pool(id: $poolKey) { id tokenA { id name symbol decimals tokenDayData(orderBy: date, orderDirection: asc) { date priceUSD } } tokenB { id name symbol decimals tokenDayData(orderBy: date, orderDirection: asc) { date priceUSD } } initialTotalSupply initialTokenAAmount initialTokenBAmount initialLPPriceUSD createdAtTimestamp createdAtTransaction { id } totalValueLockedUSD totalSupply volumeUSD lpPriceUSD spreadProfitUSD } poolDayDatas( where: {pool: $poolKey, oraclePrice_gt: 0} orderBy: date orderDirection: desc first: 1000 ) { date totalValueLockedUSD totalSupply spreadProfitUSD lpPriceUSD oraclePrice priceA priceB volumeTokenA volumeTokenB volumeUSD } }',
     {
       poolKey: poolKey.toLowerCase(),
     },
@@ -130,31 +130,31 @@ export const fetchPoolSnapshotFromSubgraph = async (
     lpPriceUSD: pool.lpPriceUSD,
     totalTvlUSD: pool.totalValueLockedUSD,
     totalSpreadProfitUSD: pool.spreadProfitUSD,
-    performanceHistories: poolHourDatas.map((poolHourData) => ({
-      timestamp: poolHourData.date,
-      spreadProfitUSD: poolHourData.spreadProfitUSD,
-      tvlUSD: poolHourData.totalValueLockedUSD,
-      lpPriceUSD: poolHourData.lpPriceUSD,
-      oraclePrice: poolHourData.oraclePrice,
-      priceA: poolHourData.priceA,
+    performanceHistories: poolDayDatas.map((poolDayData) => ({
+      timestamp: poolDayData.date,
+      spreadProfitUSD: poolDayData.spreadProfitUSD,
+      tvlUSD: poolDayData.totalValueLockedUSD,
+      lpPriceUSD: poolDayData.lpPriceUSD,
+      oraclePrice: poolDayData.oraclePrice,
+      priceA: poolDayData.priceA,
       priceAUSD: Number(
-        pool.tokenA.tokenDayData.find(({ date }) => date === poolHourData.date)
+        pool.tokenA.tokenDayData.find(({ date }) => date === poolDayData.date)
           ?.priceUSD ?? 0,
       ),
-      priceB: poolHourData.priceB,
+      priceB: poolDayData.priceB,
       priceBUSD: Number(
-        pool.tokenB.tokenDayData.find(({ date }) => date === poolHourData.date)
+        pool.tokenB.tokenDayData.find(({ date }) => date === poolDayData.date)
           ?.priceUSD ?? 0,
       ),
       volumeA: {
         currency: currencyA,
-        value: poolHourData.volumeTokenA,
+        value: poolDayData.volumeTokenA,
       },
       volumeB: {
         currency: currencyB,
-        value: poolHourData.volumeTokenB,
+        value: poolDayData.volumeTokenB,
       },
-      volumeUSD: poolHourData.volumeUSD,
+      volumeUSD: poolDayData.volumeUSD,
     })),
   }
 }
