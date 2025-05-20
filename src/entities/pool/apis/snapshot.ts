@@ -126,7 +126,8 @@ export const fetchPoolSnapshotFromSubgraph = async (
     currencyA,
     currencyB,
     currencyLp,
-    volumeUSD24h: pool.volumeUSD,
+    volumeUSD24h:
+      poolDayDatas.sort((a, b) => b.date - a.date)?.[0]?.volumeUSD ?? '0',
     lpPriceUSD: pool.lpPriceUSD,
     totalTvlUSD: pool.totalValueLockedUSD,
     totalSpreadProfitUSD: pool.spreadProfitUSD,
