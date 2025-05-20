@@ -1,6 +1,6 @@
 import { PublicClient, zeroAddress, isAddressEqual } from 'viem'
 
-import { NATIVE_CURRENCY } from '../../../constants/chain-configs/currency'
+import { NATIVE_CURRENCY_TOTAL_SUPPLY } from '../../../constants/chain-configs/currency'
 
 const abi = [
   {
@@ -29,7 +29,7 @@ export const fetchTotalSupply = async (
   address: `0x${string}`,
 ): Promise<bigint> => {
   if (isAddressEqual(address, zeroAddress)) {
-    return NATIVE_CURRENCY[chainId].totalSupply
+    return NATIVE_CURRENCY_TOTAL_SUPPLY[chainId]
   }
 
   const cached = getFromCache(chainId, address)
@@ -93,6 +93,6 @@ export const fetchTotalSupplyMap = async (
   return {
     ...cached,
     ...fetched,
-    [zeroAddress as `0x${string}`]: NATIVE_CURRENCY[chainId].totalSupply,
+    [zeroAddress as `0x${string}`]: NATIVE_CURRENCY_TOTAL_SUPPLY[chainId],
   }
 }
