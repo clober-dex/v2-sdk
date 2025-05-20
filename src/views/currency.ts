@@ -26,7 +26,7 @@ export const getNativeCurrency = ({
   chainId,
 }: {
   chainId: CHAIN_IDS
-}): Currency & { totalSupply: bigint } => {
+}): Currency => {
   return NATIVE_CURRENCY[chainId]
 }
 
@@ -46,7 +46,7 @@ export const getReferenceCurrency = ({
   chainId,
 }: {
   chainId: CHAIN_IDS
-}): Currency & { totalSupply: bigint } => {
+}): Currency => {
   return REFERENCE_CURRENCY[chainId]
 }
 
