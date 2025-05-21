@@ -12,6 +12,7 @@ import {
   PublicClient,
   zeroHash,
 } from 'viem'
+import { arbitrumSepolia } from 'viem/chains'
 
 import { parsePrice } from '../src/utils/prices'
 import { invertTick } from '../src/utils/tick'
@@ -145,7 +146,7 @@ test('get expected output ask', async () => {
 
 test('get expected output ask with subgraph', async () => {
   const { takenAmount, spentAmount } = await getExpectedOutput({
-    chainId: cloberTestChain.id,
+    chainId: arbitrumSepolia.id,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0x0000000000000000000000000000000000000000',
     amountIn: '1000.123',
@@ -159,7 +160,7 @@ test('get expected output ask with subgraph', async () => {
 
 test('get expected input ask with subgraph', async () => {
   const { takenAmount, spentAmount } = await getExpectedInput({
-    chainId: cloberTestChain.id,
+    chainId: arbitrumSepolia.id,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0x0000000000000000000000000000000000000000',
     amountOut: '1000.123',
