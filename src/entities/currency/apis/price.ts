@@ -16,7 +16,7 @@ export const fetchCurrencies = async (
         id: string
         name: string
         symbol: string
-        decimals: number
+        decimals: string
       }[]
     }
   }>(
@@ -73,10 +73,10 @@ export const fetchDailyPriceMapAtTimestamp = async (
   const dayStartTimestamp = getDailyStartTimestampInSeconds(timestampInSeconds)
 
   const {
-    data: { tokenDayDatas },
+    data: { tokenDayData },
   } = await Subgraph.get<{
     data: {
-      tokenDayDatas: {
+      tokenDayData: {
         token: {
           id: string
         }
@@ -86,13 +86,13 @@ export const fetchDailyPriceMapAtTimestamp = async (
   }>(
     chainId,
     'getDailyPriceMap',
-    `query getDailyPriceMap($date: Int!) { tokenDayDatas(where: {date: $date, priceUSD_gt: 0}) { token { id } priceUSD } }`,
+    `query getDailyPriceMap($date: Int!) { tokenDayData(where: {date: $date, priceUSD_gt: 0}) { token { id } priceUSD } }`,
     {
       date: dayStartTimestamp,
     },
   )
 
-  return tokenDayDatas.reduce(
+  return tokenDayData.reduce(
     (acc, { token, priceUSD }) => {
       acc[getAddress(token.id)] = parseFloat(priceUSD)
       return acc
