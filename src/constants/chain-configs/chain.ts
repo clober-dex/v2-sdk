@@ -1,4 +1,9 @@
-import { arbitrumSepolia, type Chain, monadTestnet } from 'viem/chains'
+import {
+  arbitrumSepolia,
+  berachain,
+  type Chain,
+  monadTestnet,
+} from 'viem/chains'
 
 import { cloberTestChain, cloberTestChain2 } from '../networks/test-chain'
 import { riseSepolia } from '../networks/rise-sepolia'
@@ -9,7 +14,7 @@ export enum CHAIN_IDS {
   CLOBER_TESTNET_2 = cloberTestChain2.id,
   ARBITRUM_SEPOLIA = arbitrumSepolia.id,
   // BASE = base.id,
-  // BERACHAIN_MAINNET = berachain.id,
+  BERACHAIN_MAINNET = berachain.id,
   MONAD_TESTNET = monadTestnet.id,
   // SONIC_MAINNET = sonic.id,
   RISE_SEPOLIA = riseSepolia.id,
@@ -22,7 +27,7 @@ export const CHAIN_MAP: {
   [CHAIN_IDS.CLOBER_TESTNET_2]: cloberTestChain2,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: arbitrumSepolia,
   // [CHAIN_IDS.BASE]: base,
-  // [CHAIN_IDS.BERACHAIN_MAINNET]: berachain,
+  [CHAIN_IDS.BERACHAIN_MAINNET]: berachain,
   [CHAIN_IDS.MONAD_TESTNET]: monadTestnet,
   // [CHAIN_IDS.SONIC_MAINNET]: sonic,
   [CHAIN_IDS.RISE_SEPOLIA]: riseSepolia,
