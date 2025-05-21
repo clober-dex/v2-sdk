@@ -16,7 +16,7 @@ export const fetchCurrencies = async (
         id: string
         name: string
         symbol: string
-        decimals: number
+        decimals: string
       }[]
     }
   }>(
