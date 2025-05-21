@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
-import { getMarket, getQuoteToken } from '@clober/v2-sdk'
+import { getMarket, getMarketSnapshots, getQuoteToken } from '@clober/v2-sdk'
 
 import { cloberTestChain } from '../src/constants/networks/test-chain'
 
@@ -71,6 +71,38 @@ test('fetch open market', async () => {
 
   expect(market.bidBook.isOpened).toEqual(true)
   expect(market.askBook.isOpened).toEqual(true)
+})
+
+test('fetch open market with subgraph', async () => {
+  const market = await getMarket({
+    chainId: cloberTestChain.id,
+    token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    token1: '0x0000000000000000000000000000000000000000',
+    options: {
+      useSubgraph: true,
+    },
+  })
+  expect(market.chainId).toEqual(cloberTestChain.id)
+  expect(market.quote.address).toEqual(
+    '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0',
+  )
+  expect(market.base.address).toEqual(
+    '0x0000000000000000000000000000000000000000',
+  )
+})
+
+test('fetch market snapshot', async () => {
+  const market = await getMarketSnapshots({
+    chainId: cloberTestChain.id,
+  })
+  expect(market.length).toBeGreaterThan(0)
+})
+
+test('fetch market snapshots', async () => {
+  const market = await getMarketSnapshots({
+    chainId: cloberTestChain.id,
+  })
+  expect(market.length).toBeGreaterThan(0)
 })
 
 test('fetch empty market', async () => {

@@ -1,6 +1,12 @@
 import { beforeEach, expect, test } from 'vitest'
-import { getPool, openPool } from '@clober/v2-sdk'
+import {
+  getPool,
+  getPoolSnapshot,
+  getPoolSnapshots,
+  openPool,
+} from '@clober/v2-sdk'
 import { zeroHash } from 'viem'
+import { monadTestnet } from 'viem/chains'
 
 import { cloberTestChain2 } from '../src/constants/networks/test-chain'
 
@@ -80,4 +86,20 @@ test('try open pool', async () => {
     },
   })
   expect(transaction2).toBeUndefined()
+})
+
+test('fetch pool snapshot', async () => {
+  const poolSnapshot = await getPoolSnapshot({
+    chainId: monadTestnet.id,
+    poolKey:
+      '0xad46920833ad7a1ba8e74cc241faf9ae4fd3dc4616ad9648b13160f8453e444f',
+  })
+  expect(poolSnapshot.chainId).toEqual(monadTestnet.id)
+})
+
+test('fetch pool snapshots', async () => {
+  const poolSnapshots = await getPoolSnapshots({
+    chainId: monadTestnet.id,
+  })
+  expect(poolSnapshots.length).toBeGreaterThan(0)
 })

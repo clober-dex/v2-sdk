@@ -1,5 +1,10 @@
 import { expect, test } from 'vitest'
-import { getExpectedOutput, getMarket, toPrice } from '@clober/v2-sdk'
+import {
+  getExpectedInput,
+  getExpectedOutput,
+  getMarket,
+  toPrice,
+} from '@clober/v2-sdk'
 import {
   formatUnits,
   isAddressEqual,
@@ -136,6 +141,34 @@ test('get expected output ask', async () => {
     '1000000',
     (Math.pow(2, 256) - 1).toFixed(0),
   )
+})
+
+test('get expected output ask with subgraph', async () => {
+  const { takenAmount, spentAmount } = await getExpectedOutput({
+    chainId: cloberTestChain.id,
+    inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    outputToken: '0x0000000000000000000000000000000000000000',
+    amountIn: '1000.123',
+    options: {
+      useSubgraph: true,
+    },
+  })
+  expect(Number(takenAmount)).toBeGreaterThan(0)
+  expect(Number(spentAmount)).toBeGreaterThan(0)
+})
+
+test('get expected input ask with subgraph', async () => {
+  const { takenAmount, spentAmount } = await getExpectedInput({
+    chainId: cloberTestChain.id,
+    inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    outputToken: '0x0000000000000000000000000000000000000000',
+    amountOut: '1000.123',
+    options: {
+      useSubgraph: true,
+    },
+  })
+  expect(Number(takenAmount)).toBeGreaterThan(0)
+  expect(Number(spentAmount)).toBeGreaterThan(0)
 })
 
 test('get expected output bid', async () => {
