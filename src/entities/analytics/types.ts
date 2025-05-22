@@ -25,6 +25,12 @@ export type AnalyticsSnapshot = {
     { currency: Currency; usd: number }
   >
 
+  poolTotalValueLockedUSD: number
+  poolTotalValueLockedUSDMap: Record<
+    `0x${string}`,
+    { currency: Currency; usd: number }
+  >
+
   totalValueLockedUSD: number
   totalValueLockedUSDMap: Record<
     `0x${string}`,
