@@ -1,14 +1,14 @@
 import { Currency } from '../currency/types'
 
 export type TransactionType =
-  | 'limit'
-  | 'claim'
-  | 'cancel'
-  | 'market'
-  | 'add-liquidity'
-  | 'remove-liquidity'
-  | 'swap'
-  | 'unknown'
+  | 'Limit'
+  | 'Claim'
+  | 'Cancel'
+  | 'Market'
+  | 'Add-Liq'
+  | 'Remove-Liq'
+  | 'Swap'
+  | 'Unknown'
 
 export type AnalyticsSnapshot = {
   timestamp: number

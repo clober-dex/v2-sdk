@@ -23,6 +23,13 @@ export type {
 
 export type { Transaction } from './transaction'
 export type { PermitSignature, ERC20PermitParam } from './permit'
+export type {
+  TransactionType,
+  AnalyticsSnapshot,
+  UserVolumeSnapshot,
+  AnalyticsSummary,
+  TopUser,
+} from '../entities/analytics/types'
 
 export enum CHART_LOG_INTERVALS {
   oneMinute = '1m',
