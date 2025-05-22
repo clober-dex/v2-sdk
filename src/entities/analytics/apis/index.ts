@@ -242,3 +242,28 @@ export async function fetchTopUsersByNativeVolume(
       }) as TopUser,
   )
 }
+
+export async function fetchUserNativeVolume(
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+): Promise<number> {
+  const {
+    data: { user },
+  } = await Subgraph.get<{
+    data: {
+      user: {
+        id: string
+        nativeVolume: string
+      }
+    }
+  }>(
+    chainId,
+    'getUserNativeVolume',
+    'query getUserNativeVolume($user: ID!) { user(id: $user) { nativeVolume } }',
+    {
+      user: userAddress.toLowerCase(),
+    },
+  )
+
+  return Number(user.nativeVolume)
+}

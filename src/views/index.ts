@@ -31,4 +31,5 @@ export {
   getProtocolAnalytics,
   getUserDailyVolumes,
   getTopUsersByNativeVolume,
+  getUserNativeVolume,
 } from './analytics'

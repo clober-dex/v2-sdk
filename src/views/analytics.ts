@@ -7,6 +7,7 @@ import {
 import {
   fetchProtocolAnalytics,
   fetchTopUsersByNativeVolume,
+  fetchUserNativeVolume,
   fetchUserVolumeSnapshots,
 } from '../entities/analytics/apis'
 
@@ -34,4 +35,14 @@ export const getTopUsersByNativeVolume = async ({
   chainId: CHAIN_IDS
 }): Promise<TopUser[]> => {
   return fetchTopUsersByNativeVolume(chainId)
+}
+
+export const getUserNativeVolume = async ({
+  chainId,
+  userAddress,
+}: {
+  chainId: CHAIN_IDS
+  userAddress: `0x${string}`
+}): Promise<number> => {
+  return fetchUserNativeVolume(chainId, userAddress)
 }
