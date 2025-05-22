@@ -45,3 +45,10 @@ export type AnalyticsSummary = {
   accumulatedProtocolFeesUSD: number
   analyticsSnapshots: AnalyticsSnapshot[]
 }
+
+export type TopUser = {
+  address: `0x${string}`
+  nativeVolume: number
+  firstSeenTimestamp: number
+  firstSeenBlockNumber: number
+}

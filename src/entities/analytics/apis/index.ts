@@ -2,7 +2,12 @@ import { getAddress } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
-import { AnalyticsSummary, TransactionType, UserVolumeSnapshot } from '../types'
+import {
+  AnalyticsSummary,
+  TopUser,
+  TransactionType,
+  UserVolumeSnapshot,
+} from '../types'
 
 type TokenDayDataDto = {
   volumeUSD: string
@@ -39,6 +44,13 @@ type UserDayDatasDTO = {
       decimals: string
     }
   }[]
+}
+
+type TopUserDTO = {
+  id: string
+  firstSeenTimestamp: string
+  firstSeenBlockNumber: string
+  nativeVolume: string
 }
 
 const FUNCTION_SIG_MAP: Record<string, TransactionType> = {
@@ -202,4 +214,31 @@ export async function fetchUserVolumeSnapshots(
       ]),
     ),
   }))
+}
+
+export async function fetchTopUsersByNativeVolume(
+  chainId: CHAIN_IDS,
+): Promise<TopUser[]> {
+  const {
+    data: { users },
+  } = await Subgraph.get<{
+    data: {
+      users: TopUserDTO[]
+    }
+  }>(
+    chainId,
+    'getTopUsersByNativeVolume',
+    'query getTopUsersByNativeVolume { users(first: 1000, orderBy: nativeVolume, orderDirection: desc) { id firstSeenTimestamp firstSeenBlockNumber nativeVolume } }',
+    {},
+  )
+
+  return users.map(
+    (item) =>
+      ({
+        address: getAddress(item.id),
+        firstSeenTimestamp: Number(item.firstSeenTimestamp),
+        firstSeenBlockNumber: Number(item.firstSeenBlockNumber),
+        nativeVolume: Number(item.nativeVolume),
+      }) as TopUser,
+  )
 }
