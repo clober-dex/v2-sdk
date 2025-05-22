@@ -54,17 +54,17 @@ type TopUserDTO = {
 }
 
 const FUNCTION_SIG_MAP: Record<string, TransactionType> = {
-  '0x7d773110': 'limit',
-  '0xfe815746': 'limit',
-  '0x8feb85b7': 'claim',
-  '0xa04c796b': 'cancel',
-  '0xc0e8e89a': 'market',
-  '0x4f28185a': 'add-liquidity',
-  '0x0a31b953': 'remove-liquidity',
-  '0x7e865aa4': 'swap',
-  '0xa0f15331': 'unknown', // update position
-  '0xed56531a': 'unknown', // pause
-  '0xf4dfd83a': 'unknown', // arbitrage
+  '0x7d773110': 'Limit',
+  '0xfe815746': 'Limit',
+  '0x8feb85b7': 'Claim',
+  '0xa04c796b': 'Cancel',
+  '0xc0e8e89a': 'Market',
+  '0x4f28185a': 'Add-Liq',
+  '0x0a31b953': 'Remove-Liq',
+  '0x7e865aa4': 'Swap',
+  '0xa0f15331': 'Unknown', // update position
+  '0xed56531a': 'Unknown', // pause
+  '0xf4dfd83a': 'Unknown', // arbitrage
 }
 
 export async function fetchProtocolAnalytics(
