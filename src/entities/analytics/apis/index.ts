@@ -8,6 +8,7 @@ import {
   TransactionType,
   UserVolumeSnapshot,
 } from '../types'
+import { convertTokenToDecimal } from '../../../utils/bigint'
 
 type TokenDayDataDto = {
   volumeUSD: string
@@ -31,6 +32,37 @@ type CloberDayDataDTO = {
     txCount: string
   }[]
   tokenDayData: TokenDayDataDto[]
+}
+
+type PoolDayDataDTO = {
+  date: number
+  liquidityA: string
+  liquidityB: string
+  totalValueLockedUSD: string
+}
+
+type TokenDayDataDTO = {
+  date: number
+  priceUSD: string
+}
+
+type PoolDTO = {
+  id: string
+  tokenA: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
+    tokenDayData: TokenDayDataDTO[]
+  }
+  tokenB: {
+    id: string
+    name: string
+    symbol: string
+    decimals: string
+    tokenDayData: TokenDayDataDTO[]
+  }
+  poolDayData: PoolDayDataDTO[]
 }
 
 type UserDayDatasDTO = {
@@ -83,6 +115,72 @@ export async function fetchProtocolAnalytics(
     {},
   )
 
+  const {
+    data: { pools },
+  } = await Subgraph.get<{
+    data: {
+      pools: PoolDTO[]
+    }
+  }>(
+    chainId,
+    'getDailyPoolSnapshot',
+    'query getDailyPoolSnapshot { pools { id tokenA { id name symbol decimals tokenDayData(first: 1000, orderBy: date, orderDirection: desc) { date priceUSD } } tokenB { id name symbol decimals tokenDayData(first: 1000, orderBy: date, orderDirection: desc) { date priceUSD } } poolDayData(first: 1000, orderBy: date, orderDirection: desc) { date liquidityA liquidityB totalValueLockedUSD } } }',
+    {},
+  )
+
+  const poolTvlMap: Record<
+    number,
+    {
+      usd: number
+      tvlMap: Record<`0x${string}`, number>
+    }
+  > = pools.reduce(
+    (acc, pool) => {
+      pool.poolDayData.forEach((poolDayData) => {
+        const date = poolDayData.date
+        if (!acc[date]) {
+          acc[date] = {
+            usd: 0,
+            tvlMap: {},
+          }
+        }
+        acc[date].usd += Number(poolDayData.totalValueLockedUSD)
+        const tokenA = getAddress(pool.tokenA.id)
+        const tokenAPriceUSD = Number(
+          pool.tokenA.tokenDayData.find((item) => item.date === date)
+            ?.priceUSD ?? '0',
+        )
+        const tokenB = getAddress(pool.tokenB.id)
+        const tokenBPriceUSD = Number(
+          pool.tokenB.tokenDayData.find((item) => item.date === date)
+            ?.priceUSD ?? '0',
+        )
+
+        if (!acc[date].tvlMap[tokenA]) {
+          acc[date].tvlMap[tokenA] = 0
+        }
+        if (!acc[date].tvlMap[tokenB]) {
+          acc[date].tvlMap[tokenB] = 0
+        }
+        acc[date].tvlMap[tokenA] +=
+          convertTokenToDecimal(
+            BigInt(poolDayData.liquidityA),
+            Number(pool.tokenA.decimals),
+          ) * tokenAPriceUSD
+        acc[date].tvlMap[tokenB] +=
+          convertTokenToDecimal(
+            BigInt(poolDayData.liquidityB),
+            Number(pool.tokenB.decimals),
+          ) * tokenBPriceUSD
+      })
+      return acc
+    },
+    {} as Record<
+      number,
+      { usd: number; tvlMap: Record<`0x${string}`, number> }
+    >,
+  )
+
   const analyticsSnapshots = cloberDayDatas.map((item) => ({
     timestamp: item.date,
     activeUsers: Number(item.walletCount),
@@ -129,10 +227,29 @@ export async function fetchProtocolAnalytics(
         },
       ]),
     ),
-    totalValueLockedUSD: item.tokenDayData.reduce(
-      (acc, token) => acc + Number(token.totalValueLockedUSD),
-      0,
+    poolTotalValueLockedUSD: poolTvlMap?.[item.date]?.usd ?? 0,
+    poolTotalValueLockedUSDMap: Object.fromEntries(
+      item.tokenDayData.map((token) => [
+        getAddress(token.token.id),
+        {
+          currency: {
+            address: getAddress(token.token.id),
+            name: token.token.name,
+            symbol: token.token.symbol,
+            decimals: Number(token.token.decimals),
+          },
+          usd: Number(
+            poolTvlMap?.[item.date]?.tvlMap?.[getAddress(token.token.id)] ?? 0,
+          ),
+        },
+      ]),
     ),
+    totalValueLockedUSD:
+      (poolTvlMap?.[item.date]?.usd ?? 0) +
+      item.tokenDayData.reduce(
+        (acc, token) => acc + Number(token.totalValueLockedUSD),
+        0,
+      ),
     totalValueLockedUSDMap: Object.fromEntries(
       item.tokenDayData.map((token) => [
         getAddress(token.token.id),
@@ -143,7 +260,12 @@ export async function fetchProtocolAnalytics(
             symbol: token.token.symbol,
             decimals: Number(token.token.decimals),
           },
-          usd: Number(token.totalValueLockedUSD),
+          usd:
+            Number(token.totalValueLockedUSD) +
+            Number(
+              poolTvlMap?.[item.date]?.tvlMap?.[getAddress(token.token.id)] ??
+                0,
+            ),
         },
       ]),
     ),
