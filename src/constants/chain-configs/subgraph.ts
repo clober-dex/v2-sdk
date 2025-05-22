@@ -18,7 +18,7 @@ export const SUBGRAPH_URL: {
   [CHAIN_IDS.RISE_SEPOLIA]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-rise-sepolia/latest/gn',
   [CHAIN_IDS.MONAD_TESTNET]:
-    'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-subgraph-monad-testnet/api',
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-monad-testnet/latest/gn',
   // [CHAIN_IDS.SONIC_MAINNET]:
   //   'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-sonic-mainnet/api',
 }
