@@ -27,4 +27,8 @@ export {
   getLatestPriceMap,
   getDailyClosePriceMap,
 } from './currency'
-export { getProtocolAnalytics, getUserDailyVolumes } from './analytics'
+export {
+  getProtocolAnalytics,
+  getUserDailyVolumes,
+  getTopUsersByNativeVolume,
+} from './analytics'
