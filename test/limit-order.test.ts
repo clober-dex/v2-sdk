@@ -7,7 +7,7 @@ import { cloberTestChain3 } from '../src/constants/networks/test-chain'
 
 import { fetchTokenBalance } from './utils/currency'
 import { getSize } from './utils/depth'
-import { account, FORK_URL } from './utils/constants'
+import { account, FORK_BLOCK_NUMBER_2, FORK_URL } from './utils/constants'
 import { createProxyClients3 } from './utils/utils'
 
 const clients = createProxyClients3(
@@ -21,7 +21,7 @@ afterEach(async () => {
     clients.map(({ testClient }) => {
       return testClient.reset({
         jsonRpcUrl: FORK_URL,
-        blockNumber: 155898728n,
+        blockNumber: FORK_BLOCK_NUMBER_2,
       })
     }),
   )

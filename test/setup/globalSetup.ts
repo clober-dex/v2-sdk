@@ -6,7 +6,11 @@ import {
   cloberTestChain2,
   cloberTestChain3,
 } from '../../src/constants/networks/test-chain.ts'
-import { DEV_MNEMONIC_SEED, FORK_BLOCK_NUMBER } from '../utils/constants'
+import {
+  DEV_MNEMONIC_SEED,
+  FORK_BLOCK_NUMBER,
+  FORK_BLOCK_NUMBER_2,
+} from '../utils/constants'
 
 dotenv.config()
 
@@ -47,7 +51,7 @@ export default async function () {
       forkUrl:
         process.env.ARBITRUM_SEPOLIA_RPC_URL ||
         'https://arbitrum-sepolia-archive.allthatnode.com',
-      forkBlockNumber: 155898728n,
+      forkBlockNumber: FORK_BLOCK_NUMBER_2,
       mnemonic: DEV_MNEMONIC_SEED,
       accounts: 10,
       balance: 1000, // 1000 ETH
