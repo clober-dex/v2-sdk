@@ -18,7 +18,7 @@ export const getMarketSnapshot = async ({
   token0: `0x${string}`
   token1: `0x${string}`
   options?: DefaultReadContractOptions & { timestampInSeconds?: number }
-}): Promise<MarketSnapshot> => {
+}): Promise<MarketSnapshot | null> => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
