@@ -8,6 +8,7 @@ import {
 import {
   cloberTestChain,
   cloberTestChain2,
+  cloberTestChain3,
 } from '../../src/constants/networks/test-chain'
 
 import { account } from './constants'
@@ -68,6 +69,34 @@ export function createProxyClients2<const TIds extends readonly number[]>(
 
     const walletClient = createWalletClient({
       chain: cloberTestChain2,
+      account,
+      transport: http(`http://127.0.0.1:${port}/${i}`),
+    })
+
+    return { publicClient, testClient, walletClient } as const
+  })
+
+  return output as Tuple<(typeof output)[number], TIds['length']>
+}
+
+export function createProxyClients3<const TIds extends readonly number[]>(
+  ids: TIds,
+  port = 8547,
+) {
+  const output = ids.map((i) => {
+    const publicClient = createPublicClient({
+      chain: cloberTestChain3,
+      transport: http(`http://127.0.0.1:${port}/${i}`),
+    })
+
+    const testClient = createTestClient({
+      chain: cloberTestChain3,
+      mode: 'anvil',
+      transport: http(`http://127.0.0.1:${port}/${i}`),
+    })
+
+    const walletClient = createWalletClient({
+      chain: cloberTestChain3,
       account,
       transport: http(`http://127.0.0.1:${port}/${i}`),
     })

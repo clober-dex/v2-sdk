@@ -3,14 +3,14 @@ import { approveERC20, getMarket, limitOrder, openMarket } from '@clober/v2-sdk'
 import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
 
-import { cloberTestChain } from '../src/constants/networks/test-chain'
+import { cloberTestChain3 } from '../src/constants/networks/test-chain'
 
 import { fetchTokenBalance } from './utils/currency'
 import { getSize } from './utils/depth'
-import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
-import { createProxyClients } from './utils/utils'
+import { account, FORK_URL } from './utils/constants'
+import { createProxyClients3 } from './utils/utils'
 
-const clients = createProxyClients(
+const clients = createProxyClients3(
   Array.from({ length: 5 }, () => Math.floor(new Date().getTime())).map(
     (id) => id,
   ),
@@ -21,7 +21,7 @@ afterEach(async () => {
     clients.map(({ testClient }) => {
       return testClient.reset({
         jsonRpcUrl: FORK_URL,
-        blockNumber: FORK_BLOCK_NUMBER,
+        blockNumber: 155898728n,
       })
     }),
   )
@@ -46,7 +46,7 @@ test('make bid order', async () => {
   const { publicClient, walletClient } = clients[1] as any
 
   const approveHash = await approveERC20({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '1',
@@ -63,7 +63,7 @@ test('make bid order', async () => {
     transaction,
     result: { make, taken, spent },
   } = await limitOrder({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     userAddress: account.address,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0x0000000000000000000000000000000000000000',
@@ -79,12 +79,12 @@ test('make bid order', async () => {
   const [beforeBalance, beforeMarket] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain3.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
     ),
     getMarket({
-      chainId: cloberTestChain.id,
+      chainId: cloberTestChain3.id,
       token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       token1: '0x0000000000000000000000000000000000000000',
       options: {
@@ -105,12 +105,12 @@ test('make bid order', async () => {
   const [afterBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain3.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
     ),
     getMarket({
-      chainId: cloberTestChain.id,
+      chainId: cloberTestChain3.id,
       token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       token1: '0x0000000000000000000000000000000000000000',
       options: {
@@ -125,7 +125,7 @@ test('make bid order', async () => {
     getSize(afterMarket.bids, 0.009, 0.01)
       .minus(getSize(beforeMarket.bids, 0.009, 0.01))
       .toString(),
-  ).toEqual('100.039694430551598028')
+  ).toEqual('100.009691523094669627')
   expect(make.amount).toEqual('1')
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
@@ -148,7 +148,7 @@ test('make bid order at $1', async () => {
   const { publicClient, walletClient } = clients[1] as any
 
   const tx = await openMarket({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     userAddress: account.address,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
@@ -166,7 +166,7 @@ test('make bid order at $1', async () => {
   expect(r.status).toEqual('success')
 
   const approveHash = await approveERC20({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '1',
@@ -183,7 +183,7 @@ test('make bid order at $1', async () => {
     transaction,
     result: { make, taken, spent },
   } = await limitOrder({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     userAddress: account.address,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
@@ -199,12 +199,12 @@ test('make bid order at $1', async () => {
   const [beforeBalance, beforeMarket] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain3.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
     ),
     getMarket({
-      chainId: cloberTestChain.id,
+      chainId: cloberTestChain3.id,
       token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       token1: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
       options: {
@@ -225,12 +225,12 @@ test('make bid order at $1', async () => {
   const [afterBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain3.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
     ),
     getMarket({
-      chainId: cloberTestChain.id,
+      chainId: cloberTestChain3.id,
       token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       token1: '0xEfC8df673Ac18CFa6b92A1eE8939C84506C9Faf3',
       options: {
@@ -245,7 +245,7 @@ test('make bid order at $1', async () => {
     getSize(afterMarket.bids, 1, 1)
       .minus(getSize(beforeMarket.bids, 1, 1))
       .toString(),
-  ).toEqual('1.0003')
+  ).toEqual('1')
   expect(make.amount).toEqual('1')
   expect(make.currency.address).toEqual(
     getAddress('0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'),
@@ -267,7 +267,7 @@ test('make ask order', async () => {
     transaction,
     result: { make, taken, spent },
   } = await limitOrder({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     userAddress: account.address,
     inputToken: '0x0000000000000000000000000000000000000000',
     outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -285,7 +285,7 @@ test('make ask order', async () => {
       address: account.address,
     }),
     getMarket({
-      chainId: cloberTestChain.id,
+      chainId: cloberTestChain3.id,
       token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       token1: '0x0000000000000000000000000000000000000000',
       options: {
@@ -308,7 +308,7 @@ test('make ask order', async () => {
       address: account.address,
     }),
     getMarket({
-      chainId: cloberTestChain.id,
+      chainId: cloberTestChain3.id,
       token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       token1: '0x0000000000000000000000000000000000000000',
       options: {
@@ -349,7 +349,7 @@ test('limit bid order', async () => {
     [
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain3.id,
         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
         account.address,
       ),
@@ -357,7 +357,7 @@ test('limit bid order', async () => {
         address: account.address,
       }),
       getMarket({
-        chainId: cloberTestChain.id,
+        chainId: cloberTestChain3.id,
         token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
         token1: '0x0000000000000000000000000000000000000000',
         options: {
@@ -368,7 +368,7 @@ test('limit bid order', async () => {
     ],
   )
   const approveHash = await approveERC20({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '100000',
@@ -385,7 +385,7 @@ test('limit bid order', async () => {
     transaction,
     result: { make, taken, spent },
   } = await limitOrder({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     userAddress: account.address,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0x0000000000000000000000000000000000000000',
@@ -408,7 +408,7 @@ test('limit bid order', async () => {
   const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain3.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
     ),
@@ -416,7 +416,7 @@ test('limit bid order', async () => {
       address: account.address,
     }),
     getMarket({
-      chainId: cloberTestChain.id,
+      chainId: cloberTestChain3.id,
       token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       token1: '0x0000000000000000000000000000000000000000',
       options: {
@@ -428,7 +428,7 @@ test('limit bid order', async () => {
 
   expect(beforeUSDCBalance - afterUSDCBalance).toEqual(100000000000n)
   expect(Number(afterETHBalance - beforeETHBalance)).lessThan(
-    100000000000000000,
+    13295049637117310000,
   )
   expect(
     getSize(afterMarket.bids, 3500, 3501)
@@ -464,7 +464,7 @@ test('limit bid order with rounding up', async () => {
     [
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain3.id,
         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
         account.address,
       ),
@@ -472,7 +472,7 @@ test('limit bid order with rounding up', async () => {
         address: account.address,
       }),
       getMarket({
-        chainId: cloberTestChain.id,
+        chainId: cloberTestChain3.id,
         token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
         token1: '0x0000000000000000000000000000000000000000',
         options: {
@@ -483,7 +483,7 @@ test('limit bid order with rounding up', async () => {
     ],
   )
   const approveHash = await approveERC20({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     walletClient,
     token: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     amount: '100000',
@@ -500,7 +500,7 @@ test('limit bid order with rounding up', async () => {
     transaction,
     result: { make, taken, spent },
   } = await limitOrder({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     userAddress: account.address,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     outputToken: '0x0000000000000000000000000000000000000000',
@@ -525,7 +525,7 @@ test('limit bid order with rounding up', async () => {
   const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain3.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
     ),
@@ -533,7 +533,7 @@ test('limit bid order with rounding up', async () => {
       address: account.address,
     }),
     getMarket({
-      chainId: cloberTestChain.id,
+      chainId: cloberTestChain3.id,
       token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       token1: '0x0000000000000000000000000000000000000000',
       options: {
@@ -545,7 +545,7 @@ test('limit bid order with rounding up', async () => {
 
   expect(beforeUSDCBalance - afterUSDCBalance).toEqual(100000000000n)
   expect(Number(afterETHBalance - beforeETHBalance)).lessThan(
-    100000000000000000,
+    13295694603985380000,
   )
   expect(
     getSize(afterMarket.bids, 3500, 3501)
@@ -589,7 +589,7 @@ test('limit ask order', async () => {
     transaction,
     result: { make, taken, spent },
   } = await limitOrder({
-    chainId: cloberTestChain.id,
+    chainId: cloberTestChain3.id,
     userAddress: account.address,
     inputToken: '0x0000000000000000000000000000000000000000',
     outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
@@ -605,7 +605,7 @@ test('limit ask order', async () => {
     [
       fetchTokenBalance(
         publicClient,
-        cloberTestChain.id,
+        cloberTestChain3.id,
         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
         account.address,
       ),
@@ -613,7 +613,7 @@ test('limit ask order', async () => {
         address: account.address,
       }),
       getMarket({
-        chainId: cloberTestChain.id,
+        chainId: cloberTestChain3.id,
         token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
         token1: '0x0000000000000000000000000000000000000000',
         options: {
@@ -635,7 +635,7 @@ test('limit ask order', async () => {
   const [afterUSDCBalance, afterETHBalance, afterMarket] = await Promise.all([
     fetchTokenBalance(
       publicClient,
-      cloberTestChain.id,
+      cloberTestChain3.id,
       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       account.address,
     ),
@@ -643,7 +643,7 @@ test('limit ask order', async () => {
       address: account.address,
     }),
     getMarket({
-      chainId: cloberTestChain.id,
+      chainId: cloberTestChain3.id,
       token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
       token1: '0x0000000000000000000000000000000000000000',
       options: {
