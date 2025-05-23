@@ -42,7 +42,7 @@ export const fetchMarketSnapshot = async (
   token0: `0x${string}`,
   token1: `0x${string}`,
   timestampInSeconds: number,
-): Promise<MarketSnapshot> => {
+): Promise<MarketSnapshot | null> => {
   const dayStartTimestamp = getDailyStartTimestampInSeconds(timestampInSeconds)
 
   const {
@@ -66,6 +66,7 @@ export const fetchMarketSnapshot = async (
     console.warn(
       `[fetchMarketSnapshot] too many bookDayDatas for ${token0}/${token1}`,
     )
+    return null
   }
 
   const totalSupplyMap = await fetchTotalSupplyMap(
@@ -212,7 +213,7 @@ export const fetchMarketSnapshot = async (
       askBookUpdatedAt: Number(askBook.book.lastTakenTimestamp) || 0,
     }
   }
-  throw new Error('No bookDayDatas found')
+  return null
 }
 
 export const fetchMarketSnapshots = async (

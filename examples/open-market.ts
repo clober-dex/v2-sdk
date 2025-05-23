@@ -1,4 +1,4 @@
-import { createWalletClient, http, parseUnits } from 'viem'
+import { createWalletClient, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
 import * as dotenv from 'dotenv'
@@ -7,40 +7,43 @@ import { getMarket, openMarket } from '@clober/v2-sdk'
 dotenv.config()
 
 const main = async () => {
+  const chain = arbitrumSepolia
+  const ETH = '0x0000000000000000000000000000000000000000'
+  const USDC = '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0'
   const walletClient = createWalletClient({
-    chain: arbitrumSepolia,
+    chain,
     account: privateKeyToAccount(
       (process.env.TESTNET_PRIVATE_KEY || '0x') as `0x${string}`,
     ),
     transport: http(),
   })
 
-  const transaction1 = await openMarket({
-    chainId: arbitrumSepolia.id,
-    inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    outputToken: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
+  const openBidBookTx = await openMarket({
+    chainId: chain.id,
+    inputToken: USDC,
+    outputToken: ETH,
+    userAddress: walletClient.account.address,
   })
-  const hash1 = await walletClient.sendTransaction({
-    ...transaction1,
-    gasPrice: parseUnits('1', 9),
+  const openBidBookTxHash = await walletClient.sendTransaction({
+    ...openBidBookTx,
   })
-  console.log(`open market hash: ${hash1}`)
+  console.log(`open bid book hash: ${openBidBookTxHash}`)
 
-  const transaction2 = await openMarket({
-    chainId: arbitrumSepolia.id,
-    inputToken: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-    outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+  const openAskBookTx = await openMarket({
+    chainId: chain.id,
+    inputToken: ETH,
+    outputToken: USDC,
+    userAddress: walletClient.account.address,
   })
-  const hash2 = await walletClient.sendTransaction({
-    ...transaction2,
-    gasPrice: parseUnits('1', 9),
+  const openAskBookTxHash = await walletClient.sendTransaction({
+    ...openAskBookTx,
   })
-  console.log(`open market hash: ${hash2}`)
+  console.log(`open market hash: ${openAskBookTxHash}`)
 
   const market = await getMarket({
-    chainId: arbitrumSepolia.id,
-    token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
+    chainId: chain.id,
+    token0: ETH,
+    token1: USDC,
   })
   console.log(`market: `, market)
 }

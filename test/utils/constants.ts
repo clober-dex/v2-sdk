@@ -9,6 +9,8 @@ export const FORK_URL =
 
 export const FORK_BLOCK_NUMBER = 32836280n
 
+export const FORK_BLOCK_NUMBER_2 = 155908666n
+
 export const account = privateKeyToAccount(
   process.env.DEV_PRIVATE_KEY as `0x${string}`,
 )

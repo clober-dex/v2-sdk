@@ -3,7 +3,7 @@ export const CONTROLLER_ABI = [
     inputs: [
       {
         internalType: 'address',
-        name: 'bookManager',
+        name: 'bookManager_',
         type: 'address',
       },
     ],
@@ -118,6 +118,19 @@ export const CONTROLLER_ABI = [
     ],
     name: 'SafeERC20FailedOperation',
     type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'bookManager',
+    outputs: [
+      {
+        internalType: 'contract IBookManager',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
   },
   {
     inputs: [
@@ -515,6 +528,11 @@ export const CONTROLLER_ABI = [
             type: 'uint256',
           },
           {
+            internalType: 'address',
+            name: 'provider',
+            type: 'address',
+          },
+          {
             internalType: 'bytes',
             name: 'takeHookData',
             type: 'bytes',
@@ -637,6 +655,11 @@ export const CONTROLLER_ABI = [
             internalType: 'uint256',
             name: 'quoteAmount',
             type: 'uint256',
+          },
+          {
+            internalType: 'address',
+            name: 'provider',
+            type: 'address',
           },
           {
             internalType: 'bytes',
