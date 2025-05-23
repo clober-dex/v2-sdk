@@ -98,15 +98,18 @@ test('fetch open market with subgraph', async () => {
 
 test('fetch market snapshot', async () => {
   const marketSnapshots = await getMarketSnapshot({
-    chainId: arbitrumSepolia.id,
+    chainId: monadTestnet.id,
     token0: '0x0000000000000000000000000000000000000000',
-    token1: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+    token1: '0xf817257fed379853cDe0fa4F97AB987181B1E5Ea',
+    options: {
+      timestampInSeconds: 1741996800,
+    },
   })
-  expect(marketSnapshots.chainId).toEqual(arbitrumSepolia.id)
-  expect(marketSnapshots.quote.address).toEqual(
-    '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0',
+  expect(marketSnapshots!.chainId).toEqual(monadTestnet.id)
+  expect(marketSnapshots!.quote.address).toEqual(
+    '0xf817257fed379853cDe0fa4F97AB987181B1E5Ea',
   )
-  expect(marketSnapshots.base.address).toEqual(
+  expect(marketSnapshots!.base.address).toEqual(
     '0x0000000000000000000000000000000000000000',
   )
 })
