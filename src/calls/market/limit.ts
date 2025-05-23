@@ -1,7 +1,9 @@
 import {
   createPublicClient,
   formatUnits,
+  getAddress,
   http,
+  isAddress,
   isAddressEqual,
   parseUnits,
   zeroAddress,
@@ -95,6 +97,7 @@ export const limitOrder = async ({
     roundingDownTakenBid?: boolean
     roundingUpTakenAsk?: boolean
     useSubgraph?: boolean
+    provider?: `0x${string}`
   } & DefaultWriteContractOptions
 }): Promise<{
   transaction: Transaction
@@ -145,6 +148,10 @@ export const limitOrder = async ({
     `)
   }
 
+  const provider =
+    options && options.provider && isAddress(options.provider)
+      ? getAddress(options.provider)
+      : zeroAddress
   const { roundingDownTick, roundingUpTick } = parsePrice(
     Number(price),
     market.quote.decimals,
@@ -180,6 +187,7 @@ export const limitOrder = async ({
               ),
         ),
     quoteAmount,
+    provider,
     hookData: zeroHash,
   }
   if (options?.postOnly === true || spentAmount === '0') {
@@ -260,6 +268,7 @@ export const limitOrder = async ({
                     ),
                 tick: makeParam.tick,
                 quoteAmount,
+                provider,
                 takeHookData: zeroHash,
                 makeHookData: makeParam.hookData,
               },
