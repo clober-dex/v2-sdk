@@ -81,10 +81,7 @@ export const fetchTotalSupplyMap = async (
   const fetched = Object.fromEntries(
     results.map((r, i) => {
       const address = toFetch[i]
-      const result = r.result as bigint | undefined
-      if (!result) {
-        throw new Error(`Failed to fetch totalSupply for ${address}`)
-      }
+      const result = (r.result as bigint | undefined) ?? 0n
       setToCache(chainId, address, result)
       return [address, result]
     }),
