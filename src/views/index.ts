@@ -24,6 +24,7 @@ export {
   getNativeCurrency,
   getReferenceCurrency,
   getCurrencies,
+  getStableCurrencies,
   getLatestPriceMap,
   getDailyClosePriceMap,
 } from './currency'

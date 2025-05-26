@@ -100,20 +100,40 @@ export const NATIVE_CURRENCY_TOTAL_SUPPLY: {
 
 // @dev: https://defillama.com/stablecoins
 // order by total circulating supply (over $40M)
-export const STABLE_COIN_ADDRESSES: {
-  [chain in CHAIN_IDS]: `0x${string}`[]
+export const STABLE_COINS: {
+  [chain in CHAIN_IDS]: Currency[]
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: [
-    '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0', // Mock USDT
+    {
+      address: getAddress('0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'),
+      name: 'Mock USDT',
+      symbol: 'MT',
+      decimals: 6,
+    },
   ],
   [CHAIN_IDS.CLOBER_TESTNET_2]: [
-    '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0', // Mock USDT
+    {
+      address: getAddress('0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'),
+      name: 'Mock USDT',
+      symbol: 'MT',
+      decimals: 6,
+    },
   ],
   [CHAIN_IDS.CLOBER_TESTNET_3]: [
-    '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0', // Mock USDT
+    {
+      address: getAddress('0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'),
+      name: 'Mock USDT',
+      symbol: 'MT',
+      decimals: 6,
+    },
   ],
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: [
-    '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0', // Mock USDT
+    {
+      address: getAddress('0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'),
+      name: 'Mock USDT',
+      symbol: 'MT',
+      decimals: 6,
+    },
   ],
   // [CHAIN_IDS.BASE]: [
   //   '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC
@@ -123,18 +143,70 @@ export const STABLE_COIN_ADDRESSES: {
   //   '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb', // DAI
   // ],
   [CHAIN_IDS.BERACHAIN_MAINNET]: [
-    '0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce', // HONEY
-    '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34', // USDe
-    '0x549943e04f40284185054145c6E4e9568C1D3241', // USDC.e
-    '0x779Ded0c9e1022225f8E0630b35a9b54bE713736', // USDT0
+    {
+      address: getAddress('0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce'),
+      name: 'Honey',
+      symbol: 'HONEY',
+      decimals: 18,
+    },
+    {
+      address: getAddress('0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34'),
+      name: 'USDe',
+      symbol: 'USDe',
+      decimals: 18,
+    },
+    {
+      address: getAddress('0x549943e04f40284185054145c6E4e9568C1D3241'),
+      name: 'Bridged USDC (Stargate)',
+      symbol: 'USDC.e',
+      decimals: 6,
+    },
+    {
+      address: getAddress('0x779Ded0c9e1022225f8E0630b35a9b54bE713736'),
+      name: 'USD₮0',
+      symbol: 'USD₮0',
+      decimals: 6,
+    },
   ],
   [CHAIN_IDS.RISE_SEPOLIA]: [
-    '0xA985e387dDF21b87c1Fe8A0025D827674040221E', // cUSDC
+    {
+      address: getAddress('0xA985e387dDF21b87c1Fe8A0025D827674040221E'),
+      name: 'Clober USD',
+      symbol: 'cUSD',
+      decimals: 6,
+    },
+    {
+      address: getAddress('0x40918Ba7f132E0aCba2CE4de4c4baF9BD2D7D849'),
+      name: 'Tether USD',
+      symbol: 'USDT',
+      decimals: 8,
+    },
+    {
+      address: getAddress('0x8A93d247134d91e0de6f96547cB0204e5BE8e5D8'),
+      name: 'USD Coin',
+      symbol: 'USDC',
+      decimals: 6,
+    },
   ],
   [CHAIN_IDS.MONAD_TESTNET]: [
-    '0x43D614B1bA4bA469fAEAa4557AEAFdec039b8795', // Clober USDC
-    '0xf817257fed379853cDe0fa4F97AB987181B1E5Ea', // USDC
-    '0x88b8E2161DEDC77EF4ab7585569D2415a1C1055D', // USDT
+    {
+      address: getAddress('0x43D614B1bA4bA469fAEAa4557AEAFdec039b8795'),
+      name: 'MockB',
+      symbol: 'MOCKB',
+      decimals: 6,
+    },
+    {
+      address: getAddress('0xf817257fed379853cDe0fa4F97AB987181B1E5Ea'),
+      name: 'USD Coin',
+      symbol: 'USDC',
+      decimals: 6,
+    },
+    {
+      address: getAddress('0x88b8E2161DEDC77EF4ab7585569D2415a1C1055D'),
+      name: 'Tether USD',
+      symbol: 'USDT',
+      decimals: 6,
+    },
   ],
   // [CHAIN_IDS.SONIC_MAINNET]: [
   //   '0x29219dd400f2Bf60E5a23d13Be72B486D4038894', // USDC

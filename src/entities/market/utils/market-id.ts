@@ -1,7 +1,7 @@
 import { getAddress, isAddressEqual, zeroAddress } from 'viem'
 
 import {
-  STABLE_COIN_ADDRESSES,
+  STABLE_COINS,
   REFERENCE_CURRENCY,
 } from '../../../constants/chain-configs/currency'
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
@@ -21,8 +21,8 @@ export const getMarketId = (
 
   // include stable coin
   const stable = tokenAddresses.find((address) => {
-    return STABLE_COIN_ADDRESSES[chainId]!.map((addresses) =>
-      getAddress(addresses),
+    return STABLE_COINS[chainId]!.map(({ address }) =>
+      getAddress(address),
     ).some((addresses) => addresses.includes(address))
   })
   if (stable) {
