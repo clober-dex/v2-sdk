@@ -6,21 +6,32 @@ import {
   getLatestPriceMap,
   getNativeCurrency,
   getReferenceCurrency,
+  getStableCurrencies,
 } from '@clober/v2-sdk'
-import { zeroAddress } from 'viem'
+import { getAddress, zeroAddress } from 'viem'
 
 test('get native currency', async () => {
-  const currency = await getNativeCurrency({
+  const currency = getNativeCurrency({
     chainId: arbitrumSepolia.id,
   })
   expect(currency.address).toBe(zeroAddress)
 })
 
 test('get reference currency', async () => {
-  const currency = await getReferenceCurrency({
+  const currency = getReferenceCurrency({
     chainId: arbitrumSepolia.id,
   })
   expect(currency.address).toBe('0xF2e615A933825De4B39b497f6e6991418Fb31b78')
+})
+
+test('get stable currencies', async () => {
+  const currency = getStableCurrencies({
+    chainId: arbitrumSepolia.id,
+  })
+  expect(currency.length).toBe(1)
+  expect(currency[0].address).toBe(
+    getAddress('0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'),
+  )
 })
 
 test('get currencies', async () => {
