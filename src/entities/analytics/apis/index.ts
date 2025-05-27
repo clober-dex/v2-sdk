@@ -85,6 +85,8 @@ type TopUserDTO = {
   nativeVolume: string
 }
 
+const UNKNOWN = 'Unknown'
+
 const FUNCTION_SIG_MAP: Record<string, TransactionType> = {
   '0x7d773110': 'Limit',
   '0xfe815746': 'Limit',
@@ -94,9 +96,9 @@ const FUNCTION_SIG_MAP: Record<string, TransactionType> = {
   '0x4f28185a': 'Add-Liq',
   '0x0a31b953': 'Remove-Liq',
   '0x7e865aa4': 'Swap',
-  '0xa0f15331': 'Unknown', // update position
-  '0xed56531a': 'Unknown', // pause
-  '0xf4dfd83a': 'Unknown', // arbitrage
+  '0xa0f15331': UNKNOWN, // update position
+  '0xed56531a': UNKNOWN, // pause
+  '0xf4dfd83a': UNKNOWN, // arbitrage
 }
 
 export async function fetchProtocolAnalytics(
@@ -187,7 +189,7 @@ export async function fetchProtocolAnalytics(
     firstTimeUsers: Number(item.newWalletCount),
     transactionTypeCounts: Object.fromEntries(
       item.transactionTypes.map((transactionType) => [
-        FUNCTION_SIG_MAP[transactionType.type] ?? 'unknown',
+        FUNCTION_SIG_MAP[transactionType.type] ?? UNKNOWN,
         Number(transactionType.txCount),
       ]),
     ) as Record<TransactionType, number>,
