@@ -88,8 +88,10 @@ type TopUserDTO = {
 const UNKNOWN = 'Unknown'
 
 const FUNCTION_SIG_MAP: Record<string, TransactionType> = {
-  '0x7d773110': 'Limit',
-  '0xfe815746': 'Limit',
+  '0x7d773110': 'Limit', // make
+  '0xfe815746': 'Limit', // limit
+  '0xb305b94c': 'Limit', // make
+  '0x08b2c1d8': 'Limit', // limit
   '0x8feb85b7': 'Claim',
   '0xa04c796b': 'Cancel',
   '0xc0e8e89a': 'Market',
