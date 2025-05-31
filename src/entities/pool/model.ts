@@ -7,6 +7,7 @@ import { Currency6909 } from '../currency/types'
 export class PoolModel {
   chainId: CHAIN_IDS
   key: `0x${string}`
+  salt: `0x${string}`
   market: Market
   isOpened: boolean
   strategy: `0x${string}`
@@ -48,6 +49,7 @@ export class PoolModel {
     orderListA,
     orderListB,
     paused,
+    salt,
   }: {
     chainId: CHAIN_IDS
     market: Market
@@ -68,6 +70,7 @@ export class PoolModel {
     orderListA: bigint[]
     orderListB: bigint[]
     paused: boolean
+    salt: `0x${string}`
   }) {
     this.chainId = chainId
     this.key = poolKey
@@ -113,12 +116,14 @@ export class PoolModel {
     this.orderListA = orderListA
     this.orderListB = orderListB
     this.paused = paused
+    this.salt = salt
   }
 
   toJson = (): PoolType => {
     return {
       chainId: this.chainId,
       key: this.key,
+      salt: this.salt,
       market: this.market,
       isOpened: this.isOpened,
       strategy: this.strategy,
