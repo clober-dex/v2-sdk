@@ -79,6 +79,7 @@ export async function fetchPool(
     bookIdA,
     bookIdB,
     poolKey,
+    salt,
     totalSupply: BigInt(totalSupply),
     decimals: 18,
     liquidityA: BigInt(liquidityA),
