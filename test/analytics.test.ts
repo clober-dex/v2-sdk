@@ -1,8 +1,10 @@
 import { expect, test } from 'vitest'
 import { monadTestnet } from 'viem/chains'
-import { getProtocolAnalytics, getUserDailyVolumes } from '@clober/v2-sdk'
-
-import { getTopUsersByNativeVolume } from '../src/views/analytics'
+import {
+  getProtocolAnalytics,
+  getUserDailyVolumes,
+  getTopUsersByNativeVolume,
+} from '@clober/v2-sdk'
 
 test('get protocol analytics', async () => {
   const analyticsSummary = await getProtocolAnalytics({
