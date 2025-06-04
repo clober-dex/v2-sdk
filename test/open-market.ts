@@ -4,7 +4,7 @@ import { getMarket, openMarket } from '@clober/v2-sdk'
 import { cloberTestChain } from '../src/constants/networks/test-chain'
 
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
-import { createProxyClients } from './utils/utils'
+import { createProxyClients } from './proxy-client'
 
 const clients = createProxyClients(
   Array.from({ length: 2 }, () => Math.floor(new Date().getTime())).map(

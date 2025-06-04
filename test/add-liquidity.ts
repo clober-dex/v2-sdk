@@ -6,7 +6,7 @@ import { cloberTestChain2 } from '../src/constants/networks/test-chain'
 import { CONTRACT_ADDRESSES } from '../src/constants/chain-configs/addresses'
 
 import { FORK_URL } from './utils/constants'
-import { createProxyClients2 } from './utils/utils'
+import { createProxyClients2 } from './proxy-client'
 import { fetchLPBalance, fetchTokenBalance } from './utils/currency'
 
 const clients = createProxyClients2(

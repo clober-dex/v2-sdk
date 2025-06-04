@@ -1,3 +1,5 @@
+// @TODO: remove this file
+
 import { getAddress, PublicClient } from 'viem'
 
 import { CHAIN_IDS, Currency } from '../../src'

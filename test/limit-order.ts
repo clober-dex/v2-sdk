@@ -8,7 +8,7 @@ import { cloberTestChain3 } from '../src/constants/networks/test-chain'
 import { fetchTokenBalance } from './utils/currency'
 import { getSize } from './utils/depth'
 import { account, FORK_BLOCK_NUMBER_2, FORK_URL } from './utils/constants'
-import { createProxyClients3 } from './utils/utils'
+import { createProxyClients3 } from './proxy-client'
 
 const clients = createProxyClients3(
   Array.from({ length: 5 }, () => Math.floor(new Date().getTime())).map(

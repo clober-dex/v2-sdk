@@ -5,7 +5,7 @@ import { getAddress } from 'viem'
 import { cloberTestChain } from '../src/constants/networks/test-chain'
 
 import { account, FORK_BLOCK_NUMBER, FORK_URL } from './utils/constants'
-import { createProxyClients } from './utils/utils'
+import { createProxyClients } from './proxy-client'
 import { fetchTokenBalance } from './utils/currency'
 
 const clients = createProxyClients(

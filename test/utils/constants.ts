@@ -1,3 +1,4 @@
+// @TODO: remove this file
 import * as dotenv from 'dotenv'
 import { privateKeyToAccount } from 'viem/accounts'
 

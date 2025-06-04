@@ -1,3 +1,5 @@
+// @TODO: remove this file
+
 import BigNumber from 'bignumber.js'
 
 export const getSize = (depth: any[], from: number, to: number) => {
