@@ -3,7 +3,6 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   envDir: '.',
   test: {
-    globalSetup: ['./setup/globalSetup.ts'],
     disableConsoleIntercept: false,
     environment: 'node',
     include: ['*.test.ts'],
