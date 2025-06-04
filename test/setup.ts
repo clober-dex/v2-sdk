@@ -25,9 +25,11 @@ import {
 dotenv.config()
 
 let snapshotId: `0x${string}` | null = null
-let erc20Address: `0x${string}` | null = null
+let tokenAddress: `0x${string}` | null = null
 
 export default async function () {
+  const start = performance.now()
+  console.log(`Setting up test environment...`)
   await startProxy({
     options: {
       chainId: cloberTestChain.id,
@@ -43,6 +45,11 @@ export default async function () {
     },
     port: ANVIL_PORT,
   })
+  console.log(
+    `[${(performance.now() - start).toFixed(
+      2,
+    )}ms]Anvil proxy started on port ${ANVIL_PORT}`,
+  )
 }
 
 export async function setUp() {
@@ -64,14 +71,21 @@ export async function setUp() {
     transport: http(`http://127.0.0.1:${ANVIL_PORT}/1`),
   })
 
-  if (snapshotId && erc20Address) {
+  let start = performance.now()
+  if (snapshotId !== null && tokenAddress !== null) {
     await testClient.revert({ id: snapshotId })
+    console.log(
+      `[${(performance.now() - start).toFixed(
+        2,
+      )}ms]Test client reverted to snapshot ID: ${snapshotId}`,
+    )
     return {
-      publicClient,
       testClient,
+      publicClient,
       walletClient,
-      tokenAddress: erc20Address,
+      account,
       snapshotId,
+      tokenAddress,
     }
   }
 
@@ -80,8 +94,14 @@ export async function setUp() {
     jsonRpcUrl: FORK_URL,
     blockNumber: FORK_BLOCK_NUMBER,
   })
+  console.log(
+    `[${(performance.now() - start).toFixed(
+      2,
+    )}]Test client reset to block ${FORK_BLOCK_NUMBER}`,
+  )
 
   // 1. Deploy ERC20 token
+  start = performance.now()
   const tokenDeployHash = await walletClient.deployContract({
     account,
     chain: cloberTestChain,
@@ -93,13 +113,19 @@ export async function setUp() {
   const tokenDeployReceipt = await publicClient.waitForTransactionReceipt({
     hash: tokenDeployHash,
   })
-  erc20Address = tokenDeployReceipt.contractAddress!
+  tokenAddress = tokenDeployReceipt.contractAddress!
+  console.log(
+    `[${(performance.now() - start).toFixed(
+      2,
+    )}ms]ERC20 token deployed at address: ${tokenAddress}`,
+  )
 
   // 2. Open a market with the deployed ERC20 token
+  start = performance.now()
   const openBidBookTx = await openMarket({
     chainId: cloberTestChain.id,
     userAddress: account.address,
-    inputToken: erc20Address,
+    inputToken: tokenAddress,
     outputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
     options: {
       rpcUrl: publicClient.transport.url!,
@@ -112,12 +138,18 @@ export async function setUp() {
     chain: cloberTestChain,
   })
   await publicClient.waitForTransactionReceipt({ hash: openBidBookHash })
+  console.log(
+    `[${(performance.now() - start).toFixed(
+      2,
+    )}ms]Bid book opened for ERC20 token hash: ${openBidBookHash}`,
+  )
 
+  start = performance.now()
   const openAskBookTx = await openMarket({
     chainId: cloberTestChain.id,
     userAddress: account.address,
     inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-    outputToken: erc20Address,
+    outputToken: tokenAddress,
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
@@ -129,12 +161,18 @@ export async function setUp() {
     chain: cloberTestChain,
   })
   await publicClient.waitForTransactionReceipt({ hash: openAskBookHash })
+  console.log(
+    `[${(performance.now() - start).toFixed(
+      2,
+    )}ms]Ask book opened for ERC20 token hash: ${openAskBookHash}`,
+  )
 
   // 3. Approve the ERC20 token and set approval for open orders
+  start = performance.now()
   const erc20ApproveHash = await approveERC20({
     chainId: cloberTestChain.id,
     walletClient,
-    token: erc20Address,
+    token: tokenAddress,
     options: {
       rpcUrl: publicClient.transport.url!,
     },
@@ -142,8 +180,14 @@ export async function setUp() {
   await publicClient.waitForTransactionReceipt({
     hash: erc20ApproveHash!,
   })
+  console.log(
+    `[${(performance.now() - start).toFixed(
+      2,
+    )}ms]ERC20 token approved for open orders hash: ${erc20ApproveHash}`,
+  )
 
   // 4. Set approval for all open orders
+  start = performance.now()
   const erc721ApproveHash = await setApprovalOfOpenOrdersForAll({
     chainId: cloberTestChain.id,
     walletClient,
@@ -154,14 +198,21 @@ export async function setUp() {
   await publicClient.waitForTransactionReceipt({
     hash: erc721ApproveHash!,
   })
+  console.log(
+    `[${(performance.now() - start).toFixed(
+      2,
+    )}ms]ERC721 approval for all open orders hash: ${erc721ApproveHash}`,
+  )
 
   snapshotId = await testClient.snapshot()
+  console.log(`Test client snapshot created with ID: ${snapshotId}`)
 
   return {
-    publicClient,
     testClient,
+    publicClient,
     walletClient,
-    tokenAddress: erc20Address,
+    account,
     snapshotId,
+    tokenAddress,
   }
 }

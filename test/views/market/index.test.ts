@@ -1,6 +1,6 @@
 import { test } from 'vitest'
 
-import { setUp } from '../../setup'
+import { setUp } from '../../setup.ts'
 
 test('getMarket', async () => {
   const { publicClient, walletClient, tokenAddress } = await setUp()
