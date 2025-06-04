@@ -4,7 +4,7 @@ import { arbitrumSepolia } from 'viem/chains'
 
 import { lnWad } from '../src/utils/math'
 
-import { FORK_URL } from './utils/constants'
+import { FORK_URL } from './constants'
 
 const publicClient = createPublicClient({
   chain: arbitrumSepolia,

@@ -5,7 +5,7 @@ import { arbitrumSepolia } from 'viem/chains'
 import { toBookId } from '../src/entities/book/utils/book-id'
 import { toPoolKey } from '../src/entities/pool/utils/pool-key'
 
-import { FORK_URL } from './utils/constants'
+import { FORK_URL } from './constants'
 
 const _abi = [
   {

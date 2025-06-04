@@ -10,7 +10,7 @@ import {
   getMarketPrice,
 } from '@clober/v2-sdk'
 
-import { FORK_URL } from './utils/constants'
+import { FORK_URL } from './constants'
 
 const _abi = [
   {

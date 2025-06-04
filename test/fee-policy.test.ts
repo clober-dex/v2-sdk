@@ -8,7 +8,7 @@ import {
   TAKER_DEFAULT_POLICY,
 } from '../src/constants/chain-configs/fee'
 
-import { FORK_URL } from './utils/constants'
+import { FORK_URL } from './constants'
 
 const _abi = [
   {
