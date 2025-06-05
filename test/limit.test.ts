@@ -70,7 +70,7 @@ test('limit bid', async () => {
     },
   })
 
-  const [beforeUSDCBalance, beforeTokenBalance] = await Promise.all([
+  const [beforeUSDC, beforeToken] = await Promise.all([
     getTokenBalance({
       publicClient,
       userAddress: walletClient.account.address,
@@ -89,7 +89,7 @@ test('limit bid', async () => {
     walletClient,
   })
 
-  const [afterUSDCBalance, afterTokenBalance] = await Promise.all([
+  const [afterUSDC, afterToken] = await Promise.all([
     getTokenBalance({
       publicClient,
       userAddress: walletClient.account.address,
@@ -112,8 +112,8 @@ test('limit bid', async () => {
     }),
   ])
 
-  expect(beforeUSDCBalance - afterUSDCBalance).toEqual(2000000000n)
-  expect(afterTokenBalance - beforeTokenBalance).toEqual(999299789910000000000n)
+  expect(beforeUSDC - afterUSDC).toEqual(2000000000n)
+  expect(afterToken - beforeToken).toEqual(999299789910000000000n)
   expect(bidDepths).toEqual([{ tick: -276323, depth: 999897204n }])
   expect(askDepths).toEqual([{ tick: 276322, depth: 1000300090n }])
 
@@ -202,7 +202,7 @@ test('limit bid with rounding take', async () => {
     },
   })
 
-  const [beforeUSDCBalance, beforeTokenBalance] = await Promise.all([
+  const [beforeUSDC, beforeToken] = await Promise.all([
     getTokenBalance({
       publicClient,
       userAddress: walletClient.account.address,
@@ -221,7 +221,7 @@ test('limit bid with rounding take', async () => {
     walletClient,
   })
 
-  const [afterUSDCBalance, afterTokenBalance] = await Promise.all([
+  const [afterUSDC, afterToken] = await Promise.all([
     getTokenBalance({
       publicClient,
       userAddress: walletClient.account.address,
@@ -244,10 +244,8 @@ test('limit bid with rounding take', async () => {
     }),
   ])
 
-  expect(beforeUSDCBalance - afterUSDCBalance).toEqual(2000000000n)
-  expect(afterTokenBalance - beforeTokenBalance).toEqual(
-    1997695098207000000000n,
-  )
+  expect(beforeUSDC - afterUSDC).toEqual(2000000000n)
+  expect(afterToken - beforeToken).toEqual(1997695098207000000000n)
   expect(bidDepths).toEqual([])
   expect(askDepths).toEqual([{ tick: 276322, depth: 905387n }])
 
@@ -341,7 +339,7 @@ test('limit ask', async () => {
     },
   })
 
-  const [beforeUSDCBalance, beforeTokenBalance] = await Promise.all([
+  const [beforeUSDC, beforeToken] = await Promise.all([
     getTokenBalance({
       publicClient,
       userAddress: walletClient.account.address,
@@ -360,7 +358,7 @@ test('limit ask', async () => {
     walletClient,
   })
 
-  const [afterUSDCBalance, afterTokenBalance] = await Promise.all([
+  const [afterUSDC, afterToken] = await Promise.all([
     getTokenBalance({
       publicClient,
       userAddress: walletClient.account.address,
@@ -383,10 +381,8 @@ test('limit ask', async () => {
     }),
   ])
 
-  expect(afterUSDCBalance - beforeUSDCBalance).toEqual(999299789n)
-  expect(beforeTokenBalance - afterTokenBalance).toEqual(
-    1999999999858590021975n,
-  )
+  expect(afterUSDC - beforeUSDC).toEqual(999299789n)
+  expect(beforeToken - afterToken).toEqual(1999999999858590021975n)
   expect(bidDepths).toEqual([{ tick: -276324, depth: 1000300090n }])
   expect(askDepths).toEqual([{ tick: 276323, depth: 1000102605n }])
 
@@ -475,7 +471,7 @@ test('limit ask with rounding take', async () => {
     },
   })
 
-  const [beforeUSDCBalance, beforeTokenBalance] = await Promise.all([
+  const [beforeUSDC, beforeToken] = await Promise.all([
     getTokenBalance({
       publicClient,
       userAddress: walletClient.account.address,
@@ -494,7 +490,7 @@ test('limit ask with rounding take', async () => {
     walletClient,
   })
 
-  const [afterUSDCBalance, afterTokenBalance] = await Promise.all([
+  const [afterUSDC, afterToken] = await Promise.all([
     getTokenBalance({
       publicClient,
       userAddress: walletClient.account.address,
@@ -518,10 +514,8 @@ test('limit ask with rounding take', async () => {
     }),
   ])
 
-  expect(afterUSDCBalance - beforeUSDCBalance).toEqual(1998105200n)
-  expect(beforeTokenBalance - afterTokenBalance).toEqual(
-    1999999999331101144697n,
-  )
+  expect(afterUSDC - beforeUSDC).toEqual(1998105200n)
+  expect(beforeToken - afterToken).toEqual(1999999999331101144697n)
   expect(bidDepths).toEqual([{ tick: -276324, depth: 494873n }])
   expect(askDepths).toEqual([])
 
