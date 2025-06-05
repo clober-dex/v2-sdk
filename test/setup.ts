@@ -10,6 +10,8 @@ import {
 import { mnemonicToAccount } from 'viem/accounts'
 import {
   approveERC20,
+  getMarket,
+  Market,
   openMarket,
   setApprovalOfOpenOrdersForAll,
 } from '@clober/v2-sdk'
@@ -29,6 +31,7 @@ dotenv.config()
 
 let snapshotId: `0x${string}` | null = null
 let tokenAddress: `0x${string}` | null = null
+let market: Market | null = null
 
 const CHAIN = cloberTestChain
 
@@ -77,8 +80,9 @@ export async function setUp() {
   })
 
   let start = performance.now()
-  if (snapshotId !== null && tokenAddress !== null) {
+  if (snapshotId !== null && tokenAddress !== null && market !== null) {
     await testClient.revert({ id: snapshotId })
+    snapshotId = await testClient.snapshot()
     console.log(
       `[${(performance.now() - start).toFixed(
         2,
@@ -91,6 +95,7 @@ export async function setUp() {
       account,
       snapshotId,
       tokenAddress,
+      market,
     }
   }
 
@@ -220,6 +225,16 @@ export async function setUp() {
   snapshotId = await testClient.snapshot()
   console.log(`Test client snapshot created with ID: ${snapshotId}`)
 
+  market = await getMarket({
+    chainId: CHAIN.id,
+    token0: tokenAddress,
+    token1: MOCK_USDC,
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  })
+
   return {
     testClient,
     publicClient,
@@ -227,5 +242,6 @@ export async function setUp() {
     account,
     snapshotId,
     tokenAddress,
+    market,
   }
 }
