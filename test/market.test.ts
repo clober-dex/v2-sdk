@@ -329,3 +329,140 @@ test('market sell with amountOut (token > usdc)', async () => {
     '2499.91359911940940429445461260259447994181401797586516977389692328870296478271484375',
   )
 })
+
+test('market buy fails with slippage 0 (usdc > token)', async () => {
+  const { publicClient, walletClient, tokenAddress } = await setUp('market')
+
+  await limitOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: tokenAddress,
+    outputToken: MOCK_USDC,
+    amount: '1.3',
+    price: '2500.01',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  await limitOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: tokenAddress,
+    outputToken: MOCK_USDC,
+    amount: '1.3',
+    price: '3000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  const { transaction } = await marketOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: MOCK_USDC,
+    outputToken: tokenAddress,
+    amountIn: '1000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      slippage: 0.5,
+    },
+  })
+
+  await marketOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: MOCK_USDC,
+    outputToken: tokenAddress,
+    amountIn: '3000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      slippage: 0.5,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  await expect(
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  ).rejects.toThrowError()
+})
+
+test('market sell fails with slippage 0 (token > usdc)', async () => {
+  const { publicClient, walletClient, tokenAddress, market } =
+    await setUp('market')
+
+  await limitOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: MOCK_USDC,
+    outputToken: tokenAddress,
+    amount: '4000',
+    price: '2500.01',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  await limitOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: MOCK_USDC,
+    outputToken: tokenAddress,
+    amount: '4000',
+    price: '2000',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  const { transaction } = await marketOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: tokenAddress,
+    outputToken: MOCK_USDC,
+    amountIn: '0.5',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      slippage: 0.5,
+    },
+  })
+
+  await marketOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: tokenAddress,
+    outputToken: MOCK_USDC,
+    amountIn: '3',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      slippage: 0.5,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  await expect(
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  ).rejects.toThrowError()
+})
