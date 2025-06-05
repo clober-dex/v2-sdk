@@ -60,23 +60,24 @@ export default async function () {
   )
 }
 
-export async function setUp() {
+export async function setUp(alias: string) {
+  alias = `0x${Buffer.from(alias, 'utf8').toString('hex')}`
   const account = mnemonicToAccount(DEV_MNEMONIC_SEED)
   const publicClient = createPublicClient({
     chain: CHAIN,
-    transport: http(`http://127.0.0.1:${ANVIL_PORT}/1`),
+    transport: http(`http://127.0.0.1:${ANVIL_PORT}/${Number(alias)}`),
   })
 
   const testClient = createTestClient({
     chain: CHAIN,
     mode: 'anvil',
-    transport: http(`http://127.0.0.1:${ANVIL_PORT}/1`),
+    transport: http(`http://127.0.0.1:${ANVIL_PORT}/${Number(alias)}`),
   })
 
   const walletClient = createWalletClient({
     chain: CHAIN,
     account,
-    transport: http(`http://127.0.0.1:${ANVIL_PORT}/1`),
+    transport: http(`http://127.0.0.1:${ANVIL_PORT}/${Number(alias)}`),
   })
 
   let start = performance.now()

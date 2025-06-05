@@ -8,7 +8,8 @@ import { getDepth } from './utils/depth'
 import { getTokenBalance } from './utils/currency'
 
 test('limit bid', async () => {
-  const { publicClient, walletClient, tokenAddress, market } = await setUp()
+  const { publicClient, walletClient, tokenAddress, market } =
+    await setUp('limit')
 
   const { transaction: tx1 } = await limitOrder({
     chainId: publicClient.chain.id,
@@ -144,7 +145,8 @@ test('limit bid', async () => {
 })
 
 test('limit bid with rounding take', async () => {
-  const { publicClient, walletClient, tokenAddress, market } = await setUp()
+  const { publicClient, walletClient, tokenAddress, market } =
+    await setUp('limit')
 
   const { transaction: tx1 } = await limitOrder({
     chainId: publicClient.chain.id,
@@ -289,7 +291,8 @@ test('limit bid with rounding take', async () => {
 })
 
 test('limit ask', async () => {
-  const { publicClient, walletClient, tokenAddress, market } = await setUp()
+  const { publicClient, walletClient, tokenAddress, market } =
+    await setUp('limit')
 
   const { transaction: tx1 } = await limitOrder({
     chainId: publicClient.chain.id,
@@ -427,7 +430,8 @@ test('limit ask', async () => {
 })
 
 test('limit ask with rounding take', async () => {
-  const { publicClient, walletClient, tokenAddress, market } = await setUp()
+  const { publicClient, walletClient, tokenAddress, market } =
+    await setUp('limit')
 
   const { transaction: tx1 } = await limitOrder({
     chainId: publicClient.chain.id,
