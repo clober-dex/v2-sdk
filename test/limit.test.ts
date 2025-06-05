@@ -11,7 +11,7 @@ test('limit bid', async () => {
   const { publicClient, walletClient, tokenAddress, market } =
     await setUp('limit')
 
-  const { transaction: tx1 } = await limitOrder({
+  await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: tokenAddress,
@@ -23,14 +23,11 @@ test('limit bid', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  })
-  await waitForTransaction({
-    transaction: tx1,
-    publicClient,
-    walletClient,
-  })
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
 
-  const { transaction: tx2 } = await limitOrder({
+  await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: tokenAddress,
@@ -42,12 +39,9 @@ test('limit bid', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  })
-  await waitForTransaction({
-    transaction: tx2,
-    publicClient,
-    walletClient,
-  })
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
 
   expect(
     await getDepth({
@@ -60,7 +54,7 @@ test('limit bid', async () => {
   ])
 
   const {
-    transaction: tx3,
+    transaction,
     result: { make, taken, spent },
   } = await limitOrder({
     chainId: publicClient.chain.id,
@@ -90,7 +84,7 @@ test('limit bid', async () => {
   ])
 
   await waitForTransaction({
-    transaction: tx3,
+    transaction,
     publicClient,
     walletClient,
   })
@@ -148,7 +142,7 @@ test('limit bid with rounding take', async () => {
   const { publicClient, walletClient, tokenAddress, market } =
     await setUp('limit')
 
-  const { transaction: tx1 } = await limitOrder({
+  await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: tokenAddress,
@@ -160,14 +154,11 @@ test('limit bid with rounding take', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  })
-  await waitForTransaction({
-    transaction: tx1,
-    publicClient,
-    walletClient,
-  })
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
 
-  const { transaction: tx2 } = await limitOrder({
+  await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: tokenAddress,
@@ -179,12 +170,9 @@ test('limit bid with rounding take', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  })
-  await waitForTransaction({
-    transaction: tx2,
-    publicClient,
-    walletClient,
-  })
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
 
   expect(
     await getDepth({
@@ -197,7 +185,7 @@ test('limit bid with rounding take', async () => {
   ])
 
   const {
-    transaction: tx3,
+    transaction,
     result: { make, taken, spent },
   } = await limitOrder({
     chainId: publicClient.chain.id,
@@ -228,7 +216,7 @@ test('limit bid with rounding take', async () => {
   ])
 
   await waitForTransaction({
-    transaction: tx3,
+    transaction,
     publicClient,
     walletClient,
   })
@@ -294,7 +282,7 @@ test('limit ask', async () => {
   const { publicClient, walletClient, tokenAddress, market } =
     await setUp('limit')
 
-  const { transaction: tx1 } = await limitOrder({
+  await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: MOCK_USDC,
@@ -306,14 +294,11 @@ test('limit ask', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  })
-  await waitForTransaction({
-    transaction: tx1,
-    publicClient,
-    walletClient,
-  })
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
 
-  const { transaction: tx2 } = await limitOrder({
+  await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: MOCK_USDC,
@@ -325,12 +310,9 @@ test('limit ask', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  })
-  await waitForTransaction({
-    transaction: tx2,
-    publicClient,
-    walletClient,
-  })
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
 
   expect(
     await getDepth({
@@ -343,7 +325,7 @@ test('limit ask', async () => {
   ])
 
   const {
-    transaction: tx3,
+    transaction,
     result: { make, taken, spent },
   } = await limitOrder({
     chainId: publicClient.chain.id,
@@ -373,7 +355,7 @@ test('limit ask', async () => {
   ])
 
   await waitForTransaction({
-    transaction: tx3,
+    transaction,
     publicClient,
     walletClient,
   })
@@ -433,7 +415,7 @@ test('limit ask with rounding take', async () => {
   const { publicClient, walletClient, tokenAddress, market } =
     await setUp('limit')
 
-  const { transaction: tx1 } = await limitOrder({
+  await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: MOCK_USDC,
@@ -445,14 +427,11 @@ test('limit ask with rounding take', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  })
-  await waitForTransaction({
-    transaction: tx1,
-    publicClient,
-    walletClient,
-  })
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
 
-  const { transaction: tx2 } = await limitOrder({
+  await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: MOCK_USDC,
@@ -464,12 +443,9 @@ test('limit ask with rounding take', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  })
-  await waitForTransaction({
-    transaction: tx2,
-    publicClient,
-    walletClient,
-  })
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
 
   expect(
     await getDepth({
@@ -482,7 +458,7 @@ test('limit ask with rounding take', async () => {
   ])
 
   const {
-    transaction: tx3,
+    transaction,
     result: { make, taken, spent },
   } = await limitOrder({
     chainId: publicClient.chain.id,
@@ -513,7 +489,7 @@ test('limit ask with rounding take', async () => {
   ])
 
   await waitForTransaction({
-    transaction: tx3,
+    transaction,
     publicClient,
     walletClient,
   })
@@ -530,6 +506,7 @@ test('limit ask with rounding take', async () => {
       tokenAddress: tokenAddress,
     }),
   ])
+
   const [bidDepths, askDepths] = await Promise.all([
     getDepth({
       publicClient,
