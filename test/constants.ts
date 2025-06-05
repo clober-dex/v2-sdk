@@ -1,5 +1,6 @@
 import { Chain } from 'viem'
 
+export const MOCK_USDC = '0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'
 export const ANVIL_PORT = Number(process.env.ANVIL_PORT) || 8545
 export const FORK_BLOCK_NUMBER = 155889340n
 export const DEV_MNEMONIC_SEED =

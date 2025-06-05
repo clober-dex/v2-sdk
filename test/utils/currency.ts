@@ -1,9 +1,8 @@
-// @TODO: remove this file
-
 import { PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../src'
 import { CONTRACT_ADDRESSES } from '../../src/constants/chain-configs/addresses'
+import { erc20Abi } from '../constants'
 
 const _abi = [
   {
@@ -27,6 +26,24 @@ const _abi = [
   },
 ] as const
 
+export const getTokenBalance = async ({
+  publicClient,
+  tokenAddress,
+  userAddress,
+}: {
+  publicClient: PublicClient
+  tokenAddress: `0x${string}`
+  userAddress: `0x${string}`
+}): Promise<bigint> => {
+  return publicClient.readContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: [userAddress],
+  })
+}
+
+// @TODO: remove this function
 export const fetchTokenBalance = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
@@ -41,6 +58,7 @@ export const fetchTokenBalance = async (
   })
 }
 
+// @TODO: remove this function
 export const fetchLPBalance = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
