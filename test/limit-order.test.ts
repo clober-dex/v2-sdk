@@ -1,17 +1,18 @@
 import { expect, test } from 'vitest'
-import { limitOrder } from '@clober/v2-sdk'
+import { cancelOrder, claimOrder, limitOrder } from '@clober/v2-sdk'
 
 import { setUp } from './setup'
 import { MOCK_USDC } from './constants'
 import { waitForTransaction } from './utils/transaction'
 import { getDepth } from './utils/depth'
 import { getTokenBalance } from './utils/currency'
+import { getOpenOrderIdFromReceipt, getOpenOrders } from './utils/order'
 
-test('limit bid', async () => {
+test('limit bid > claim > cancel', async () => {
   const { publicClient, walletClient, tokenAddress, market } =
     await setUp('limit')
 
-  await limitOrder({
+  const openOrder1 = await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: tokenAddress,
@@ -23,11 +24,32 @@ test('limit bid', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  }).then(({ transaction }) =>
-    waitForTransaction({ transaction, publicClient, walletClient }),
-  )
+  }).then(async ({ transaction }) => {
+    const receipt = await waitForTransaction({
+      transaction,
+      publicClient,
+      walletClient,
+    })
+    const orderId = getOpenOrderIdFromReceipt({
+      chainId: publicClient.chain.id,
+      receipt,
+    })
+    return getOpenOrders({
+      publicClient,
+      orderIds: orderId ? [orderId] : [],
+    })
+  })
+  expect(openOrder1).toEqual([
+    {
+      open: 1000300090n,
+      claimable: 0n,
+      orderId: openOrder1[0].orderId,
+      owner: walletClient.account.address,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+  ])
 
-  await limitOrder({
+  const openOrder2 = await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: tokenAddress,
@@ -39,9 +61,30 @@ test('limit bid', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  }).then(({ transaction }) =>
-    waitForTransaction({ transaction, publicClient, walletClient }),
-  )
+  }).then(async ({ transaction }) => {
+    const receipt = await waitForTransaction({
+      transaction,
+      publicClient,
+      walletClient,
+    })
+    const orderId = getOpenOrderIdFromReceipt({
+      chainId: publicClient.chain.id,
+      receipt,
+    })
+    return getOpenOrders({
+      publicClient,
+      orderIds: orderId ? [orderId] : [],
+    })
+  })
+  expect(openOrder2).toEqual([
+    {
+      open: 1000300090n,
+      claimable: 0n,
+      orderId: openOrder2[0].orderId,
+      owner: walletClient.account.address,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+  ])
 
   expect(
     await getDepth({
@@ -136,6 +179,72 @@ test('limit bid', async () => {
   expect(spent.events[0].price).toEqual(
     '1.00010264409533375529728112865347577250239342883109117110507213510572910308837890625',
   )
+
+  const beforeOpenOrders = await getOpenOrders({
+    publicClient,
+    orderIds: [openOrder1[0].orderId, openOrder2[0].orderId],
+  })
+  expect(beforeOpenOrders).toEqual([
+    {
+      open: 0n,
+      claimable: 1000300090n,
+      orderId: beforeOpenOrders[0].orderId,
+      owner: walletClient.account.address,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+    {
+      open: 1000300090n,
+      claimable: 0n,
+      orderId: beforeOpenOrders[1].orderId,
+      owner: walletClient.account.address,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+  ])
+
+  await claimOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    id: openOrder1[0].orderId.toString(),
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  await cancelOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    id: openOrder2[0].orderId.toString(),
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  const afterOpenOrders = await getOpenOrders({
+    publicClient,
+    orderIds: [openOrder1[0].orderId, openOrder2[0].orderId],
+  })
+  expect(afterOpenOrders).toEqual([
+    {
+      open: 0n,
+      claimable: 0n,
+      orderId: afterOpenOrders[0].orderId,
+      owner: undefined,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+    {
+      open: 0n,
+      claimable: 0n,
+      orderId: afterOpenOrders[1].orderId,
+      owner: undefined,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+  ])
 })
 
 test('limit bid with rounding take', async () => {
@@ -276,11 +385,11 @@ test('limit bid with rounding take', async () => {
   )
 })
 
-test('limit ask', async () => {
+test('limit ask > claim > cancel', async () => {
   const { publicClient, walletClient, tokenAddress, market } =
     await setUp('limit')
 
-  await limitOrder({
+  const openOrder1 = await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: MOCK_USDC,
@@ -292,11 +401,32 @@ test('limit ask', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  }).then(({ transaction }) =>
-    waitForTransaction({ transaction, publicClient, walletClient }),
-  )
+  }).then(async ({ transaction }) => {
+    const receipt = await waitForTransaction({
+      transaction,
+      publicClient,
+      walletClient,
+    })
+    const orderId = getOpenOrderIdFromReceipt({
+      chainId: publicClient.chain.id,
+      receipt,
+    })
+    return getOpenOrders({
+      publicClient,
+      orderIds: orderId ? [orderId] : [],
+    })
+  })
+  expect(openOrder1).toEqual([
+    {
+      open: 1000300090n,
+      claimable: 0n,
+      orderId: openOrder1[0].orderId,
+      owner: walletClient.account.address,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+  ])
 
-  await limitOrder({
+  const openOrder2 = await limitOrder({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
     inputToken: MOCK_USDC,
@@ -308,9 +438,30 @@ test('limit ask', async () => {
       postOnly: true,
       useSubgraph: false,
     },
-  }).then(({ transaction }) =>
-    waitForTransaction({ transaction, publicClient, walletClient }),
-  )
+  }).then(async ({ transaction }) => {
+    const receipt = await waitForTransaction({
+      transaction,
+      publicClient,
+      walletClient,
+    })
+    const orderId = getOpenOrderIdFromReceipt({
+      chainId: publicClient.chain.id,
+      receipt,
+    })
+    return getOpenOrders({
+      publicClient,
+      orderIds: orderId ? [orderId] : [],
+    })
+  })
+  expect(openOrder2).toEqual([
+    {
+      open: 1000300090n,
+      claimable: 0n,
+      orderId: openOrder2[0].orderId,
+      owner: walletClient.account.address,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+  ])
 
   expect(
     await getDepth({
@@ -405,6 +556,72 @@ test('limit ask', async () => {
   expect(spent.events[0].price).toEqual(
     '1.00010264409533375529728112865347577250239342883109117110507213510572910308837890625',
   )
+
+  const beforeOpenOrders = await getOpenOrders({
+    publicClient,
+    orderIds: [openOrder1[0].orderId, openOrder2[0].orderId],
+  })
+  expect(beforeOpenOrders).toEqual([
+    {
+      open: 1000300090n,
+      claimable: 0n,
+      orderId: beforeOpenOrders[0].orderId,
+      owner: walletClient.account.address,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+    {
+      open: 0n,
+      claimable: 1000300090n,
+      orderId: beforeOpenOrders[1].orderId,
+      owner: walletClient.account.address,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+  ])
+
+  await claimOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    id: openOrder1[0].orderId.toString(),
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  await cancelOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    id: openOrder2[0].orderId.toString(),
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  const afterOpenOrders = await getOpenOrders({
+    publicClient,
+    orderIds: [openOrder1[0].orderId, openOrder2[0].orderId],
+  })
+  expect(afterOpenOrders).toEqual([
+    {
+      open: 1000300090n,
+      claimable: 0n,
+      orderId: afterOpenOrders[0].orderId,
+      owner: walletClient.account.address,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+    {
+      open: 0n,
+      claimable: 1000300090n,
+      orderId: afterOpenOrders[1].orderId,
+      owner: walletClient.account.address,
+      provider: '0x0000000000000000000000000000000000000000',
+    },
+  ])
 })
 
 test('limit ask with rounding take', async () => {
