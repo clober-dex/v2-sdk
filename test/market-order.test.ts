@@ -399,8 +399,7 @@ test('market buy fails with slippage 0 (usdc > token)', async () => {
 })
 
 test('market sell fails with slippage 0 (token > usdc)', async () => {
-  const { publicClient, walletClient, tokenAddress, market } =
-    await setUp('market')
+  const { publicClient, walletClient, tokenAddress } = await setUp('market')
 
   await limitOrder({
     chainId: publicClient.chain.id,
