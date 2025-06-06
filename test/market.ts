@@ -10,7 +10,7 @@ import {
 
 import { cloberTestChain } from '../src/constants/networks/test-chain'
 
-import { createProxyClients } from './utils/utils'
+import { createProxyClients } from './proxy-client'
 
 const clients = createProxyClients(
   Array.from({ length: 4 }, () => Math.floor(new Date().getTime())).map(

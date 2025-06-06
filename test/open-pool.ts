@@ -11,7 +11,7 @@ import { monadTestnet } from 'viem/chains'
 import { cloberTestChain2 } from '../src/constants/networks/test-chain'
 
 import { FORK_URL } from './utils/constants'
-import { createProxyClients2 } from './utils/utils'
+import { createProxyClients2 } from './proxy-client'
 
 const clients = createProxyClients2(
   Array.from({ length: 2 }, () => Math.floor(new Date().getTime())).map(

@@ -20,7 +20,7 @@ import { CONTRACT_ADDRESSES } from '../src/constants/chain-configs/addresses'
 import { BOOK_VIEWER_ABI } from '../src/constants/abis/core/book-viewer-abi'
 import { cloberTestChain } from '../src/constants/networks/test-chain'
 
-import { createProxyClients } from './utils/utils'
+import { createProxyClients } from './proxy-client'
 
 const isSpendResultEqual = async (
   publicClient: PublicClient,
