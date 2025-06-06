@@ -9,7 +9,7 @@ import { getTokenBalance } from './utils/currency'
 import { getOpenOrderIdFromReceipt, getOpenOrders } from './utils/order'
 
 test('make at exactly price', async () => {
-  const { publicClient, walletClient, tokenAddress } = await setUp('make')
+  const { publicClient, walletClient, tokenAddress } = await setUp('limit')
 
   const {
     transaction,
@@ -84,7 +84,7 @@ test('make at exactly price', async () => {
 })
 
 test('make at approximate price', async () => {
-  const { publicClient, walletClient, tokenAddress } = await setUp('make')
+  const { publicClient, walletClient, tokenAddress } = await setUp('limit')
 
   const {
     transaction,
@@ -158,7 +158,7 @@ test('make at approximate price', async () => {
 })
 
 test('make bid at 0.01', async () => {
-  const { publicClient, walletClient, tokenAddress } = await setUp('make')
+  const { publicClient, walletClient, tokenAddress } = await setUp('limit')
 
   const {
     transaction,
@@ -232,7 +232,7 @@ test('make bid at 0.01', async () => {
 })
 
 test('make bid at 0.01 with rounding up', async () => {
-  const { publicClient, walletClient, tokenAddress } = await setUp('make')
+  const { publicClient, walletClient, tokenAddress } = await setUp('limit')
 
   const {
     transaction,
@@ -307,7 +307,7 @@ test('make bid at 0.01 with rounding up', async () => {
 })
 
 test('make ask at 0.01', async () => {
-  const { publicClient, walletClient, tokenAddress } = await setUp('make')
+  const { publicClient, walletClient, tokenAddress } = await setUp('limit')
 
   const {
     transaction,
@@ -381,7 +381,7 @@ test('make ask at 0.01', async () => {
 })
 
 test('make ask at 0.01 with rounding down', async () => {
-  const { publicClient, walletClient, tokenAddress } = await setUp('make')
+  const { publicClient, walletClient, tokenAddress } = await setUp('limit')
 
   const {
     transaction,
