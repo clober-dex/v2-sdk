@@ -9,13 +9,14 @@ import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { toBookId } from '../utils/book-id'
 import { BookModel } from '../model'
 
+const MAX_DEPTH = 1000n
+
 export const fetchBook = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   quoteCurrency: Currency,
   baseCurrency: Currency,
   useSubgraph: boolean,
-  n: number,
 ): Promise<BookModel> => {
   const unitSize = calculateUnitSize(chainId, quoteCurrency)
   const bookId = toBookId(
@@ -69,7 +70,7 @@ export const fetchBook = async (
           address: CONTRACT_ADDRESSES[chainId]!.BookViewer,
           abi: BOOK_VIEWER_ABI,
           functionName: 'getLiquidity',
-          args: [bookId, Number(2n ** 19n - 1n), BigInt(n)],
+          args: [bookId, Number(2n ** 19n - 1n), MAX_DEPTH],
         },
         {
           address: CONTRACT_ADDRESSES[chainId]!.BookManager,
