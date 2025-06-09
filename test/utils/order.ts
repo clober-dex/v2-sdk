@@ -1,13 +1,5 @@
-import {
-  getAddress,
-  isAddressEqual,
-  PublicClient,
-  TransactionReceipt,
-} from 'viem'
+import { isAddressEqual, PublicClient, TransactionReceipt } from 'viem'
 import { CHAIN_IDS, Currency, getContractAddresses } from '@clober/v2-sdk'
-
-import { fetchCurrencyMap } from '../../src/entities/currency/apis'
-import { fromOrderId } from '../../src/entities/open-order/utils/order-id'
 
 const _abi = [
   {
@@ -244,87 +236,6 @@ export const getOpenOrders = async ({
       orderId,
       owner,
       provider: order.provider,
-    }
-  })
-}
-
-// @TODO: remove this function
-export const fetchOrders = async (
-  publicClient: PublicClient,
-  chainId: CHAIN_IDS,
-  orderIds: bigint[],
-): Promise<
-  {
-    open: bigint
-    claimable: bigint
-    orderId: bigint
-    unit: bigint
-    tick: bigint
-    owner: `0x${string}`
-    baseCurrency: Currency
-    quoteCurrency: Currency
-  }[]
-> => {
-  const result = await publicClient.multicall({
-    contracts: [
-      ...orderIds.map((orderId) => ({
-        address: CONTRACT_ADDRESSES[chainId]!.BookManager,
-        abi: _abi,
-        functionName: 'getOrder',
-        args: [orderId],
-      })),
-      ...orderIds.map((orderId) => ({
-        address: CONTRACT_ADDRESSES[chainId]!.BookManager,
-        abi: _abi,
-        functionName: 'ownerOf',
-        args: [orderId],
-      })),
-      ...orderIds.map((orderId) => ({
-        address: CONTRACT_ADDRESSES[chainId]!.BookManager,
-        abi: _abi,
-        functionName: 'getBookKey',
-        args: [fromOrderId(orderId).bookId],
-      })),
-    ],
-  })
-  const addresses = orderIds
-    .map((_, index) => {
-      const { base, quote } = result[index + orderIds.length * 2].result as {
-        base: `0x${string}`
-        quote: `0x${string}`
-      }
-      return [base, quote]
-    })
-    .flat()
-  const currencyMap = await fetchCurrencyMap(
-    publicClient,
-    chainId,
-    addresses,
-    false,
-  )
-
-  return orderIds.map((orderId, index) => {
-    const order = result[index].result as {
-      provider: `0x${string}`
-      open: bigint
-      claimable: bigint
-    }
-    const owner = result[index + orderIds.length].result as `0x${string}`
-    const { base, quote, unit } = result[index + orderIds.length * 2]
-      .result as {
-      base: `0x${string}`
-      quote: `0x${string}`
-      unit: bigint
-    }
-    return {
-      open: order.open,
-      claimable: order.claimable,
-      orderId,
-      owner,
-      unit,
-      tick: fromOrderId(orderId).tick,
-      baseCurrency: currencyMap[getAddress(base)],
-      quoteCurrency: currencyMap[getAddress(quote)],
     }
   })
 }

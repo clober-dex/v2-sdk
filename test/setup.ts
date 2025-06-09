@@ -6,13 +6,14 @@ import {
   createWalletClient,
   getAddress,
   http,
+  zeroHash,
 } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import {
-  approveERC20,
+  getContractAddresses,
   getMarket,
   Market,
-  openMarket,
+  openPool,
   setApprovalOfOpenOrdersForAll,
 } from '@clober/v2-sdk'
 
@@ -21,11 +22,13 @@ import {
   ANVIL_PORT,
   cloberTestChain,
   DEV_MNEMONIC_SEED,
+  DEV_WALLET,
   erc20Abi,
   FORK_BLOCK_NUMBER,
   MOCK_USDC,
 } from './constants'
 import { waitForTransaction } from './utils/transaction'
+import { maxApproveToken } from './utils/currency'
 
 dotenv.config()
 
@@ -131,79 +134,89 @@ export async function setUp(alias: string) {
     )}ms] ERC20 token deployed at address: ${tokenAddress}`,
   )
 
-  // 2. Open a market with the deployed ERC20 token
+  // 2. Open a pool with the deployed ERC20 token
   start = performance.now()
-  const openBidBookTx = await openMarket({
-    chainId: CHAIN.id,
-    userAddress: account.address,
-    inputToken: tokenAddress,
-    outputToken: MOCK_USDC,
+  await testClient.impersonateAccount({
+    address: DEV_WALLET,
+  })
+  await openPool({
+    chainId: publicClient.chain!.id,
+    userAddress: DEV_WALLET,
+    tokenA: MOCK_USDC,
+    tokenB: tokenAddress,
+    salt: zeroHash,
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
     },
+  }).then((transaction) =>
+    waitForTransaction({
+      transaction: transaction!,
+      publicClient,
+      walletClient,
+    }),
+  )
+  await testClient.stopImpersonatingAccount({
+    address: DEV_WALLET,
   })
-  await waitForTransaction({
-    transaction: openBidBookTx!,
-    publicClient,
-    walletClient,
-  })
-  console.log(`[${(performance.now() - start).toFixed(2)}ms] bid book opened`)
-
-  start = performance.now()
-  const openAskBookTx = await openMarket({
-    chainId: CHAIN.id,
-    userAddress: account.address,
-    inputToken: MOCK_USDC,
-    outputToken: tokenAddress,
-    options: {
-      rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
-    },
-  })
-  await waitForTransaction({
-    transaction: openAskBookTx!,
-    publicClient,
-    walletClient,
-  })
-  console.log(`[${(performance.now() - start).toFixed(2)}ms] ask book opened`)
+  console.log(`[${(performance.now() - start).toFixed(2)}ms] Pool opened`)
 
   // 3. Approve the ERC20 token and set approval for open orders
   start = performance.now()
-  const erc20ApproveHash = await approveERC20({
-    chainId: CHAIN.id,
-    walletClient,
+  await maxApproveToken({
     token: tokenAddress,
-    options: {
-      rpcUrl: publicClient.transport.url!,
-    },
+    spender: getContractAddresses({ chainId: CHAIN.id }).Controller,
+    walletClient,
+  }).then(async (hash) => {
+    await publicClient.waitForTransactionReceipt({ hash: hash! })
+    console.log(
+      `[${(performance.now() - start).toFixed(
+        2,
+      )}ms] ERC20 token approved for Controller hash: ${hash}`,
+    )
   })
-  await publicClient.waitForTransactionReceipt({
-    hash: erc20ApproveHash!,
-  })
-  console.log(
-    `[${(performance.now() - start).toFixed(
-      2,
-    )}ms] ERC20 token approved for open orders hash: ${erc20ApproveHash}`,
-  )
 
   start = performance.now()
-  const mockUSDCApproveHash = await approveERC20({
-    chainId: CHAIN.id,
-    walletClient,
+  await maxApproveToken({
     token: MOCK_USDC,
-    options: {
-      rpcUrl: publicClient.transport.url!,
-    },
+    spender: getContractAddresses({ chainId: CHAIN.id }).Controller,
+    walletClient,
+  }).then(async (hash) => {
+    await publicClient.waitForTransactionReceipt({ hash: hash! })
+    console.log(
+      `[${(performance.now() - start).toFixed(
+        2,
+      )}ms] Mock token approved for Controller hash: ${hash}`,
+    )
   })
-  await publicClient.waitForTransactionReceipt({
-    hash: mockUSDCApproveHash!,
+
+  start = performance.now()
+  await maxApproveToken({
+    token: tokenAddress,
+    spender: getContractAddresses({ chainId: CHAIN.id }).Minter,
+    walletClient,
+  }).then(async (hash) => {
+    await publicClient.waitForTransactionReceipt({ hash: hash! })
+    console.log(
+      `[${(performance.now() - start).toFixed(
+        2,
+      )}ms] ERC20 token approved for Minter hash: ${hash}`,
+    )
   })
-  console.log(
-    `[${(performance.now() - start).toFixed(
-      2,
-    )}ms] Mock token approved for open orders hash: ${mockUSDCApproveHash}`,
-  )
+
+  start = performance.now()
+  await maxApproveToken({
+    token: MOCK_USDC,
+    spender: getContractAddresses({ chainId: CHAIN.id }).Minter,
+    walletClient,
+  }).then(async (hash) => {
+    await publicClient.waitForTransactionReceipt({ hash: hash! })
+    console.log(
+      `[${(performance.now() - start).toFixed(
+        2,
+      )}ms] Mock token approved for Minter hash: ${hash}`,
+    )
+  })
 
   // 4. Set approval for all open orders
   start = performance.now()
