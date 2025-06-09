@@ -9,7 +9,7 @@ import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { toBookId } from '../utils/book-id'
 import { BookModel } from '../model'
 
-const MAX_DEPTH = 100n
+const MAX_DEPTH = 20n
 
 export const fetchBook = async (
   publicClient: PublicClient,
@@ -41,7 +41,7 @@ export const fetchBook = async (
     }>(
       chainId,
       'getBook',
-      'query getBook($bookId: ID!) { book(id: $bookId) { depths(where: {unitAmount_gt: 0}) { tick unitAmount } } }',
+      'query getBook($bookId: ID!) { book(id: $bookId) { depths(where: {unitAmount_gt: 0} orderBy: tick orderDirection: desc) { tick unitAmount } } }',
       {
         bookId: bookId.toString(),
       },
@@ -63,7 +63,7 @@ export const fetchBook = async (
       isOpened: book !== null,
     })
   }
-  const [{ result: depths }, { result: isOpened }] =
+  const [{ result: depths, error }, { result: isOpened }] =
     await publicClient.multicall({
       contracts: [
         {
@@ -100,6 +100,10 @@ export const fetchBook = async (
         },
       ],
     })
+
+  if (error) {
+    throw new Error(`Failed to fetch book data: ${error.message}`)
+  }
 
   return new BookModel({
     chainId,
