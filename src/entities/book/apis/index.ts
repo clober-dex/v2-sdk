@@ -9,7 +9,7 @@ import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { toBookId } from '../utils/book-id'
 import { BookModel } from '../model'
 
-const MAX_DEPTH = 500n
+const MAX_DEPTH = 100n
 
 export const fetchBook = async (
   publicClient: PublicClient,
