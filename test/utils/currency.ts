@@ -1,9 +1,8 @@
-import { PublicClient, WalletClient } from 'viem'
+import { isAddressEqual, PublicClient, WalletClient, zeroAddress } from 'viem'
+import { CHAIN_IDS, getContractAddresses } from '@clober/v2-sdk'
 
-import { CHAIN_IDS } from '../../src'
 import { CONTRACT_ADDRESSES } from '../../src/constants/chain-configs/addresses'
 import { erc20Abi } from '../constants'
-import { CHAIN_MAP } from '../../src/constants/chain-configs/chain'
 
 const _abi = [
   {
@@ -36,11 +35,57 @@ export const getTokenBalance = async ({
   tokenAddress: `0x${string}`
   userAddress: `0x${string}`
 }): Promise<bigint> => {
+  if (isAddressEqual(tokenAddress, zeroAddress)) {
+    return publicClient.getBalance({ address: userAddress })
+  }
   return publicClient.readContract({
     address: tokenAddress,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: [userAddress],
+  })
+}
+
+export const getLpTokenBalance = async ({
+  publicClient,
+  tokenId,
+  userAddress,
+}: {
+  publicClient: PublicClient
+  tokenId: bigint
+  userAddress: `0x${string}`
+}): Promise<bigint> => {
+  return publicClient.readContract({
+    address: getContractAddresses({ chainId: publicClient.chain!.id })
+      .Rebalancer,
+    abi: [
+      {
+        inputs: [
+          {
+            internalType: 'address',
+            name: '',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: '',
+            type: 'uint256',
+          },
+        ],
+        name: 'balanceOf',
+        outputs: [
+          {
+            internalType: 'uint256',
+            name: '',
+            type: 'uint256',
+          },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ] as const,
+    functionName: 'balanceOf',
+    args: [userAddress, tokenId],
   })
 }
 

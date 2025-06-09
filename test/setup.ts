@@ -11,11 +11,14 @@ import {
 import { mnemonicToAccount } from 'viem/accounts'
 import {
   getContractAddresses,
-  getMarket,
+  getPool,
   Market,
   openPool,
+  Pool,
   setApprovalOfOpenOrdersForAll,
 } from '@clober/v2-sdk'
+
+import { cloberTestChain2 } from '../src/constants/networks/test-chain'
 
 import { FORK_URL } from './utils/constants'
 import {
@@ -34,7 +37,8 @@ dotenv.config()
 
 let snapshotId: `0x${string}` | null = null
 let tokenAddress: `0x${string}` | null = null
-let market: Market | null = null
+const market: Market | null = null
+let pool: Pool | null = null
 
 const CHAIN = cloberTestChain
 
@@ -84,7 +88,12 @@ export async function setUp(alias: string) {
   })
 
   let start = performance.now()
-  if (snapshotId !== null && tokenAddress !== null && market !== null) {
+  if (
+    snapshotId !== null &&
+    tokenAddress !== null &&
+    market !== null &&
+    pool !== null
+  ) {
     await testClient.revert({ id: snapshotId })
     snapshotId = await testClient.snapshot()
     console.log(
@@ -100,6 +109,7 @@ export async function setUp(alias: string) {
       snapshotId,
       tokenAddress,
       market,
+      pool,
     }
   }
 
@@ -239,10 +249,11 @@ export async function setUp(alias: string) {
   snapshotId = await testClient.snapshot()
   console.log(`Test client snapshot created with ID: ${snapshotId}`)
 
-  market = await getMarket({
-    chainId: CHAIN.id,
-    token0: tokenAddress,
-    token1: MOCK_USDC,
+  pool = await getPool({
+    chainId: cloberTestChain2.id,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
+    salt: zeroHash,
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
@@ -256,6 +267,7 @@ export async function setUp(alias: string) {
     account,
     snapshotId,
     tokenAddress,
-    market,
+    market: pool.market,
+    pool,
   }
 }
