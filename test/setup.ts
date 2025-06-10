@@ -18,8 +18,6 @@ import {
   setApprovalOfOpenOrdersForAll,
 } from '@clober/v2-sdk'
 
-import { cloberTestChain2 } from '../src/constants/networks/test-chain'
-
 import { FORK_URL } from './utils/constants'
 import {
   ANVIL_PORT,
@@ -146,9 +144,6 @@ export async function setUp(alias: string) {
 
   // 2. Open a pool with the deployed ERC20 token
   start = performance.now()
-  await testClient.impersonateAccount({
-    address: DEV_WALLET,
-  })
   await openPool({
     chainId: publicClient.chain!.id,
     userAddress: DEV_WALLET,
@@ -166,9 +161,6 @@ export async function setUp(alias: string) {
       walletClient,
     }),
   )
-  await testClient.stopImpersonatingAccount({
-    address: DEV_WALLET,
-  })
   console.log(`[${(performance.now() - start).toFixed(2)}ms] Pool opened`)
 
   // 3. Approve the ERC20 token and set approval for open orders
@@ -250,7 +242,7 @@ export async function setUp(alias: string) {
   console.log(`Test client snapshot created with ID: ${snapshotId}`)
 
   pool = await getPool({
-    chainId: cloberTestChain2.id,
+    chainId: publicClient.chain.id,
     token0: MOCK_USDC,
     token1: tokenAddress,
     salt: zeroHash,
