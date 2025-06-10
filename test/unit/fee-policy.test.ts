@@ -2,13 +2,12 @@ import { expect, test } from 'vitest'
 import { createPublicClient, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
-import { FeePolicy } from '../src/entities/fee-policy/model'
+import { FeePolicy } from '../../src/entities/fee-policy/model'
 import {
   MAKER_DEFAULT_POLICY,
   TAKER_DEFAULT_POLICY,
-} from '../src/constants/chain-configs/fee'
-
-import { FORK_URL } from './utils/constants'
+} from '../../src/constants/chain-configs/fee'
+import { FORK_URL } from '../utils/constants'
 
 const _abi = [
   {

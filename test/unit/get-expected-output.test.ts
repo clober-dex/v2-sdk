@@ -5,7 +5,7 @@ import {
   getMarket,
   invertTick,
   toPrice,
-} from '@clober/v2-sdk'
+} from 'v2-sdk/src'
 import {
   createPublicClient,
   formatUnits,
@@ -18,10 +18,9 @@ import {
 } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
-import { BOOK_VIEWER_ABI } from '../src/constants/abis/core/book-viewer-abi'
-import { MAX_TICK } from '../src/constants/tick'
-
-import { MOCK_USDC } from './utils/constants'
+import { BOOK_VIEWER_ABI } from '../../src/constants/abis/core/book-viewer-abi'
+import { MAX_TICK } from '../../src/constants/tick'
+import { MOCK_USDC } from '../utils/constants'
 
 const publicClient = createPublicClient({
   chain: arbitrumSepolia,
