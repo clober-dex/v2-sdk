@@ -9,7 +9,7 @@ import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { toBookId } from '../utils/book-id'
 import { BookModel } from '../model'
 
-const MAX_DEPTH = 20n
+const MAX_DEPTH = 20n // if the depth is too large, it may cause revert errors in the contract call
 
 export const fetchBook = async (
   publicClient: PublicClient,
@@ -41,9 +41,10 @@ export const fetchBook = async (
     }>(
       chainId,
       'getBook',
-      'query getBook($bookId: ID!) { book(id: $bookId) { depths(where: {unitAmount_gt: 0} orderBy: tick orderDirection: desc) { tick unitAmount } } }',
+      'query getBook($bookId: ID!, $first: Int!) { book(id: $bookId) { depths(first: $first where: {unitAmount_gt: 0}, orderBy: tick, orderDirection: desc) { tick unitAmount } } }',
       {
         bookId: bookId.toString(),
+        first: 1000, // Adjust as needed for depth
       },
     )
     return new BookModel({
