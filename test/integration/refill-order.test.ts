@@ -6,16 +6,16 @@ import {
   getPool,
   marketOrder,
   refillOrder,
-} from 'v2-sdk/src'
+} from '@clober/v2-sdk'
 import { zeroHash } from 'viem'
 
-import { STRATEGY_ABI } from '../../src/constants/abis/rebalancer/strategy-abi.ts'
-import { setUp } from '../setup.ts'
-import { DEV_WALLET, MOCK_USDC } from '../utils/constants.ts'
-import { waitForTransaction } from '../utils/transaction.ts'
+import { STRATEGY_ABI } from '../../src/constants/abis/rebalancer/strategy-abi'
+import { setUp } from '../setup'
+import { DEV_WALLET, MOCK_USDC } from '../utils/constants'
+import { waitForTransaction } from '../utils/transaction'
 
 test('Refill order', async () => {
-  const { publicClient, walletClient, tokenAddress } = await setUp('adjust')
+  const { publicClient, walletClient, tokenAddress } = await setUp('refill')
 
   await addLiquidity({
     chainId: publicClient.chain.id,

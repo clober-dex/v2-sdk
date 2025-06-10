@@ -1,12 +1,12 @@
 import { expect, test } from 'vitest'
-import { addLiquidity } from 'v2-sdk/src'
+import { addLiquidity } from '@clober/v2-sdk'
 import { formatUnits, zeroHash } from 'viem'
 
-import { getQuoteAmountFromPrices } from '../../src/entities/pool/utils/mint.ts'
-import { setUp } from '../setup.ts'
-import { getLpTokenBalance, getTokenBalance } from '../utils/currency.ts'
-import { MOCK_USDC } from '../utils/constants.ts'
-import { waitForTransaction } from '../utils/transaction.ts'
+import { getQuoteAmountFromPrices } from '../../src/entities/pool/utils/mint'
+import { setUp } from '../setup'
+import { getLpTokenBalance, getTokenBalance } from '../utils/currency'
+import { MOCK_USDC } from '../utils/constants'
+import { waitForTransaction } from '../utils/transaction'
 
 test('Add liquidity without swap - 1', async () => {
   const { publicClient, walletClient, tokenAddress, pool } = await setUp('mint')

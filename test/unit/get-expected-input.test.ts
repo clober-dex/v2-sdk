@@ -5,7 +5,7 @@ import {
   getMarket,
   invertTick,
   toPrice,
-} from 'v2-sdk/src'
+} from '@clober/v2-sdk'
 import {
   createPublicClient,
   formatUnits,

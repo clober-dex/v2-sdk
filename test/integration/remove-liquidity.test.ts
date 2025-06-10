@@ -1,11 +1,11 @@
 import { expect, test } from 'vitest'
-import { addLiquidity, removeLiquidity } from 'v2-sdk/src'
+import { addLiquidity, removeLiquidity } from '@clober/v2-sdk'
 import { formatUnits, zeroHash } from 'viem'
 
-import { setUp } from '../setup.ts'
-import { MOCK_USDC } from '../utils/constants.ts'
-import { waitForTransaction } from '../utils/transaction.ts'
-import { getLpTokenBalance, getTokenBalance } from '../utils/currency.ts'
+import { setUp } from '../setup'
+import { MOCK_USDC } from '../utils/constants'
+import { waitForTransaction } from '../utils/transaction'
+import { getLpTokenBalance, getTokenBalance } from '../utils/currency'
 
 test('Remove liquidity - 1', async () => {
   const { publicClient, walletClient, tokenAddress, pool } = await setUp('burn')

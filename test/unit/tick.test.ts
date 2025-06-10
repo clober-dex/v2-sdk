@@ -8,9 +8,9 @@ import {
   quoteToBase,
   getPriceNeighborhood,
   getMarketPrice,
-} from '@clober/v2-sdk'
+} from 'v2-sdk/src'
 
-import { FORK_URL } from './utils/constants'
+import { FORK_URL } from '../utils/constants.ts'
 
 const _abi = [
   {
