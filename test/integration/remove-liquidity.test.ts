@@ -84,10 +84,9 @@ test('Remove liquidity - 1', async () => {
     }),
   ])
 
-  expect(formatUnits(afterUSDC - beforeUSDC, 6)).toBe(result.currencyA.amount)
-  expect(formatUnits(afterToken - beforeToken, 18)).toBe(
-    result.currencyB.amount,
-  )
+  // contain small fee
+  expect(formatUnits(afterUSDC - beforeUSDC, 6)).toBe('0.49995')
+  expect(formatUnits(afterToken - beforeToken, 18)).toBe('999.9')
   expect(formatUnits(beforeLP - afterLP, 18)).toBe(result.lpCurrency.amount)
 })
 
@@ -168,9 +167,8 @@ test('Remove liquidity - 2', async () => {
     }),
   ])
 
-  expect(formatUnits(afterUSDC - beforeUSDC, 6)).toBe(result.currencyA.amount)
-  expect(formatUnits(afterToken - beforeToken, 18)).toBe(
-    result.currencyB.amount,
-  )
+  // contain small fee
+  expect(formatUnits(afterUSDC - beforeUSDC, 6)).toBe('0.9999')
+  expect(formatUnits(afterToken - beforeToken, 18)).toBe('1999.8')
   expect(formatUnits(beforeLP - afterLP, 18)).toBe(result.lpCurrency.amount)
 })
