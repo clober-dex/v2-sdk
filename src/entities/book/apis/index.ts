@@ -9,7 +9,7 @@ import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { toBookId } from '../utils/book-id'
 import { BookModel } from '../model'
 
-const MAX_DEPTH = 20n
+const MAX_DEPTH = 20n // if the depth is too large, it may cause revert errors in the contract call
 
 export const fetchBook = async (
   publicClient: PublicClient,
