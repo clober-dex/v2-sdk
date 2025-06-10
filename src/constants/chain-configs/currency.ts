@@ -15,8 +15,6 @@ export const NATIVE_CURRENCY: {
   [chain in CHAIN_IDS]: Currency
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: ETH,
-  [CHAIN_IDS.CLOBER_TESTNET_2]: ETH,
-  [CHAIN_IDS.CLOBER_TESTNET_3]: ETH,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: ETH,
   // [CHAIN_IDS.BASE]: ETH,
   [CHAIN_IDS.BERACHAIN_MAINNET]: {
@@ -39,18 +37,6 @@ export const REFERENCE_CURRENCY: {
   [chain in CHAIN_IDS]: Currency
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: {
-    address: getAddress('0xF2e615A933825De4B39b497f6e6991418Fb31b78'), // Mock WETH
-    symbol: 'WETH',
-    name: 'Wrapped Ether',
-    decimals: 18,
-  },
-  [CHAIN_IDS.CLOBER_TESTNET_2]: {
-    address: getAddress('0xF2e615A933825De4B39b497f6e6991418Fb31b78'), // Mock WETH
-    symbol: 'WETH',
-    name: 'Wrapped Ether',
-    decimals: 18,
-  },
-  [CHAIN_IDS.CLOBER_TESTNET_3]: {
     address: getAddress('0xF2e615A933825De4B39b497f6e6991418Fb31b78'), // Mock WETH
     symbol: 'WETH',
     name: 'Wrapped Ether',
@@ -88,8 +74,6 @@ export const NATIVE_CURRENCY_TOTAL_SUPPLY: {
   [chain in CHAIN_IDS]: bigint
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: 120000000000000000000000000n,
-  [CHAIN_IDS.CLOBER_TESTNET_2]: 120000000000000000000000000n,
-  [CHAIN_IDS.CLOBER_TESTNET_3]: 120000000000000000000000000n,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: 120000000000000000000000000n,
   // [CHAIN_IDS.BASE]: ETH,
   [CHAIN_IDS.BERACHAIN_MAINNET]: 502000000000000000000000000n,
@@ -104,22 +88,6 @@ export const STABLE_COINS: {
   [chain in CHAIN_IDS]: Currency[]
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: [
-    {
-      address: getAddress('0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'),
-      name: 'Mock USDT',
-      symbol: 'MT',
-      decimals: 6,
-    },
-  ],
-  [CHAIN_IDS.CLOBER_TESTNET_2]: [
-    {
-      address: getAddress('0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'),
-      name: 'Mock USDT',
-      symbol: 'MT',
-      decimals: 6,
-    },
-  ],
-  [CHAIN_IDS.CLOBER_TESTNET_3]: [
     {
       address: getAddress('0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0'),
       name: 'Mock USDT',
