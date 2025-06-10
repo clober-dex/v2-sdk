@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js'
 import { PublicClient } from 'viem'
 
 import { CONTRACT_ADDRESSES } from '../../src/constants/chain-configs/addresses'

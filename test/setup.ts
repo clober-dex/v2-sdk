@@ -18,8 +18,8 @@ import {
   setApprovalOfOpenOrdersForAll,
 } from '@clober/v2-sdk'
 
-import { FORK_URL } from './utils/constants'
 import {
+  FORK_URL,
   ANVIL_PORT,
   cloberTestChain,
   DEV_MNEMONIC_SEED,
@@ -27,7 +27,7 @@ import {
   erc20Abi,
   FORK_BLOCK_NUMBER,
   MOCK_USDC,
-} from './constants'
+} from './utils/constants'
 import { waitForTransaction } from './utils/transaction'
 import { maxApproveToken } from './utils/currency'
 

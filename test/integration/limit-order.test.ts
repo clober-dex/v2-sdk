@@ -1,12 +1,12 @@
 import { expect, test } from 'vitest'
-import { cancelOrder, claimOrder, getMarket, limitOrder } from '@clober/v2-sdk'
+import { cancelOrder, claimOrder, getMarket, limitOrder } from 'v2-sdk/src'
 
-import { setUp } from './setup'
-import { MOCK_USDC } from './constants'
-import { waitForTransaction } from './utils/transaction'
-import { getDepth } from './utils/depth'
-import { getTokenBalance } from './utils/currency'
-import { getOpenOrderIdFromReceipt, getOpenOrders } from './utils/order'
+import { setUp } from '../setup.ts'
+import { MOCK_USDC } from '../utils/constants.ts'
+import { waitForTransaction } from '../utils/transaction.ts'
+import { getDepth } from '../utils/depth.ts'
+import { getTokenBalance } from '../utils/currency.ts'
+import { getOpenOrderIdFromReceipt, getOpenOrders } from '../utils/order.ts'
 
 test('make at exactly price', async () => {
   const { publicClient, walletClient, tokenAddress } = await setUp('limit')

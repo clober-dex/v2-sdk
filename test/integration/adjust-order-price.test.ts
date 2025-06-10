@@ -4,14 +4,13 @@ import {
   adjustOrderPrice,
   getContractAddresses,
   getPool,
-} from '@clober/v2-sdk'
+} from 'v2-sdk/src'
 import { zeroHash } from 'viem'
 
-import { STRATEGY_ABI } from '../src/constants/abis/rebalancer/strategy-abi'
-
-import { setUp } from './setup'
-import { waitForTransaction } from './utils/transaction'
-import { DEV_WALLET, MOCK_USDC } from './constants'
+import { STRATEGY_ABI } from '../../src/constants/abis/rebalancer/strategy-abi.ts'
+import { setUp } from '../setup.ts'
+import { waitForTransaction } from '../utils/transaction.ts'
+import { DEV_WALLET, MOCK_USDC } from '../utils/constants.ts'
 
 test('Adjust order price', async () => {
   const { publicClient, walletClient, tokenAddress } = await setUp('adjust')

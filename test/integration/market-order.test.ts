@@ -1,10 +1,10 @@
 import { expect, test } from 'vitest'
-import { marketOrder, limitOrder } from '@clober/v2-sdk'
+import { marketOrder, limitOrder } from 'v2-sdk/src'
 
-import { setUp } from './setup'
-import { MOCK_USDC } from './constants'
-import { waitForTransaction } from './utils/transaction'
-import { getTokenBalance } from './utils/currency'
+import { setUp } from '../setup.ts'
+import { MOCK_USDC } from '../utils/constants.ts'
+import { waitForTransaction } from '../utils/transaction.ts'
+import { getTokenBalance } from '../utils/currency.ts'
 
 test('market buy with amountIn (usdc > token)', async () => {
   const { publicClient, walletClient, tokenAddress } = await setUp('market')
