@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest/index'
+import { expect, test } from 'vitest'
 import { arbitrumSepolia } from 'viem/chains'
 import { getAddress } from 'viem'
 import { getQuoteToken } from '@clober/v2-sdk'
