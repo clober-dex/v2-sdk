@@ -120,12 +120,10 @@ test('Adjust order price', async () => {
     }),
   ])
 
-  expect(strategyPrice).toBe({
-    oraclePrice: 272700000000n,
-    rate: '0.5',
-    bidTick: -197248n,
-    askTick: 197174n,
-  })
+  expect(strategyPrice.oraclePrice).toBe(272700000000n)
+  expect(strategyPrice.rate).toBe('0.5')
+  expect(strategyPrice.bidTick).toBe(-197248n)
+  expect(strategyPrice.askTick).toBe(197174n)
   expect(lastAmounts.lastAmountA).toBe(1000000000n)
   expect(lastAmounts.lastAmountB).toBe(499999955000000000n)
 
