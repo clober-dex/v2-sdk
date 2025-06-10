@@ -11,7 +11,6 @@ export async function fetchMarket(
   chainId: CHAIN_IDS,
   tokenAddresses: `0x${string}`[],
   useSubgraph: boolean,
-  n = 100,
 ): Promise<MarketModel> {
   if (tokenAddresses.length !== 2) {
     throw new Error('Invalid token pair')
@@ -32,22 +31,8 @@ export async function fetchMarket(
     currencyMap[baseTokenAddress],
   ]
   const [bidBook, askBook] = await Promise.all([
-    fetchBook(
-      publicClient,
-      chainId,
-      quoteCurrency,
-      baseCurrency,
-      useSubgraph,
-      n,
-    ),
-    fetchBook(
-      publicClient,
-      chainId,
-      baseCurrency,
-      quoteCurrency,
-      useSubgraph,
-      n,
-    ),
+    fetchBook(publicClient, chainId, quoteCurrency, baseCurrency, useSubgraph),
+    fetchBook(publicClient, chainId, baseCurrency, quoteCurrency, useSubgraph),
   ])
 
   return new MarketModel({

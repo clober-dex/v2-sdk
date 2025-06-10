@@ -115,7 +115,7 @@ export async function fetchProtocolAnalytics(
   }>(
     chainId,
     'getDailyCloberSnapshot',
-    'query getDailyCloberSnapshot { cloberDayDatas(orderBy: date, orderDirection: asc) { date walletCount newWalletCount transactionTypes { type txCount } tokenDayData { volumeUSD totalValueLockedUSD protocolFeesUSD token { id name symbol decimals priceUSD } } } }',
+    'query getDailyCloberSnapshot { cloberDayDatas(first: 1000, orderBy: date, orderDirection: asc) { date walletCount newWalletCount transactionTypes { type txCount } tokenDayData { volumeUSD totalValueLockedUSD protocolFeesUSD token { id name symbol decimals priceUSD } } } }',
     {},
   )
 

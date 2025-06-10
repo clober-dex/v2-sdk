@@ -9,13 +9,14 @@ import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { toBookId } from '../utils/book-id'
 import { BookModel } from '../model'
 
+const MAX_DEPTH = 20n // if the depth is too large, it may cause revert errors in the contract call
+
 export const fetchBook = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   quoteCurrency: Currency,
   baseCurrency: Currency,
   useSubgraph: boolean,
-  n: number,
 ): Promise<BookModel> => {
   const unitSize = calculateUnitSize(chainId, quoteCurrency)
   const bookId = toBookId(
@@ -40,9 +41,10 @@ export const fetchBook = async (
     }>(
       chainId,
       'getBook',
-      'query getBook($bookId: ID!) { book(id: $bookId) { depths(where: {unitAmount_gt: 0}) { tick unitAmount } } }',
+      'query getBook($bookId: ID!, $first: Int!) { book(id: $bookId) { depths(first: $first where: {unitAmount_gt: 0}, orderBy: tick, orderDirection: desc) { tick unitAmount } } }',
       {
         bookId: bookId.toString(),
+        first: 1000, // Adjust as needed for depth
       },
     )
     return new BookModel({
@@ -62,14 +64,14 @@ export const fetchBook = async (
       isOpened: book !== null,
     })
   }
-  const [{ result: depths }, { result: isOpened }] =
+  const [{ result: depths, error }, { result: isOpened }] =
     await publicClient.multicall({
       contracts: [
         {
           address: CONTRACT_ADDRESSES[chainId]!.BookViewer,
           abi: BOOK_VIEWER_ABI,
           functionName: 'getLiquidity',
-          args: [bookId, Number(2n ** 19n - 1n), BigInt(n)],
+          args: [bookId, Number(2n ** 19n - 1n), MAX_DEPTH],
         },
         {
           address: CONTRACT_ADDRESSES[chainId]!.BookManager,
@@ -99,6 +101,10 @@ export const fetchBook = async (
         },
       ],
     })
+
+  if (error) {
+    throw new Error(`Failed to fetch book data: ${error.message}`)
+  }
 
   return new BookModel({
     chainId,

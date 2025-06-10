@@ -15,7 +15,6 @@ export { getQuoteToken } from './token'
  * @param token0 - token0 address
  * @param token1 - token1 address
  * @param options {@link DefaultReadContractOptions} options.
- * @param options.n - number of depth levels to fetch
  * @returns A market {@link Market}
  *
  * @example
@@ -37,7 +36,6 @@ export const getMarket = async ({
   token0: `0x${string}`
   token1: `0x${string}`
   options?: {
-    n?: number
     useSubgraph?: boolean
   } & DefaultReadContractOptions
 }): Promise<Market> => {
@@ -53,7 +51,6 @@ export const getMarket = async ({
     chainId,
     [token0, token1],
     !!(options && options.useSubgraph),
-    options?.n,
   )
   return market.toJson()
 }

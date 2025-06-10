@@ -144,8 +144,10 @@ export const fetchMarketSnapshot = async (
         ? Number(dailyBidBookData.book.price)
         : Number(dailyAskBookData.book.inversePrice),
       priceUSD: isBidNewer
-        ? Number(dailyBidBookData.book.base.priceUSD)
-        : Number(dailyAskBookData.book.quote.priceUSD),
+        ? Number(dailyBidBookData.book.price) *
+          Number(dailyBidBookData.book.quote.priceUSD)
+        : Number(dailyAskBookData.book.inversePrice) *
+          Number(dailyAskBookData.book.base.priceUSD),
       volume24hUSD:
         Number(dailyBidBookData.volumeUSD) + Number(dailyAskBookData.volumeUSD),
       totalValueLockedUSD:
@@ -190,7 +192,9 @@ export const fetchMarketSnapshot = async (
         decimals: Number(dailyBidBookData.book.quote.decimals),
       },
       price: Number(dailyBidBookData.book.price) || 0,
-      priceUSD: Number(dailyBidBookData.book.base.priceUSD) || 0,
+      priceUSD:
+        Number(dailyBidBookData.book.price) *
+        Number(dailyBidBookData.book.quote.priceUSD),
       volume24hUSD: Number(dailyBidBookData.volumeUSD) || 0,
       totalValueLockedUSD:
         Number(dailyBidBookData.book.totalValueLockedUSD) || 0,
@@ -224,7 +228,9 @@ export const fetchMarketSnapshot = async (
         decimals: Number(dailyAskBookData.book.base.decimals),
       },
       price: Number(dailyAskBookData.book.inversePrice) || 0,
-      priceUSD: Number(dailyAskBookData.book.quote.priceUSD) || 0,
+      priceUSD:
+        Number(dailyAskBookData.book.inversePrice) *
+        Number(dailyAskBookData.book.base.priceUSD),
       volume24hUSD: Number(dailyAskBookData.volumeUSD) || 0,
       totalValueLockedUSD:
         Number(dailyAskBookData.book.totalValueLockedUSD) || 0,
@@ -288,7 +294,7 @@ export const fetchMarketSnapshot = async (
         decimals: Number(bidBook.quote.decimals),
       },
       price: Number(bidBook.price),
-      priceUSD: Number(bidBook.base.priceUSD),
+      priceUSD: Number(bidBook.price) * Number(bidBook.quote.priceUSD),
       volume24hUSD: 0,
       totalValueLockedUSD:
         Number(bidBook.totalValueLockedUSD) +
@@ -323,7 +329,7 @@ export const fetchMarketSnapshot = async (
         decimals: Number(bidBook.quote.decimals),
       },
       price: Number(bidBook.price),
-      priceUSD: Number(bidBook.base.priceUSD),
+      priceUSD: Number(bidBook.price) * Number(bidBook.quote.priceUSD),
       volume24hUSD: 0,
       totalValueLockedUSD: Number(bidBook.totalValueLockedUSD),
       priceChange24h: 0,
@@ -353,7 +359,7 @@ export const fetchMarketSnapshot = async (
         decimals: Number(askBook.base.decimals),
       },
       price: Number(askBook.inversePrice),
-      priceUSD: Number(askBook.quote.priceUSD),
+      priceUSD: Number(askBook.inversePrice) * Number(askBook.base.priceUSD),
       volume24hUSD: 0,
       totalValueLockedUSD: Number(askBook.totalValueLockedUSD),
       priceChange24h: 0,
@@ -463,8 +469,9 @@ export const fetchMarketSnapshots = async (
           ? Number(bidBook.book.price)
           : Number(askBook?.book.inversePrice),
         priceUSD: isBidNewer
-          ? Number(bidBook.book.base.priceUSD)
-          : Number(askBook?.book.quote.priceUSD),
+          ? Number(bidBook.book.price) * Number(bidBook.book.quote.priceUSD)
+          : Number(askBook?.book.inversePrice) *
+            Number(askBook?.book.base.priceUSD),
         priceChange24h:
           isBidNewer && Number(bidBook.open) > 0
             ? Number(bidBook.close) / Number(bidBook.open) - 1
@@ -531,8 +538,9 @@ export const fetchMarketSnapshots = async (
           ? Number(bidBook?.book.price)
           : Number(askBook.book.inversePrice),
         priceUSD: isBidNewer
-          ? Number(bidBook?.book.base.priceUSD)
-          : Number(askBook.book.quote.priceUSD),
+          ? Number(bidBook?.book.price) * Number(bidBook?.book.quote.priceUSD)
+          : Number(askBook.book.inversePrice) *
+            Number(askBook.book.base.priceUSD),
         priceChange24h:
           isBidNewer && bidBook && Number(bidBook.open) > 0
             ? Number(bidBook.close) / Number(bidBook.open) - 1
