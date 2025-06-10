@@ -2,9 +2,8 @@ import { expect, test } from 'vitest'
 import { createPublicClient, getAddress, http } from 'viem'
 import { arbitrumSepolia } from 'viem/chains'
 
-import { lnWad } from '../src/utils/math'
-
-import { FORK_URL } from './utils/constants'
+import { lnWad } from '../../src/utils/math'
+import { FORK_URL } from '../utils/constants'
 
 const publicClient = createPublicClient({
   chain: arbitrumSepolia,

@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-import { fromOrderId } from '../src/entities/open-order/utils/order-id'
+import { fromOrderId } from '../../src/entities/open-order/utils/order-id'
 
 test('check fromOrderId function - 1', async () => {
   const { bookId, tick, index } =
