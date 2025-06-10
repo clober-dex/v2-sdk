@@ -2,18 +2,19 @@ import { expect, test } from 'vitest'
 import {
   addLiquidity,
   adjustOrderPrice,
+  getContractAddresses,
   getPool,
-  setStrategyConfig,
 } from '@clober/v2-sdk'
 import { zeroHash } from 'viem'
+
+import { STRATEGY_ABI } from '../src/constants/abis/rebalancer/strategy-abi'
 
 import { setUp } from './setup'
 import { waitForTransaction } from './utils/transaction'
 import { DEV_WALLET, MOCK_USDC } from './constants'
 
 test('Adjust order price', async () => {
-  const { publicClient, walletClient, testClient, tokenAddress } =
-    await setUp('adjust')
+  const { publicClient, walletClient, tokenAddress } = await setUp('adjust')
 
   await addLiquidity({
     chainId: publicClient.chain.id,
@@ -46,36 +47,28 @@ test('Adjust order price', async () => {
     },
   })
 
-  await testClient.impersonateAccount({
-    address: DEV_WALLET,
-  })
-  await setStrategyConfig({
-    chainId: publicClient.chain.id,
-    userAddress: DEV_WALLET,
-    token0: MOCK_USDC,
-    token1: tokenAddress,
-    salt: zeroHash,
-    config: {
-      referenceThreshold: '0.1',
-      rebalanceThreshold: '0.1',
-      rateA: '0.1',
-      rateB: '0.1',
-      minRateA: '0.003',
-      minRateB: '0.003',
-      priceThresholdA: '0.1',
-      priceThresholdB: '0.1',
-    },
-    options: {
-      rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
-    },
-  }).then((transaction) =>
-    waitForTransaction({
-      transaction: transaction!,
-      walletClient,
-      publicClient,
-    }),
-  )
+  await walletClient
+    .writeContract({
+      account: DEV_WALLET,
+      address: getContractAddresses({ chainId: publicClient.chain.id })!
+        .Strategy,
+      abi: STRATEGY_ABI,
+      functionName: 'setConfig',
+      args: [
+        beforePool.key,
+        {
+          referenceThreshold: 10000,
+          rebalanceThreshold: 50000,
+          rateA: 1000000,
+          rateB: 1000000,
+          minRateA: 1000000,
+          minRateB: 1000000,
+          priceThresholdA: 10000,
+          priceThresholdB: 10000,
+        },
+      ],
+    })
+    .then((hash) => publicClient.waitForTransactionReceipt({ hash }))
 
   await adjustOrderPrice({
     chainId: publicClient.chain.id,
@@ -112,16 +105,42 @@ test('Adjust order price', async () => {
 
   expect(beforePool.liquidityA.total.value).toBe('2000')
   expect(beforePool.liquidityB.total.value).toBe('1')
-
   expect(beforePool.liquidityA.cancelable.value).toBe('0')
   expect(beforePool.liquidityB.cancelable.value).toBe('0')
   expect(beforePool.liquidityA.claimable.value).toBe('0')
   expect(beforePool.liquidityB.claimable.value).toBe('0')
 
-  expect(afterPool.liquidityA.cancelable.value).toBe('99.999999')
-  expect(afterPool.liquidityB.cancelable.value).toBe('0.0366699957')
+  expect(afterPool.liquidityA.total.value).toBe('1999.999999')
+  expect(afterPool.liquidityB.total.value).toBe('1')
+
+  expect(afterPool.liquidityA.reserve.value).toBe('1000')
+  expect(afterPool.liquidityB.reserve.value).toBe('0.500000045')
+
+  expect(afterPool.liquidityA.cancelable.value).toBe('999.999999')
+  expect(afterPool.liquidityB.cancelable.value).toBe('0.499999955')
+
   expect(afterPool.liquidityA.claimable.value).toBe('0')
   expect(afterPool.liquidityB.claimable.value).toBe('0')
 })
 
-test('Adjust order price with invalid alpha', async () => {})
+test('Adjust order price with invalid alpha', async () => {
+  const { publicClient, walletClient, tokenAddress } = await setUp('adjust')
+
+  await expect(
+    adjustOrderPrice({
+      chainId: publicClient.chain.id,
+      userAddress: walletClient.account!.address,
+      token0: MOCK_USDC,
+      token1: tokenAddress,
+      salt: zeroHash,
+      oraclePrice: '2620',
+      bidPrice: '2600',
+      askPrice: '2650',
+      alpha: '1.1', // Invalid alpha value
+      options: {
+        rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
+      },
+    }),
+  ).rejects.toThrow('Alpha value must be in the range (0, 1]')
+})

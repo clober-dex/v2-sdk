@@ -25,7 +25,7 @@ export const cloberTestChain: Chain = {
 }
 
 export const cloberTestChain2: Chain = {
-  id: 77772,
+  id: 77773,
   name: 'Clober Test Chain 2',
   nativeCurrency: {
     name: 'Ether',
