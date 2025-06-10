@@ -2,6 +2,8 @@ import { expect, test } from 'vitest'
 import {
   addLiquidity,
   adjustOrderPrice,
+  getLastAmounts,
+  getStrategyPrice,
   getContractAddresses,
   getPool,
 } from '@clober/v2-sdk'
@@ -91,16 +93,41 @@ test('Adjust order price', async () => {
     }),
   )
 
-  const afterPool = await getPool({
-    chainId: publicClient.chain.id,
-    token0: MOCK_USDC,
-    token1: tokenAddress,
-    salt: zeroHash,
-    options: {
-      rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
-    },
+  const [afterPool, strategyPrice, lastAmounts] = await Promise.all([
+    getPool({
+      chainId: publicClient.chain.id,
+      token0: MOCK_USDC,
+      token1: tokenAddress,
+      salt: zeroHash,
+      options: {
+        rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
+      },
+    }),
+    getStrategyPrice({
+      chainId: publicClient.chain.id,
+      poolKey: beforePool.key,
+      options: {
+        rpcUrl: publicClient.transport.url!,
+      },
+    }),
+    getLastAmounts({
+      chainId: publicClient.chain.id,
+      poolKey: beforePool.key,
+      options: {
+        rpcUrl: publicClient.transport.url!,
+      },
+    }),
+  ])
+
+  expect(strategyPrice).toBe({
+    oraclePrice: 272700000000n,
+    rate: '0.5',
+    bidTick: -197248n,
+    askTick: 197174n,
   })
+  expect(lastAmounts.lastAmountA).toBe(1000000000n)
+  expect(lastAmounts.lastAmountB).toBe(499999955000000000n)
 
   expect(beforePool.liquidityA.total.value).toBe('2000')
   expect(beforePool.liquidityB.total.value).toBe('1')
