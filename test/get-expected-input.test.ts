@@ -58,7 +58,7 @@ const isTakeResultEqual = async (
     amountOut,
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
+      useSubgraph: true,
     },
   })
 

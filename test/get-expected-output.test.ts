@@ -58,7 +58,7 @@ const isSpendResultEqual = async (
     amountIn,
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: false,
+      useSubgraph: true,
     },
   })
 
