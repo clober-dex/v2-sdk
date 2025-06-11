@@ -65,10 +65,11 @@ test('get subgraph block number', async () => {
 })
 
 test('get subgraph block', async () => {
-  const blockNumber = await getSubgraphBlock({
+  const block = await getSubgraphBlock({
     chainId: monadTestnet.id,
   })
-  expect(Number(blockNumber)).toBeGreaterThan(0)
+  expect(Number(block.blockNumber)).toBeGreaterThan(0)
+  expect(Number(block.timestamp)).toBeGreaterThan(0)
 })
 
 test('get market snapshot', async () => {
