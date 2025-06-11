@@ -20,6 +20,7 @@ import {
   getProtocolAnalytics,
   getReferenceCurrency,
   getStableCurrencies,
+  getSubgraphBlock,
   getSubgraphBlockNumber,
   getSubgraphEndpoint,
   getTopUsersByNativeVolume,
@@ -61,6 +62,14 @@ test('get subgraph block number', async () => {
     chainId: monadTestnet.id,
   })
   expect(Number(blockNumber)).toBeGreaterThan(0)
+})
+
+test('get subgraph block', async () => {
+  const block = await getSubgraphBlock({
+    chainId: monadTestnet.id,
+  })
+  expect(Number(block.blockNumber)).toBeGreaterThan(0)
+  expect(Number(block.timestamp)).toBeGreaterThan(0)
 })
 
 test('get market snapshot', async () => {

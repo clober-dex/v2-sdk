@@ -43,7 +43,7 @@ export const getSubgraphBlockNumber = async ({
   } = await Subgraph.get<{
     data: {
       _meta: {
-        block: { number: string }
+        block: { number: number }
       }
     }
   }>(
@@ -52,5 +52,49 @@ export const getSubgraphBlockNumber = async ({
     'query getLatestBlockNumber { _meta { block { number } } }',
     {},
   )
-  return Number(blockNumber)
+  return blockNumber
+}
+
+/**
+ * Get subgraph block number by chain id
+ * @param chainId - chain id from {@link CHAIN_IDS}
+ * @returns Contract addresses
+ *
+ * @example
+ * import { getContractAddresses } from '@clober/v2-sdk'
+ *
+ * const blockNumber = await getSubgraphBlock({
+ *   chainId: 421614,
+ * })
+ */
+export const getSubgraphBlock = async ({ chainId }: { chainId: CHAIN_IDS }) => {
+  const {
+    data: {
+      _meta: {
+        block: { number: blockNumber, hash, timestamp, parentHash },
+      },
+    },
+  } = await Subgraph.get<{
+    data: {
+      _meta: {
+        block: {
+          number: number
+          hash: string
+          timestamp: number
+          parentHash: string
+        }
+      }
+    }
+  }>(
+    chainId,
+    'getLatestBlock',
+    'query getLatestBlock { _meta { block { number hash timestamp parentHash } } }',
+    {},
+  )
+  return {
+    blockNumber,
+    hash,
+    timestamp,
+    parentHash,
+  }
 }
