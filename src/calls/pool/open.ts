@@ -17,8 +17,9 @@ import { toBytes32 } from '../../entities/pool/utils/mint'
  *
  * @param chainId The chain ID of the blockchain.
  * @param userAddress The address of the user.
- * @param inputToken The address of the input token.
- * @param outputToken The address of the output token.
+ * @param tokenA The address of the input token.
+ * @param tokenB The address of the output token.
+ * @param salt A unique identifier for the pool, used to prevent collisions.
  * @param options {@link DefaultWriteContractOptions} options.
  * @returns A Promise resolving to a transaction object. If the market is already open, returns undefined.
  * @example
@@ -27,8 +28,8 @@ import { toBytes32 } from '../../entities/pool/utils/mint'
  * const transaction = await openPool({
  *   chainId: 421614,
  *   userAddress: '0xF8c1869Ecd4df136693C45EcE1b67f85B6bDaE69',
- *   inputToken: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
- *   outputToken: '0x0000000000000000000000000000000000000000',
+ *   tokenA: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
+ *   tokenB: '0x0000000000000000000000000000000000000000',
  *   salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
  * })
  */
