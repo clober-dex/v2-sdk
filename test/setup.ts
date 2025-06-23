@@ -147,8 +147,8 @@ export async function setUp(alias: string) {
   await openPool({
     chainId: publicClient.chain!.id,
     userAddress: DEV_WALLET,
-    tokenA: MOCK_USDC,
-    tokenB: tokenAddress,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
     salt: zeroHash,
     options: {
       rpcUrl: publicClient.transport.url!,

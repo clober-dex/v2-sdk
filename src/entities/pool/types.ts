@@ -46,8 +46,8 @@ export type PoolSnapshot = {
   totalTvlUSD: string
   totalSpreadProfitUSD: string
   initialLPInfo: {
-    tokenA: CurrencyAmount
-    tokenB: CurrencyAmount
+    currencyA: CurrencyAmount
+    currencyB: CurrencyAmount
     lpToken: Currency6909Amount
     lpPriceUSD: string
     timestamp: number

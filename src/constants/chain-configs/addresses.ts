@@ -11,6 +11,7 @@ export const CONTRACT_ADDRESSES: {
     Strategy: `0x${string}`
     Minter: `0x${string}`
     Operator: `0x${string}`
+    Wrapped6909Factory: `0x${string}`
   }
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: {
@@ -21,6 +22,9 @@ export const CONTRACT_ADDRESSES: {
     Strategy: getAddress('0xd400FE4504052C7D6540Db19e6863BFd91c95521'),
     Minter: getAddress('0x4dEa6b2085463158B80192D567254F773BC0Aa78'),
     Operator: getAddress('0x32d70eF6BFb7055dAC25B1FC05f201cD055796C1'),
+    Wrapped6909Factory: getAddress(
+      '0x9050b0A12D92b8ba7369ecc87BcD04643Fa0CfDB',
+    ),
   },
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: {
     Controller: getAddress('0x08feDaACe14EB141E51282441b05182519D853D1'),
@@ -30,6 +34,9 @@ export const CONTRACT_ADDRESSES: {
     Strategy: getAddress('0xd400FE4504052C7D6540Db19e6863BFd91c95521'),
     Minter: getAddress('0x4dEa6b2085463158B80192D567254F773BC0Aa78'),
     Operator: getAddress('0x32d70eF6BFb7055dAC25B1FC05f201cD055796C1'),
+    Wrapped6909Factory: getAddress(
+      '0x9050b0A12D92b8ba7369ecc87BcD04643Fa0CfDB',
+    ),
   },
   // [CHAIN_IDS.BASE]: {
   //   Controller: getAddress('0xbA1BFFd18bF55D656cc755c6555661002bf440F2'),
@@ -48,6 +55,9 @@ export const CONTRACT_ADDRESSES: {
     Strategy: zeroAddress,
     Minter: zeroAddress,
     Operator: zeroAddress,
+    Wrapped6909Factory: getAddress(
+      '0x0000000000000000000000000000000000000000',
+    ),
   },
   [CHAIN_IDS.MONAD_TESTNET]: {
     Controller: getAddress('0x08feDaACe14EB141E51282441b05182519D853D1'),
@@ -57,6 +67,9 @@ export const CONTRACT_ADDRESSES: {
     Strategy: getAddress('0x9eE708876804F9416B3C1a1aad0c016dee9DD804'),
     Minter: getAddress('0xAF9Ca76F6BB5bd2B18964A14Fc095455E2C2a099'),
     Operator: getAddress('0x4BB54bB9a42Fe787D1D1A2AAcF91C70b02e5553E'),
+    Wrapped6909Factory: getAddress(
+      '0x9050b0A12D92b8ba7369ecc87BcD04643Fa0CfDB',
+    ),
   },
   // [CHAIN_IDS.SONIC_MAINNET]: {
   //   Controller: getAddress('0x920F77AebF215E611ABACd0fd51A87F3927D05B8'),
@@ -75,5 +88,8 @@ export const CONTRACT_ADDRESSES: {
     Strategy: getAddress('0xa3CC662732e4ae2a2e0156859B7Fbcd57936723c'),
     Minter: getAddress('0x30a5460B801CA79F74e2A4D3b83A34af5D45c6b3'),
     Operator: getAddress('0x8E6983D1fb8E953135413Ee538afF53F4D098eD7'),
+    Wrapped6909Factory: getAddress(
+      '0x0000000000000000000000000000000000000000',
+    ),
   },
 }

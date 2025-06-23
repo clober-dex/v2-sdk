@@ -6,6 +6,7 @@ export { cancelOrder, cancelOrders } from './market/cancel'
 export { openPool } from './pool/open'
 export { addLiquidity } from './pool/mint'
 export { removeLiquidity } from './pool/burn'
+export { wrapToERC20, unwrapFromERC20 } from './pool/wrap'
 
 export { adjustOrderPrice } from './pool/market-making/adjust'
 export { refillOrder } from './pool/market-making/refill'

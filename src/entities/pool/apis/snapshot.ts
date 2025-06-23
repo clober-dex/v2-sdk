@@ -103,14 +103,14 @@ export const fetchPoolSnapshotFromSubgraph = async (
     key: poolKey,
     salt: pool.salt as `0x${string}`,
     initialLPInfo: {
-      tokenA: {
+      currencyA: {
         currency: currencyA,
         value: formatUnits(
           BigInt(pool.initialTokenAAmount),
           Number(pool.tokenA.decimals),
         ),
       },
-      tokenB: {
+      currencyB: {
         currency: currencyB,
         value: formatUnits(
           BigInt(pool.initialTokenBAmount),

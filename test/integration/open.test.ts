@@ -103,8 +103,8 @@ test('try open pool', async () => {
   await openPool({
     chainId: publicClient.chain.id,
     userAddress: DEV_WALLET,
-    tokenA: MOCK_USDC,
-    tokenB: zeroAddress,
+    token0: MOCK_USDC,
+    token1: zeroAddress,
     salt: zeroHash,
     options: {
       rpcUrl: publicClient.transport.url!,

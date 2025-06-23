@@ -82,8 +82,8 @@ export const addLiquidity = async ({
 
        const transaction = await openPool({
             chainId: ${chainId},
-            tokenA: '${token0}',
-            tokenB: '${token1}',
+            token0: '${token0}',
+            token1: '${token1}',
             salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
        })
     `)
