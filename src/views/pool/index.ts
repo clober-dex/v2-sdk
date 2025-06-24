@@ -1,8 +1,15 @@
 import { createPublicClient, http, isAddressEqual } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
-import { DefaultReadContractOptions, Market, Pool } from '../../types'
+import {
+  DefaultReadContractOptions,
+  DefaultWriteContractOptions,
+  Market,
+  Pool,
+} from '../../types'
 import { fetchPool } from '../../entities/pool/apis'
+import { CONTRACT_ADDRESSES } from '../../constants/chain-configs/addresses'
+import { WRAPPED_6909_FACTORY_ABI } from '../../constants/abis/rebalancer/wrapped-6909-factory-abi'
 
 export { getStrategyPrice, getLastAmounts } from './market-making'
 export { getPoolSnapshot, getPoolSnapshots } from './snapshot'
@@ -63,4 +70,27 @@ export const getPool = async ({
     throw new Error('Pool is not opened')
   }
   return pool.toJson()
+}
+
+export const getLpWrappedERC20Address = ({
+  chainId,
+  poolKey,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  poolKey: `0x${string}`
+  options?: DefaultWriteContractOptions & {
+    useSubgraph?: boolean
+  }
+}) => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  return publicClient.readContract({
+    address: CONTRACT_ADDRESSES[chainId]!.Wrapped6909Factory,
+    abi: WRAPPED_6909_FACTORY_ABI,
+    functionName: 'getWrapped6909Address',
+    args: [CONTRACT_ADDRESSES[chainId]!.Rebalancer, BigInt(poolKey)],
+  })
 }
