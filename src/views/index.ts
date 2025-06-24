@@ -14,6 +14,7 @@ export {
   getPoolSnapshots,
   getStrategyPrice,
   getLastAmounts,
+  getLpWrappedERC20Address,
 } from './pool'
 
 export { getPriceNeighborhood } from './tick'
