@@ -4,6 +4,7 @@ import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import {
   CurrencyFlow,
   DefaultWriteContractOptions,
+  Pool,
   Transaction,
 } from '../../types'
 import { fetchPool } from '../../entities/pool/apis'
@@ -51,6 +52,7 @@ export const wrapToERC20 = async ({
   amount: string
   options?: DefaultWriteContractOptions & {
     useSubgraph?: boolean
+    pool?: Pool
   }
 }): Promise<{
   transaction: Transaction | undefined
@@ -60,13 +62,15 @@ export const wrapToERC20 = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  const pool = await fetchPool(
-    publicClient,
-    chainId,
-    [token0, token1],
-    salt,
-    !!(options && options.useSubgraph),
-  )
+  const pool = options?.pool
+    ? options.pool
+    : await fetchPool(
+        publicClient,
+        chainId,
+        [token0, token1],
+        salt,
+        !!(options && options.useSubgraph),
+      )
   if (pool.isOpened) {
     const address = await publicClient.readContract({
       address: CONTRACT_ADDRESSES[chainId]!.Wrapped6909Factory,
@@ -149,6 +153,7 @@ export const unwrapFromERC20 = async ({
   amount: string
   options?: DefaultWriteContractOptions & {
     useSubgraph?: boolean
+    pool?: Pool
   }
 }): Promise<{
   transaction: Transaction | undefined
@@ -158,13 +163,15 @@ export const unwrapFromERC20 = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  const pool = await fetchPool(
-    publicClient,
-    chainId,
-    [token0, token1],
-    salt,
-    !!(options && options.useSubgraph),
-  )
+  const pool = options?.pool
+    ? options.pool
+    : await fetchPool(
+        publicClient,
+        chainId,
+        [token0, token1],
+        salt,
+        !!(options && options.useSubgraph),
+      )
   if (pool.isOpened) {
     const address = await publicClient.readContract({
       address: CONTRACT_ADDRESSES[chainId]!.Wrapped6909Factory,
