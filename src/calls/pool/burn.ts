@@ -65,7 +65,7 @@ export const removeLiquidity = async ({
        })
     `)
   }
-  const burnAmount = parseUnits(amount, pool.currencyLp.decimals)
+  const burnAmount = parseUnits(amount, pool.lpCurrency.decimals)
   const slippageLimitPercent = options?.slippage ?? 2
   const withdrawAmountA = (burnAmount * pool.liquidityA) / pool.totalSupply
   const withdrawAmountB = (burnAmount * pool.liquidityB) / pool.totalSupply
@@ -93,7 +93,7 @@ export const removeLiquidity = async ({
           direction: 'out',
         },
         lpCurrency: {
-          currency: pool.currencyLp,
+          currency: pool.lpCurrency,
           amount: '0',
           direction: 'in',
         },
@@ -128,7 +128,7 @@ export const removeLiquidity = async ({
         direction: 'out',
       },
       lpCurrency: {
-        currency: pool.currencyLp,
+        currency: pool.lpCurrency,
         amount: amount,
         direction: 'in',
       },

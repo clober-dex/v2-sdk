@@ -91,7 +91,7 @@ export const fetchPoolSnapshotFromSubgraph = async (
     symbol: pool.tokenB.symbol,
     decimals: Number(pool.tokenB.decimals),
   }
-  const currencyLp = {
+  const lpCurrency = {
     id: pool.id as `0x${string}`,
     address: getContractAddresses({ chainId }).Rebalancer,
     name: pool.tokenA.name + '/' + pool.tokenB.name,
@@ -118,7 +118,7 @@ export const fetchPoolSnapshotFromSubgraph = async (
         ),
       },
       lpToken: {
-        currency: currencyLp,
+        currency: lpCurrency,
         value: formatUnits(BigInt(pool.initialTotalSupply), 18),
       },
       lpPriceUSD: pool.initialLPPriceUSD,
@@ -127,7 +127,7 @@ export const fetchPoolSnapshotFromSubgraph = async (
     },
     currencyA,
     currencyB,
-    currencyLp,
+    lpCurrency,
     volumeUSD24h:
       poolDayDatas.sort((a, b) => b.date - a.date)?.[0]?.volumeUSD ?? '0',
     lpPriceUSD: pool.lpPriceUSD,
