@@ -13,7 +13,7 @@ export class PoolModel {
   strategy: `0x${string}`
   currencyA: Currency
   currencyB: Currency
-  currencyLp: Currency6909
+  lpCurrency: Currency6909
 
   totalSupply: bigint
   decimals: number
@@ -96,7 +96,7 @@ export class PoolModel {
     } else {
       throw new Error('Invalid book id')
     }
-    this.currencyLp = {
+    this.lpCurrency = {
       address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
       id: poolKey,
       name: `${this.currencyA.symbol}-${this.currencyB.symbol} LP Token`,
@@ -129,7 +129,7 @@ export class PoolModel {
       strategy: this.strategy,
       currencyA: this.currencyA,
       currencyB: this.currencyB,
-      currencyLp: this.currencyLp,
+      lpCurrency: this.lpCurrency,
       liquidityA: {
         total: {
           currency: this.currencyA,
@@ -167,7 +167,7 @@ export class PoolModel {
         },
       },
       totalSupply: {
-        currency: this.currencyLp,
+        currency: this.lpCurrency,
         value: formatUnits(this.totalSupply, this.decimals),
       },
       orderListA: this.orderListA.map((order) => order.toString()),

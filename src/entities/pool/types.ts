@@ -15,7 +15,7 @@ export type Pool = {
   strategy: `0x${string}`
   currencyA: Currency
   currencyB: Currency
-  currencyLp: Currency6909
+  lpCurrency: Currency6909
   liquidityA: {
     total: CurrencyAmount
     reserve: CurrencyAmount

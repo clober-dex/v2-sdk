@@ -79,7 +79,7 @@ export const wrapToERC20 = async ({
         currency: {
           name: `Wrapped Clober Liquidity Vault ${pool.currencyB.symbol}-${pool.currencyA.symbol}`,
           symbol: `wCLV-${pool.currencyB.symbol}-${pool.currencyA.symbol}`,
-          decimals: pool.currencyLp.decimals,
+          decimals: pool.lpCurrency.decimals,
           address,
         },
         amount,
@@ -96,7 +96,7 @@ export const wrapToERC20 = async ({
           args: [
             CONTRACT_ADDRESSES[chainId]!.Rebalancer,
             BigInt(pool.key),
-            parseUnits(amount, pool.currencyLp.decimals),
+            parseUnits(amount, pool.lpCurrency.decimals),
           ],
         },
         options?.gasLimit,
@@ -177,7 +177,7 @@ export const unwrapFromERC20 = async ({
         currency: {
           name: `Wrapped Clober Liquidity Vault ${pool.currencyB.symbol}-${pool.currencyA.symbol}`,
           symbol: `wCLV-${pool.currencyB.symbol}-${pool.currencyA.symbol}`,
-          decimals: pool.currencyLp.decimals,
+          decimals: pool.lpCurrency.decimals,
           address,
         },
         amount,
@@ -202,7 +202,7 @@ export const unwrapFromERC20 = async ({
             },
           ] as const,
           functionName: 'withdrawTo',
-          args: [userAddress, parseUnits(amount, pool.currencyLp.decimals)],
+          args: [userAddress, parseUnits(amount, pool.lpCurrency.decimals)],
         },
         options?.gasLimit,
       ),

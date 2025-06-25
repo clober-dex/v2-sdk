@@ -255,7 +255,7 @@ export const addLiquidity = async ({
           direction: 'in',
         },
         lpCurrency: {
-          currency: pool.currencyLp,
+          currency: pool.lpCurrency,
           amount: '0',
           direction: 'out',
         },
@@ -322,8 +322,8 @@ export const addLiquidity = async ({
         direction: currencyBResultAmount >= 0 ? 'in' : 'out',
       },
       lpCurrency: {
-        currency: pool.currencyLp,
-        amount: formatUnits(mintAmount, pool.currencyLp.decimals),
+        currency: pool.lpCurrency,
+        amount: formatUnits(mintAmount, pool.lpCurrency.decimals),
         direction: 'out',
       },
     },
