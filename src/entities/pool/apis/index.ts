@@ -1,4 +1,4 @@
-import { PublicClient } from 'viem'
+import { getAddress, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { CONTRACT_ADDRESSES } from '../../../constants/chain-configs/addresses'
@@ -8,6 +8,7 @@ import { STRATEGY_ABI } from '../../../constants/abis/rebalancer/strategy-abi'
 import { fetchMarket } from '../../market/apis'
 import { PoolModel } from '../model'
 import { toPoolKey } from '../utils/pool-key'
+import { WRAPPED_6909_FACTORY_ABI } from '../../../constants/abis/rebalancer/wrapped-6909-factory-abi'
 
 export async function fetchPool(
   publicClient: PublicClient,
@@ -35,6 +36,7 @@ export async function fetchPool(
     totalSupply,
     [totalLiquidityA, totalLiquidityB],
     paused,
+    wrapped6909Address,
   ] = await publicClient.multicall({
     allowFailure: false,
     contracts: [
@@ -62,6 +64,12 @@ export async function fetchPool(
         functionName: 'isPaused',
         args: [poolKey],
       },
+      {
+        address: CONTRACT_ADDRESSES[chainId]!.Wrapped6909Factory,
+        abi: WRAPPED_6909_FACTORY_ABI,
+        functionName: 'getWrapped6909Address',
+        args: [CONTRACT_ADDRESSES[chainId]!.Rebalancer, BigInt(poolKey)],
+      },
     ],
   })
   const liquidityA =
@@ -79,6 +87,7 @@ export async function fetchPool(
     bookIdA,
     bookIdB,
     poolKey,
+    wrappedTokenAddress: getAddress(wrapped6909Address),
     salt,
     totalSupply: BigInt(totalSupply),
     decimals: 18,

@@ -16,6 +16,7 @@ export class PoolModel {
   lpCurrency: Currency6909
 
   totalSupply: bigint
+  wrappedCurrencyLp: Currency
   decimals: number
   reserveA: bigint
   reserveB: bigint
@@ -36,6 +37,7 @@ export class PoolModel {
     bookIdA,
     bookIdB,
     poolKey,
+    wrappedTokenAddress,
     totalSupply,
     decimals,
     reserveA,
@@ -57,6 +59,7 @@ export class PoolModel {
     bookIdA: bigint
     bookIdB: bigint
     poolKey: `0x${string}`
+    wrappedTokenAddress: `0x${string}`
     totalSupply: bigint
     decimals: number
     reserveA: bigint
@@ -103,6 +106,12 @@ export class PoolModel {
       symbol: `${this.currencyA.symbol}-${this.currencyB.symbol}`,
       decimals: decimals,
     }
+    this.wrappedCurrencyLp = {
+      address: wrappedTokenAddress,
+      name: `Wrapped ${this.currencyA.symbol}-${this.currencyB.symbol} LP Token`,
+      symbol: `w${this.currencyA.symbol}-${this.currencyB.symbol}`,
+      decimals: decimals,
+    }
     this.totalSupply = totalSupply
     this.decimals = decimals
     this.liquidityA = liquidityA
@@ -130,6 +139,7 @@ export class PoolModel {
       currencyA: this.currencyA,
       currencyB: this.currencyB,
       lpCurrency: this.lpCurrency,
+      wrappedCurrencyLp: this.wrappedCurrencyLp,
       liquidityA: {
         total: {
           currency: this.currencyA,

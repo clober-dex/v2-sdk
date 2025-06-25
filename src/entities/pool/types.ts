@@ -16,6 +16,7 @@ export type Pool = {
   currencyA: Currency
   currencyB: Currency
   lpCurrency: Currency6909
+  wrappedCurrencyLp: Currency
   liquidityA: {
     total: CurrencyAmount
     reserve: CurrencyAmount
