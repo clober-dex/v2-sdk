@@ -16,7 +16,7 @@ export type Pool = {
   currencyA: Currency
   currencyB: Currency
   lpCurrency: Currency6909
-  wrappedCurrencyLp: Currency
+  wrappedLpCurrency: Currency
   liquidityA: {
     total: CurrencyAmount
     reserve: CurrencyAmount
@@ -41,7 +41,7 @@ export type PoolSnapshot = {
   salt: `0x${string}`
   currencyA: Currency
   currencyB: Currency
-  currencyLp: Currency6909
+  lpCurrency: Currency6909
   volumeUSD24h: string
   lpPriceUSD: string
   totalTvlUSD: string
