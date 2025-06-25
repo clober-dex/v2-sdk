@@ -102,14 +102,14 @@ export class PoolModel {
     this.lpCurrency = {
       address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
       id: poolKey,
-      name: `${this.currencyA.symbol}-${this.currencyB.symbol} LP Token`,
-      symbol: `${this.currencyA.symbol}-${this.currencyB.symbol}`,
+      name: `Clober Liquidity Vault ${this.currencyB.symbol}-${this.currencyA.symbol}`,
+      symbol: `CLV-${this.currencyB.symbol}-${this.currencyA.symbol}`,
       decimals: decimals,
     }
     this.wrappedLpCurrency = {
       address: wrappedTokenAddress,
-      name: `Wrapped ${this.currencyA.symbol}-${this.currencyB.symbol} LP Token`,
-      symbol: `w${this.currencyA.symbol}-${this.currencyB.symbol}`,
+      name: `Wrapped Clober Liquidity Vault ${this.currencyB.symbol}-${this.currencyA.symbol}`,
+      symbol: `wCLV-${this.currencyB.symbol}-${this.currencyA.symbol}`,
       decimals: decimals,
     }
     this.totalSupply = totalSupply
