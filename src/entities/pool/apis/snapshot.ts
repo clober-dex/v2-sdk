@@ -94,8 +94,8 @@ export const fetchPoolSnapshotFromSubgraph = async (
   const lpCurrency = {
     id: pool.id as `0x${string}`,
     address: getContractAddresses({ chainId }).Rebalancer,
-    name: pool.tokenA.name + '/' + pool.tokenB.name,
-    symbol: pool.tokenA.symbol + '/' + pool.tokenB.symbol,
+    name: `Clober Liquidity Vault ${currencyB.symbol}-${currencyA.symbol}`,
+    symbol: `CLV-${currencyB.symbol}-${currencyA.symbol}`,
     decimals: 18,
   }
   return {
