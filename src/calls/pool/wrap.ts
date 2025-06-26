@@ -64,13 +64,15 @@ export const wrapToERC20 = async ({
   })
   const pool = options?.pool
     ? options.pool
-    : await fetchPool(
-        publicClient,
-        chainId,
-        [token0, token1],
-        salt,
-        !!(options && options.useSubgraph),
-      )
+    : (
+        await fetchPool(
+          publicClient,
+          chainId,
+          [token0, token1],
+          salt,
+          !!(options && options.useSubgraph),
+        )
+      ).toJson()
   if (pool.isOpened) {
     const address = await publicClient.readContract({
       address: CONTRACT_ADDRESSES[chainId]!.Wrapped6909Factory,
@@ -165,13 +167,15 @@ export const unwrapFromERC20 = async ({
   })
   const pool = options?.pool
     ? options.pool
-    : await fetchPool(
-        publicClient,
-        chainId,
-        [token0, token1],
-        salt,
-        !!(options && options.useSubgraph),
-      )
+    : (
+        await fetchPool(
+          publicClient,
+          chainId,
+          [token0, token1],
+          salt,
+          !!(options && options.useSubgraph),
+        )
+      ).toJson()
   if (pool.isOpened) {
     const address = await publicClient.readContract({
       address: CONTRACT_ADDRESSES[chainId]!.Wrapped6909Factory,
