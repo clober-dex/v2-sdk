@@ -65,7 +65,7 @@ export const CONTRACT_ADDRESSES: {
     BookViewer: getAddress('0x3e22d091F90ae759733B7CB06a6f7b440d84a425'),
     Rebalancer: getAddress('0x6d8fa3025b6d6604309Ca257563CcA358c0CF1AA'),
     Strategy: getAddress('0x9eE708876804F9416B3C1a1aad0c016dee9DD804'),
-    Minter: getAddress('0xAF9Ca76F6BB5bd2B18964A14Fc095455E2C2a099'),
+    Minter: getAddress('0x56B40a9517223f111441E58E865eBb3FB3898f42'),
     Operator: getAddress('0x4BB54bB9a42Fe787D1D1A2AAcF91C70b02e5553E'),
     Wrapped6909Factory: getAddress(
       '0x9050b0A12D92b8ba7369ecc87BcD04643Fa0CfDB',
