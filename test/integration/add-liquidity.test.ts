@@ -1,12 +1,21 @@
 import { expect, test } from 'vitest'
-import { addLiquidity } from '@clober/v2-sdk'
-import { formatUnits, zeroHash } from 'viem'
+import {
+  limitOrder,
+  Transaction,
+  addLiquidity,
+  adjustOrderPrice,
+  getContractAddresses,
+} from '@clober/v2-sdk'
+import { formatUnits, parseUnits, zeroHash } from 'viem'
 
 import { getQuoteAmountFromPrices } from '../../src/entities/pool/utils/mint'
 import { setUp } from '../setup'
 import { getLpTokenBalance, getTokenBalance } from '../utils/currency'
-import { MOCK_USDC } from '../utils/constants'
+import { DEV_WALLET, MOCK_USDC } from '../utils/constants'
 import { waitForTransaction } from '../utils/transaction'
+import type { Currency } from '../../src'
+import { marketOrder } from '../../src'
+import { STRATEGY_ABI } from '../../src/constants/abis/rebalancer/strategy-abi'
 
 test('Add liquidity without swap - 1', async () => {
   const { publicClient, walletClient, tokenAddress, pool } = await setUp('mint')
@@ -276,483 +285,628 @@ test('quote amount from prices when adding liquidity', () => {
   ).toEqual(1847294729n)
 })
 
-// TODO: remove comment when other aggregators are ready
-// test('Add liquidity one side with swap', async () => {
-//   const { publicClient, walletClient, testClient } = clients[0] as any
-//
-//   await setting(publicClient, walletClient, testClient)
-//
-//   const pool = await getPool({
-//     chainId: cloberTestChain2.id,
-//     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//     salt: zeroHash,
-//     options: {
-//       rpcUrl: publicClient.transport.url!,
-//       useSubgraph: false,
-//     },
-//   })
-//
-//   let [beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] =
-//     await Promise.all([
-//       fetchTokenBalance(
-//         publicClient,
-//         cloberTestChain2.id,
-//         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//         '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//       ),
-//       fetchTokenBalance(
-//         publicClient,
-//         cloberTestChain2.id,
-//         '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//         '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//       ),
-//       fetchLPBalance(
-//         publicClient,
-//         cloberTestChain2.id,
-//         BigInt(pool.key),
-//         '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//       ),
-//     ])
-//
-//   const { transaction: tx1, result: result1 } = await addLiquidity({
-//     chainId: cloberTestChain2.id,
-//     userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//     salt: zeroHash,
-//     amount0: '2000',
-//     amount1: '1.0',
-//     options: {
-//       rpcUrl: publicClient.transport.url!,
-//       useSubgraph: false,
-//       disableSwap: true,
-//     },
-//   })
-//
-//   const hash1 = await walletClient.sendTransaction({
-//     ...tx1!,
-//     account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     gasPrice: tx1!.gasPrice! * 2n,
-//   })
-//   await publicClient.waitForTransactionReceipt({ hash: hash1 })
-//   let [afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchLPBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       BigInt(pool.key),
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//   ])
-//   expect(formatUnits(beforeUSDCBalance - afterUSDCBalance, 6)).toBe(
-//     result1.currencyA.amount,
-//   )
-//   expect(formatUnits(beforeWETHBalance - afterWETHBalance, 18)).toBe(
-//     result1.currencyB.amount,
-//   )
-//   expect(formatUnits(afterLPBalance - beforeLPBalance, 18)).toBe(
-//     result1.lpCurrency.amount,
-//   )
-//
-//   // add liquidity more
-//   ;[beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] = await Promise.all([
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchLPBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       BigInt(pool.key),
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//   ])
-//
-//   const { transaction: tx2, result: result2 } = await addLiquidity({
-//     chainId: cloberTestChain2.id,
-//     userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//     salt: zeroHash,
-//     amount0: '2000',
-//     amount1: '0',
-//     options: {
-//       rpcUrl: publicClient.transport.url!,
-//       useSubgraph: false,
-//       testnetPrice: 2000,
-//     },
-//   })
-//
-//   const hash2 = await walletClient.sendTransaction({
-//     ...tx2!,
-//     account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     gasPrice: tx2!.gasPrice! * 2n,
-//   })
-//   await publicClient.waitForTransactionReceipt({ hash: hash2 })
-//   ;[afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchLPBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       BigInt(pool.key),
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//   ])
-//
-//   expect(formatUnits(beforeUSDCBalance - afterUSDCBalance, 6)).toBe(
-//     result2.currencyA.amount,
-//   )
-//   expect(formatUnits(beforeWETHBalance - afterWETHBalance, 18)).toBe(
-//     result2.currencyB.amount,
-//   )
-//   expect(formatUnits(afterLPBalance - beforeLPBalance, 18)).toBe(
-//     result2.lpCurrency.amount,
-//   )
-//
-//   // add liquidity more
-//   ;[beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] = await Promise.all([
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchLPBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       BigInt(pool.key),
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//   ])
-//
-//   const { transaction: tx3, result: result3 } = await addLiquidity({
-//     chainId: cloberTestChain2.id,
-//     userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//     salt: zeroHash,
-//     amount0: '0',
-//     amount1: '1',
-//     options: {
-//       rpcUrl: publicClient.transport.url!,
-//       useSubgraph: false,
-//       testnetPrice: 2000,
-//     },
-//   })
-//
-//   const hash3 = await walletClient.sendTransaction({
-//     ...tx3!,
-//     account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     gasPrice: tx2!.gasPrice! * 2n,
-//   })
-//   await publicClient.waitForTransactionReceipt({ hash: hash3 })
-//   ;[afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchLPBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       BigInt(pool.key),
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//   ])
-//
-//   expect(formatUnits(beforeUSDCBalance - afterUSDCBalance, 6)).toBe(
-//     result3.currencyA.amount,
-//   )
-//   expect(formatUnits(beforeWETHBalance - afterWETHBalance, 18)).toBe(
-//     result3.currencyB.amount,
-//   )
-//   expect(formatUnits(afterLPBalance - beforeLPBalance, 18)).toBe(
-//     result3.lpCurrency.amount,
-//   )
-//
-//   expect(result2.lpCurrency.amount).toBe(result3.lpCurrency.amount)
-// })
+test('Add liquidity one side with swap - 1', async () => {
+  const { publicClient, walletClient, tokenAddress, pool } = await setUp('mint')
+  const cloberQuote = async (
+    inputCurrency: Currency,
+    amountIn: bigint,
+    outputCurrency: Currency,
+    slippageLimitPercent: number,
+    // @ts-ignore
+    gasPrice: bigint,
+    userAddress: `0x${string}`,
+  ): Promise<{
+    amountOut: bigint
+    transaction: Transaction | undefined
+  }> => {
+    const {
+      transaction,
+      result: {
+        taken: {
+          amount,
+          currency: { decimals },
+          events,
+        },
+      },
+    } = await marketOrder({
+      chainId: publicClient.chain.id,
+      userAddress: userAddress!,
+      inputToken: inputCurrency.address,
+      outputToken: outputCurrency.address,
+      amountIn: formatUnits(amountIn, inputCurrency.decimals),
+      options: {
+        rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
+        slippage: slippageLimitPercent,
+        gasLimit: 300_000n,
+      },
+    })
+    return {
+      transaction: {
+        ...transaction,
+        gas: 300_000n * BigInt(events.length),
+        from: userAddress,
+      },
+      amountOut: parseUnits(amount, decimals),
+    }
+  }
 
-// TODO: remove comment when other aggregators are ready
-// test('Add liquidity two sides with swap', async () => {
-//   const { publicClient, walletClient, testClient } = clients[0] as any
-//
-//   await setting(publicClient, walletClient, testClient)
-//
-//   const pool = await getPool({
-//     chainId: cloberTestChain2.id,
-//     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//     salt: zeroHash,
-//     options: {
-//       rpcUrl: publicClient.transport.url!,
-//       useSubgraph: false,
-//     },
-//   })
-//
-//   let [beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] =
-//     await Promise.all([
-//       fetchTokenBalance(
-//         publicClient,
-//         cloberTestChain2.id,
-//         '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//         '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//       ),
-//       fetchTokenBalance(
-//         publicClient,
-//         cloberTestChain2.id,
-//         '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//         '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//       ),
-//       fetchLPBalance(
-//         publicClient,
-//         cloberTestChain2.id,
-//         BigInt(pool.key),
-//         '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//       ),
-//     ])
-//
-//   const { transaction: tx1, result: result1 } = await addLiquidity({
-//     chainId: cloberTestChain2.id,
-//     userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//     salt: zeroHash,
-//     amount0: '2000',
-//     amount1: '1.0',
-//     options: {
-//       rpcUrl: publicClient.transport.url!,
-//       useSubgraph: false,
-//     },
-//   })
-//
-//   const hash1 = await walletClient.sendTransaction({
-//     ...tx1!,
-//     account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     gasPrice: tx1!.gasPrice! * 2n,
-//   })
-//   await publicClient.waitForTransactionReceipt({ hash: hash1 })
-//   let [afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchLPBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       BigInt(pool.key),
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//   ])
-//   expect(formatUnits(beforeUSDCBalance - afterUSDCBalance, 6)).toBe(
-//     result1.currencyA.amount,
-//   )
-//   expect(formatUnits(beforeWETHBalance - afterWETHBalance, 18)).toBe(
-//     result1.currencyB.amount,
-//   )
-//   expect(formatUnits(afterLPBalance - beforeLPBalance, 18)).toBe(
-//     result1.lpCurrency.amount,
-//   )
-//
-//   // add liquidity more
-//   ;[beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] = await Promise.all([
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchLPBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       BigInt(pool.key),
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//   ])
-//
-//   const { transaction: tx2, result: result2 } = await addLiquidity({
-//     chainId: cloberTestChain2.id,
-//     userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//     salt: zeroHash,
-//     amount0: '2000',
-//     amount1: '0.2',
-//     options: {
-//       rpcUrl: publicClient.transport.url!,
-//       useSubgraph: false,
-//       testnetPrice: 2000,
-//     },
-//   })
-//
-//   const hash2 = await walletClient.sendTransaction({
-//     ...tx2!,
-//     account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     gasPrice: tx2!.gasPrice! * 2n,
-//   })
-//   await publicClient.waitForTransactionReceipt({ hash: hash2 })
-//   ;[afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchLPBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       BigInt(pool.key),
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//   ])
-//
-//   expect(formatUnits(beforeUSDCBalance - afterUSDCBalance, 6)).toBe(
-//     result2.currencyA.amount,
-//   )
-//   expect(formatUnits(beforeWETHBalance - afterWETHBalance, 18)).toBe(
-//     result2.currencyB.amount,
-//   )
-//   expect(formatUnits(afterLPBalance - beforeLPBalance, 18)).toBe(
-//     result2.lpCurrency.amount,
-//   )
-//
-//   // add liquidity more
-//   ;[beforeUSDCBalance, beforeWETHBalance, beforeLPBalance] = await Promise.all([
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchLPBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       BigInt(pool.key),
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//   ])
-//
-//   const { transaction: tx3, result: result3 } = await addLiquidity({
-//     chainId: cloberTestChain2.id,
-//     userAddress: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     token0: '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//     token1: '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//     salt: zeroHash,
-//     amount0: '400',
-//     amount1: '1',
-//     options: {
-//       rpcUrl: publicClient.transport.url!,
-//       useSubgraph: false,
-//       testnetPrice: 2000,
-//     },
-//   })
-//
-//   const hash3 = await walletClient.sendTransaction({
-//     ...tx3!,
-//     account: '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     gasPrice: tx3!.gasPrice! * 2n,
-//   })
-//   await publicClient.waitForTransactionReceipt({ hash: hash3 })
-//   ;[afterUSDCBalance, afterWETHBalance, afterLPBalance] = await Promise.all([
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0x00bfd44e79fb7f6dd5887a9426c8ef85a0cd23e0',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchTokenBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       '0xF2e615A933825De4B39b497f6e6991418Fb31b78',
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//     fetchLPBalance(
-//       publicClient,
-//       cloberTestChain2.id,
-//       BigInt(pool.key),
-//       '0x5F79EE8f8fA862E98201120d83c4eC39D9468D49',
-//     ),
-//   ])
-//
-//   expect(formatUnits(beforeUSDCBalance - afterUSDCBalance, 6)).toBe(
-//     result3.currencyA.amount,
-//   )
-//   expect(formatUnits(beforeWETHBalance - afterWETHBalance, 18)).toBe(
-//     result3.currencyB.amount,
-//   )
-//   expect(formatUnits(afterLPBalance - beforeLPBalance, 18)).toBe(
-//     result3.lpCurrency.amount,
-//   )
-//
-//   expect(result2.lpCurrency.amount).toBe(result3.lpCurrency.amount)
-// })
+  await walletClient
+    .writeContract({
+      account: DEV_WALLET,
+      address: getContractAddresses({ chainId: publicClient.chain.id })!
+        .Strategy,
+      abi: STRATEGY_ABI,
+      functionName: 'setConfig',
+      args: [
+        pool.key,
+        {
+          referenceThreshold: 10000,
+          rebalanceThreshold: 50000,
+          rateA: 1000000,
+          rateB: 1000000,
+          minRateA: 1000000,
+          minRateB: 1000000,
+          priceThresholdA: 10000,
+          priceThresholdB: 10000,
+        },
+      ],
+    })
+    .then((hash) => publicClient.waitForTransactionReceipt({ hash }))
+
+  await addLiquidity({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
+    salt: zeroHash,
+    amount0: '2000',
+    amount1: '1.0',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      disableSwap: true,
+    },
+  }).then(async ({ transaction }) =>
+    waitForTransaction({
+      transaction: transaction!,
+      publicClient,
+      walletClient,
+    }),
+  )
+
+  await adjustOrderPrice({
+    chainId: publicClient.chain.id,
+    userAddress: DEV_WALLET,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
+    salt: zeroHash,
+    oraclePrice: '2727',
+    bidPrice: '2717',
+    askPrice: '2737',
+    alpha: '0.5',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  }).then((transaction) =>
+    waitForTransaction({
+      transaction: transaction!,
+      walletClient,
+      publicClient,
+    }),
+  )
+  await limitOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: MOCK_USDC,
+    outputToken: tokenAddress,
+    amount: '20000',
+    price: '2718',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  await limitOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: tokenAddress,
+    outputToken: MOCK_USDC,
+    amount: '20',
+    price: '2736',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  const [beforeUSDC, beforeToken, beforeLP] = await Promise.all([
+    getTokenBalance({
+      publicClient,
+      tokenAddress: MOCK_USDC,
+      userAddress: walletClient.account.address,
+    }),
+    getTokenBalance({
+      publicClient,
+      tokenAddress: tokenAddress,
+      userAddress: walletClient.account.address,
+    }),
+    getLpTokenBalance({
+      publicClient,
+      tokenId: BigInt(pool.key),
+      userAddress: walletClient.account.address,
+    }),
+  ])
+
+  // add liquidity with swap
+  const { transaction, result } = await addLiquidity({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
+    salt: zeroHash,
+    amount0: '2000',
+    amount1: '0',
+    quotes: [cloberQuote as any],
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      disableSwap: false,
+      slippage: 5,
+    },
+  })
+  await waitForTransaction({
+    transaction: transaction!,
+    publicClient,
+    walletClient,
+  })
+
+  const [afterUSDC, afterToken, afterLP] = await Promise.all([
+    getTokenBalance({
+      publicClient,
+      tokenAddress: MOCK_USDC,
+      userAddress: walletClient.account.address,
+    }),
+    getTokenBalance({
+      publicClient,
+      tokenAddress: tokenAddress,
+      userAddress: walletClient.account.address,
+    }),
+    getLpTokenBalance({
+      publicClient,
+      tokenId: BigInt(pool.key),
+      userAddress: walletClient.account.address,
+    }),
+  ])
+  expect(Number(formatUnits(beforeUSDC - afterUSDC, 6)).toFixed(2)).toBe(
+    Number(result.currencyA.amount).toFixed(2),
+  )
+  expect(formatUnits(beforeToken - afterToken, 18)).toBe('0')
+  expect(formatUnits(afterLP - beforeLP, 18)).toBe(result.lpCurrency.amount)
+})
+
+test('Add liquidity one side with swap - 2', async () => {
+  const { publicClient, walletClient, tokenAddress, pool } = await setUp('mint')
+  const cloberQuote = async (
+    inputCurrency: Currency,
+    amountIn: bigint,
+    outputCurrency: Currency,
+    slippageLimitPercent: number,
+    // @ts-ignore
+    gasPrice: bigint,
+    userAddress: `0x${string}`,
+  ): Promise<{
+    amountOut: bigint
+    transaction: Transaction | undefined
+  }> => {
+    const {
+      transaction,
+      result: {
+        taken: {
+          amount,
+          currency: { decimals },
+          events,
+        },
+      },
+    } = await marketOrder({
+      chainId: publicClient.chain.id,
+      userAddress: userAddress!,
+      inputToken: inputCurrency.address,
+      outputToken: outputCurrency.address,
+      amountIn: formatUnits(amountIn, inputCurrency.decimals),
+      options: {
+        rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
+        slippage: slippageLimitPercent,
+        gasLimit: 300_000n,
+      },
+    })
+    return {
+      transaction: {
+        ...transaction,
+        gas: 300_000n * BigInt(events.length),
+        from: userAddress,
+      },
+      amountOut: parseUnits(amount, decimals),
+    }
+  }
+
+  await walletClient
+    .writeContract({
+      account: DEV_WALLET,
+      address: getContractAddresses({ chainId: publicClient.chain.id })!
+        .Strategy,
+      abi: STRATEGY_ABI,
+      functionName: 'setConfig',
+      args: [
+        pool.key,
+        {
+          referenceThreshold: 10000,
+          rebalanceThreshold: 50000,
+          rateA: 1000000,
+          rateB: 1000000,
+          minRateA: 1000000,
+          minRateB: 1000000,
+          priceThresholdA: 10000,
+          priceThresholdB: 10000,
+        },
+      ],
+    })
+    .then((hash) => publicClient.waitForTransactionReceipt({ hash }))
+
+  await addLiquidity({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
+    salt: zeroHash,
+    amount0: '2000',
+    amount1: '1.0',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      disableSwap: true,
+    },
+  }).then(async ({ transaction }) =>
+    waitForTransaction({
+      transaction: transaction!,
+      publicClient,
+      walletClient,
+    }),
+  )
+
+  await adjustOrderPrice({
+    chainId: publicClient.chain.id,
+    userAddress: DEV_WALLET,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
+    salt: zeroHash,
+    oraclePrice: '2727',
+    bidPrice: '2717',
+    askPrice: '2737',
+    alpha: '0.5',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  }).then((transaction) =>
+    waitForTransaction({
+      transaction: transaction!,
+      walletClient,
+      publicClient,
+    }),
+  )
+  await limitOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: MOCK_USDC,
+    outputToken: tokenAddress,
+    amount: '20000',
+    price: '2718',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  await limitOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: tokenAddress,
+    outputToken: MOCK_USDC,
+    amount: '20',
+    price: '2736',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  const [beforeUSDC, beforeToken, beforeLP] = await Promise.all([
+    getTokenBalance({
+      publicClient,
+      tokenAddress: MOCK_USDC,
+      userAddress: walletClient.account.address,
+    }),
+    getTokenBalance({
+      publicClient,
+      tokenAddress: tokenAddress,
+      userAddress: walletClient.account.address,
+    }),
+    getLpTokenBalance({
+      publicClient,
+      tokenId: BigInt(pool.key),
+      userAddress: walletClient.account.address,
+    }),
+  ])
+
+  // add liquidity with swap
+  const { transaction, result } = await addLiquidity({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
+    salt: zeroHash,
+    amount0: '0',
+    amount1: '1.0',
+    quotes: [cloberQuote as any],
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      disableSwap: false,
+      slippage: 5,
+    },
+  })
+  await waitForTransaction({
+    transaction: transaction!,
+    publicClient,
+    walletClient,
+  })
+
+  const [afterUSDC, afterToken, afterLP] = await Promise.all([
+    getTokenBalance({
+      publicClient,
+      tokenAddress: MOCK_USDC,
+      userAddress: walletClient.account.address,
+    }),
+    getTokenBalance({
+      publicClient,
+      tokenAddress: tokenAddress,
+      userAddress: walletClient.account.address,
+    }),
+    getLpTokenBalance({
+      publicClient,
+      tokenId: BigInt(pool.key),
+      userAddress: walletClient.account.address,
+    }),
+  ])
+  expect(formatUnits(beforeUSDC - afterUSDC, 6)).toBe('0')
+  expect(Number(formatUnits(beforeToken - afterToken, 18)).toFixed(9)).toBe(
+    Number(result.currencyB.amount).toFixed(9),
+  )
+  expect(formatUnits(afterLP - beforeLP, 18)).toBe(result.lpCurrency.amount)
+})
+
+test('Add liquidity one side with swap - 3', async () => {
+  const { publicClient, walletClient, tokenAddress, pool } = await setUp('mint')
+  const cloberQuote = async (
+    inputCurrency: Currency,
+    amountIn: bigint,
+    outputCurrency: Currency,
+    slippageLimitPercent: number,
+    // @ts-ignore
+    gasPrice: bigint,
+    userAddress: `0x${string}`,
+  ): Promise<{
+    amountOut: bigint
+    transaction: Transaction | undefined
+  }> => {
+    const {
+      transaction,
+      result: {
+        taken: {
+          amount,
+          currency: { decimals },
+          events,
+        },
+      },
+    } = await marketOrder({
+      chainId: publicClient.chain.id,
+      userAddress: userAddress!,
+      inputToken: inputCurrency.address,
+      outputToken: outputCurrency.address,
+      amountIn: formatUnits(amountIn, inputCurrency.decimals),
+      options: {
+        rpcUrl: publicClient.transport.url!,
+        useSubgraph: false,
+        slippage: slippageLimitPercent,
+        gasLimit: 300_000n,
+      },
+    })
+    return {
+      transaction: {
+        ...transaction,
+        gas: 300_000n * BigInt(events.length),
+        from: userAddress,
+      },
+      amountOut: parseUnits(amount, decimals),
+    }
+  }
+
+  await walletClient
+    .writeContract({
+      account: DEV_WALLET,
+      address: getContractAddresses({ chainId: publicClient.chain.id })!
+        .Strategy,
+      abi: STRATEGY_ABI,
+      functionName: 'setConfig',
+      args: [
+        pool.key,
+        {
+          referenceThreshold: 10000,
+          rebalanceThreshold: 50000,
+          rateA: 1000000,
+          rateB: 1000000,
+          minRateA: 1000000,
+          minRateB: 1000000,
+          priceThresholdA: 10000,
+          priceThresholdB: 10000,
+        },
+      ],
+    })
+    .then((hash) => publicClient.waitForTransactionReceipt({ hash }))
+
+  await addLiquidity({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
+    salt: zeroHash,
+    amount0: '2000',
+    amount1: '1.0',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      disableSwap: true,
+    },
+  }).then(async ({ transaction }) =>
+    waitForTransaction({
+      transaction: transaction!,
+      publicClient,
+      walletClient,
+    }),
+  )
+
+  await adjustOrderPrice({
+    chainId: publicClient.chain.id,
+    userAddress: DEV_WALLET,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
+    salt: zeroHash,
+    oraclePrice: '2727',
+    bidPrice: '2717',
+    askPrice: '2737',
+    alpha: '0.5',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+    },
+  }).then((transaction) =>
+    waitForTransaction({
+      transaction: transaction!,
+      walletClient,
+      publicClient,
+    }),
+  )
+  await limitOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: MOCK_USDC,
+    outputToken: tokenAddress,
+    amount: '20000',
+    price: '2718',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  await limitOrder({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    inputToken: tokenAddress,
+    outputToken: MOCK_USDC,
+    amount: '20',
+    price: '2736',
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      postOnly: true,
+      useSubgraph: false,
+    },
+  }).then(({ transaction }) =>
+    waitForTransaction({ transaction, publicClient, walletClient }),
+  )
+
+  const [beforeUSDC, beforeToken, beforeLP] = await Promise.all([
+    getTokenBalance({
+      publicClient,
+      tokenAddress: MOCK_USDC,
+      userAddress: walletClient.account.address,
+    }),
+    getTokenBalance({
+      publicClient,
+      tokenAddress: tokenAddress,
+      userAddress: walletClient.account.address,
+    }),
+    getLpTokenBalance({
+      publicClient,
+      tokenId: BigInt(pool.key),
+      userAddress: walletClient.account.address,
+    }),
+  ])
+
+  // add liquidity with swap
+  const { transaction, result } = await addLiquidity({
+    chainId: publicClient.chain.id,
+    userAddress: walletClient.account.address,
+    token0: MOCK_USDC,
+    token1: tokenAddress,
+    salt: zeroHash,
+    amount0: '1000',
+    amount1: '1.0',
+    quotes: [cloberQuote as any],
+    options: {
+      rpcUrl: publicClient.transport.url!,
+      useSubgraph: false,
+      disableSwap: false,
+      slippage: 5,
+    },
+  })
+  await waitForTransaction({
+    transaction: transaction!,
+    publicClient,
+    walletClient,
+  })
+
+  const [afterUSDC, afterToken, afterLP] = await Promise.all([
+    getTokenBalance({
+      publicClient,
+      tokenAddress: MOCK_USDC,
+      userAddress: walletClient.account.address,
+    }),
+    getTokenBalance({
+      publicClient,
+      tokenAddress: tokenAddress,
+      userAddress: walletClient.account.address,
+    }),
+    getLpTokenBalance({
+      publicClient,
+      tokenId: BigInt(pool.key),
+      userAddress: walletClient.account.address,
+    }),
+  ])
+  expect(Number(formatUnits(beforeUSDC - afterUSDC, 6)).toFixed(2)).toBe(
+    Number(result.currencyA.amount).toFixed(2),
+  )
+  expect(Number(formatUnits(beforeToken - afterToken, 18)).toFixed(9)).toBe(
+    Number(result.currencyB.amount).toFixed(9),
+  )
+  expect(formatUnits(afterLP - beforeLP, 18)).toBe(result.lpCurrency.amount)
+})
