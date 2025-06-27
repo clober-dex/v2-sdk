@@ -28,6 +28,8 @@ import { buildTransaction } from '../../utils/build-transaction'
 import { CONTRACT_ADDRESSES } from '../../constants/chain-configs/addresses'
 import { MINTER_ABI } from '../../constants/abis/rebalancer/minter-abi'
 import { abs } from '../../utils/math'
+import { fromOrderId } from '../../entities/open-order/utils/order-id'
+import { formatPrice, invertTick, toPrice } from '../../utils'
 
 export const addLiquidity = async ({
   chainId,
@@ -133,52 +135,42 @@ export const addLiquidity = async ({
   }
 
   if (!disableSwap) {
-    // const currencyBPerCurrencyA = options?.testnetPrice
-    //   ? isAddressEqual(
-    //       getQuoteToken({
-    //         chainId,
-    //         token0,
-    //         token1,
-    //       }),
-    //       pool.currencyA.address,
-    //     )
-    //     ? 1 / Number(options.testnetPrice)
-    //     : Number(options.testnetPrice)
-    //   : undefined
-    const swapAmountA = parseUnits('1', pool.currencyA.decimals)
-    let swapAmountB = -1n
-    if (options && options.token0Price && options.token1Price) {
-      const tokenAPrice = isAddressEqual(
-        pool.currencyA.address,
-        getAddress(token0),
-      )
-        ? options.token0Price
-        : options.token1Price
-      const tokenBPrice = isAddressEqual(
-        pool.currencyA.address,
-        getAddress(token0),
-      )
-        ? options.token1Price
-        : options.token0Price
-      swapAmountB = getQuoteAmountFromPrices(
-        swapAmountA,
-        tokenAPrice,
-        tokenBPrice,
-        pool.currencyA.decimals,
-        pool.currencyB.decimals,
-      )
-    } else {
-      // ;({ amountOut: swapAmountB } = await fetchOdosQuote({
-      //   chainId,
-      //   amountIn: swapAmountA,
-      //   tokenIn: pool.currencyA,
-      //   tokenOut: pool.currencyB,
-      //   slippageLimitPercent: 1,
-      //   userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
-      //   testnetPrice: currencyBPerCurrencyA,
-      // }))
-      throw new Error('external aggregator is not supported yet')
+    let tokenAPrice =
+      pool.orderListA.length > 0
+        ? Number(
+            formatPrice(
+              toPrice(fromOrderId(BigInt(pool.orderListA[0])).tick),
+              pool.market.quote.decimals,
+              pool.market.base.decimals,
+            ),
+          )
+        : 0
+    let tokenBPrice =
+      pool.orderListB.length > 0
+        ? Number(
+            formatPrice(
+              toPrice(invertTick(fromOrderId(BigInt(pool.orderListB[0])).tick)),
+              pool.market.quote.decimals,
+              pool.market.base.decimals,
+            ),
+          )
+        : 0
+    if (tokenAPrice === 0 && tokenBPrice === 0) {
+      throw new Error('No orders in the pool, cannot add liquidity')
+    } else if (tokenAPrice === 0 && tokenBPrice > 0) {
+      tokenAPrice = tokenBPrice
+    } else if (tokenAPrice > 0 && tokenBPrice === 0) {
+      tokenBPrice = tokenAPrice
     }
+
+    const swapAmountA = parseUnits('1', pool.currencyA.decimals)
+    const swapAmountB = getQuoteAmountFromPrices(
+      swapAmountA,
+      tokenAPrice,
+      tokenBPrice,
+      pool.currencyA.decimals,
+      pool.currencyB.decimals,
+    )
     if (swapAmountB === -1n) {
       throw new Error('Failed to fetch quote')
     }
@@ -192,9 +184,8 @@ export const addLiquidity = async ({
     )
 
     if (deltaA < 0n) {
-      throw new Error('external aggregator is not supported yet: deltaA < 0')
-      // swapParams.inCurrency = pool.currencyA.address
-      // swapParams.amount = -deltaA
+      swapParams.inCurrency = pool.currencyA.address
+      swapParams.amount = -deltaA
       // const { amountOut: actualDeltaB, data: calldata } =
       //   await fetchOdosCallData({
       //     chainId,
@@ -209,9 +200,8 @@ export const addLiquidity = async ({
       // amountA += deltaA
       // amountB += actualDeltaB
     } else if (deltaB < 0n) {
-      throw new Error('external aggregator is not supported yet: deltaB < 0')
-      // swapParams.inCurrency = pool.currencyB.address
-      // swapParams.amount = -deltaB
+      swapParams.inCurrency = pool.currencyB.address
+      swapParams.amount = -deltaB
       // const { amountOut: actualDeltaA, data: calldata } =
       //   await fetchOdosCallData({
       //     chainId,
