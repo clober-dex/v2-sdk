@@ -74,19 +74,13 @@ export const wrapToERC20 = async ({
         )
       ).toJson()
   if (pool.isOpened) {
-    const address = await publicClient.readContract({
-      address: CONTRACT_ADDRESSES[chainId]!.Wrapped6909Factory,
-      abi: WRAPPED_6909_FACTORY_ABI,
-      functionName: 'getWrapped6909Address',
-      args: [CONTRACT_ADDRESSES[chainId]!.Rebalancer, BigInt(pool.key)],
-    })
     return {
       result: {
         currency: {
           name: `Wrapped Clober Liquidity Vault ${pool.currencyB.symbol}-${pool.currencyA.symbol}`,
           symbol: `wCLV-${pool.currencyB.symbol}-${pool.currencyA.symbol}`,
           decimals: pool.lpCurrency.decimals,
-          address,
+          address: pool.wrappedLpCurrency.address,
         },
         amount,
         direction: 'out',
@@ -177,19 +171,13 @@ export const unwrapFromERC20 = async ({
         )
       ).toJson()
   if (pool.isOpened) {
-    const address = await publicClient.readContract({
-      address: CONTRACT_ADDRESSES[chainId]!.Wrapped6909Factory,
-      abi: WRAPPED_6909_FACTORY_ABI,
-      functionName: 'getWrapped6909Address',
-      args: [CONTRACT_ADDRESSES[chainId]!.Rebalancer, BigInt(pool.key)],
-    })
     return {
       result: {
         currency: {
           name: `Wrapped Clober Liquidity Vault ${pool.currencyB.symbol}-${pool.currencyA.symbol}`,
           symbol: `wCLV-${pool.currencyB.symbol}-${pool.currencyA.symbol}`,
           decimals: pool.lpCurrency.decimals,
-          address,
+          address: pool.wrappedLpCurrency.address,
         },
         amount,
         direction: 'in',
@@ -198,7 +186,7 @@ export const unwrapFromERC20 = async ({
         publicClient,
         {
           chain: CHAIN_MAP[chainId],
-          address,
+          address: pool.wrappedLpCurrency.address,
           account: userAddress,
           abi: [
             {
