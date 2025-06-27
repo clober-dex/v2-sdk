@@ -133,9 +133,6 @@ export const addLiquidity = async ({
     disableSwap?: boolean
     token0PermitParams?: ERC20PermitParam
     token1PermitParams?: ERC20PermitParam
-    token0Price?: number
-    token1Price?: number
-    testnetPrice?: number
     useSubgraph?: boolean
   } & DefaultWriteContractOptions
 }): Promise<{
