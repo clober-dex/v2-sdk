@@ -10,6 +10,7 @@ import {
 
 import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import {
+  Currency,
   Currency6909Flow,
   CurrencyFlow,
   DefaultWriteContractOptions,
@@ -31,6 +32,73 @@ import { abs } from '../../utils/math'
 import { fromOrderId } from '../../entities/open-order/utils/order-id'
 import { formatPrice, invertTick, toPrice } from '../../utils'
 
+const getBestQuote = async ({
+  quotes,
+  tokenIn,
+  tokenOut,
+  amountIn,
+  slippageLimitPercent,
+  gasPrice,
+  userAddress,
+}: {
+  quotes: ((
+    inputCurrency: Currency,
+    amountIn: bigint,
+    outputCurrency: Currency,
+    slippageLimitPercent: number,
+    gasPrice: bigint,
+    userAddress: `0x${string}`,
+  ) => Promise<{
+    amountOut: bigint
+    transaction: Transaction | undefined
+  }>)[]
+  tokenIn: Currency
+  tokenOut: Currency
+  amountIn: bigint
+  slippageLimitPercent: number
+  gasPrice: bigint
+  userAddress: `0x${string}`
+}): Promise<{ amountOut: bigint; transaction: Transaction }> => {
+  const results = (
+    await Promise.allSettled(
+      (quotes ?? []).map(async (quote) =>
+        quote(
+          tokenIn,
+          amountIn,
+          tokenOut,
+          slippageLimitPercent,
+          gasPrice,
+          userAddress,
+        ),
+      ),
+    )
+  )
+    .map((result) => (result.status === 'fulfilled' ? result.value : undefined))
+    .filter(
+      (
+        quote,
+      ): quote is {
+        amountOut: bigint
+        transaction: Transaction | undefined
+      } => quote !== undefined && quote.amountOut > 0n,
+    )
+    .sort((a, b) => Number(b.amountOut - a.amountOut))
+
+  if (results.length === 0) {
+    throw new Error('No quotes available')
+  }
+  if (results[0].amountOut <= 0n) {
+    throw new Error('No valid quotes found')
+  }
+  if (results[0].transaction === undefined) {
+    throw new Error('No transaction found for the best quote')
+  }
+  return {
+    amountOut: results[0].amountOut,
+    transaction: results[0].transaction,
+  }
+}
+
 export const addLiquidity = async ({
   chainId,
   userAddress,
@@ -39,6 +107,7 @@ export const addLiquidity = async ({
   salt,
   amount0,
   amount1,
+  quotes,
   options,
 }: {
   chainId: CHAIN_IDS
@@ -48,6 +117,17 @@ export const addLiquidity = async ({
   salt: `0x${string}`
   amount0?: string
   amount1?: string
+  quotes?: ((
+    inputCurrency: Currency,
+    amountIn: bigint,
+    outputCurrency: Currency,
+    slippageLimitPercent: number,
+    gasPrice: bigint,
+    userAddress: `0x${string}`,
+  ) => Promise<{
+    amountOut: bigint
+    transaction: Transaction | undefined
+  }>)[]
   options?: {
     slippage?: number
     disableSwap?: boolean
@@ -102,7 +182,7 @@ export const addLiquidity = async ({
         parseUnits(amount1 ?? '0', pool.currencyA.decimals),
         parseUnits(amount0 ?? '0', pool.currencyB.decimals),
       ]
-  const [amountA, amountB] = [amountAOrigin, amountBOrigin]
+  let [amountA, amountB] = [amountAOrigin, amountBOrigin]
   const tokenAPermitParams = isAddressEqual(
     pool.currencyA.address,
     getAddress(token0),
@@ -135,6 +215,17 @@ export const addLiquidity = async ({
   }
 
   if (!disableSwap) {
+    if (
+      !(
+        isAddressEqual(pool.currencyA.address, pool.market.quote.address) &&
+        isAddressEqual(pool.currencyB.address, pool.market.base.address)
+      )
+    ) {
+      throw new Error(
+        'Cannot add liquidity to a pool with the same quote and base currencies',
+      )
+    }
+
     let tokenAPrice =
       pool.orderListA.length > 0
         ? Number(
@@ -162,12 +253,13 @@ export const addLiquidity = async ({
     } else if (tokenAPrice > 0 && tokenBPrice === 0) {
       tokenBPrice = tokenAPrice
     }
+    const price = (tokenAPrice + tokenBPrice) / 2
 
     const swapAmountA = parseUnits('1', pool.currencyA.decimals)
     const swapAmountB = getQuoteAmountFromPrices(
       swapAmountA,
-      tokenAPrice,
-      tokenBPrice,
+      1,
+      price,
       pool.currencyA.decimals,
       pool.currencyB.decimals,
     )
@@ -182,41 +274,41 @@ export const addLiquidity = async ({
       swapAmountA,
       swapAmountB,
     )
-
+    const gasPrice = await publicClient.getGasPrice()
     if (deltaA < 0n) {
       swapParams.inCurrency = pool.currencyA.address
       swapParams.amount = -deltaA
-      // const { amountOut: actualDeltaB, data: calldata } =
-      //   await fetchOdosCallData({
-      //     chainId,
-      //     amountIn: swapParams.amount,
-      //     tokenIn: pool.currencyA,
-      //     tokenOut: pool.currencyB,
-      //     slippageLimitPercent,
-      //     userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
-      //     testnetPrice: currencyBPerCurrencyA,
-      //   })
-      // swapParams.data = calldata
-      // amountA += deltaA
-      // amountB += actualDeltaB
+
+      const { amountOut: actualDeltaB, transaction } = await getBestQuote({
+        quotes: quotes ?? [],
+        tokenIn: pool.currencyA,
+        tokenOut: pool.currencyB,
+        amountIn: swapParams.amount,
+        slippageLimitPercent,
+        gasPrice,
+        userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+      })
+
+      swapParams.data = transaction.data
+      amountA += deltaA
+      amountB += actualDeltaB
     } else if (deltaB < 0n) {
       swapParams.inCurrency = pool.currencyB.address
       swapParams.amount = -deltaB
-      // const { amountOut: actualDeltaA, data: calldata } =
-      //   await fetchOdosCallData({
-      //     chainId,
-      //     amountIn: swapParams.amount,
-      //     tokenIn: pool.currencyB,
-      //     tokenOut: pool.currencyA,
-      //     slippageLimitPercent,
-      //     userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
-      //     testnetPrice: currencyBPerCurrencyA
-      //       ? 1 / currencyBPerCurrencyA
-      //       : undefined,
-      //   })
-      // swapParams.data = calldata
-      // amountA += actualDeltaA
-      // amountB += deltaB
+
+      const { amountOut: actualDeltaA, transaction } = await getBestQuote({
+        quotes: quotes ?? [],
+        tokenIn: pool.currencyB,
+        tokenOut: pool.currencyA,
+        amountIn: swapParams.amount,
+        slippageLimitPercent,
+        gasPrice,
+        userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+      })
+
+      swapParams.data = transaction.data
+      amountA += actualDeltaA
+      amountB += deltaB
     }
   }
 
