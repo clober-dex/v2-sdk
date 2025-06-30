@@ -61,7 +61,11 @@ const getBestQuote = async ({
   gasPrice: bigint
   userAddress: `0x${string}`
   timeout: number
-}): Promise<{ amountOut: bigint; transaction: Transaction }> => {
+}): Promise<{
+  amountOut: bigint
+  transaction: Transaction
+  aggregator: string
+}> => {
   const results = (
     await Promise.allSettled(
       (quotes ?? []).map(async (quote) =>
@@ -84,6 +88,7 @@ const getBestQuote = async ({
       ): quote is {
         amountOut: bigint
         transaction: Transaction | undefined
+        aggregator: { name: string }
       } => quote !== undefined && quote.amountOut > 0n,
     )
     .sort((a, b) => Number(b.amountOut - a.amountOut))
@@ -100,6 +105,7 @@ const getBestQuote = async ({
   return {
     amountOut: results[0].amountOut,
     transaction: results[0].transaction,
+    aggregator: results[0].aggregator.name,
   }
 }
 
@@ -146,6 +152,24 @@ export const addLiquidity = async ({
     currencyA: CurrencyFlow
     currencyB: CurrencyFlow
     lpCurrency: Currency6909Flow
+    quoteRequest:
+      | {
+          tokenIn: Currency
+          tokenOut: Currency
+          amountIn: bigint
+          slippageLimitPercent: number
+          gasPrice: bigint
+          userAddress: `0x${string}`
+          timeout: number
+        }
+      | undefined
+    quoteResponse:
+      | {
+          amountOut: bigint
+          aggregator: string
+          exchangeRate: number
+        }
+      | undefined
   }
 }> => {
   const publicClient = createPublicClient({
@@ -216,6 +240,8 @@ export const addLiquidity = async ({
     amount: 0n,
     data: '0x',
   }
+  let quoteRequest = undefined
+  let quoteResponse = undefined
 
   if (!disableSwap) {
     if (
@@ -282,8 +308,7 @@ export const addLiquidity = async ({
       swapParams.inCurrency = pool.currencyA.address
       swapParams.amount = -deltaA
 
-      const { amountOut: actualDeltaB, transaction } = await getBestQuote({
-        quotes: quotes ?? [],
+      quoteRequest = {
         tokenIn: pool.currencyA,
         tokenOut: pool.currencyB,
         amountIn: swapParams.amount,
@@ -291,7 +316,30 @@ export const addLiquidity = async ({
         gasPrice,
         userAddress,
         timeout: timeoutForQuotes,
+      }
+      const {
+        amountOut: actualDeltaB,
+        transaction,
+        aggregator,
+      } = await getBestQuote({
+        quotes: quotes ?? [],
+        ...quoteRequest,
       })
+      const exchangeRate =
+        Number(formatUnits(actualDeltaB, quoteRequest.tokenOut.decimals)) /
+        Number(
+          formatUnits(quoteRequest.amountIn, quoteRequest.tokenIn.decimals),
+        )
+      quoteResponse = {
+        amountOut: actualDeltaB,
+        aggregator: aggregator,
+        exchangeRate: isAddressEqual(
+          quoteRequest.tokenIn.address,
+          pool.market.quote.address,
+        )
+          ? 1 / exchangeRate
+          : exchangeRate,
+      }
 
       swapParams.data = transaction.data
       amountA += deltaA
@@ -300,8 +348,7 @@ export const addLiquidity = async ({
       swapParams.inCurrency = pool.currencyB.address
       swapParams.amount = -deltaB
 
-      const { amountOut: actualDeltaA, transaction } = await getBestQuote({
-        quotes: quotes ?? [],
+      quoteRequest = {
         tokenIn: pool.currencyB,
         tokenOut: pool.currencyA,
         amountIn: swapParams.amount,
@@ -309,7 +356,30 @@ export const addLiquidity = async ({
         gasPrice,
         userAddress,
         timeout: timeoutForQuotes,
+      }
+      const {
+        amountOut: actualDeltaA,
+        transaction,
+        aggregator,
+      } = await getBestQuote({
+        quotes: quotes ?? [],
+        ...quoteRequest,
       })
+      const exchangeRate =
+        Number(formatUnits(actualDeltaA, quoteRequest.tokenOut.decimals)) /
+        Number(
+          formatUnits(quoteRequest.amountIn, quoteRequest.tokenIn.decimals),
+        )
+      quoteResponse = {
+        amountOut: actualDeltaA,
+        aggregator: aggregator,
+        exchangeRate: isAddressEqual(
+          quoteRequest.tokenIn.address,
+          pool.market.quote.address,
+        )
+          ? 1 / exchangeRate
+          : exchangeRate,
+      }
 
       swapParams.data = transaction.data
       amountA += actualDeltaA
@@ -346,6 +416,8 @@ export const addLiquidity = async ({
           amount: '0',
           direction: 'out',
         },
+        quoteRequest,
+        quoteResponse,
       },
     }
   }
@@ -413,6 +485,8 @@ export const addLiquidity = async ({
         amount: formatUnits(mintAmount, pool.lpCurrency.decimals),
         direction: 'out',
       },
+      quoteRequest,
+      quoteResponse,
     },
   }
 }

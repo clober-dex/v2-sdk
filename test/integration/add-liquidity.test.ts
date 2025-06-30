@@ -298,6 +298,9 @@ test('Add liquidity one side with swap - 1', async () => {
   ): Promise<{
     amountOut: bigint
     transaction: Transaction | undefined
+    aggregator: {
+      name: string
+    }
   }> => {
     const {
       transaction,
@@ -328,6 +331,9 @@ test('Add liquidity one side with swap - 1', async () => {
         from: userAddress,
       },
       amountOut: parseUnits(amount, decimals),
+      aggregator: {
+        name: 'clober',
+      },
     }
   }
 
@@ -505,6 +511,9 @@ test('Add liquidity one side with swap - 2', async () => {
   ): Promise<{
     amountOut: bigint
     transaction: Transaction | undefined
+    aggregator: {
+      name: string
+    }
   }> => {
     const {
       transaction,
@@ -535,6 +544,9 @@ test('Add liquidity one side with swap - 2', async () => {
         from: userAddress,
       },
       amountOut: parseUnits(amount, decimals),
+      aggregator: {
+        name: 'clober',
+      },
     }
   }
 
@@ -713,6 +725,9 @@ test('Add liquidity one side with swap - 3', async () => {
   ): Promise<{
     amountOut: bigint
     transaction: Transaction | undefined
+    aggregator: {
+      name: string
+    }
   }> => {
     const {
       transaction,
@@ -743,6 +758,9 @@ test('Add liquidity one side with swap - 3', async () => {
         from: userAddress,
       },
       amountOut: parseUnits(amount, decimals),
+      aggregator: {
+        name: 'clober',
+      },
     }
   }
 
