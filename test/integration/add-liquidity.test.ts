@@ -381,9 +381,9 @@ test('Add liquidity one side with swap - 1', async () => {
     token0: MOCK_USDC,
     token1: tokenAddress,
     salt: zeroHash,
-    oraclePrice: '2727',
-    bidPrice: '2717',
-    askPrice: '2737',
+    oraclePrice: '2000',
+    bidPrice: '1999',
+    askPrice: '2001',
     alpha: '0.5',
     options: {
       rpcUrl: publicClient.transport.url!,
@@ -402,7 +402,7 @@ test('Add liquidity one side with swap - 1', async () => {
     inputToken: MOCK_USDC,
     outputToken: tokenAddress,
     amount: '20000',
-    price: '2718',
+    price: '1999.5',
     options: {
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
@@ -418,7 +418,7 @@ test('Add liquidity one side with swap - 1', async () => {
     inputToken: tokenAddress,
     outputToken: MOCK_USDC,
     amount: '20',
-    price: '2736',
+    price: '2000.5',
     options: {
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
@@ -468,7 +468,7 @@ test('Add liquidity one side with swap - 1', async () => {
     publicClient,
     walletClient,
   })
-
+  console.log('result', result)
   const [afterUSDC, afterToken, afterLP] = await Promise.all([
     getTokenBalance({
       publicClient,
@@ -589,9 +589,9 @@ test('Add liquidity one side with swap - 2', async () => {
     token0: MOCK_USDC,
     token1: tokenAddress,
     salt: zeroHash,
-    oraclePrice: '2727',
-    bidPrice: '2717',
-    askPrice: '2737',
+    oraclePrice: '2000',
+    bidPrice: '1999',
+    askPrice: '2001',
     alpha: '0.5',
     options: {
       rpcUrl: publicClient.transport.url!,
@@ -610,7 +610,7 @@ test('Add liquidity one side with swap - 2', async () => {
     inputToken: MOCK_USDC,
     outputToken: tokenAddress,
     amount: '20000',
-    price: '2718',
+    price: '1999.5',
     options: {
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
@@ -626,7 +626,7 @@ test('Add liquidity one side with swap - 2', async () => {
     inputToken: tokenAddress,
     outputToken: MOCK_USDC,
     amount: '20',
-    price: '2736',
+    price: '2000.5',
     options: {
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
@@ -797,9 +797,9 @@ test('Add liquidity one side with swap - 3', async () => {
     token0: MOCK_USDC,
     token1: tokenAddress,
     salt: zeroHash,
-    oraclePrice: '2727',
-    bidPrice: '2717',
-    askPrice: '2737',
+    oraclePrice: '2000',
+    bidPrice: '1999',
+    askPrice: '2001',
     alpha: '0.5',
     options: {
       rpcUrl: publicClient.transport.url!,
@@ -818,7 +818,7 @@ test('Add liquidity one side with swap - 3', async () => {
     inputToken: MOCK_USDC,
     outputToken: tokenAddress,
     amount: '20000',
-    price: '2718',
+    price: '1999.5',
     options: {
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
@@ -834,7 +834,7 @@ test('Add liquidity one side with swap - 3', async () => {
     inputToken: tokenAddress,
     outputToken: MOCK_USDC,
     amount: '20',
-    price: '2736',
+    price: '2000.5',
     options: {
       rpcUrl: publicClient.transport.url!,
       postOnly: true,
