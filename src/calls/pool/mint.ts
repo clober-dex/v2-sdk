@@ -283,7 +283,7 @@ export const addLiquidity = async ({
         amountIn: swapParams.amount,
         slippageLimitPercent,
         gasPrice,
-        userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+        userAddress,
       })
 
       swapParams.data = transaction.data
@@ -300,7 +300,7 @@ export const addLiquidity = async ({
         amountIn: swapParams.amount,
         slippageLimitPercent,
         gasPrice,
-        userAddress: CONTRACT_ADDRESSES[chainId]!.Minter,
+        userAddress,
       })
 
       swapParams.data = transaction.data
