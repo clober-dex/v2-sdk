@@ -167,6 +167,7 @@ export const addLiquidity = async ({
       | {
           amountOut: bigint
           aggregator: string
+          exchangeRate: number
         }
       | undefined
   }
@@ -324,9 +325,20 @@ export const addLiquidity = async ({
         quotes: quotes ?? [],
         ...quoteRequest,
       })
+      const exchangeRate =
+        Number(formatUnits(actualDeltaB, quoteRequest.tokenOut.decimals)) /
+        Number(
+          formatUnits(quoteRequest.amountIn, quoteRequest.tokenIn.decimals),
+        )
       quoteResponse = {
         amountOut: actualDeltaB,
         aggregator: aggregator,
+        exchangeRate: isAddressEqual(
+          quoteRequest.tokenIn.address,
+          pool.market.quote.address,
+        )
+          ? 1 / exchangeRate
+          : exchangeRate,
       }
 
       swapParams.data = transaction.data
@@ -353,9 +365,20 @@ export const addLiquidity = async ({
         quotes: quotes ?? [],
         ...quoteRequest,
       })
+      const exchangeRate =
+        Number(formatUnits(actualDeltaA, quoteRequest.tokenOut.decimals)) /
+        Number(
+          formatUnits(quoteRequest.amountIn, quoteRequest.tokenIn.decimals),
+        )
       quoteResponse = {
         amountOut: actualDeltaA,
         aggregator: aggregator,
+        exchangeRate: isAddressEqual(
+          quoteRequest.tokenIn.address,
+          pool.market.quote.address,
+        )
+          ? 1 / exchangeRate
+          : exchangeRate,
       }
 
       swapParams.data = transaction.data
