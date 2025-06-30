@@ -40,6 +40,7 @@ const getBestQuote = async ({
   slippageLimitPercent,
   gasPrice,
   userAddress,
+  timeout = 4000, // Default timeout of 4 seconds
 }: {
   quotes: ((
     inputCurrency: Currency,
@@ -48,6 +49,7 @@ const getBestQuote = async ({
     slippageLimitPercent: number,
     gasPrice: bigint,
     userAddress: `0x${string}`,
+    timeout: number,
   ) => Promise<{
     amountOut: bigint
     transaction: Transaction | undefined
@@ -58,6 +60,7 @@ const getBestQuote = async ({
   slippageLimitPercent: number
   gasPrice: bigint
   userAddress: `0x${string}`
+  timeout: number
 }): Promise<{ amountOut: bigint; transaction: Transaction }> => {
   const results = (
     await Promise.allSettled(
@@ -69,6 +72,7 @@ const getBestQuote = async ({
           slippageLimitPercent,
           gasPrice,
           userAddress,
+          timeout,
         ),
       ),
     )
@@ -131,6 +135,7 @@ export const addLiquidity = async ({
   options?: {
     slippage?: number
     disableSwap?: boolean
+    timeoutForQuotes?: number
     token0PermitParams?: ERC20PermitParam
     token1PermitParams?: ERC20PermitParam
     useSubgraph?: boolean
@@ -200,6 +205,7 @@ export const addLiquidity = async ({
     disableSwap = true
   }
   const slippageLimitPercent = options?.slippage ?? 1.0
+  const timeoutForQuotes = options?.timeoutForQuotes ?? 4000 // Default timeout of 4 seconds
 
   const swapParams: {
     inCurrency: `0x${string}`
@@ -284,6 +290,7 @@ export const addLiquidity = async ({
         slippageLimitPercent,
         gasPrice,
         userAddress,
+        timeout: timeoutForQuotes,
       })
 
       swapParams.data = transaction.data
@@ -301,6 +308,7 @@ export const addLiquidity = async ({
         slippageLimitPercent,
         gasPrice,
         userAddress,
+        timeout: timeoutForQuotes,
       })
 
       swapParams.data = transaction.data
