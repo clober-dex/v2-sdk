@@ -468,7 +468,6 @@ test('Add liquidity one side with swap - 1', async () => {
     publicClient,
     walletClient,
   })
-  console.log('result', result)
   const [afterUSDC, afterToken, afterLP] = await Promise.all([
     getTokenBalance({
       publicClient,
