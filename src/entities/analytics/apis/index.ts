@@ -191,12 +191,15 @@ export async function fetchProtocolAnalytics(
     timestamp: item.date,
     activeUsers: Number(item.walletCount),
     firstTimeUsers: Number(item.newWalletCount),
-    transactionTypeCounts: Object.fromEntries(
-      item.transactionTypes.map((transactionType) => [
-        FUNCTION_SIG_MAP[transactionType.type] ?? UNKNOWN,
-        Number(transactionType.txCount),
-      ]),
-    ) as Record<TransactionType, number>,
+    transactionTypeCounts: item.transactionTypes.reduce(
+      (acc, transactionType) => {
+        const key = FUNCTION_SIG_MAP[transactionType.type] ?? UNKNOWN
+        const count = Number(transactionType.txCount)
+        acc[key] = (acc[key] ?? 0) + count
+        return acc
+      },
+      {} as Record<TransactionType, number>,
+    ),
     volume24hUSD: item.tokenDayData.reduce(
       (acc, token) => acc + Number(token.volumeUSD),
       0,
