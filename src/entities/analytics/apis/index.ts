@@ -99,6 +99,7 @@ const FUNCTION_SIG_MAP: Record<string, TransactionType> = {
   '0x0a31b953': 'Remove-Liq',
   '0x7e865aa4': 'Swap',
   '0xb69cbf9f': 'Swap', // swap with min amount out
+  '0x5973bd5e': 'Swap', // swap with fee
   '0xa0f15331': UNKNOWN, // update position
   '0xed56531a': UNKNOWN, // pause
   '0xf4dfd83a': UNKNOWN, // arbitrage
