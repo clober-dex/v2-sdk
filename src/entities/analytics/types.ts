@@ -15,6 +15,7 @@ export type AnalyticsSnapshot = {
   activeUsers: number
   firstTimeUsers: number
   transactionTypeCounts: Record<TransactionType, number>
+  routerCounts: Record<`0x${string}`, number>
 
   volume24hUSD: number
   volume24hUSDMap: Record<`0x${string}`, { currency: Currency; usd: number }>

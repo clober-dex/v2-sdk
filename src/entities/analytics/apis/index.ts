@@ -31,6 +31,10 @@ type CloberDayDataDTO = {
     type: string
     txCount: string
   }[]
+  routerDayData: {
+    router: `0x${string}`
+    txCount: string
+  }[]
   tokenDayData: TokenDayDataDto[]
 }
 
@@ -117,7 +121,7 @@ export async function fetchProtocolAnalytics(
   }>(
     chainId,
     'getDailyCloberSnapshot',
-    'query getDailyCloberSnapshot { cloberDayDatas(first: 1000, orderBy: date, orderDirection: asc) { date walletCount newWalletCount transactionTypes { type txCount } tokenDayData { volumeUSD totalValueLockedUSD protocolFeesUSD token { id name symbol decimals priceUSD } } } }',
+    'query getDailyCloberSnapshot { cloberDayDatas(first: 1000, orderBy: date, orderDirection: asc) { date walletCount newWalletCount transactionTypes { type txCount } routerDayData { router txCount } tokenDayData { volumeUSD totalValueLockedUSD protocolFeesUSD token { id name symbol decimals priceUSD } } } }',
     {},
   )
 
@@ -199,6 +203,14 @@ export async function fetchProtocolAnalytics(
         return acc
       },
       {} as Record<TransactionType, number>,
+    ),
+    routerCounts: item.routerDayData.reduce(
+      (acc, router) => {
+        acc[getAddress(router.router)] =
+          (acc[getAddress(router.router)] ?? 0) + Number(router.txCount)
+        return acc
+      },
+      {} as Record<`0x${string}`, number>,
     ),
     volume24hUSD: item.tokenDayData.reduce(
       (acc, token) => acc + Number(token.volumeUSD),
