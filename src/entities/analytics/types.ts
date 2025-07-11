@@ -48,6 +48,7 @@ export type UserVolumeSnapshot = {
 export type AnalyticsSummary = {
   accumulatedUniqueUsers: number
   accumulatedUniqueTransactions: number
+  accumulatedUniqueSwapTransactions: number
   accumulatedVolumeUSD: number
   accumulatedProtocolFeesUSD: number
   analyticsSnapshots: AnalyticsSnapshot[]
