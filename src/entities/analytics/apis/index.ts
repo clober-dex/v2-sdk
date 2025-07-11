@@ -305,6 +305,12 @@ export async function fetchProtocolAnalytics(
         ),
       0,
     ),
+    accumulatedUniqueSwapTransactions: analyticsSnapshots.reduce(
+      (acc, item) =>
+        acc +
+        Object.values(item.routerCounts).reduce((acc, item) => acc + item, 0),
+      0,
+    ),
     accumulatedVolumeUSD: analyticsSnapshots.reduce(
       (acc, item) => acc + item.volume24hUSD,
       0,
