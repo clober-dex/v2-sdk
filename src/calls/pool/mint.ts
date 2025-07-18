@@ -50,6 +50,7 @@ const getBestQuote = async ({
     gasPrice: bigint,
     userAddress: `0x${string}`,
     timeout: number,
+    estimateGas: boolean,
   ) => Promise<{
     amountOut: bigint
     transaction: Transaction | undefined
@@ -77,6 +78,7 @@ const getBestQuote = async ({
           gasPrice,
           userAddress,
           timeout,
+          false,
         ),
       ),
     )
