@@ -19,5 +19,10 @@ export const getLatestTrades = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  return fetchLatestTrades(publicClient, chainId, n)
+  return fetchLatestTrades(
+    publicClient,
+    chainId,
+    n,
+    !!(options && options.useSubgraph),
+  )
 }

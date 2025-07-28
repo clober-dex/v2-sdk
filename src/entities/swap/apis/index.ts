@@ -27,6 +27,7 @@ export const fetchLatestTrades = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   n: number,
+  useSubgraph: boolean,
 ): Promise<Swap[]> => {
   const {
     data: { swaps },
@@ -49,7 +50,7 @@ export const fetchLatestTrades = async (
     publicClient,
     chainId,
     uniqueTokens,
-    false,
+    useSubgraph,
   )
 
   return swaps.map((swap) => ({
