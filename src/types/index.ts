@@ -16,6 +16,7 @@ export type {
   LastAmounts,
   StrategyPosition,
 } from '../entities/pool/types'
+export type { Swap } from '../entities/swap/types'
 export type {
   DefaultReadContractOptions,
   DefaultWriteContractOptions,

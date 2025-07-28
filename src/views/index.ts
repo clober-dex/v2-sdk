@@ -16,6 +16,7 @@ export {
   getLastAmounts,
   getLpWrappedERC20Address,
 } from './pool'
+export { getLatestTrades } from './trade'
 
 export { getPriceNeighborhood } from './tick'
 export { getOpenOrder, getOpenOrders } from './open-order'

@@ -26,6 +26,7 @@ import {
   getTopUsersByNativeVolume,
   getUserDailyVolumes,
   getUserNativeVolume,
+  getLatestTrades,
 } from '../../src'
 
 test('get latest chart log', async () => {
@@ -189,4 +190,12 @@ test('get user native volume', async () => {
     userAddress: DEV_WALLET,
   })
   expect(userNativeVolume).toBeGreaterThan(0)
+})
+
+test('get latest trades', async () => {
+  const trades = await getLatestTrades({
+    chainId: monadTestnet.id,
+    n: 10,
+  })
+  expect(trades.length).toBe(10)
 })
