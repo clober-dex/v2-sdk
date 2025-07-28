@@ -53,34 +53,41 @@ export const fetchLatestTrades = async (
     useSubgraph,
   )
 
-  return swaps.map((swap) => ({
-    transaction: {
-      data: '' as `0x${string}`,
-      id: swap.transaction.id as `0x${string}`,
-      gas: BigInt(swap.transaction.gasUsed),
-      gasPrice: BigInt(swap.transaction.gasPrice),
-      value: BigInt(swap.transaction.value),
-      to: getAddress(swap.transaction.to),
-      from: getAddress(swap.transaction.from),
-    },
-    timestamp: Number(swap.timestamp),
-    currencyIn: {
-      currency: currencyMap[getAddress(swap.inputToken)],
-      amount: formatUnits(
-        BigInt(swap.inputAmount),
-        currencyMap[getAddress(swap.inputToken)].decimals,
-      ),
-      direction: 'in',
-    },
-    currencyOut: {
-      currency: currencyMap[getAddress(swap.outputToken)],
-      amount: formatUnits(
-        BigInt(swap.outputAmount),
-        currencyMap[getAddress(swap.outputToken)].decimals,
-      ),
-      direction: 'out',
-    },
-    amountUSD: Number(swap.amountUSD),
-    router: getAddress(swap.router),
-  }))
+  return swaps
+    .map((swap) => {
+      return currencyMap[getAddress(swap.inputToken)] &&
+        currencyMap[getAddress(swap.outputToken)]
+        ? {
+            transaction: {
+              data: '' as `0x${string}`,
+              id: swap.transaction.id as `0x${string}`,
+              gas: BigInt(swap.transaction.gasUsed),
+              gasPrice: BigInt(swap.transaction.gasPrice),
+              value: BigInt(swap.transaction.value),
+              to: getAddress(swap.transaction.to),
+              from: getAddress(swap.transaction.from),
+            },
+            timestamp: Number(swap.timestamp),
+            currencyIn: {
+              currency: currencyMap[getAddress(swap.inputToken)],
+              amount: formatUnits(
+                BigInt(swap.inputAmount),
+                currencyMap[getAddress(swap.inputToken)].decimals,
+              ),
+              direction: 'in',
+            },
+            currencyOut: {
+              currency: currencyMap[getAddress(swap.outputToken)],
+              amount: formatUnits(
+                BigInt(swap.outputAmount),
+                currencyMap[getAddress(swap.outputToken)].decimals,
+              ),
+              direction: 'out',
+            },
+            amountUSD: Number(swap.amountUSD),
+            router: getAddress(swap.router),
+          }
+        : null
+    })
+    .filter((swap): swap is any => swap !== null) as Swap[]
 }
