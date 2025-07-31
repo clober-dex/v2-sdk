@@ -1,8 +1,8 @@
 import { parseEventLogs, TransactionReceipt } from 'viem'
 
-import { Market } from '../../../dist/types'
 import { BOOK_MANAGER_ABI } from '../../constants/abis/core/book-manager-abi'
 import { toOrderId } from '../../entities/open-order/utils/order-id'
+import { Market } from '../../entities/market/types'
 
 export const parseMakeOrderIdsFromReceipt = ({
   market,

@@ -11,9 +11,8 @@ import {
 } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
-import { DefaultWriteContractOptions } from '../../types'
+import { DefaultWriteContractOptions, Market, Transaction } from '../../types'
 import { fetchMarket } from '../../entities/market/apis'
-import { Market, Transaction } from '../../../dist/types'
 import {
   getContractAddresses,
   getOpenOrders,
