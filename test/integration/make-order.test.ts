@@ -1,5 +1,9 @@
 import { expect, test } from 'vitest'
-import { getMarket, placeMarketMakingQuotes } from '@clober/v2-sdk'
+import {
+  getMarket,
+  placeMarketMakingQuotes,
+  parseMakeOrderIdsFromReceipt,
+} from '@clober/v2-sdk'
 
 import { setUp } from '../setup'
 import { MOCK_USDC } from '../utils/constants'
@@ -55,7 +59,7 @@ test('make batch orders', async () => {
       }),
     ])
   expect(beforeMarket.bids.length).toEqual(0)
-  await waitForTransaction({
+  const transactionReceipt = await waitForTransaction({
     transaction,
     publicClient,
     walletClient,
@@ -115,4 +119,11 @@ test('make batch orders', async () => {
       baseAmount: '1.20036',
     },
   ])
+
+  const { bidOrderIds, askOrderIds } = parseMakeOrderIdsFromReceipt({
+    transactionReceipt,
+    market: afterMarket,
+  })
+  expect(bidOrderIds.length).toEqual(2)
+  expect(askOrderIds.length).toEqual(2)
 })
