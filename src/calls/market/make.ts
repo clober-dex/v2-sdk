@@ -6,6 +6,7 @@ import {
   isAddress,
   isAddressEqual,
   parseUnits,
+  TransactionReceipt,
   zeroAddress,
   zeroHash,
 } from 'viem'
@@ -14,7 +15,11 @@ import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import { DefaultWriteContractOptions } from '../../types'
 import { fetchMarket } from '../../entities/market/apis'
 import { Market, Transaction } from '../../../dist/types'
-import { getContractAddresses, getPriceNeighborhood } from '../../views'
+import {
+  getContractAddresses,
+  getOpenOrders,
+  getPriceNeighborhood,
+} from '../../views'
 import { CONTROLLER_ABI } from '../../constants/abis/core/controller-abi'
 import {
   CANCEL_ORDER_PARAMS_ABI,
@@ -39,8 +44,7 @@ export const placeMarketMakingQuotes = async ({
   quotes,
   token0,
   token1,
-  orderIdsToClaim,
-  orderIdsToCancel,
+  clearOpenOrders,
   options,
 }: {
   chainId: CHAIN_IDS
@@ -51,16 +55,32 @@ export const placeMarketMakingQuotes = async ({
   }
   token0: `0x${string}`
   token1: `0x${string}`
-  orderIdsToClaim: string[]
-  orderIdsToCancel: string[]
+  clearOpenOrders?: boolean
   options?: {
     market?: Market
     roundingUpMakeBid?: boolean
     roundingDownMakeAsk?: boolean
     useSubgraph?: boolean
     provider?: `0x${string}`
+    orderIdsToClaim: string[]
+    orderIdsToCancel: string[]
   } & DefaultWriteContractOptions
 }): Promise<Transaction> => {
+  let orderIdsToClaim = options?.orderIdsToClaim || []
+  let orderIdsToCancel = options?.orderIdsToCancel || []
+  if (clearOpenOrders) {
+    const openOrders = await getOpenOrders({
+      chainId,
+      userAddress,
+    })
+    orderIdsToClaim = openOrders
+      .filter(({ claimable }) => Number(claimable.value) > 0)
+      .map((order) => order.id)
+    orderIdsToCancel = openOrders
+      .filter(({ cancelable }) => Number(cancelable.value) > 0)
+      .map((order) => order.id)
+  }
+
   const [roundingUpMakeBid, roundingDownMakeAsk] = [
     options?.roundingUpMakeBid ? options.roundingUpMakeBid : false,
     options?.roundingDownMakeAsk ? options.roundingDownMakeAsk : false,
@@ -211,4 +231,14 @@ export const placeMarketMakingQuotes = async ({
   } as any
 
   return buildTransaction(publicClient, args, options?.gasLimit)
+}
+
+export const parseMakeOrderIdsFromReceipt = ({
+  market,
+  transactionReceipt,
+}: {
+  market: Market
+  transactionReceipt: TransactionReceipt
+}) => {
+  return null
 }

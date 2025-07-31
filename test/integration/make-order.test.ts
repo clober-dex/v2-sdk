@@ -24,12 +24,12 @@ test('make batch orders', async () => {
         { price: '1000', amount: '1500' },
       ],
     },
-    orderIdsToClaim: [],
-    orderIdsToCancel: [],
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
       gas: 3000000n,
+      orderIdsToClaim: [],
+      orderIdsToCancel: [],
     },
   })
   const [beforeUSDCBalance, beforeTokenBalance, beforeMarket] =
