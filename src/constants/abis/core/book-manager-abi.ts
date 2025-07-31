@@ -105,4 +105,32 @@ export const BOOK_MANAGER_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
+  {
+    type: 'event',
+    name: 'Make',
+    inputs: [
+      {
+        name: 'bookId',
+        type: 'uint192',
+        indexed: true,
+        internalType: 'BookId',
+      },
+      { name: 'user', type: 'address', indexed: true, internalType: 'address' },
+      { name: 'tick', type: 'int24', indexed: false, internalType: 'Tick' },
+      {
+        name: 'orderIndex',
+        type: 'uint256',
+        indexed: false,
+        internalType: 'uint256',
+      },
+      { name: 'unit', type: 'uint64', indexed: false, internalType: 'uint64' },
+      {
+        name: 'provider',
+        type: 'address',
+        indexed: false,
+        internalType: 'address',
+      },
+    ],
+    anonymous: false,
+  },
 ] as const

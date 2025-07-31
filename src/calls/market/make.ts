@@ -6,7 +6,6 @@ import {
   isAddress,
   isAddressEqual,
   parseUnits,
-  TransactionReceipt,
   zeroAddress,
   zeroHash,
 } from 'viem'
@@ -231,14 +230,4 @@ export const placeMarketMakingQuotes = async ({
   } as any
 
   return buildTransaction(publicClient, args, options?.gasLimit)
-}
-
-export const parseMakeOrderIdsFromReceipt = ({
-  market,
-  transactionReceipt,
-}: {
-  market: Market
-  transactionReceipt: TransactionReceipt
-}) => {
-  return null
 }
