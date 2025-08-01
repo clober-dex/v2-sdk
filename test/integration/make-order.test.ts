@@ -16,8 +16,8 @@ test('make batch orders', async () => {
   const transaction = await placeMarketMakingQuotes({
     chainId: publicClient.chain.id,
     userAddress: walletClient.account.address,
-    token0: MOCK_USDC,
-    token1: tokenAddress,
+    baseToken: tokenAddress,
+    quoteToken: MOCK_USDC,
     quotes: {
       ask: [
         { price: '4000', amount: '1.2' },

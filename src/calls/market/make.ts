@@ -17,6 +17,7 @@ import {
   getContractAddresses,
   getOpenOrders,
   getPriceNeighborhood,
+  getQuoteToken,
 } from '../../views'
 import { CONTROLLER_ABI } from '../../constants/abis/core/controller-abi'
 import {
@@ -40,8 +41,8 @@ export const placeMarketMakingQuotes = async ({
   chainId,
   userAddress,
   quotes,
-  token0,
-  token1,
+  baseToken,
+  quoteToken,
   clearOpenOrders,
   options,
 }: {
@@ -51,8 +52,8 @@ export const placeMarketMakingQuotes = async ({
     bid: { price: string; amount: string }[]
     ask: { price: string; amount: string }[]
   }
-  token0: `0x${string}`
-  token1: `0x${string}`
+  baseToken: `0x${string}`
+  quoteToken: `0x${string}`
   clearOpenOrders?: boolean
   options?: {
     market?: Market
@@ -93,12 +94,23 @@ export const placeMarketMakingQuotes = async ({
         await fetchMarket(
           publicClient,
           chainId,
-          [token0, token1],
+          [baseToken, quoteToken],
           !!(options && options.useSubgraph),
         )
       ).toJson()
 
-  if (!market.bidBook.isOpened) {
+  if (
+    !isAddressEqual(
+      quoteToken,
+      getQuoteToken({ chainId, token0: baseToken, token1: quoteToken }),
+    )
+  ) {
+    throw new Error(
+      `Invalid market: The quote token ${quoteToken} does not match the base token ${baseToken}. Please check the market configuration.`,
+    )
+  }
+
+  if (!market.bidBook.isOpened && quotes.bid.length > 0) {
     throw new Error(`
        Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
@@ -111,7 +123,7 @@ export const placeMarketMakingQuotes = async ({
     `)
   }
 
-  if (!market.askBook.isOpened) {
+  if (!market.askBook.isOpened && quotes.ask.length > 0) {
     throw new Error(`
        Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
