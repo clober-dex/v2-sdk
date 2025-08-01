@@ -41,7 +41,8 @@ export enum Action {
 export const placeMarketMakingQuotes = async ({
   chainId,
   userAddress,
-  quotes,
+  bidQuotes,
+  askQuotes,
   baseToken,
   quoteToken,
   clearOpenOrders,
@@ -49,10 +50,8 @@ export const placeMarketMakingQuotes = async ({
 }: {
   chainId: CHAIN_IDS
   userAddress: `0x${string}`
-  quotes: {
-    bid: { price: string; amount: string }[]
-    ask: { price: string; amount: string }[]
-  }
+  bidQuotes: { price: string; amount: string }[]
+  askQuotes: { price: string; amount: string }[]
   baseToken: `0x${string}`
   quoteToken: `0x${string}`
   clearOpenOrders?: boolean
@@ -111,7 +110,7 @@ export const placeMarketMakingQuotes = async ({
     )
   }
 
-  if (!market.bidBook.isOpened && quotes.bid.length > 0) {
+  if (!market.bidBook.isOpened && bidQuotes.length > 0) {
     throw new Error(`
        Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
@@ -124,7 +123,7 @@ export const placeMarketMakingQuotes = async ({
     `)
   }
 
-  if (!market.askBook.isOpened && quotes.ask.length > 0) {
+  if (!market.askBook.isOpened && askQuotes.length > 0) {
     throw new Error(`
        Open the market before placing a limit order.
        import { openMarket } from '@clober/v2-sdk'
@@ -142,7 +141,7 @@ export const placeMarketMakingQuotes = async ({
       ? getAddress(options.provider)
       : zeroAddress
 
-  const bidMakeParams = quotes.bid.map((quote) => {
+  const bidMakeParams = bidQuotes.map((quote) => {
     const {
       normal: {
         now: { tick: bidTick },
@@ -162,7 +161,7 @@ export const placeMarketMakingQuotes = async ({
       isNative: isAddressEqual(market.quote.address, zeroAddress),
     }
   })
-  const askMakeParams = quotes.ask.map((quote) => {
+  const askMakeParams = askQuotes.map((quote) => {
     const {
       inverted: {
         now: { tick: askTick },

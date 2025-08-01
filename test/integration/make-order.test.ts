@@ -18,16 +18,14 @@ test('make batch orders', async () => {
     userAddress: walletClient.account.address,
     baseToken: tokenAddress,
     quoteToken: MOCK_USDC,
-    quotes: {
-      ask: [
-        { price: '4000', amount: '1.2' },
-        { price: '3000', amount: '1.1' },
-      ],
-      bid: [
-        { price: '2000', amount: '3000' },
-        { price: '1000', amount: '1500' },
-      ],
-    },
+    bidQuotes: [
+      { price: '2000', amount: '3000' },
+      { price: '1000', amount: '1500' },
+    ],
+    askQuotes: [
+      { price: '4000', amount: '1.2' },
+      { price: '3000', amount: '1.1' },
+    ],
     options: {
       rpcUrl: publicClient.transport.url!,
       useSubgraph: false,
