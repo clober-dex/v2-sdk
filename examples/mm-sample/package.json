@@ -1,0 +1,14 @@
+{
+  "name": "mm-sample",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@clober/v2-sdk": "^1.0.0-rc.58"
+  }
+}
