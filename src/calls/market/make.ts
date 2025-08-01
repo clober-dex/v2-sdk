@@ -26,6 +26,7 @@ import {
   MAKE_ORDER_PARAMS_ABI,
 } from '../../constants/abis/core/params-abi'
 import { buildTransaction } from '../../utils/build-transaction'
+import { getDeadlineTimestampInSeconds } from '../../utils/time'
 
 export enum Action {
   OPEN,
@@ -233,7 +234,7 @@ export const placeMarketMakingQuotes = async ({
       ),
       [],
       [],
-      2n ** 64n - 1n,
+      getDeadlineTimestampInSeconds(),
     ],
     value: [...bidMakeParams, ...askMakeParams]
       .filter((p) => p.isNative)
