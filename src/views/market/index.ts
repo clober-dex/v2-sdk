@@ -8,6 +8,7 @@ export { getExpectedOutput, getExpectedInput } from './quote'
 export { getChartLogs, getLatestChartLog } from './chart-log'
 export { getMarketSnapshots, getMarketSnapshot } from './snapshot'
 export { getQuoteToken } from './token'
+export { parseMakeOrderIdsFromReceipt } from './parse'
 
 /**
  * Get market information by chain id and token addresses

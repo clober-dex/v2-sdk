@@ -1,4 +1,5 @@
 export { openMarket } from './market/open'
+export { placeMarketMakingQuotes } from './market/make'
 export { limitOrder } from './market/limit'
 export { marketOrder } from './market/market'
 export { claimOrder, claimOrders } from './market/claim'

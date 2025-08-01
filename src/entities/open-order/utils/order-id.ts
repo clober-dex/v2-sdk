@@ -12,3 +12,12 @@ export const fromOrderId = (
     index: orderId & (2n ** 40n - 1n),
   }
 }
+
+export const toOrderId = (
+  bookId: bigint,
+  tick: bigint,
+  orderIndex: bigint,
+): bigint => {
+  const tickU24 = tick & (2n ** 24n - 1n)
+  return orderIndex + (tickU24 << 40n) + (bookId << 64n)
+}
