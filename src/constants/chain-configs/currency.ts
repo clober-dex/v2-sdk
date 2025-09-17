@@ -24,6 +24,7 @@ export const NATIVE_CURRENCY: {
     decimals: 18,
   },
   [CHAIN_IDS.RISE_SEPOLIA]: ETH,
+  [CHAIN_IDS.GIWA_SEPOLIA]: ETH,
   [CHAIN_IDS.MONAD_TESTNET]: {
     address: zeroAddress,
     name: 'Monad Token',
@@ -61,6 +62,12 @@ export const REFERENCE_CURRENCY: {
     name: 'Wrapped Ether',
     decimals: 18,
   },
+  [CHAIN_IDS.GIWA_SEPOLIA]: {
+    address: getAddress('0x4200000000000000000000000000000000000006'), // Mock WETH
+    symbol: 'WETH',
+    name: 'Wrapped Ether',
+    decimals: 18,
+  },
   [CHAIN_IDS.MONAD_TESTNET]: {
     address: getAddress('0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701'), // WMON
     symbol: 'WMON',
@@ -78,6 +85,7 @@ export const NATIVE_CURRENCY_TOTAL_SUPPLY: {
   // [CHAIN_IDS.BASE]: ETH,
   [CHAIN_IDS.BERACHAIN_MAINNET]: 502000000000000000000000000n,
   [CHAIN_IDS.RISE_SEPOLIA]: 120000000000000000000000000n,
+  [CHAIN_IDS.GIWA_SEPOLIA]: 120000000000000000000000000n,
   [CHAIN_IDS.MONAD_TESTNET]: 10000000000000000000000000000n,
   // [CHAIN_IDS.SONIC_MAINNET]: S,
 }
@@ -153,6 +161,14 @@ export const STABLE_COINS: {
       address: getAddress('0x8A93d247134d91e0de6f96547cB0204e5BE8e5D8'),
       name: 'USD Coin',
       symbol: 'USDC',
+      decimals: 6,
+    },
+  ],
+  [CHAIN_IDS.GIWA_SEPOLIA]: [
+    {
+      address: getAddress('0x5C91A02B8B5D10597fc6cA23faF56F9718D1feD0'),
+      name: 'GiwaDex USD',
+      symbol: 'GUSD',
       decimals: 6,
     },
   ],
