@@ -92,4 +92,16 @@ export const CONTRACT_ADDRESSES: {
       '0x0000000000000000000000000000000000000000',
     ),
   },
+  [CHAIN_IDS.GIWA_SEPOLIA]: {
+    Controller: getAddress('0x43D614B1bA4bA469fAEAa4557AEAFdec039b8795'),
+    BookManager: getAddress('0xBe84BD49aAf710Cc11FA9675c79D107af8552f17'),
+    BookViewer: getAddress('0x474fb05A287f4BF3aE6A728FEC5E70967B3A04dC'),
+    Rebalancer: getAddress('0x9C6C405cbB2c1DC7aAAa65156744fC00efc7EC82'),
+    Strategy: getAddress('0x253F7b745d69eAAAe60b60153850070C572b4daA'),
+    Minter: getAddress('0x6563188ADfBa863B42B50d010ed0fCD09fBDcD59'),
+    Operator: getAddress('0x5a5E58992AadA8770d3220f0af7c39c8476f7A1d'),
+    Wrapped6909Factory: getAddress(
+      '0x0000000000000000000000000000000000000000',
+    ),
+  },
 }

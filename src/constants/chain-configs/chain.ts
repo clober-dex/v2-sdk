@@ -7,6 +7,7 @@ import {
 
 import { cloberTestChain } from '../networks/test-chain'
 import { riseSepolia } from '../networks/rise-sepolia'
+import { giwaSepolia } from '../networks/giwa-sepolia'
 
 // follow the https://docs.alchemy.com/reference/supported-subgraph-chains
 export enum CHAIN_IDS {
@@ -17,6 +18,7 @@ export enum CHAIN_IDS {
   MONAD_TESTNET = monadTestnet.id,
   // SONIC_MAINNET = sonic.id,
   RISE_SEPOLIA = riseSepolia.id,
+  GIWA_SEPOLIA = giwaSepolia.id,
 }
 
 export const CHAIN_MAP: {
@@ -29,4 +31,5 @@ export const CHAIN_MAP: {
   [CHAIN_IDS.MONAD_TESTNET]: monadTestnet,
   // [CHAIN_IDS.SONIC_MAINNET]: sonic,
   [CHAIN_IDS.RISE_SEPOLIA]: riseSepolia,
+  [CHAIN_IDS.GIWA_SEPOLIA]: giwaSepolia,
 }
