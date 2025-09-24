@@ -166,9 +166,15 @@ export const STABLE_COINS: {
   ],
   [CHAIN_IDS.GIWA_SEPOLIA]: [
     {
-      address: getAddress('0x5C91A02B8B5D10597fc6cA23faF56F9718D1feD0'),
+      address: getAddress('0x0Cd2C356be90864F4a5e0551E79dd039b246FaCA'),
       name: 'GiwaDex USD',
-      symbol: 'GUSD',
+      symbol: 'USDG',
+      decimals: 6,
+    },
+    {
+      address: getAddress('0xD031A3C56eD35EFE5F7e5269B088F8C3a2c9d463'),
+      name: 'GiwaDex KRW',
+      symbol: 'KRWG',
       decimals: 6,
     },
   ],
