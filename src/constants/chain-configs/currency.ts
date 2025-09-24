@@ -171,12 +171,6 @@ export const STABLE_COINS: {
       symbol: 'USDG',
       decimals: 6,
     },
-    {
-      address: getAddress('0xD031A3C56eD35EFE5F7e5269B088F8C3a2c9d463'),
-      name: 'GiwaDex KRW',
-      symbol: 'KRWG',
-      decimals: 6,
-    },
   ],
   [CHAIN_IDS.MONAD_TESTNET]: [
     {
