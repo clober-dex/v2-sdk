@@ -20,11 +20,22 @@ export const getMarketId = (
   tokenAddresses = tokenAddresses.map((address) => getAddress(address)).sort()
 
   // include stable coin
-  const stable = tokenAddresses.find((address) => {
-    return STABLE_COINS[chainId]!.map(({ address }) =>
-      getAddress(address),
-    ).some((addresses) => addresses.includes(address))
-  })
+  const stable = STABLE_COINS[chainId]!.slice()
+    .sort((a, b) => {
+      if (a.priority !== undefined && b.priority !== undefined) {
+        return a.priority - b.priority
+      } else if (a.priority !== undefined) {
+        return -1
+      } else if (b.priority !== undefined) {
+        return 1
+      }
+      return a.address.localeCompare(b.address)
+    })
+    .map(({ address }) => getAddress(address))
+    .find((stableAddr) =>
+      tokenAddresses.some((addr) => isAddressEqual(addr, stableAddr)),
+    )
+
   if (stable) {
     const other = tokenAddresses.find(
       (address) => !isAddressEqual(address, stable),
