@@ -64,7 +64,12 @@ export const getStableCurrencies = ({
 }: {
   chainId: CHAIN_IDS
 }): Currency[] => {
-  return STABLE_COINS[chainId]
+  return STABLE_COINS[chainId].map((coin) => ({
+    address: coin.address,
+    name: coin.name,
+    symbol: coin.symbol,
+    decimals: coin.decimals,
+  }))
 }
 
 export const getLatestPriceMap = async ({

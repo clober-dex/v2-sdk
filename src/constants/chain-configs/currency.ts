@@ -93,7 +93,7 @@ export const NATIVE_CURRENCY_TOTAL_SUPPLY: {
 // @dev: https://defillama.com/stablecoins
 // order by total circulating supply (over $40M)
 export const STABLE_COINS: {
-  [chain in CHAIN_IDS]: Currency[]
+  [chain in CHAIN_IDS]: (Currency & { priority?: number })[]
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: [
     {
@@ -166,10 +166,18 @@ export const STABLE_COINS: {
   ],
   [CHAIN_IDS.GIWA_SEPOLIA]: [
     {
+      address: getAddress('0xD031A3C56eD35EFE5F7e5269B088F8C3a2c9d463'),
+      name: 'GiwaDex KRW',
+      symbol: 'KRWG',
+      decimals: 6,
+      priority: 1,
+    },
+    {
       address: getAddress('0x0Cd2C356be90864F4a5e0551E79dd039b246FaCA'),
       name: 'GiwaDex USD',
       symbol: 'USDG',
       decimals: 6,
+      priority: 2,
     },
   ],
   [CHAIN_IDS.MONAD_TESTNET]: [
