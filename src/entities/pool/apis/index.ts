@@ -1,4 +1,4 @@
-import { getAddress, PublicClient } from 'viem'
+import { getAddress, PublicClient, zeroAddress } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { CONTRACT_ADDRESSES } from '../../../constants/chain-configs/addresses'
@@ -32,13 +32,17 @@ export async function fetchPool(
     salt,
   )
   const [
-    { bookIdA, bookIdB, reserveA, reserveB, orderListA, orderListB },
-    totalSupply,
-    [totalLiquidityA, totalLiquidityB],
-    paused,
-    wrapped6909Address,
-  ] = await publicClient.multicall({
-    allowFailure: false,
+    {
+      result: { bookIdA, bookIdB, reserveA, reserveB, orderListA, orderListB },
+    },
+    { result: totalSupply },
+    {
+      result: [totalLiquidityA, totalLiquidityB],
+    },
+    { result: paused },
+    { result: wrapped6909Address },
+  ] = (await publicClient.multicall({
+    allowFailure: true,
     contracts: [
       {
         address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,
@@ -71,7 +75,7 @@ export async function fetchPool(
         args: [CONTRACT_ADDRESSES[chainId]!.Rebalancer, BigInt(poolKey)],
       },
     ],
-  })
+  })) as any
   const liquidityA =
     totalLiquidityA.reserve +
     totalLiquidityA.cancelable +
@@ -87,7 +91,9 @@ export async function fetchPool(
     bookIdA,
     bookIdB,
     poolKey,
-    wrappedTokenAddress: getAddress(wrapped6909Address),
+    wrappedTokenAddress: wrapped6909Address
+      ? getAddress(wrapped6909Address as `0x${string}`)
+      : zeroAddress,
     salt,
     totalSupply: BigInt(totalSupply),
     decimals: 18,
