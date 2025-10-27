@@ -19,6 +19,8 @@ export const SUBGRAPH_URL: {
     'https://subgraph.giwadex.io/subgraphs/name/v2-subgraph-giwa-sepolia',
   [CHAIN_IDS.MONAD_TESTNET]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-monad-testnet/latest/gn',
+  [CHAIN_IDS.MONAD_MAINNET]:
+    'https://subgraph.clober.io/subgraphs/name/v2-subgraph-monad-mainnet',
   // [CHAIN_IDS.SONIC_MAINNET]:
   //   'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-sonic-mainnet/api',
 }
