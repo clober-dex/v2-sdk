@@ -15,7 +15,6 @@ export type OnChainOpenOrder = {
 }
 
 export type OpenOrder = OnChainOpenOrder & {
-  txHash: `0x${string}`
   createdAt: number
   amount: CurrencyAmount
   filled: CurrencyAmount
