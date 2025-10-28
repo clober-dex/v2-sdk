@@ -31,6 +31,12 @@ export const NATIVE_CURRENCY: {
     symbol: 'MON',
     decimals: 18,
   },
+  [CHAIN_IDS.MONAD_MAINNET]: {
+    address: zeroAddress,
+    name: 'Monad Token',
+    symbol: 'MON',
+    decimals: 18,
+  },
   // [CHAIN_IDS.SONIC_MAINNET]: S,
 }
 
@@ -74,6 +80,12 @@ export const REFERENCE_CURRENCY: {
     name: 'Wrapped Monad',
     decimals: 18,
   },
+  [CHAIN_IDS.MONAD_MAINNET]: {
+    address: getAddress('0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A'), // WMON
+    symbol: 'WMON',
+    name: 'Wrapped Monad',
+    decimals: 18,
+  },
   // [CHAIN_IDS.SONIC_MAINNET]: '0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38', // wS
 }
 
@@ -87,6 +99,7 @@ export const NATIVE_CURRENCY_TOTAL_SUPPLY: {
   [CHAIN_IDS.RISE_SEPOLIA]: 120000000000000000000000000n,
   [CHAIN_IDS.GIWA_SEPOLIA]: 120000000000000000000000000n,
   [CHAIN_IDS.MONAD_TESTNET]: 10000000000000000000000000000n,
+  [CHAIN_IDS.MONAD_MAINNET]: 10000000000000000000000000000n,
   // [CHAIN_IDS.SONIC_MAINNET]: S,
 }
 
@@ -197,6 +210,14 @@ export const STABLE_COINS: {
       address: getAddress('0x88b8E2161DEDC77EF4ab7585569D2415a1C1055D'),
       name: 'Tether USD',
       symbol: 'USDT',
+      decimals: 6,
+    },
+  ],
+  [CHAIN_IDS.MONAD_MAINNET]: [
+    {
+      address: getAddress('0x754704Bc059F8C67012fEd69BC8A327a5aafb603'),
+      name: 'USD Coin',
+      symbol: 'USDC',
       decimals: 6,
     },
   ],
