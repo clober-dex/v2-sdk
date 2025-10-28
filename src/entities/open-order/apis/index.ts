@@ -48,9 +48,6 @@ type OpenOrderDto = {
     unitSize: string
   }
   tick: string
-  transaction: {
-    id: string
-  }
   timestamp: string
   unitAmount: string
   filledUnitAmount: string
@@ -108,7 +105,6 @@ const toOpenOrder = (
     isBid,
     inputCurrency,
     outputCurrency,
-    txHash: openOrder.transaction.id as `0x${string}`,
     createdAt: Number(openOrder.timestamp),
     price: formatPrice(
       toPrice(isBid ? tick : invertTick(tick)),

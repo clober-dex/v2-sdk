@@ -1,5 +1,4 @@
 import { expect, test } from 'vitest'
-import { arbitrumSepolia, monadTestnet } from 'viem/chains'
 import { zeroAddress } from 'viem'
 
 import { DEV_WALLET, MOCK_USDC } from '../utils/constants'
@@ -26,12 +25,11 @@ import {
   getTopUsersByNativeVolume,
   getUserDailyVolumes,
   getUserNativeVolume,
-  getLatestTrades,
 } from '../../src'
 
 test('get latest chart log', async () => {
   const latestLog = await getLatestChartLog({
-    chainId: arbitrumSepolia.id,
+    chainId: 143,
     quote: MOCK_USDC,
     base: zeroAddress,
   })
@@ -40,7 +38,7 @@ test('get latest chart log', async () => {
 
 test('get chart logs', async () => {
   const chartLogs = await getChartLogs({
-    chainId: arbitrumSepolia.id,
+    chainId: 143,
     quote: MOCK_USDC,
     base: zeroAddress,
     from: 1687305600,
@@ -53,21 +51,21 @@ test('get chart logs', async () => {
 
 test('get subgraph endpoint', async () => {
   const endpoint = await getSubgraphEndpoint({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
   expect(endpoint).toBeDefined()
 })
 
 test('get subgraph block number', async () => {
   const blockNumber = await getSubgraphBlockNumber({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
   expect(Number(blockNumber)).toBeGreaterThan(0)
 })
 
 test('get subgraph block', async () => {
   const block = await getSubgraphBlock({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
   expect(Number(block.blockNumber)).toBeGreaterThan(0)
   expect(Number(block.timestamp)).toBeGreaterThan(0)
@@ -75,11 +73,11 @@ test('get subgraph block', async () => {
 
 test('get market snapshot', async () => {
   const marketSnapshots = await getMarketSnapshots({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
 
   const marketSnapshot = await getMarketSnapshot({
-    chainId: monadTestnet.id,
+    chainId: 143,
     token0: marketSnapshots[0].base.address,
     token1: marketSnapshots[0].quote.address,
   })
@@ -90,27 +88,27 @@ test('get market snapshot', async () => {
 
 test('get pool snapshot', async () => {
   const poolSnapshots = await getPoolSnapshots({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
 
   const poolSnapshot = await getPoolSnapshot({
-    chainId: monadTestnet.id,
+    chainId: 143,
     poolKey: poolSnapshots[0].key,
   })
 
   expect(poolSnapshots.length).toBeGreaterThan(0)
   expect(poolSnapshot.key).toBe(poolSnapshots[0].key)
-  expect(poolSnapshot.chainId).toBe(monadTestnet.id)
+  expect(poolSnapshot.chainId).toBe(143)
 })
 
 test('get open order', async () => {
   const openOrders = await getOpenOrders({
-    chainId: arbitrumSepolia.id,
+    chainId: 143,
     userAddress: DEV_WALLET,
   })
 
   const openOrder = await getOpenOrder({
-    chainId: arbitrumSepolia.id,
+    chainId: 143,
     id: openOrders[0].id,
   })
 
@@ -121,42 +119,42 @@ test('get open order', async () => {
 
 test('get native currency', async () => {
   const nativeCurrency = await getNativeCurrency({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
   expect(nativeCurrency).toBeDefined()
 })
 
 test('get reference currency', async () => {
   const referenceCurrency = await getReferenceCurrency({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
   expect(referenceCurrency).toBeDefined()
 })
 
 test('get currencies', async () => {
   const currencies = await getCurrencies({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
   expect(currencies.length).toBeGreaterThan(0)
 })
 
 test('get stable currencies', async () => {
   const stableCurrencies = getStableCurrencies({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
   expect(stableCurrencies.length).toBeGreaterThan(0)
 })
 
 test('get latest price map', async () => {
   const latestPriceMap = await getLatestPriceMap({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
   expect(Object.keys(latestPriceMap).length).toBeGreaterThan(0)
 })
 
 test('get daily close price map', async () => {
   const dailyClosePriceMap = await getDailyClosePriceMap({
-    chainId: monadTestnet.id,
+    chainId: 143,
     timestampInSeconds: Math.floor(Date.now() / 1000),
   })
   expect(Object.keys(dailyClosePriceMap).length).toBeGreaterThan(0)
@@ -164,14 +162,14 @@ test('get daily close price map', async () => {
 
 test('get protocol analytics', async () => {
   const analyticsSummary = await getProtocolAnalytics({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
   expect(analyticsSummary.analyticsSnapshots.length).toBeGreaterThan(0)
 })
 
 test('get user daily volumes', async () => {
   const userVolumeSnapshots = await getUserDailyVolumes({
-    chainId: monadTestnet.id,
+    chainId: 143,
     userAddress: DEV_WALLET,
   })
   expect(userVolumeSnapshots.length).toBeGreaterThan(0)
@@ -179,14 +177,14 @@ test('get user daily volumes', async () => {
 
 test('get top users by native volume', async () => {
   const topUsers = await getTopUsersByNativeVolume({
-    chainId: monadTestnet.id,
+    chainId: 143,
   })
   expect(topUsers.length).toBeGreaterThan(0)
 })
 
 test('get user native volume', async () => {
   const userNativeVolume = await getUserNativeVolume({
-    chainId: monadTestnet.id,
+    chainId: 143,
     userAddress: DEV_WALLET,
   })
   expect(userNativeVolume).toBeGreaterThan(0)
