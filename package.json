@@ -1,6 +1,6 @@
 {
   "name": "@clober/v2-sdk",
-  "version": "1.0.0-rc.66",
+  "version": "1.0.0",
   "description": "🛠 An SDK for building applications on top of Clober V2",
   "files": [
     "dist"
@@ -43,6 +43,6 @@
   "dependencies": {
     "axios": "^1.7.7",
     "bignumber.js": "^9.1.2",
-    "viem": "^2.23.12"
+    "viem": "^2.40.0"
   }
 }

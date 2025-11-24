@@ -209,7 +209,7 @@ export async function fetchOpenOrderByOrderIdFromSubgraph(
   }>(
     chainId,
     'getOpenOrder',
-    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id owner book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick transaction { id } timestamp unitAmount filledUnitAmount claimedUnitAmount claimableUnitAmount orderIndex } }',
+    'query getOpenOrder($orderId: ID!) { openOrder(id: $orderId) { id owner book { id base { id name symbol decimals } quote { id name symbol decimals } unitSize } tick timestamp unitAmount filledUnitAmount claimedUnitAmount claimableUnitAmount orderIndex } }',
     {
       orderId,
     },
