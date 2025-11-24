@@ -80,7 +80,7 @@ export const CONTRACT_ADDRESSES: {
     Minter: getAddress('0xb1251BF43Bb7De76DE7e6CE7B64aF843dfc9d242'),
     Operator: getAddress('0xCBd3C0B81A9a36356a3669A7f60A0d2F0846195B'),
     Wrapped6909Factory: getAddress(
-      '0x0000000000000000000000000000000000000000',
+      '0x9050b0A12D92b8ba7369ecc87BcD04643Fa0CfDB',
     ),
   },
   // [CHAIN_IDS.SONIC_MAINNET]: {
