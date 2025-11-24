@@ -3,12 +3,12 @@ import {
   berachain,
   type Chain,
   monadTestnet,
+  monad,
 } from 'viem/chains'
 
 import { cloberTestChain } from '../networks/test-chain'
 import { riseSepolia } from '../networks/rise-sepolia'
 import { giwaSepolia } from '../networks/giwa-sepolia'
-import { monad } from '../networks/monad-mainnet'
 
 // follow the https://docs.alchemy.com/reference/supported-subgraph-chains
 export enum CHAIN_IDS {
