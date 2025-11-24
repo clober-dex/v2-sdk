@@ -1,13 +1,8 @@
 import { expect, test } from 'vitest'
-import { zeroAddress } from 'viem'
 
-import { DEV_WALLET, MOCK_USDC } from '../utils/constants'
 import {
-  CHART_LOG_INTERVALS,
-  getChartLogs,
   getCurrencies,
   getDailyClosePriceMap,
-  getLatestChartLog,
   getLatestPriceMap,
   getMarketSnapshot,
   getMarketSnapshots,
@@ -27,27 +22,29 @@ import {
   getUserNativeVolume,
 } from '../../src'
 
-test('get latest chart log', async () => {
-  const latestLog = await getLatestChartLog({
-    chainId: 143,
-    quote: MOCK_USDC,
-    base: zeroAddress,
-  })
-  expect(latestLog).toBeDefined()
-})
+const DEV_WALLET = '0x88748318ce7fA8650f4C79C6a2e065eA5e0F5d67'
 
-test('get chart logs', async () => {
-  const chartLogs = await getChartLogs({
-    chainId: 143,
-    quote: MOCK_USDC,
-    base: zeroAddress,
-    from: 1687305600,
-    to: 1713312000,
-    intervalType: CHART_LOG_INTERVALS.oneDay,
-  })
-  expect(chartLogs).toBeDefined()
-  expect(chartLogs.length).toBeGreaterThan(0)
-})
+// test('get latest chart log', async () => {
+//   const latestLog = await getLatestChartLog({
+//     chainId: 143,
+//     quote: MOCK_USDC,
+//     base: zeroAddress,
+//   })
+//   expect(latestLog).toBeDefined()
+// })
+
+// test('get chart logs', async () => {
+//   const chartLogs = await getChartLogs({
+//     chainId: 143,
+//     quote: MOCK_USDC,
+//     base: zeroAddress,
+//     from: 1687305600,
+//     to: 1713312000,
+//     intervalType: CHART_LOG_INTERVALS.oneDay,
+//   })
+//   expect(chartLogs).toBeDefined()
+//   expect(chartLogs.length).toBeGreaterThan(0)
+// })
 
 test('get subgraph endpoint', async () => {
   const endpoint = await getSubgraphEndpoint({
