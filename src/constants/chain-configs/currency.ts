@@ -220,6 +220,30 @@ export const STABLE_COINS: {
       symbol: 'USDC',
       decimals: 6,
     },
+    {
+      address: getAddress('0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a'),
+      name: 'AUSD',
+      symbol: 'AUSD',
+      decimals: 6,
+    },
+    {
+      address: getAddress('0xe7cd86e13AC4309349F30B3435a9d337750fC82D'),
+      name: 'USDT0',
+      symbol: 'USDT0',
+      decimals: 6,
+    },
+    {
+      address: getAddress('0x103222f020e98Bba0AD9809A011FDF8e6F067496'),
+      name: 'earnAUSD',
+      symbol: 'earnAUSD',
+      decimals: 6,
+    },
+    {
+      address: getAddress('0x111111d2bf19e43C34263401e0CAd979eD1cdb61'),
+      name: 'World Liberty Financial USD',
+      symbol: 'USD1',
+      decimals: 6,
+    },
   ],
   // [CHAIN_IDS.SONIC_MAINNET]: [
   //   '0x29219dd400f2Bf60E5a23d13Be72B486D4038894', // USDC
