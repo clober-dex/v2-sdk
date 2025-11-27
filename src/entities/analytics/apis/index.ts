@@ -14,6 +14,8 @@ type TokenDayDataDto = {
   volumeUSD: string
   totalValueLockedUSD: string
   protocolFeesUSD: string
+  liquidityVaultProtocolFeeUSD: string
+  routerGatewayProtocolFeeUSD: string
   token: {
     id: string
     name: string
@@ -121,7 +123,7 @@ export async function fetchProtocolAnalytics(
   }>(
     chainId,
     'getDailyCloberSnapshot',
-    'query getDailyCloberSnapshot { cloberDayDatas(first: 1000, orderBy: date, orderDirection: asc) { date walletCount newWalletCount transactionTypes { type txCount } routerDayData { router txCount } tokenDayData { volumeUSD totalValueLockedUSD protocolFeesUSD token { id name symbol decimals priceUSD } } } }',
+    'query getDailyCloberSnapshot { cloberDayDatas(first: 1000, orderBy: date, orderDirection: asc) { date walletCount newWalletCount transactionTypes { type txCount } routerDayData { router txCount } tokenDayData { volumeUSD totalValueLockedUSD protocolFeesUSD liquidityVaultProtocolFeeUSD routerGatewayProtocolFeeUSD token { id name symbol decimals priceUSD } } } }',
     {},
   )
 
