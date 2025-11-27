@@ -213,7 +213,7 @@ export async function fetchProtocolAnalytics(
       {} as Record<`0x${string}`, number>,
     ),
     volume24hUSD: item.tokenDayData.reduce(
-      (acc, token) => acc + Number(token.volumeUSD),
+      (acc, token) => acc + Number(token.volumeUSD) / 2,
       0,
     ),
     volume24hUSDMap: Object.fromEntries(
@@ -226,7 +226,8 @@ export async function fetchProtocolAnalytics(
             symbol: token.token.symbol,
             decimals: Number(token.token.decimals),
           },
-          usd: Number(token.volumeUSD),
+          // divide by 2 to avoid double counting
+          usd: Number(token.volumeUSD) / 2,
         },
       ]),
     ),
