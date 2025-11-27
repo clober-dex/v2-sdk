@@ -259,7 +259,7 @@ export async function fetchProtocolAnalytics(
             symbol: token.token.symbol,
             decimals: Number(token.token.decimals),
           },
-          feeUSD: {
+          protocolFees: {
             totalFeeUSD: Number(token.protocolFeesUSD),
             liquidityVaultProtocolFeeUSD: Number(
               token.liquidityVaultProtocolFeeUSD,

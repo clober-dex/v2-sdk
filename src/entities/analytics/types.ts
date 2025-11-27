@@ -20,20 +20,12 @@ export type AnalyticsSnapshot = {
   volume24hUSD: number
   volume24hUSDMap: Record<`0x${string}`, { currency: Currency; usd: number }>
 
-  protocolFees24hUSD: {
-    totalFeeUSD: number
-    liquidityVaultProtocolFeeUSD: number
-    routerGatewayProtocolFeeUSD: number
-  }
+  protocolFees24hUSD: ProtocolFeesType
   protocolFees24hUSDMap: Record<
     `0x${string}`,
     {
       currency: Currency
-      feeUSD: {
-        totalFeeUSD: number
-        liquidityVaultProtocolFeeUSD: number
-        routerGatewayProtocolFeeUSD: number
-      }
+      protocolFees: ProtocolFeesType
     }
   >
 
@@ -70,4 +62,10 @@ export type TopUser = {
   nativeVolume: number
   firstSeenTimestamp: number
   firstSeenBlockNumber: number
+}
+
+export type ProtocolFeesType = {
+  totalFeeUSD: number
+  liquidityVaultProtocolFeeUSD: number
+  routerGatewayProtocolFeeUSD: number
 }
