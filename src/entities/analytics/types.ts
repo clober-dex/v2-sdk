@@ -20,7 +20,11 @@ export type AnalyticsSnapshot = {
   volume24hUSD: number
   volume24hUSDMap: Record<`0x${string}`, { currency: Currency; usd: number }>
 
-  protocolFees24hUSD: number
+  protocolFees24hUSD: {
+    totalFeeUSD: number
+    liquidityVaultProtocolFeeUSD: number
+    routerGatewayProtocolFeeUSD: number
+  }
   protocolFees24hUSDMap: Record<
     `0x${string}`,
     {
