@@ -234,8 +234,20 @@ export async function fetchProtocolAnalytics(
       ]),
     ),
     protocolFees24hUSD: item.tokenDayData.reduce(
-      (acc, token) => acc + Number(token.protocolFeesUSD),
-      0,
+      (acc, token) => ({
+        totalFeeUSD: acc.totalFeeUSD + Number(token.protocolFeesUSD),
+        liquidityVaultProtocolFeeUSD:
+          acc.liquidityVaultProtocolFeeUSD +
+          Number(token.liquidityVaultProtocolFeeUSD),
+        routerGatewayProtocolFeeUSD:
+          acc.routerGatewayProtocolFeeUSD +
+          Number(token.routerGatewayProtocolFeeUSD),
+      }),
+      {
+        totalFeeUSD: 0,
+        liquidityVaultProtocolFeeUSD: 0,
+        routerGatewayProtocolFeeUSD: 0,
+      },
     ),
     protocolFees24hUSDMap: Object.fromEntries(
       item.tokenDayData.map((token) => [
@@ -247,7 +259,15 @@ export async function fetchProtocolAnalytics(
             symbol: token.token.symbol,
             decimals: Number(token.token.decimals),
           },
-          usd: Number(token.protocolFeesUSD),
+          protocolFees: {
+            totalFeeUSD: Number(token.protocolFeesUSD),
+            liquidityVaultProtocolFeeUSD: Number(
+              token.liquidityVaultProtocolFeeUSD,
+            ),
+            routerGatewayProtocolFeeUSD: Number(
+              token.routerGatewayProtocolFeeUSD,
+            ),
+          },
         },
       ]),
     ),
@@ -319,7 +339,7 @@ export async function fetchProtocolAnalytics(
       0,
     ),
     accumulatedProtocolFeesUSD: analyticsSnapshots.reduce(
-      (acc, item) => acc + item.protocolFees24hUSD,
+      (acc, item) => acc + item.protocolFees24hUSD.totalFeeUSD,
       0,
     ),
     analyticsSnapshots,
