@@ -161,6 +161,7 @@ test('get protocol analytics', async () => {
   const analyticsSummary = await getProtocolAnalytics({
     chainId: 143,
   })
+  expect(analyticsSummary.accumulatedUniqueUsers).toBeGreaterThan(0)
   expect(analyticsSummary.analyticsSnapshots.length).toBeGreaterThan(0)
 })
 

@@ -325,7 +325,7 @@ export async function fetchProtocolAnalytics(
         acc +
         Object.entries(item.transactionTypeCounts).reduce(
           (acc, [key, item]) => {
-            if (key in FUNCTION_SIG_MAP) {
+            if (key !== UNKNOWN) {
               return acc + item
             }
             return acc
