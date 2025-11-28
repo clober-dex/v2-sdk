@@ -30,6 +30,7 @@ export type {
   UserVolumeSnapshot,
   AnalyticsSummary,
   TopUser,
+  ProtocolFeesType,
 } from '../entities/analytics/types'
 
 export enum CHART_LOG_INTERVALS {

@@ -319,11 +319,17 @@ export async function fetchProtocolAnalytics(
       (acc, item) => acc + item.firstTimeUsers,
       0,
     ),
+    // filter only in FUNCTION_SIG_MAP
     accumulatedUniqueTransactions: analyticsSnapshots.reduce(
       (acc, item) =>
         acc +
-        Object.values(item.transactionTypeCounts).reduce(
-          (acc, item) => acc + item,
+        Object.entries(item.transactionTypeCounts).reduce(
+          (acc, [key, item]) => {
+            if (key in FUNCTION_SIG_MAP) {
+              return acc + item
+            }
+            return acc
+          },
           0,
         ),
       0,
