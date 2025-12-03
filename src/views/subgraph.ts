@@ -1,5 +1,9 @@
 import { CHAIN_IDS } from '../constants/chain-configs/chain'
-import { Subgraph, SUBGRAPH_URL } from '../constants/chain-configs/subgraph'
+import {
+  FALLBACK_SUBGRAPH_URL,
+  Subgraph,
+  SUBGRAPH_URL,
+} from '../constants/chain-configs/subgraph'
 
 /**
  * Get subgraph endpoint by chain id
@@ -15,6 +19,26 @@ import { Subgraph, SUBGRAPH_URL } from '../constants/chain-configs/subgraph'
  */
 export const getSubgraphEndpoint = ({ chainId }: { chainId: CHAIN_IDS }) => {
   return SUBGRAPH_URL[chainId]
+}
+
+/**
+ * Get fallback subgraph endpoint by chain id
+ * @param chainId - chain id from {@link CHAIN_IDS}
+ * @returns Subgraph endpoint
+ *
+ * @example
+ * import { getFallbackSubgraphEndpoint } from '@clober/v2-sdk'
+ *
+ * const endpoint = await getFallbackSubgraphEndpoint({
+ *   chainId: 421614,
+ * })
+ */
+export const getFallbackSubgraphEndpoint = ({
+  chainId,
+}: {
+  chainId: CHAIN_IDS
+}) => {
+  return FALLBACK_SUBGRAPH_URL[chainId]
 }
 
 /**

@@ -39,25 +39,38 @@ export class Subgraph {
     query: string,
     variables: {},
   ): Promise<T> {
-    if (!SUBGRAPH_URL[chainId]) {
+    const timeout = 5000
+    const primary = SUBGRAPH_URL[chainId]
+    const fallback = FALLBACK_SUBGRAPH_URL[chainId]
+
+    if (!primary) {
       throw new Error('Unsupported chain for subgraph')
     }
-    const response = await axios.post(
-      SUBGRAPH_URL[chainId],
-      {
-        query,
-        variables,
-        operationName,
-      },
-      {
-        timeout: 5000, // TODO: pass with option
-      },
-    )
 
-    if (response.status === 200) {
-      return response.data
-    } else {
-      throw new Error((response.data as any).errors || 'Failed to fetch data')
+    try {
+      const res = await axios.post(
+        primary,
+        { query, variables, operationName },
+        { timeout },
+      )
+      return res.data
+    } catch (err: any) {
+      const status = err?.response?.status
+
+      if (status !== 429) {
+        throw err
+      }
+
+      if (!fallback) {
+        throw err
+      }
+
+      const res = await axios.post(
+        fallback,
+        { query, variables, operationName },
+        { timeout },
+      )
+      return res.data
     }
   }
 }
