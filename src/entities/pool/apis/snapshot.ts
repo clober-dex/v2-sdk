@@ -4,6 +4,7 @@ import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { Currency, PoolSnapshot } from '../../../types'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { getContractAddresses } from '../../../views'
+import { UserPoolPosition } from '../types'
 
 type PoolDto = {
   id: string
@@ -181,4 +182,82 @@ export const fetchPoolSnapshotsFromSubgraph = async (
       return fetchPoolSnapshotFromSubgraph(chainId, pool.id as `0x${string}`)
     }),
   ) as Promise<PoolSnapshot[]>
+}
+
+export const fetchUserPoolPositionsFromSubgraph = async (
+  chainId: CHAIN_IDS,
+  userAddress: `0x${string}`,
+  prices: Record<`0x${string}`, number>,
+): Promise<UserPoolPosition[]> => {
+  const {
+    data: { userPoolBalances },
+  } = await Subgraph.get<{
+    data: {
+      userPoolBalances: {
+        user: { id: string }
+        lpBalance: string
+        pool: {
+          id: string
+          salt: string
+          totalSupply: string
+          liquidityA: string
+          liquidityB: string
+          tokenA: { id: string; decimals: string; symbol: string; name: string }
+          tokenB: { id: string; decimals: string; symbol: string; name: string }
+        }
+        lpBalanceUSD: string
+        averageLPPriceUSD: string
+      }[]
+    }
+  }>(
+    chainId,
+    'getUserPoolBalances',
+    'query getUserPoolBalances($userAddress: String!) { userPoolBalances(where: {user: $userAddress}) { user { id } lpBalance pool { id salt totalSupply liquidityA liquidityB tokenA { id decimals symbol name } tokenB { id decimals symbol name } } lpBalanceUSD averageLPPriceUSD } }',
+    {
+      userAddress: userAddress.toLowerCase(),
+    },
+  )
+  return userPoolBalances.map(
+    ({ user, averageLPPriceUSD, lpBalance: _lpBalance, pool }) => {
+      const lpBalance = Number(formatUnits(BigInt(_lpBalance), 18))
+      const currencyA = {
+        address: getAddress(pool.tokenA.id),
+        name: pool.tokenA.name,
+        symbol: pool.tokenA.symbol,
+        decimals: Number(pool.tokenA.decimals),
+      }
+      const currencyB = {
+        address: getAddress(pool.tokenB.id),
+        name: pool.tokenB.name,
+        symbol: pool.tokenB.symbol,
+        decimals: Number(pool.tokenB.decimals),
+      }
+      const totalSupply = Number(formatUnits(BigInt(pool.totalSupply), 18))
+      const liquidityA = Number(
+        formatUnits(BigInt(pool.liquidityA), Number(pool.tokenA.decimals)),
+      )
+      const liquidityAInUSD =
+        liquidityA *
+        (prices?.[currencyA.address.toLowerCase() as `0x${string}`] ?? 0)
+      const liquidityB = Number(
+        formatUnits(BigInt(pool.liquidityB), Number(pool.tokenB.decimals)),
+      )
+      const liquidityBInUSD =
+        liquidityB *
+        (prices?.[currencyB.address.toLowerCase() as `0x${string}`] ?? 0)
+      const lpPrice = (liquidityAInUSD + liquidityBInUSD) / totalSupply
+      return {
+        chainId,
+        key: pool.id as `0x${string}`,
+        salt: pool.salt as `0x${string}`,
+        currencyA,
+        currencyB,
+        userAddress: getAddress(user.id) as `0x${string}`,
+        averageLPPriceUSD,
+        lpBalance: lpBalance.toString(),
+        lpBalanceUSD: (lpBalance * lpPrice).toString(),
+        pnlUSD: (lpBalance * (lpPrice - Number(averageLPPriceUSD))).toString(),
+      }
+    },
+  )
 }

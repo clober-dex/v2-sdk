@@ -20,6 +20,7 @@ import {
   getTopUsersByNativeVolume,
   getUserDailyVolumes,
   getUserNativeVolume,
+  getUserPoolPositions,
 } from '../../src'
 
 const DEV_WALLET = '0x88748318ce7fA8650f4C79C6a2e065eA5e0F5d67'
@@ -186,4 +187,17 @@ test('get user native volume', async () => {
     userAddress: DEV_WALLET,
   })
   expect(userNativeVolume).toBeGreaterThan(0)
+})
+
+test('get user pool position', async () => {
+  const userPoolPositions = await getUserPoolPositions({
+    chainId: 143,
+    userAddress: '0xC7FF064706bfA9186747ee2018e270B2C0ce87E3',
+    prices: {
+      '0x0000000000000000000000000000000000000000': 0.03,
+      '0xEE8c0E9f1BFFb4Eb878d8f15f368A02a35481242': 3000,
+      '0x754704Bc059F8C67012fEd69BC8A327a5aafb603': 1,
+    },
+  })
+  expect(userPoolPositions.length).toBeGreaterThan(0)
 })
