@@ -3,6 +3,7 @@ import { expect, test } from 'vitest'
 import {
   getCurrencies,
   getDailyClosePriceMap,
+  getFallbackSubgraphEndpoint,
   getLatestPriceMap,
   getMarketSnapshot,
   getMarketSnapshots,
@@ -49,6 +50,13 @@ const DEV_WALLET = '0x88748318ce7fA8650f4C79C6a2e065eA5e0F5d67'
 
 test('get subgraph endpoint', async () => {
   const endpoint = await getSubgraphEndpoint({
+    chainId: 143,
+  })
+  expect(endpoint).toBeDefined()
+})
+
+test('get subgraph endpoint', async () => {
+  const endpoint = await getFallbackSubgraphEndpoint({
     chainId: 143,
   })
   expect(endpoint).toBeDefined()

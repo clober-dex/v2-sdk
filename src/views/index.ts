@@ -24,6 +24,7 @@ export { getPriceNeighborhood } from './tick'
 export { getOpenOrder, getOpenOrders } from './open-order'
 export {
   getSubgraphEndpoint,
+  getFallbackSubgraphEndpoint,
   getSubgraphBlockNumber,
   getSubgraphBlock,
 } from './subgraph'
