@@ -15,6 +15,7 @@ export type {
   PoolSnapshot,
   LastAmounts,
   StrategyPosition,
+  UserPoolPosition,
 } from '../entities/pool/types'
 export type { Swap } from '../entities/swap/types'
 export type {

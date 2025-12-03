@@ -35,6 +35,19 @@ export type Pool = {
   paused: boolean
 }
 
+export type UserPoolPosition = {
+  chainId: CHAIN_IDS
+  key: `0x${string}`
+  salt: `0x${string}`
+  currencyA: Currency
+  currencyB: Currency
+  userAddress: `0x${string}`
+  averageLPPriceUSD: string
+  lpBalance: string
+  lpBalanceUSD: string
+  pnlUSD: string
+}
+
 export type PoolSnapshot = {
   chainId: CHAIN_IDS
   key: `0x${string}`

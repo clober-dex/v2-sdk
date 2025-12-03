@@ -13,6 +13,7 @@ import { WRAPPED_6909_FACTORY_ABI } from '../../constants/abis/rebalancer/wrappe
 
 export { getStrategyPrice, getLastAmounts } from './market-making'
 export { getPoolSnapshot, getPoolSnapshots } from './snapshot'
+export { getUserPoolPositions } from './position'
 
 /**
  * Get pool information by chain id and token addresses

@@ -13,6 +13,7 @@ export {
   getPool,
   getPoolSnapshot,
   getPoolSnapshots,
+  getUserPoolPositions,
   getStrategyPrice,
   getLastAmounts,
   getLpWrappedERC20Address,
