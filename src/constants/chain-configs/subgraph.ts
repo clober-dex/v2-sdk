@@ -25,6 +25,13 @@ export const SUBGRAPH_URL: {
   //   'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-sonic-mainnet/api',
 }
 
+export const FALLBACK_SUBGRAPH_URL: {
+  [chain in CHAIN_IDS]: string | undefined
+} = {
+  [CHAIN_IDS.MONAD_MAINNET]:
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-monad/latest/gn',
+}
+
 export class Subgraph {
   public static async get<T>(
     chainId: CHAIN_IDS,
