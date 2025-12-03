@@ -65,6 +65,10 @@ export class Subgraph {
       return primaryRes.data
     }
 
+    console.warn(
+      `[${query.slice(0, 30)}...] Primary subgraph endpoint failed with status: ${primaryRes.status}`,
+    )
+
     if (primaryRes.status === 429 && fallback) {
       const fallbackRes = await safePost(fallback)
 
