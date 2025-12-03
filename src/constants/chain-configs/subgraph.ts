@@ -47,30 +47,56 @@ export class Subgraph {
       throw new Error('Unsupported chain for subgraph')
     }
 
-    try {
-      const res = await axios.post(
-        primary,
-        { query, variables, operationName },
-        { timeout },
-      )
-      return res.data
-    } catch (err: any) {
-      const status = err?.response?.status
-
-      if (status !== 429) {
-        throw err
+    const safePost = async (url: string) => {
+      try {
+        const res = await axios.post(
+          url,
+          { query, variables, operationName },
+          {
+            timeout,
+            validateStatus: () => true,
+          },
+        )
+        return { ok: true, status: res.status, data: res.data }
+      } catch (err: any) {
+        return {
+          ok: false,
+          status: null,
+          error: err.message || 'Network error',
+        }
       }
-
-      if (!fallback) {
-        throw err
-      }
-
-      const res = await axios.post(
-        fallback,
-        { query, variables, operationName },
-        { timeout },
-      )
-      return res.data
     }
+
+    const primaryRes = await safePost(primary)
+
+    if (!primaryRes.ok) {
+      throw new Error(`Network error: ${primaryRes.error}`)
+    }
+
+    if (primaryRes.status === 200) {
+      return primaryRes.data
+    }
+
+    if (primaryRes.status === 429 && fallback) {
+      const fallbackRes = await safePost(fallback)
+
+      if (!fallbackRes.ok) {
+        throw new Error(`Fallback network error: ${fallbackRes.error}`)
+      }
+
+      if (fallbackRes.status === 200) {
+        return fallbackRes.data
+      }
+
+      throw new Error(
+        (fallbackRes.data as any)?.errors ||
+          `Fallback failed with status ${fallbackRes.status}`,
+      )
+    }
+
+    throw new Error(
+      (primaryRes.data as any)?.errors ||
+        `Failed with status ${primaryRes.status}`,
+    )
   }
 }
