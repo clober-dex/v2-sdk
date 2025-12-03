@@ -48,37 +48,49 @@ export class Subgraph {
     }
 
     const safePost = async (url: string) => {
-      const res = await axios.post(
-        url,
-        { query, variables, operationName },
-        {
-          timeout,
-          validateStatus: () => true,
-        },
-      )
-      return { status: res.status, data: res.data }
+      try {
+        const res = await axios.post(
+          url,
+          { query, variables, operationName },
+          {
+            timeout,
+            validateStatus: () => true,
+          },
+        )
+        return { ok: true, status: res.status, data: res.data }
+      } catch (err: any) {
+        console.error(
+          `[${operationName}] Error while fetching from subgraph: ${err.message}`,
+        )
+        return {
+          ok: false,
+          status: err.response?.status ?? null,
+          data: err.response?.data,
+          error: err.message,
+        }
+      }
     }
 
     const primaryRes = await safePost(primary)
 
-    if (primaryRes.status === 200) {
+    if (primaryRes.ok && primaryRes.status === 200) {
       return primaryRes.data
     }
 
     console.warn(
-      `[${query.slice(0, 30)}...] Primary subgraph endpoint failed with status: ${primaryRes.status}`,
+      `[${operationName}] Primary subgraph endpoint failed with status: ${primaryRes.status}`,
     )
 
-    if (primaryRes.status === 429 && fallback) {
+    if ((!primaryRes.ok || primaryRes.status === 429) && fallback) {
       const fallbackRes = await safePost(fallback)
 
-      if (fallbackRes.status === 200) {
+      if (fallbackRes.ok && fallbackRes.status === 200) {
         return fallbackRes.data
       }
 
       throw new Error(
-        (fallbackRes.data as any)?.errors ??
-          `Fallback failed with status ${fallbackRes.status}`,
+        fallbackRes.data?.errors ??
+          `Fallback failed (status: ${fallbackRes.status})`,
       )
     }
 
