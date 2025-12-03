@@ -48,30 +48,18 @@ export class Subgraph {
     }
 
     const safePost = async (url: string) => {
-      try {
-        const res = await axios.post(
-          url,
-          { query, variables, operationName },
-          {
-            timeout,
-            validateStatus: () => true,
-          },
-        )
-        return { ok: true, status: res.status, data: res.data }
-      } catch (err: any) {
-        return {
-          ok: false,
-          status: null,
-          error: err.message || 'Network error',
-        }
-      }
+      const res = await axios.post(
+        url,
+        { query, variables, operationName },
+        {
+          timeout,
+          validateStatus: () => true,
+        },
+      )
+      return { status: res.status, data: res.data }
     }
 
     const primaryRes = await safePost(primary)
-
-    if (!primaryRes.ok) {
-      throw new Error(`Network error: ${primaryRes.error}`)
-    }
 
     if (primaryRes.status === 200) {
       return primaryRes.data
@@ -80,22 +68,18 @@ export class Subgraph {
     if (primaryRes.status === 429 && fallback) {
       const fallbackRes = await safePost(fallback)
 
-      if (!fallbackRes.ok) {
-        throw new Error(`Fallback network error: ${fallbackRes.error}`)
-      }
-
       if (fallbackRes.status === 200) {
         return fallbackRes.data
       }
 
       throw new Error(
-        (fallbackRes.data as any)?.errors ||
+        (fallbackRes.data as any)?.errors ??
           `Fallback failed with status ${fallbackRes.status}`,
       )
     }
 
     throw new Error(
-      (primaryRes.data as any)?.errors ||
+      (primaryRes.data as any)?.errors ??
         `Failed with status ${primaryRes.status}`,
     )
   }
