@@ -186,6 +186,12 @@ export const fetchPoolSnapshotFromSubgraph = async (
     lpPriceUSD: pool.lpPriceUSD,
     totalTvlUSD: pool.totalValueLockedUSD,
     totalSpreadProfitUSD: pool.spreadProfitUSD,
+    currentPerformanceIndex:
+      performanceHistories?.[performanceHistories.length - 1]
+        ?.performanceIndex || 0,
+    currentRelativePriceIndex:
+      performanceHistories?.[performanceHistories.length - 1]
+        ?.relativePriceIndex || 0,
     performanceHistories,
   }
 }

@@ -67,6 +67,8 @@ export type PoolSnapshot = {
     timestamp: number
     txHash: `0x${string}`
   }
+  currentRelativePriceIndex: number
+  currentPerformanceIndex: number
   performanceHistories: {
     timestamp: number
     spreadProfitUSD: string
