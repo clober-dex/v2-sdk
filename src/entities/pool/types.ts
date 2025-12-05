@@ -74,12 +74,15 @@ export type PoolSnapshot = {
     lpPriceUSD: string
     oraclePrice: string
     priceA: string
-    priceAUSD: number
+    priceAUSD: string
     priceB: string
-    priceBUSD: number
+    priceBUSD: string
     volumeA: CurrencyAmount
     volumeB: CurrencyAmount
     volumeUSD: string
+    onHoldUSDValuePerLp: string
+    relativePriceIndex: number
+    performanceIndex: number
   }[]
 }
 
