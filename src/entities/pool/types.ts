@@ -80,6 +80,8 @@ export type PoolSnapshot = {
     volumeA: CurrencyAmount
     volumeB: CurrencyAmount
     volumeUSD: string
+    relativePriceIndex: number
+    performanceIndex: number
   }[]
 }
 

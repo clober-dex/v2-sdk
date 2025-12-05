@@ -100,6 +100,15 @@ export const fetchPoolSnapshotFromSubgraph = async (
     symbol: `CLV-${currencyB.symbol}-${currencyA.symbol}`,
     decimals: 18,
   }
+  const initialTokenAAmount = formatUnits(
+    BigInt(pool.initialTokenAAmount),
+    Number(pool.tokenA.decimals),
+  )
+  const initialTokenBAmount = formatUnits(
+    BigInt(pool.initialTokenBAmount),
+    Number(pool.tokenB.decimals),
+  )
+  const initialTotalSupply = formatUnits(BigInt(pool.initialTotalSupply), 18)
   return {
     chainId,
     key: poolKey,
@@ -107,21 +116,15 @@ export const fetchPoolSnapshotFromSubgraph = async (
     initialLPInfo: {
       currencyA: {
         currency: currencyA,
-        value: formatUnits(
-          BigInt(pool.initialTokenAAmount),
-          Number(pool.tokenA.decimals),
-        ),
+        value: initialTokenAAmount,
       },
       currencyB: {
         currency: currencyB,
-        value: formatUnits(
-          BigInt(pool.initialTokenBAmount),
-          Number(pool.tokenB.decimals),
-        ),
+        value: initialTokenBAmount,
       },
       lpToken: {
         currency: lpCurrency,
-        value: formatUnits(BigInt(pool.initialTotalSupply), 18),
+        value: initialTotalSupply,
       },
       lpPriceUSD: pool.initialLPPriceUSD,
       timestamp: Number(pool.createdAtTimestamp),
@@ -136,32 +139,45 @@ export const fetchPoolSnapshotFromSubgraph = async (
     lpPriceUSD: pool.lpPriceUSD,
     totalTvlUSD: pool.totalValueLockedUSD,
     totalSpreadProfitUSD: pool.spreadProfitUSD,
-    performanceHistories: poolDayDatas.map((poolDayData) => ({
-      timestamp: poolDayData.date,
-      spreadProfitUSD: poolDayData.spreadProfitUSD,
-      tvlUSD: poolDayData.totalValueLockedUSD,
-      lpPriceUSD: poolDayData.lpPriceUSD,
-      oraclePrice: poolDayData.oraclePrice,
-      priceA: poolDayData.priceA,
-      priceAUSD: Number(
+    performanceHistories: poolDayDatas.map((poolDayData) => {
+      const priceAUSD = Number(
         pool.tokenA.tokenDayData.find(({ date }) => date === poolDayData.date)
           ?.priceUSD ?? 0,
-      ),
-      priceB: poolDayData.priceB,
-      priceBUSD: Number(
+      )
+      const priceBUSD = Number(
         pool.tokenB.tokenDayData.find(({ date }) => date === poolDayData.date)
           ?.priceUSD ?? 0,
-      ),
-      volumeA: {
-        currency: currencyA,
-        value: poolDayData.volumeTokenA,
-      },
-      volumeB: {
-        currency: currencyB,
-        value: poolDayData.volumeTokenB,
-      },
-      volumeUSD: poolDayData.volumeUSD,
-    })),
+      )
+      const onHoldUSDValuePerLp =
+        (Number(initialTokenAAmount) * priceAUSD +
+          Number(initialTokenBAmount) * priceBUSD) /
+        Number(initialTotalSupply)
+
+      return {
+        timestamp: poolDayData.date,
+        spreadProfitUSD: poolDayData.spreadProfitUSD,
+        tvlUSD: poolDayData.totalValueLockedUSD,
+        lpPriceUSD: poolDayData.lpPriceUSD,
+        oraclePrice: poolDayData.oraclePrice,
+        priceA: poolDayData.priceA,
+        priceAUSD,
+        priceB: poolDayData.priceB,
+        priceBUSD,
+        volumeA: {
+          currency: currencyA,
+          value: poolDayData.volumeTokenA,
+        },
+        volumeB: {
+          currency: currencyB,
+          value: poolDayData.volumeTokenB,
+        },
+        volumeUSD: poolDayData.volumeUSD,
+        relativePriceIndex:
+          Number(poolDayData.lpPriceUSD) / onHoldUSDValuePerLp,
+        performanceIndex:
+          Number(poolDayData.lpPriceUSD) / Number(pool.initialLPPriceUSD),
+      }
+    }),
   }
 }
 
