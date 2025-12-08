@@ -57,6 +57,14 @@ export class Subgraph {
             validateStatus: () => true,
           },
         )
+        if (res.data?.errors) {
+          return {
+            ok: false,
+            status: res.status,
+            data: res.data,
+            error: res.data.errors,
+          }
+        }
         return { ok: true, status: res.status, data: res.data }
       } catch (err: any) {
         console.error(
