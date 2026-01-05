@@ -18,6 +18,7 @@ export type {
   UserPoolPosition,
 } from '../entities/pool/types'
 export type { Swap } from '../entities/swap/types'
+export type { Take } from '../entities/take/types'
 export type {
   DefaultReadContractOptions,
   DefaultWriteContractOptions,
