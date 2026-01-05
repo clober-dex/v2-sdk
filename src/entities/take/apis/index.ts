@@ -53,7 +53,7 @@ export const fetchLatestTakes = async (
       ? 'buy'
       : 'sell'
     return {
-      transactionHash: swap.id as `0x${string}`,
+      transactionHash: swap.id.split('-')[0] as `0x${string}`,
       timestamp: parseInt(swap.timestamp),
       side,
       currencyIn: {
