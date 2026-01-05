@@ -52,36 +52,28 @@ export const fetchLatestTakes = async (
     const side = isAddressEqual(swap.inputToken.id, quoteTokenAddress)
       ? 'buy'
       : 'sell'
+    const baseAmount = Number(
+      formatUnits(
+        BigInt(side === 'buy' ? swap.outputAmount : swap.inputAmount),
+        side === 'buy'
+          ? Number(swap.outputToken.decimals)
+          : Number(swap.inputToken.decimals),
+      ),
+    )
+    const quoteAmount = Number(
+      formatUnits(
+        BigInt(side === 'buy' ? swap.inputAmount : swap.outputAmount),
+        side === 'buy'
+          ? Number(swap.inputToken.decimals)
+          : Number(swap.outputToken.decimals),
+      ),
+    )
     return {
       transactionHash: swap.id.split('-')[0] as `0x${string}`,
       timestamp: parseInt(swap.timestamp),
       side,
-      currencyIn: {
-        currency: {
-          address: getAddress(swap.inputToken.id),
-          name: swap.inputToken.name,
-          symbol: swap.inputToken.symbol,
-          decimals: Number(swap.inputToken.decimals),
-        },
-        amount: formatUnits(
-          BigInt(swap.inputAmount),
-          Number(swap.inputToken.decimals),
-        ),
-        direction: 'in',
-      },
-      currencyOut: {
-        currency: {
-          address: getAddress(swap.outputToken.id),
-          name: swap.outputToken.name,
-          symbol: swap.outputToken.symbol,
-          decimals: Number(swap.outputToken.decimals),
-        },
-        amount: formatUnits(
-          BigInt(swap.outputAmount),
-          Number(swap.outputToken.decimals),
-        ),
-        direction: 'out',
-      },
+      price: quoteAmount / baseAmount,
+      amount: baseAmount,
       amountUSD: Number(swap.amountUSD),
       user: getAddress(swap.origin),
     }
