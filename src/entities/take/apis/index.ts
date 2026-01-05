@@ -32,10 +32,10 @@ export const fetchLatestTakes = async (
   tokenB: `0x${string}`,
 ): Promise<Take[]> => {
   const {
-    data: { swaps },
+    data: { takes },
   } = await Subgraph.get<{
     data: {
-      swaps: TakeDto[]
+      takes: TakeDto[]
     }
   }>(
     chainId,
@@ -48,7 +48,7 @@ export const fetchLatestTakes = async (
   )
   const { quoteTokenAddress } = getMarketId(chainId, [tokenA, tokenB])
 
-  return swaps.map((swap) => {
+  return takes.map((swap) => {
     const side = isAddressEqual(swap.inputToken.id, quoteTokenAddress)
       ? 'buy'
       : 'sell'
