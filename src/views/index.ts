@@ -18,6 +18,7 @@ export {
   getStrategyPrice,
   getLastAmounts,
   getLpWrappedERC20Address,
+  watchMarketMakingEvents,
 } from './pool'
 export { getLatestTrades } from './trade'
 

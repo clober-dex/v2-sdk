@@ -11,7 +11,11 @@ import { fetchPool } from '../../entities/pool/apis'
 import { CONTRACT_ADDRESSES } from '../../constants/chain-configs/addresses'
 import { WRAPPED_6909_FACTORY_ABI } from '../../constants/abis/rebalancer/wrapped-6909-factory-abi'
 
-export { getStrategyPrice, getLastAmounts } from './market-making'
+export {
+  getStrategyPrice,
+  getLastAmounts,
+  watchMarketMakingEvents,
+} from './market-making'
 export { getPoolSnapshot, getPoolSnapshots } from './snapshot'
 export { getUserPoolPositions } from './position'
 
