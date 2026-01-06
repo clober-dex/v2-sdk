@@ -59,6 +59,9 @@ export const watchMarketMakingEvents = ({
   chainId: CHAIN_IDS
   poolSnapshot: PoolSnapshot
   onEvent: (args: {
+    transactionHash: `0x${string}`
+    timestamp: number
+    blockNumber: number
     bidOrderList: { price: string; size: string }[]
     askOrderList: { price: string; size: string }[]
     quoteReserve: string
@@ -84,6 +87,9 @@ export const watchMarketMakingEvents = ({
       for (const log of logs) {
         const { args } = log as any
         onEvent({
+          transactionHash: log.transactionHash,
+          timestamp: Number((log as any).blockTimestamp),
+          blockNumber: Number(log.blockNumber),
           bidOrderList: args.orderListA.map((orderId: bigint) => {
             const tick = fromOrderId(orderId).tick
             const price = formatPrice(
