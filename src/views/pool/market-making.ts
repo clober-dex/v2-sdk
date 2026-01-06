@@ -174,7 +174,7 @@ export const watchMarketMakingEvents = async ({
     publicClient,
     chainId,
     poolSnapshot,
-    backfillBlocks: options?.backfillBlocks ?? 500n,
+    backfillBlocks: options?.backfillBlocks ?? 100n,
     onEvent,
   })
 
