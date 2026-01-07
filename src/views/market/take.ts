@@ -1,10 +1,11 @@
-import { createPublicClient, formatUnits, http, parseAbiItem } from 'viem'
+import { createPublicClient, formatUnits, http } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import { DefaultReadContractOptions, Market, TakeEvent } from '../../types'
 import { formatPrice, invertTick, quoteToBase, toPrice } from '../../utils'
 import { getContractAddresses } from '../address'
 import { BOOK_MANAGER_ABI } from '../../constants/abis/core/book-manager-abi'
+import { fetchLatestTakes } from '../../entities/take/apis'
 
 const handleTakeLog = (
   log: any,
@@ -42,41 +43,39 @@ const handleTakeLog = (
   })
 }
 
-const backfillRebalanceEvents = async ({
-  publicClient,
+const backfillTakeEventsFromSubgraph = async ({
   chainId,
   market,
-  backfillBlocks,
   onEvent,
 }: {
-  publicClient: ReturnType<typeof createPublicClient>
   chainId: CHAIN_IDS
   market: Market
-  backfillBlocks: bigint
   onEvent: Parameters<typeof handleTakeLog>[2]
 }) => {
-  const currentBlock = await publicClient.getBlockNumber()
+  const takes = await fetchLatestTakes(
+    chainId,
+    market.base.address,
+    market.quote.address,
+  )
 
-  const fromBlock =
-    currentBlock > backfillBlocks ? currentBlock - backfillBlocks : 0n
+  const logIndexMap = new Map<string, number>()
+  for (const take of takes.reverse()) {
+    if (logIndexMap.has(take.transactionHash)) {
+      logIndexMap.set(
+        take.transactionHash,
+        (logIndexMap.get(take.transactionHash) ?? 0) + 1,
+      )
+    } else {
+      logIndexMap.set(take.transactionHash, 0)
+    }
 
-  const logs = await publicClient.getLogs({
-    address: getContractAddresses({ chainId }).BookManager,
-    event: parseAbiItem(
-      'event Take(uint192 indexed bookId, address indexed user, int24 tick, uint64 unit)',
-    ),
-    args: {
-      bookId: [BigInt(market.bidBook.id), BigInt(market.askBook.id)],
-    },
-    fromBlock,
-    toBlock: currentBlock,
-  })
-
-  for (const log of logs) {
-    handleTakeLog(log, market, onEvent)
+    onEvent({
+      ...take,
+      logIndex: logIndexMap.get(take.transactionHash)!,
+      blockNumber: 0, // Subgraph does not provide block number in this query
+      side: take.side as 'buy' | 'sell',
+    })
   }
-
-  return currentBlock
 }
 
 export const watchTakeEvents = async ({
@@ -90,9 +89,7 @@ export const watchTakeEvents = async ({
   market: Market
   onEvent: Parameters<typeof handleTakeLog>[2]
   onError?: (error: Error) => void
-  options?: {
-    backfillBlocks?: bigint
-  } & DefaultReadContractOptions
+  options?: DefaultReadContractOptions
 }) => {
   const publicClient = createPublicClient({
     chain: CHAIN_MAP[chainId],
@@ -101,11 +98,9 @@ export const watchTakeEvents = async ({
 
   const seen = new Set<string>()
 
-  const lastBackfilledBlock = await backfillRebalanceEvents({
-    publicClient,
+  await backfillTakeEventsFromSubgraph({
     chainId,
     market,
-    backfillBlocks: options?.backfillBlocks ?? 100n,
     onEvent,
   })
 
@@ -116,7 +111,6 @@ export const watchTakeEvents = async ({
     args: {
       bookId: [BigInt(market.bidBook.id), BigInt(market.askBook.id)],
     },
-    fromBlock: lastBackfilledBlock + 1n,
     onLogs: (logs) => {
       for (const log of logs) {
         const key = `${log.transactionHash}-${log.logIndex}`
