@@ -16,6 +16,7 @@ import { REBALANCER_ABI } from '../../constants/abis/rebalancer/rebalancer-abi'
 import { getContractAddresses } from '../address'
 import { fromOrderId } from '../../entities/open-order/utils/order-id'
 import { formatPrice, invertTick, toPrice } from '../../utils'
+import { RebalanceEvent } from '../../types/events'
 
 export const getStrategyPrice = async ({
   chainId,
@@ -52,20 +53,13 @@ export const getLastAmounts = async ({
 const handleRebalanceLog = (
   log: any,
   poolSnapshot: PoolSnapshot,
-  onEvent: (args: {
-    transactionHash: `0x${string}`
-    timestamp: number
-    blockNumber: number
-    bidOrderList: { price: string; size: string }[]
-    askOrderList: { price: string; size: string }[]
-    quoteReserve: string
-    baseReserve: string
-  }) => void,
+  onEvent: (args: RebalanceEvent) => void,
 ) => {
   const { args } = log
 
   onEvent({
     transactionHash: log.transactionHash,
+    logIndex: Number(log.logIndex),
     timestamp: Number(log.blockTimestamp),
     blockNumber: Number(log.blockNumber),
 
