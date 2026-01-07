@@ -54,6 +54,7 @@ const handleRebalanceLog = (
   poolSnapshot: PoolSnapshot,
   onEvent: (args: {
     transactionHash: `0x${string}`
+    logIndex: number
     timestamp: number
     blockNumber: number
     bidOrderList: { price: string; size: string }[]
@@ -66,6 +67,7 @@ const handleRebalanceLog = (
 
   onEvent({
     transactionHash: log.transactionHash,
+    logIndex: Number(log.logIndex),
     timestamp: Number(log.blockTimestamp),
     blockNumber: Number(log.blockNumber),
 

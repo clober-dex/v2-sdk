@@ -32,6 +32,7 @@ const handleTakeLog = (
 
   onEvent({
     transactionHash: log.transactionHash,
+    logIndex: Number(log.logIndex),
     timestamp: Number(log.blockTimestamp),
     blockNumber: Number(log.blockNumber),
     price: parseFloat(price),
