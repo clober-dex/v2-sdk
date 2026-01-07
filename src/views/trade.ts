@@ -25,9 +25,9 @@ const handleTakeLog = (
   const isTakingBidBook = BigInt(market.bidBook.id) === args.bookId
   const tick = BigInt(args.tick)
   const unit = BigInt(args.unit)
-  const unitSize = BigInt(
-    isTakingBidBook ? market.bidBook.unitSize : market.askBook.unitSize,
-  )
+  const unitSize = isTakingBidBook
+    ? market.bidBook.unitSize
+    : market.askBook.unitSize
   const price = isTakingBidBook
     ? formatPrice(toPrice(tick), market.quote.decimals, market.base.decimals)
     : formatPrice(
