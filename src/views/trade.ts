@@ -25,6 +25,9 @@ const handleTakeLog = (
   const isTakingBidBook = BigInt(market.bidBook.id) === args.bookId
   const tick = BigInt(args.tick)
   const unit = BigInt(args.unit)
+  const unitSize = isTakingBidBook
+    ? market.bidBook.unitSize
+    : market.askBook.unitSize
   const price = isTakingBidBook
     ? formatPrice(toPrice(tick), market.quote.decimals, market.base.decimals)
     : formatPrice(
@@ -34,10 +37,10 @@ const handleTakeLog = (
       )
   const size = isTakingBidBook
     ? formatUnits(
-        quoteToBase(tick, unit * BigInt(market.bidBook.unitSize), false),
+        quoteToBase(tick, unit * unitSize, false),
         market.base.decimals,
       )
-    : formatUnits(unit * BigInt(market.askBook.unitSize), market.base.decimals)
+    : formatUnits(unit * unitSize, market.base.decimals)
 
   onEvent({
     transactionHash: log.transactionHash,
