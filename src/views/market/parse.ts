@@ -16,6 +16,7 @@ export const parseMakeOrderIdsFromReceipt = ({
 } => {
   const logs = parseEventLogs({
     abi: BOOK_MANAGER_ABI,
+    eventName: 'Make',
     logs: transactionReceipt.logs,
   }).filter((log) => log.eventName === 'Make')
   return {
