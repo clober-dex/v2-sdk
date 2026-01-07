@@ -8,7 +8,7 @@ export {
   getMarketSnapshot,
   getQuoteToken,
   parseMakeOrderIdsFromReceipt,
-  getLatestTakes,
+  watchTakeEvents,
 } from './market'
 export {
   getPool,

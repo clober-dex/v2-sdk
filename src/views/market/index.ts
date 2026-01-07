@@ -4,7 +4,7 @@ import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
 import { DefaultReadContractOptions, Market } from '../../types'
 import { fetchMarket } from '../../entities/market/apis'
 
-export { getLatestTakes } from './take'
+export { watchTakeEvents } from './take'
 export { getExpectedOutput, getExpectedInput } from './quote'
 export { getChartLogs, getLatestChartLog } from './chart-log'
 export { getMarketSnapshots, getMarketSnapshot } from './snapshot'
