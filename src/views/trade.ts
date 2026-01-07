@@ -2,9 +2,9 @@ import { createPublicClient, http } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from '../constants/chain-configs/chain'
 import { DefaultReadContractOptions, Swap } from '../types'
-import { fetchLatestTrades } from '../entities/swap/apis'
+import { fetchLatestSwaps } from '../entities/swap/apis'
 
-export const getLatestTrades = async ({
+export const getLatestSwaps = async ({
   chainId,
   n,
   options,
@@ -19,7 +19,7 @@ export const getLatestTrades = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  return fetchLatestTrades(
+  return fetchLatestSwaps(
     publicClient,
     chainId,
     n,

@@ -23,7 +23,7 @@ type SwapDto = {
   router: string
 }
 
-export const fetchLatestTrades = async (
+export const fetchLatestSwaps = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   n: number,
@@ -37,8 +37,8 @@ export const fetchLatestTrades = async (
     }
   }>(
     chainId,
-    'getLatestTrades',
-    'query getLatestTrades($first: Int!) { swaps(first: $first, orderBy: timestamp, orderDirection: desc) { transaction { id gasUsed gasPrice value to from } timestamp inputToken outputToken inputAmount outputAmount amountUSD router } }',
+    'getLatestSwaps',
+    'query getLatestSwaps($first: Int!) { swaps(first: $first, orderBy: timestamp, orderDirection: desc) { transaction { id gasUsed gasPrice value to from } timestamp inputToken outputToken inputAmount outputAmount amountUSD router } }',
     {
       first: n,
     },
