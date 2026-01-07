@@ -8,7 +8,7 @@ export {
   getMarketSnapshot,
   getQuoteToken,
   parseMakeOrderIdsFromReceipt,
-  getLatestTakes,
+  watchTakeEvents,
 } from './market'
 export {
   getPool,
@@ -20,7 +20,7 @@ export {
   getLpWrappedERC20Address,
   watchMarketMakingEvents,
 } from './pool'
-export { watchTakeEvents } from './trade'
+export { getLatestSwaps } from './swap'
 
 export { getPriceNeighborhood } from './tick'
 export { getOpenOrder, getOpenOrders } from './open-order'
