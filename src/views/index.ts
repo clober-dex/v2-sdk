@@ -20,7 +20,7 @@ export {
   getLpWrappedERC20Address,
   watchMarketMakingEvents,
 } from './pool'
-export { getLatestTrades } from './trade'
+export { watchTakeEvents } from './trade'
 
 export { getPriceNeighborhood } from './tick'
 export { getOpenOrder, getOpenOrders } from './open-order'
