@@ -133,35 +133,4 @@ export const BOOK_MANAGER_ABI = [
     ],
     anonymous: false,
   },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'BookId',
-        name: 'bookId',
-        type: 'uint192',
-      },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'user',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'Tick',
-        name: 'tick',
-        type: 'int24',
-      },
-      {
-        indexed: false,
-        internalType: 'uint64',
-        name: 'unit',
-        type: 'uint64',
-      },
-    ],
-    name: 'Take',
-    type: 'event',
-  },
 ] as const
