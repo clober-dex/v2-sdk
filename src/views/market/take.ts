@@ -1,7 +1,7 @@
 import { createPublicClient, formatUnits, http, parseAbiItem } from 'viem'
 
 import { CHAIN_IDS, CHAIN_MAP } from '../../constants/chain-configs/chain'
-import { DefaultReadContractOptions, Market, Take } from '../../types'
+import { DefaultReadContractOptions, Market, TakeEvent } from '../../types'
 import { formatPrice, invertTick, quoteToBase, toPrice } from '../../utils'
 import { getContractAddresses } from '../address'
 import { BOOK_MANAGER_ABI } from '../../constants/abis/core/book-manager-abi'
@@ -9,7 +9,7 @@ import { BOOK_MANAGER_ABI } from '../../constants/abis/core/book-manager-abi'
 const handleTakeLog = (
   log: any,
   market: Market,
-  onEvent: (args: Take) => void,
+  onEvent: (args: TakeEvent) => void,
 ) => {
   const { args } = log
 
