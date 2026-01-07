@@ -149,15 +149,7 @@ export const watchMarketMakingEvents = async ({
 }: {
   chainId: CHAIN_IDS
   poolSnapshot: PoolSnapshot
-  onEvent: (args: {
-    transactionHash: `0x${string}`
-    timestamp: number
-    blockNumber: number
-    bidOrderList: { price: string; size: string }[]
-    askOrderList: { price: string; size: string }[]
-    quoteReserve: string
-    baseReserve: string
-  }) => void
+  onEvent: Parameters<typeof handleRebalanceLog>[2]
   onError?: (error: Error) => void
   options?: {
     backfillBlocks?: bigint
