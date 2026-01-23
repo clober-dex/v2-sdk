@@ -16,7 +16,7 @@ export const NATIVE_CURRENCY: {
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: ETH,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: ETH,
-  // [CHAIN_IDS.BASE]: ETH,
+  [CHAIN_IDS.BASE]: ETH,
   [CHAIN_IDS.BERACHAIN_MAINNET]: {
     address: zeroAddress,
     name: 'Berachain',
@@ -55,7 +55,12 @@ export const REFERENCE_CURRENCY: {
     name: 'Wrapped Ether',
     decimals: 18,
   },
-  // [CHAIN_IDS.BASE]: '0x4200000000000000000000000000000000000006',
+  [CHAIN_IDS.BASE]: {
+    address: getAddress('0x4200000000000000000000000000000000000006'),
+    symbol: 'WETH',
+    name: 'Wrapped Ether',
+    decimals: 18,
+  },
   [CHAIN_IDS.BERACHAIN_MAINNET]: {
     address: getAddress('0x6969696969696969696969696969696969696969'), // WBERA
     symbol: 'WBERA',
@@ -94,7 +99,7 @@ export const NATIVE_CURRENCY_TOTAL_SUPPLY: {
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]: 120000000000000000000000000n,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: 120000000000000000000000000n,
-  // [CHAIN_IDS.BASE]: ETH,
+  [CHAIN_IDS.BASE]: 120000000000000000000000000n,
   [CHAIN_IDS.BERACHAIN_MAINNET]: 502000000000000000000000000n,
   [CHAIN_IDS.RISE_SEPOLIA]: 120000000000000000000000000n,
   [CHAIN_IDS.GIWA_SEPOLIA]: 120000000000000000000000000n,
@@ -124,13 +129,20 @@ export const STABLE_COINS: {
       decimals: 6,
     },
   ],
-  // [CHAIN_IDS.BASE]: [
-  //   '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC
-  //   '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA', // USDbC
-  //   '0x4621b7A9c75199271F773Ebd9A499dbd165c3191', // DOLA
-  //   '0xB79DD08EA68A908A97220C76d19A6aA9cBDE4376', // USD+
-  //   '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb', // DAI
-  // ],
+  [CHAIN_IDS.BASE]: [
+    {
+      address: getAddress('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'),
+      name: 'USD Coin',
+      symbol: 'USDC',
+      decimals: 6,
+    },
+    {
+      address: getAddress('0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA'),
+      name: 'USD Base Coin',
+      symbol: 'USDbC',
+      decimals: 6,
+    },
+  ],
   [CHAIN_IDS.BERACHAIN_MAINNET]: [
     {
       address: getAddress('0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce'),
