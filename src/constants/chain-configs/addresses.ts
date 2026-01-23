@@ -38,15 +38,18 @@ export const CONTRACT_ADDRESSES: {
       '0x9050b0A12D92b8ba7369ecc87BcD04643Fa0CfDB',
     ),
   },
-  // [CHAIN_IDS.BASE]: {
-  //   Controller: getAddress('0xbA1BFFd18bF55D656cc755c6555661002bf440F2'),
-  //   BookManager: getAddress('0x382CCccbD3b142D7DA063bF68cd0c89634767F76'),
-  //   BookViewer: getAddress('0xbfb608D67340fa54bA31614C293750EeB573c795'),
-  //   Rebalancer: getAddress('0xeA0E19fbca0D9D707f3dA10Ef846cC255B0aAdf3'),
-  //   Strategy: getAddress('0x44E550089da3A49488794B3CB761288821B7e5E0'),
-  //   Minter: getAddress('0xafBd8d66cd96b7A8188E27c61C1ec059c465CE36'),
-  //   Operator: getAddress('0x1BCD69Ff770B5A8dc4355d781F6a09515F2ea797'),
-  // },
+  [CHAIN_IDS.BASE]: {
+    Controller: getAddress('0x2610dc1f2e625e57f07b0ce17152b0f4c6520bca'),
+    BookManager: getAddress('0x8ca3a6f4a6260661fcb9a25584c796a1fa380112'),
+    BookViewer: getAddress('0xcd166f67f13c7d5c4b899fb1c980dceff278f029'),
+    Rebalancer: getAddress('0x5b351C9eED322616F76b8669176412e1808c06B5'),
+    Strategy: getAddress('0x454B85D03Ffbf86c2bFb0DaCd21d2687d36FE892'),
+    Minter: getAddress('0xC8f98f60Ce54E72cCBb18AA8628fa7a2885F098f'),
+    Operator: getAddress('0x7bA560D09BD5379216f1E4393906701210CB63Fb'),
+    Wrapped6909Factory: getAddress(
+      '0x9050b0A12D92b8ba7369ecc87BcD04643Fa0CfDB',
+    ),
+  },
   [CHAIN_IDS.BERACHAIN_MAINNET]: {
     Controller: getAddress('0x06731177b4FA6dF2B14a714736828E373e3ae03b'),
     BookManager: getAddress('0xDED58e263087f5B45d878BD9CF599B7A1a75D1E4'),
