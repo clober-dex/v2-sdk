@@ -30,6 +30,8 @@ export const FALLBACK_SUBGRAPH_URL: {
 } = {
   [CHAIN_IDS.MONAD_MAINNET]:
     'https://api.subgraph.ormilabs.com/api/public/27ad58eb-e12c-4b7b-8df8-0560d8e26b37/subgraphs/v2-subgraph-monad/latest/gn',
+  [CHAIN_IDS.BASE]:
+    'https://api.subgraph.ormilabs.com/api/public/27ad58eb-e12c-4b7b-8df8-0560d8e26b37/subgraphs/v2-subgraph-base/latest/gn',
 }
 
 export class Subgraph {
