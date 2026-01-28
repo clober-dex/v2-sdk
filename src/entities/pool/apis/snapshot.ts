@@ -62,6 +62,7 @@ type PoolPeriodDataDto = {
 export const fetchPoolSnapshotFromSubgraph = async (
   chainId: CHAIN_IDS,
   poolKey: `0x${string}`,
+  prices: Record<`0x${string}`, number>,
 ): Promise<PoolSnapshot | null> => {
   const {
     data: { pool, poolDayDatas, poolHourDatas },
@@ -88,12 +89,16 @@ export const fetchPoolSnapshotFromSubgraph = async (
     symbol: pool.tokenA.symbol,
     decimals: Number(pool.tokenA.decimals),
   }
+  const currencyAPrice =
+    prices?.[pool.tokenA.id.toLowerCase() as `0x${string}`] ?? 0
   const currencyB: Currency = {
     address: getAddress(pool.tokenB.id),
     name: pool.tokenB.name,
     symbol: pool.tokenB.symbol,
     decimals: Number(pool.tokenB.decimals),
   }
+  const currencyBPrice =
+    prices?.[pool.tokenB.id.toLowerCase() as `0x${string}`] ?? 0
   const lpCurrency = {
     id: pool.id as `0x${string}`,
     address: getContractAddresses({ chainId }).Rebalancer,
@@ -111,13 +116,19 @@ export const fetchPoolSnapshotFromSubgraph = async (
   )
   const initialTotalSupply = formatUnits(BigInt(pool.initialTotalSupply), 18)
   const performanceHistories = poolDayDatas
-    .map((poolDayData) => {
+    .map((poolDayData, index) => {
       const priceAUSD =
-        pool.tokenA.tokenDayData.find(({ date }) => date === poolDayData.date)
-          ?.priceUSD ?? '0'
+        index === poolDayDatas.length - 1 && currencyAPrice
+          ? currencyAPrice.toString()
+          : pool.tokenA.tokenDayData.find(
+              ({ date }) => date === poolDayData.date,
+            )?.priceUSD ?? '0'
       const priceBUSD =
-        pool.tokenB.tokenDayData.find(({ date }) => date === poolDayData.date)
-          ?.priceUSD ?? '0'
+        index === poolDayDatas.length - 1 && currencyBPrice
+          ? currencyBPrice.toString()
+          : pool.tokenB.tokenDayData.find(
+              ({ date }) => date === poolDayData.date,
+            )?.priceUSD ?? '0'
 
       const onHoldUSDValuePerLp = new BigNumber(initialTokenAAmount)
         .multipliedBy(priceAUSD)
@@ -198,6 +209,7 @@ export const fetchPoolSnapshotFromSubgraph = async (
 
 export const fetchPoolSnapshotsFromSubgraph = async (
   chainId: CHAIN_IDS,
+  prices: Record<`0x${string}`, number>,
 ): Promise<PoolSnapshot[]> => {
   const {
     data: { pools },
@@ -210,7 +222,11 @@ export const fetchPoolSnapshotsFromSubgraph = async (
   }>(chainId, 'getPoolKeys', 'query getPoolKeys { pools { id } }', {})
   return Promise.all(
     pools.map(async (pool) => {
-      return fetchPoolSnapshotFromSubgraph(chainId, pool.id as `0x${string}`)
+      return fetchPoolSnapshotFromSubgraph(
+        chainId,
+        pool.id as `0x${string}`,
+        prices,
+      )
     }),
   ) as Promise<PoolSnapshot[]>
 }
