@@ -8,16 +8,16 @@ import {
 export const getPoolSnapshot = async ({
   chainId,
   poolKey,
-  prices = {},
+  prices,
 }: {
   chainId: CHAIN_IDS
   poolKey: `0x${string}`
-  prices: Record<`0x${string}`, number>
+  prices?: Record<`0x${string}`, number>
 }): Promise<PoolSnapshot> => {
   const poolSnapshot = await fetchPoolSnapshotFromSubgraph(
     chainId,
     poolKey,
-    prices,
+    prices ?? {},
   )
   if (!poolSnapshot) {
     throw new Error('Pool is not existed')
@@ -27,10 +27,10 @@ export const getPoolSnapshot = async ({
 
 export const getPoolSnapshots = async ({
   chainId,
-  prices = {},
+  prices,
 }: {
   chainId: CHAIN_IDS
-  prices: Record<`0x${string}`, number>
+  prices?: Record<`0x${string}`, number>
 }): Promise<PoolSnapshot[]> => {
-  return fetchPoolSnapshotsFromSubgraph(chainId, prices)
+  return fetchPoolSnapshotsFromSubgraph(chainId, prices ?? {})
 }
