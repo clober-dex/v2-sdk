@@ -118,13 +118,13 @@ export const fetchPoolSnapshotFromSubgraph = async (
   const performanceHistories = poolDayDatas
     .map((poolDayData, index) => {
       const priceAUSD =
-        index === poolDayDatas.length - 1 && currencyAPrice
+        index === 0 && currencyAPrice
           ? currencyAPrice.toString()
           : pool.tokenA.tokenDayData.find(
               ({ date }) => date === poolDayData.date,
             )?.priceUSD ?? '0'
       const priceBUSD =
-        index === poolDayDatas.length - 1 && currencyBPrice
+        index === 0 && currencyBPrice
           ? currencyBPrice.toString()
           : pool.tokenB.tokenDayData.find(
               ({ date }) => date === poolDayData.date,
