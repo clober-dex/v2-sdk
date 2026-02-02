@@ -1,4 +1,4 @@
-import { formatUnits, getAddress } from 'viem'
+import { formatUnits, getAddress, isAddressEqual } from 'viem'
 import BigNumber from 'bignumber.js'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
@@ -6,6 +6,7 @@ import { Currency, PoolSnapshot } from '../../../types'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
 import { getContractAddresses } from '../../../views'
 import { UserPoolPosition } from '../types'
+import { STABLE_COINS } from '../../../constants/chain-configs/currency'
 
 type PoolDto = {
   id: string
@@ -114,17 +115,22 @@ export const fetchPoolSnapshotFromSubgraph = async (
     BigInt(pool.initialTokenBAmount),
     Number(pool.tokenB.decimals),
   )
+  const isQuoteStable = (STABLE_COINS[chainId] ?? []).some((stableCoin) =>
+    isAddressEqual(stableCoin.address, currencyB.address),
+  )
   const initialTotalSupply = formatUnits(BigInt(pool.initialTotalSupply), 18)
   const performanceHistories = poolDayDatas
     .map((poolDayData, index) => {
-      const priceAUSD =
-        index === 0 && currencyAPrice
+      const priceAUSD = isQuoteStable
+        ? '1'
+        : index === 0 && currencyAPrice
           ? currencyAPrice.toString()
           : pool.tokenA.tokenDayData.find(
               ({ date }) => date === poolDayData.date,
             )?.priceUSD ?? '0'
-      const priceBUSD =
-        index === 0 && currencyBPrice
+      const priceBUSD = isQuoteStable
+        ? poolDayData.priceB
+        : index === 0 && currencyBPrice
           ? currencyBPrice.toString()
           : pool.tokenB.tokenDayData.find(
               ({ date }) => date === poolDayData.date,
