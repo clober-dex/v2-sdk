@@ -116,25 +116,28 @@ export const fetchPoolSnapshotFromSubgraph = async (
     Number(pool.tokenB.decimals),
   )
   const isQuoteStable = (STABLE_COINS[chainId] ?? []).some((stableCoin) =>
-    isAddressEqual(stableCoin.address, currencyB.address),
+    isAddressEqual(stableCoin.address, currencyA.address),
   )
   const initialTotalSupply = formatUnits(BigInt(pool.initialTotalSupply), 18)
   const performanceHistories = poolDayDatas
     .map((poolDayData, index) => {
-      const priceAUSD = isQuoteStable
-        ? '1'
-        : index === 0 && currencyAPrice
+      const priceAUSD =
+        index === 0 && currencyAPrice
           ? currencyAPrice.toString()
-          : pool.tokenA.tokenDayData.find(
-              ({ date }) => date === poolDayData.date,
-            )?.priceUSD ?? '0'
-      const priceBUSD = isQuoteStable
-        ? poolDayData.priceB
-        : index === 0 && currencyBPrice
+          : isQuoteStable
+            ? '1'
+            : pool.tokenA.tokenDayData.find(
+                ({ date }) => date === poolDayData.date,
+              )?.priceUSD ?? '0'
+
+      const priceBUSD =
+        index === 0 && currencyBPrice
           ? currencyBPrice.toString()
-          : pool.tokenB.tokenDayData.find(
-              ({ date }) => date === poolDayData.date,
-            )?.priceUSD ?? '0'
+          : isQuoteStable
+            ? poolDayData.priceB
+            : pool.tokenB.tokenDayData.find(
+                ({ date }) => date === poolDayData.date,
+              )?.priceUSD ?? '0'
 
       const onHoldUSDValuePerLp = new BigNumber(initialTokenAAmount)
         .multipliedBy(priceAUSD)
