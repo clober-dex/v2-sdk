@@ -291,66 +291,78 @@ export const fetchOnChainOrders = async (
     false,
   )
 
-  return orderIds.map((orderId, index) => {
-    const order = result[index].result as {
-      provider: `0x${string}`
-      open: bigint
-      claimable: bigint
-    }
-    const owner = result[index + orderIds.length].result as `0x${string}`
-    const { base, quote, unitSize } = result[index + orderIds.length * 2]
-      .result as {
-      base: `0x${string}`
-      quote: `0x${string}`
-      unitSize: bigint
-    }
-    const cancelable = applyPercent(
-      unitSize * order.open,
-      100 +
-        (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) /
-          Number(MAKER_DEFAULT_POLICY[chainId].RATE_PRECISION),
-      6,
-    )
-    const claimable = quoteToBase(
-      fromOrderId(orderId).tick,
-      unitSize * order.claimable,
-      false,
-    )
-    const isBid = isAddressEqual(
-      quote,
-      getMarketId(chainId, [base, quote]).quoteTokenAddress,
-    )
-    const { tick, index: orderIndex } = fromOrderId(orderId)
-    const [quoteCurrency, baseCurrency] = isBid
-      ? [currencyMap[quote], currencyMap[base]]
-      : [currencyMap[base], currencyMap[quote]]
-    return {
-      id: orderId.toString(),
-      user: owner,
-      isBid,
-      price: isBid
-        ? getMarketPrice({
-            marketQuoteCurrency: quoteCurrency,
-            marketBaseCurrency: baseCurrency,
-            bidTick: tick,
-          })
-        : getMarketPrice({
-            marketQuoteCurrency: quoteCurrency,
-            marketBaseCurrency: baseCurrency,
-            askTick: tick,
-          }),
-      tick: Number(tick),
-      orderIndex: orderIndex.toString(),
-      inputCurrency: currencyMap[getAddress(quote)],
-      outputCurrency: currencyMap[getAddress(base)],
-      cancelable: {
-        currency: currencyMap[getAddress(quote)],
-        value: formatUnits(cancelable, currencyMap[getAddress(quote)].decimals),
-      },
-      claimable: {
-        currency: currencyMap[getAddress(base)],
-        value: formatUnits(claimable, currencyMap[getAddress(base)].decimals),
-      },
-    }
-  })
+  return orderIds
+    .map((orderId, index) => {
+      if (
+        result[index].status === 'failure' ||
+        result[index + orderIds.length].status === 'failure' ||
+        result[index + orderIds.length * 2].status === 'failure'
+      ) {
+        return null
+      }
+      const order = result[index].result as {
+        provider: `0x${string}`
+        open: bigint
+        claimable: bigint
+      }
+      const owner = result[index + orderIds.length].result as `0x${string}`
+      const { base, quote, unitSize } = result[index + orderIds.length * 2]
+        .result as {
+        base: `0x${string}`
+        quote: `0x${string}`
+        unitSize: bigint
+      }
+      const cancelable = applyPercent(
+        unitSize * order.open,
+        100 +
+          (Number(MAKER_DEFAULT_POLICY[chainId].rate) * 100) /
+            Number(MAKER_DEFAULT_POLICY[chainId].RATE_PRECISION),
+        6,
+      )
+      const claimable = quoteToBase(
+        fromOrderId(orderId).tick,
+        unitSize * order.claimable,
+        false,
+      )
+      const isBid = isAddressEqual(
+        quote,
+        getMarketId(chainId, [base, quote]).quoteTokenAddress,
+      )
+      const { tick, index: orderIndex } = fromOrderId(orderId)
+      const [quoteCurrency, baseCurrency] = isBid
+        ? [currencyMap[quote], currencyMap[base]]
+        : [currencyMap[base], currencyMap[quote]]
+      return {
+        id: orderId.toString(),
+        user: owner,
+        isBid,
+        price: isBid
+          ? getMarketPrice({
+              marketQuoteCurrency: quoteCurrency,
+              marketBaseCurrency: baseCurrency,
+              bidTick: tick,
+            })
+          : getMarketPrice({
+              marketQuoteCurrency: quoteCurrency,
+              marketBaseCurrency: baseCurrency,
+              askTick: tick,
+            }),
+        tick: Number(tick),
+        orderIndex: orderIndex.toString(),
+        inputCurrency: currencyMap[getAddress(quote)],
+        outputCurrency: currencyMap[getAddress(base)],
+        cancelable: {
+          currency: currencyMap[getAddress(quote)],
+          value: formatUnits(
+            cancelable,
+            currencyMap[getAddress(quote)].decimals,
+          ),
+        },
+        claimable: {
+          currency: currencyMap[getAddress(base)],
+          value: formatUnits(claimable, currencyMap[getAddress(base)].decimals),
+        },
+      }
+    })
+    .filter((x) => x) as OpenOrder[]
 }
