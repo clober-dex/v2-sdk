@@ -27,6 +27,7 @@
   "author": "Clober<official@clober.io>",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^25.2.0",
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
     "@viem/anvil": "^0.0.9",
