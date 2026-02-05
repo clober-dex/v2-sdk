@@ -25,12 +25,13 @@ jobs:
       - run: npm run build
       - name: publish to npm
         run: |
-          TAG="${GITHUB_REF_NAME}"
-
-          if [[ "$TAG" == *"-beta."* ]]; then
-            npm publish --tag beta
-          elif [[ "$TAG" == *"-rc."* ]]; then
-            npm publish --tag rc
+          VERSION=$(node -p "require('./package.json').version")
+          echo "publishing version: $VERSION"
+          
+          if [[ "$VERSION" == *"-beta."* ]]; then
+            npm publish --tag beta --access=public
+          elif [[ "$VERSION" == *"-rc."* ]]; then
+            npm publish --tag rc --access=public
           else
-            npm publish
+            npm publish --access=public
           fi
