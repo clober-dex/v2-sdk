@@ -176,6 +176,8 @@ export const fetchPoolSnapshotFromSubgraph = async (
     performanceHistories[0].performanceIndex = 1
     performanceHistories[0].relativePriceIndex = 1
   }
+  const now = Math.floor(Date.now() / 1000)
+  const before24h = now - 24 * 60 * 60
   return {
     chainId,
     key: poolKey,
@@ -201,6 +203,7 @@ export const fetchPoolSnapshotFromSubgraph = async (
     currencyB,
     lpCurrency,
     volumeUSD24h: poolHourDatas
+      .filter((data) => data.date >= before24h)
       .reduce((acc, data) => acc + Number(data.volumeUSD), 0)
       .toString(),
     lpPriceUSD: pool.lpPriceUSD,
