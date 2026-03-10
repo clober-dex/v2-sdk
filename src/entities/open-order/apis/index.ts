@@ -292,6 +292,7 @@ export const fetchOnChainOrders = async (
     chainId,
     addresses,
     false,
+    blockTag,
   )
 
   return orderIds

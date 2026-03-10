@@ -1,4 +1,4 @@
-import { formatUnits, getAddress, PublicClient } from 'viem'
+import { BlockTag, formatUnits, getAddress, PublicClient } from 'viem'
 
 import { Swap } from '../types'
 import { Subgraph } from '../../../constants/chain-configs/subgraph'
@@ -28,6 +28,7 @@ export const fetchLatestSwaps = async (
   chainId: CHAIN_IDS,
   n: number,
   useSubgraph: boolean,
+  blockTag: BlockTag,
 ): Promise<Swap[]> => {
   const {
     data: { swaps },
@@ -51,6 +52,7 @@ export const fetchLatestSwaps = async (
     chainId,
     uniqueTokens,
     useSubgraph,
+    blockTag,
   )
 
   return swaps

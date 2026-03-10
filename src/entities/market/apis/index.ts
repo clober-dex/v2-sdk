@@ -26,6 +26,7 @@ export async function fetchMarket(
     chainId,
     [quoteTokenAddress, baseTokenAddress],
     useSubgraph,
+    blockTag,
   )
   const [quoteCurrency, baseCurrency] = [
     currencyMap[quoteTokenAddress],
