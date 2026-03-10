@@ -53,6 +53,7 @@ export const getMarket = async ({
     chainId,
     [token0, token1],
     !!(options && options.useSubgraph),
+    options?.blockTag ?? 'latest',
   )
   return market.toJson()
 }

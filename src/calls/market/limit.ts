@@ -127,6 +127,7 @@ export const limitOrder = async ({
     chainId,
     [inputToken, outputToken],
     !!(options && options.useSubgraph),
+    options?.blockTag ?? 'latest',
   )
   const isBid = isAddressEqual(market.quote.address, inputToken)
   const [inputCurrency, outputCurrency] = isBid

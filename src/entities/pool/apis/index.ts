@@ -24,7 +24,13 @@ export async function fetchPool(
   }
   if (!market) {
     market = (
-      await fetchMarket(publicClient, chainId, tokenAddresses, useSubgraph)
+      await fetchMarket(
+        publicClient,
+        chainId,
+        tokenAddresses,
+        useSubgraph,
+        blockTag,
+      )
     ).toJson()
   }
   const poolKey = toPoolKey(

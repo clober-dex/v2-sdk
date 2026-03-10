@@ -108,6 +108,7 @@ export const marketOrder = async ({
     chainId,
     [inputToken, outputToken],
     !!(options && options.useSubgraph),
+    options?.blockTag ?? 'latest',
   )
   const isTakingBid = isAddressEqual(market.base.address, inputToken)
   const [inputCurrency, outputCurrency] = isTakingBid

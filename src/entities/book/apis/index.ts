@@ -1,4 +1,4 @@
-import { PublicClient } from 'viem'
+import { BlockTag, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { Currency } from '../../currency/types'
@@ -17,6 +17,7 @@ export const fetchBook = async (
   quoteCurrency: Currency,
   baseCurrency: Currency,
   useSubgraph: boolean,
+  blockTag: BlockTag,
 ): Promise<BookModel> => {
   const unitSize = calculateUnitSize(chainId, quoteCurrency)
   const bookId = toBookId(
@@ -66,6 +67,7 @@ export const fetchBook = async (
   }
   const [{ result: depths, error }, { result: isOpened }] =
     await publicClient.multicall({
+      blockTag,
       contracts: [
         {
           address: CONTRACT_ADDRESSES[chainId]!.BookViewer,

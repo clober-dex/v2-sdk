@@ -96,6 +96,7 @@ export const placeMarketMakingQuotes = async ({
           chainId,
           [baseToken, quoteToken],
           !!(options && options.useSubgraph),
+          options?.blockTag ?? 'latest',
         )
       ).toJson()
 
