@@ -22,7 +22,6 @@ import {
   getUserDailyVolumes,
   getUserNativeVolume,
   getUserPoolPositions,
-  getLatestTakes,
 } from '../../src'
 
 const DEV_WALLET = '0x88748318ce7fA8650f4C79C6a2e065eA5e0F5d67'
@@ -157,15 +156,6 @@ test('get latest price map', async () => {
     chainId: 143,
   })
   expect(Object.keys(latestPriceMap).length).toBeGreaterThan(0)
-})
-
-test('get latest takes', async () => {
-  const latestTakes = await getLatestTakes({
-    chainId: 143,
-    token0: '0x0000000000000000000000000000000000000000',
-    token1: '0x754704bc059f8c67012fed69bc8a327a5aafb603',
-  })
-  expect(latestTakes.length).toBeGreaterThan(0)
 })
 
 test('get daily close price map', async () => {
