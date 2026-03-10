@@ -184,6 +184,7 @@ export const addLiquidity = async ({
     [token0, token1],
     salt,
     !!(options && options.useSubgraph),
+    options?.blockTag ?? 'latest',
   )
   if (!pool.isOpened) {
     throw new Error(`
