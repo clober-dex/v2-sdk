@@ -54,7 +54,7 @@ export const approveERC20 = async ({
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
   const [currency, allowance] = await Promise.all([
-    fetchCurrency(publicClient, chainId, token),
+    fetchCurrency(publicClient, chainId, token, options?.blockTag ?? 'latest'),
     fetchAllowance(
       publicClient,
       token,

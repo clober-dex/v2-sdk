@@ -1,4 +1,4 @@
-import { getAddress, isAddressEqual, PublicClient } from 'viem'
+import { BlockTag, getAddress, isAddressEqual, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { MarketSnapshot } from '../types'
@@ -63,6 +63,7 @@ export const fetchMarketSnapshot = async (
   token0: `0x${string}`,
   token1: `0x${string}`,
   timestampInSeconds: number,
+  blockTag: BlockTag,
 ): Promise<MarketSnapshot | null> => {
   const dayStartTimestamp = getDailyStartTimestampInSeconds(timestampInSeconds)
 
@@ -95,6 +96,7 @@ export const fetchMarketSnapshot = async (
     publicClient,
     chainId,
     [token0, token1].map((address) => getAddress(address)),
+    blockTag,
   )
 
   const dailyBidBookData = bookDayDatas.find(({ book: { quote, base } }) =>
@@ -376,6 +378,7 @@ export const fetchMarketSnapshots = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   timestampInSeconds: number,
+  blockTag: BlockTag,
 ): Promise<MarketSnapshot[]> => {
   const dayStartTimestamp = getDailyStartTimestampInSeconds(timestampInSeconds)
   const {
@@ -426,6 +429,7 @@ export const fetchMarketSnapshots = async (
     publicClient,
     chainId,
     tokenAddresses,
+    blockTag,
   )
 
   return [

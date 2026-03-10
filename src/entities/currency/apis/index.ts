@@ -71,13 +71,14 @@ export const fetchCurrency = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   address: `0x${string}`,
+  blockTag: BlockTag,
 ): Promise<Currency> => {
   const cached = getCurrencyFromCache(chainId, address)
   if (cached) {
     return cached
   }
 
-  const currency = await fetchCurrencyInner(publicClient, address)
+  const currency = await fetchCurrencyInner(publicClient, address, blockTag)
   setCurrencyToCache(chainId, address, currency)
   return currency
 }
@@ -123,6 +124,7 @@ export const fetchCurrencyMap = async (
 const fetchCurrencyInner = async (
   publicClient: PublicClient,
   address: `0x${string}`,
+  blockTag: BlockTag,
 ): Promise<Currency> => {
   if (isAddressEqual(address, zeroAddress)) {
     return publicClient.chain ? NATIVE_CURRENCY[publicClient.chain.id] : ETH
@@ -130,6 +132,7 @@ const fetchCurrencyInner = async (
 
   const [{ result: name }, { result: symbol }, { result: decimals }] =
     await publicClient.multicall({
+      blockTag,
       contracts: [
         { address, abi, functionName: 'name' },
         { address, abi, functionName: 'symbol' },
