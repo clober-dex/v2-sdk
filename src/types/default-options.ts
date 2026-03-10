@@ -1,5 +1,8 @@
+import type { BlockTag } from 'viem'
+
 type DefaultOptions = {
   rpcUrl?: string
+  blockTag?: BlockTag
 }
 
 export type DefaultReadContractOptions = DefaultOptions

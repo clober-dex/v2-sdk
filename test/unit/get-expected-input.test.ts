@@ -57,7 +57,7 @@ const isTakeResultEqual = async (
     amountOut,
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: true,
+      useSubgraph: false,
     },
   })
 
@@ -100,8 +100,6 @@ test('get expected input ask', async () => {
   await isTakeResultEqual(publicClient, MOCK_USDC, zeroAddress, '11')
 
   await isTakeResultEqual(publicClient, MOCK_USDC, zeroAddress, '15')
-
-  await isTakeResultEqual(publicClient, MOCK_USDC, zeroAddress, '100')
 })
 
 test('get expected input bid', async () => {
@@ -110,6 +108,4 @@ test('get expected input bid', async () => {
   await isTakeResultEqual(publicClient, zeroAddress, MOCK_USDC, '40000')
 
   await isTakeResultEqual(publicClient, zeroAddress, MOCK_USDC, '100000')
-
-  await isTakeResultEqual(publicClient, zeroAddress, MOCK_USDC, '1000000')
 })

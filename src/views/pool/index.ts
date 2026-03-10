@@ -69,6 +69,7 @@ export const getPool = async ({
     [token0, token1],
     salt,
     !!(options && options.useSubgraph),
+    options?.blockTag ?? 'latest',
     options?.market,
   )
   if (!pool.isOpened) {

@@ -1,4 +1,10 @@
-import { getAddress, isAddressEqual, PublicClient, zeroAddress } from 'viem'
+import {
+  BlockTag,
+  getAddress,
+  isAddressEqual,
+  PublicClient,
+  zeroAddress,
+} from 'viem'
 
 import type { Currency } from '../types'
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
@@ -65,13 +71,14 @@ export const fetchCurrency = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   address: `0x${string}`,
+  blockTag: BlockTag,
 ): Promise<Currency> => {
   const cached = getCurrencyFromCache(chainId, address)
   if (cached) {
     return cached
   }
 
-  const currency = await fetchCurrencyInner(publicClient, address)
+  const currency = await fetchCurrencyInner(publicClient, address, blockTag)
   setCurrencyToCache(chainId, address, currency)
   return currency
 }
@@ -81,6 +88,7 @@ export const fetchCurrencyMap = async (
   chainId: CHAIN_IDS,
   addresses: `0x${string}`[],
   useSubgraph: boolean,
+  blockTag: BlockTag,
 ): Promise<Record<`0x${string}`, Currency>> => {
   const unique = Array.from(
     new Set(addresses.filter((a) => !isAddressEqual(a, zeroAddress))),
@@ -99,6 +107,7 @@ export const fetchCurrencyMap = async (
     chainId,
     uncached,
     useSubgraph,
+    blockTag,
   )
 
   for (const currency of fetched) {
@@ -115,6 +124,7 @@ export const fetchCurrencyMap = async (
 const fetchCurrencyInner = async (
   publicClient: PublicClient,
   address: `0x${string}`,
+  blockTag: BlockTag,
 ): Promise<Currency> => {
   if (isAddressEqual(address, zeroAddress)) {
     return publicClient.chain ? NATIVE_CURRENCY[publicClient.chain.id] : ETH
@@ -122,6 +132,7 @@ const fetchCurrencyInner = async (
 
   const [{ result: name }, { result: symbol }, { result: decimals }] =
     await publicClient.multicall({
+      blockTag,
       contracts: [
         { address, abi, functionName: 'name' },
         { address, abi, functionName: 'symbol' },
@@ -139,6 +150,7 @@ const fetchCurrencyMapInner = async (
   chainId: CHAIN_IDS,
   addresses: `0x${string}`[],
   useSubgraph: boolean,
+  blockTag: BlockTag,
 ): Promise<Currency[]> => {
   const unique = Array.from(
     new Set(addresses.filter((a) => !isAddressEqual(a, zeroAddress))),
@@ -178,6 +190,7 @@ const fetchCurrencyMapInner = async (
   }
 
   const result = await publicClient.multicall({
+    blockTag,
     contracts: [
       ...unique.map((a) => ({ address: a, abi, functionName: 'name' })),
       ...unique.map((a) => ({ address: a, abi, functionName: 'symbol' })),

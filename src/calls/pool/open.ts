@@ -60,6 +60,7 @@ export const openPool = async ({
     [token0, token1],
     salt,
     !!(options && options.useSubgraph),
+    options?.blockTag ?? 'latest',
   )
   if (!pool.isOpened) {
     return buildTransaction(

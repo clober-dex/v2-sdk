@@ -31,6 +31,7 @@ export const getMarketSnapshot = async ({
     options && options.timestampInSeconds
       ? options.timestampInSeconds
       : currentTimestampInSeconds(),
+    options?.blockTag ?? 'latest',
   )
 }
 
@@ -51,5 +52,6 @@ export const getMarketSnapshots = async ({
     options && options.timestampInSeconds
       ? options.timestampInSeconds
       : currentTimestampInSeconds(),
+    options?.blockTag ?? 'latest',
   )
 }

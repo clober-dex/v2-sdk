@@ -38,6 +38,7 @@ export const pausePool = async ({
           [token0, token1],
           salt,
           !!(options && options.useSubgraph),
+          options?.blockTag ?? 'latest',
         )
       ).toJson()
   if (!pool.isOpened) {

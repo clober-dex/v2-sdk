@@ -1,4 +1,4 @@
-import { PublicClient } from 'viem'
+import { BlockTag, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { MarketModel } from '../model'
@@ -11,6 +11,7 @@ export async function fetchMarket(
   chainId: CHAIN_IDS,
   tokenAddresses: `0x${string}`[],
   useSubgraph: boolean,
+  blockTag: BlockTag,
 ): Promise<MarketModel> {
   if (tokenAddresses.length !== 2) {
     throw new Error('Invalid token pair')
@@ -25,14 +26,29 @@ export async function fetchMarket(
     chainId,
     [quoteTokenAddress, baseTokenAddress],
     useSubgraph,
+    blockTag,
   )
   const [quoteCurrency, baseCurrency] = [
     currencyMap[quoteTokenAddress],
     currencyMap[baseTokenAddress],
   ]
   const [bidBook, askBook] = await Promise.all([
-    fetchBook(publicClient, chainId, quoteCurrency, baseCurrency, useSubgraph),
-    fetchBook(publicClient, chainId, baseCurrency, quoteCurrency, useSubgraph),
+    fetchBook(
+      publicClient,
+      chainId,
+      quoteCurrency,
+      baseCurrency,
+      useSubgraph,
+      blockTag,
+    ),
+    fetchBook(
+      publicClient,
+      chainId,
+      baseCurrency,
+      quoteCurrency,
+      useSubgraph,
+      blockTag,
+    ),
   ])
 
   return new MarketModel({

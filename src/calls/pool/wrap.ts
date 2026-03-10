@@ -71,6 +71,7 @@ export const wrapToERC20 = async ({
           [token0, token1],
           salt,
           !!(options && options.useSubgraph),
+          options?.blockTag ?? 'latest',
         )
       ).toJson()
   if (pool.isOpened) {
@@ -168,6 +169,7 @@ export const unwrapFromERC20 = async ({
           [token0, token1],
           salt,
           !!(options && options.useSubgraph),
+          options?.blockTag ?? 'latest',
         )
       ).toJson()
   if (pool.isOpened) {

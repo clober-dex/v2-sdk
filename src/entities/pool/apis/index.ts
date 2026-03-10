@@ -1,4 +1,4 @@
-import { getAddress, PublicClient, zeroAddress } from 'viem'
+import { BlockTag, getAddress, PublicClient, zeroAddress } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { CONTRACT_ADDRESSES } from '../../../constants/chain-configs/addresses'
@@ -16,6 +16,7 @@ export async function fetchPool(
   tokenAddresses: `0x${string}`[],
   salt: `0x${string}`,
   useSubgraph: boolean,
+  blockTag: BlockTag,
   market?: Market,
 ): Promise<PoolModel> {
   if (tokenAddresses.length !== 2) {
@@ -23,7 +24,13 @@ export async function fetchPool(
   }
   if (!market) {
     market = (
-      await fetchMarket(publicClient, chainId, tokenAddresses, useSubgraph)
+      await fetchMarket(
+        publicClient,
+        chainId,
+        tokenAddresses,
+        useSubgraph,
+        blockTag,
+      )
     ).toJson()
   }
   const poolKey = toPoolKey(
@@ -43,6 +50,7 @@ export async function fetchPool(
     { result: wrapped6909Address },
   ] = (await publicClient.multicall({
     allowFailure: true,
+    blockTag,
     contracts: [
       {
         address: CONTRACT_ADDRESSES[chainId]!.Rebalancer,

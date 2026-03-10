@@ -1,4 +1,4 @@
-import { formatUnits, PublicClient } from 'viem'
+import { BlockTag, formatUnits, PublicClient } from 'viem'
 
 import { CHAIN_IDS } from '../../../constants/chain-configs/chain'
 import { CONTRACT_ADDRESSES } from '../../../constants/chain-configs/addresses'
@@ -9,8 +9,10 @@ export async function fetchStrategyPosition(
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   poolKey: `0x${string}`,
+  blockTag: BlockTag,
 ): Promise<StrategyPosition> {
   const getPriceResult = await publicClient.readContract({
+    blockTag,
     address: CONTRACT_ADDRESSES[chainId]!.Strategy,
     abi: STRATEGY_ABI,
     functionName: 'getPosition',
@@ -28,8 +30,10 @@ export async function fetchLastAmounts(
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   poolKey: `0x${string}`,
+  blockTag: BlockTag,
 ): Promise<LastAmounts> {
   const getLastAmount = await publicClient.readContract({
+    blockTag,
     address: CONTRACT_ADDRESSES[chainId]!.Strategy,
     abi: STRATEGY_ABI,
     functionName: 'getLastAmount',

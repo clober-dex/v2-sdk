@@ -1,4 +1,4 @@
-import { PublicClient, zeroAddress, isAddressEqual } from 'viem'
+import { PublicClient, zeroAddress, isAddressEqual, BlockTag } from 'viem'
 
 import { NATIVE_CURRENCY_TOTAL_SUPPLY } from '../../../constants/chain-configs/currency'
 
@@ -27,6 +27,7 @@ export const fetchTotalSupply = async (
   publicClient: PublicClient,
   chainId: number,
   address: `0x${string}`,
+  blockTag: BlockTag,
 ): Promise<bigint> => {
   if (isAddressEqual(address, zeroAddress)) {
     return NATIVE_CURRENCY_TOTAL_SUPPLY[chainId]
@@ -38,6 +39,7 @@ export const fetchTotalSupply = async (
   }
 
   const result = await publicClient.readContract({
+    blockTag,
     address,
     abi,
     functionName: 'totalSupply',
@@ -51,6 +53,7 @@ export const fetchTotalSupplyMap = async (
   publicClient: PublicClient,
   chainId: number,
   addresses: `0x${string}`[],
+  blockTag: BlockTag,
 ): Promise<{ [address: `0x${string}`]: bigint }> => {
   const unique = Array.from(
     new Set(addresses.filter((a) => !isAddressEqual(a, zeroAddress))),
@@ -70,6 +73,7 @@ export const fetchTotalSupplyMap = async (
   const results =
     toFetch.length > 0
       ? await publicClient.multicall({
+          blockTag,
           contracts: toFetch.map((address) => ({
             address,
             abi,

@@ -24,5 +24,6 @@ export const getLatestSwaps = async ({
     chainId,
     n,
     !!(options && options.useSubgraph),
+    options?.blockTag ?? 'latest',
   )
 }

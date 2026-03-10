@@ -6,9 +6,9 @@ export const SUBGRAPH_URL: {
   [chain in CHAIN_IDS]: string
 } = {
   [CHAIN_IDS.CLOBER_TESTNET]:
-    'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-subgraph-arbitrum-sepolia/api',
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-arbitrum-sepolia/latest/gn',
   [CHAIN_IDS.ARBITRUM_SEPOLIA]:
-    'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-subgraph-arbitrum-sepolia/api',
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-arbitrum-sepolia/latest/gn',
   [CHAIN_IDS.BASE]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-base/latest/gn',
   [CHAIN_IDS.BERACHAIN_MAINNET]:
@@ -21,8 +21,6 @@ export const SUBGRAPH_URL: {
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-monad-testnet/latest/gn',
   [CHAIN_IDS.MONAD_MAINNET]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-monad/latest/gn',
-  // [CHAIN_IDS.SONIC_MAINNET]:
-  //   'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-core-subgraph-sonic-mainnet/api',
 }
 
 export const FALLBACK_SUBGRAPH_URL: {

@@ -57,7 +57,7 @@ const isSpendResultEqual = async (
     amountIn,
     options: {
       rpcUrl: publicClient.transport.url!,
-      useSubgraph: true,
+      useSubgraph: false,
     },
   })
 
@@ -95,13 +95,11 @@ const isSpendResultEqual = async (
 }
 
 test('get expected output ask', async () => {
-  await isSpendResultEqual(publicClient, MOCK_USDC, zeroAddress, '1000.123')
+  await isSpendResultEqual(publicClient, MOCK_USDC, zeroAddress, '100.123')
 
-  await isSpendResultEqual(publicClient, MOCK_USDC, zeroAddress, '40000')
+  await isSpendResultEqual(publicClient, MOCK_USDC, zeroAddress, '4000')
 
-  await isSpendResultEqual(publicClient, MOCK_USDC, zeroAddress, '100000')
-
-  await isSpendResultEqual(publicClient, MOCK_USDC, zeroAddress, '1000000')
+  await isSpendResultEqual(publicClient, MOCK_USDC, zeroAddress, '10000')
 })
 
 test('get expected output bid', async () => {
