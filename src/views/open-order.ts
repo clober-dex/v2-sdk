@@ -1,9 +1,13 @@
-import { CHAIN_IDS } from '../constants/chain-configs/chain'
-import { OpenOrder } from '../entities/open-order/types'
+import { createPublicClient, http } from 'viem'
+
+import { CHAIN_IDS, CHAIN_MAP } from '../constants/chain-configs/chain'
+import { OnChainOpenOrder, OpenOrder } from '../entities/open-order/types'
 import {
+  fetchOnChainOrders,
   fetchOpenOrderByOrderIdFromSubgraph,
   fetchOpenOrdersByUserAddressFromSubgraph,
 } from '../entities/open-order/apis'
+import { DefaultReadContractOptions } from '../types'
 
 /**
  * Retrieves the open order with the specified ID on the given chain.
@@ -52,4 +56,25 @@ export const getOpenOrders = async ({
   userAddress: `0x${string}`
 }): Promise<OpenOrder[]> => {
   return fetchOpenOrdersByUserAddressFromSubgraph(chainId, userAddress)
+}
+
+export const getOnChainOpenOrders = async ({
+  chainId,
+  orderIds,
+  options,
+}: {
+  chainId: CHAIN_IDS
+  orderIds: string[]
+  options?: DefaultReadContractOptions
+}): Promise<OnChainOpenOrder[]> => {
+  const publicClient = createPublicClient({
+    chain: CHAIN_MAP[chainId],
+    transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
+  })
+  return fetchOnChainOrders(
+    publicClient,
+    chainId,
+    orderIds.map((id) => BigInt(id)),
+    options?.blockTag ?? 'latest',
+  )
 }

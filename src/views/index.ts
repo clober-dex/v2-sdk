@@ -23,7 +23,7 @@ export {
 export { getLatestSwaps } from './swap'
 
 export { getPriceNeighborhood } from './tick'
-export { getOpenOrder, getOpenOrders } from './open-order'
+export { getOpenOrder, getOpenOrders, getOnChainOpenOrders } from './open-order'
 export {
   getSubgraphEndpoint,
   getFallbackSubgraphEndpoint,
