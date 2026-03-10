@@ -27,6 +27,7 @@ export const fetchTotalSupply = async (
   publicClient: PublicClient,
   chainId: number,
   address: `0x${string}`,
+  blockTag: BlockTag,
 ): Promise<bigint> => {
   if (isAddressEqual(address, zeroAddress)) {
     return NATIVE_CURRENCY_TOTAL_SUPPLY[chainId]
@@ -38,6 +39,7 @@ export const fetchTotalSupply = async (
   }
 
   const result = await publicClient.readContract({
+    blockTag,
     address,
     abi,
     functionName: 'totalSupply',

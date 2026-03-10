@@ -31,7 +31,12 @@ export const getStrategyPrice = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  return fetchStrategyPosition(publicClient, chainId, poolKey)
+  return fetchStrategyPosition(
+    publicClient,
+    chainId,
+    poolKey,
+    options?.blockTag ?? 'latest',
+  )
 }
 
 export const getLastAmounts = async ({
@@ -47,7 +52,12 @@ export const getLastAmounts = async ({
     chain: CHAIN_MAP[chainId],
     transport: options?.rpcUrl ? http(options.rpcUrl) : http(),
   })
-  return fetchLastAmounts(publicClient, chainId, poolKey)
+  return fetchLastAmounts(
+    publicClient,
+    chainId,
+    poolKey,
+    options?.blockTag ?? 'latest',
+  )
 }
 
 const handleRebalanceLog = (
