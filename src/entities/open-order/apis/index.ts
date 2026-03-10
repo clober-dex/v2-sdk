@@ -1,4 +1,5 @@
 import {
+  BlockTag,
   formatUnits,
   getAddress,
   isAddressEqual,
@@ -252,8 +253,10 @@ export const fetchOnChainOrders = async (
   publicClient: PublicClient,
   chainId: CHAIN_IDS,
   orderIds: bigint[],
+  blockTag: BlockTag,
 ): Promise<OnChainOpenOrder[]> => {
   const result = await publicClient.multicall({
+    blockTag,
     contracts: [
       ...orderIds.map((orderId) => ({
         address: CONTRACT_ADDRESSES[chainId]!.BookManager,

@@ -139,6 +139,7 @@ export const cancelOrders = async ({
           publicClient,
           chainId,
           ids.map((id) => BigInt(id)),
+          options?.blockTag ?? 'latest',
         )
   ).filter(
     (order) =>
