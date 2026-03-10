@@ -2,11 +2,10 @@ import type { BlockTag } from 'viem'
 
 type DefaultOptions = {
   rpcUrl?: string
-}
-
-export type DefaultReadContractOptions = DefaultOptions & {
   blockTag?: BlockTag
 }
+
+export type DefaultReadContractOptions = DefaultOptions
 
 export type DefaultWriteContractOptions = DefaultOptions & {
   gasLimit?: bigint
