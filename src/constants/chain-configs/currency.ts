@@ -17,6 +17,7 @@ export const NATIVE_CURRENCY: {
   [CHAIN_IDS.CLOBER_TESTNET]: ETH,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: ETH,
   [CHAIN_IDS.BASE]: ETH,
+  [CHAIN_IDS.ARBITRUM_MAINNET]: ETH,
   [CHAIN_IDS.BERACHAIN_MAINNET]: {
     address: zeroAddress,
     name: 'Berachain',
@@ -61,6 +62,12 @@ export const REFERENCE_CURRENCY: {
     name: 'Wrapped Ether',
     decimals: 18,
   },
+  [CHAIN_IDS.ARBITRUM_MAINNET]: {
+    address: getAddress('0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'),
+    symbol: 'WETH',
+    name: 'Wrapped Ether',
+    decimals: 18,
+  },
   [CHAIN_IDS.BERACHAIN_MAINNET]: {
     address: getAddress('0x6969696969696969696969696969696969696969'), // WBERA
     symbol: 'WBERA',
@@ -100,6 +107,7 @@ export const NATIVE_CURRENCY_TOTAL_SUPPLY: {
   [CHAIN_IDS.CLOBER_TESTNET]: 120000000000000000000000000n,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: 120000000000000000000000000n,
   [CHAIN_IDS.BASE]: 120000000000000000000000000n,
+  [CHAIN_IDS.ARBITRUM_MAINNET]: 120000000000000000000000000n,
   [CHAIN_IDS.BERACHAIN_MAINNET]: 502000000000000000000000000n,
   [CHAIN_IDS.RISE_SEPOLIA]: 120000000000000000000000000n,
   [CHAIN_IDS.GIWA_SEPOLIA]: 120000000000000000000000000n,
@@ -140,6 +148,20 @@ export const STABLE_COINS: {
       address: getAddress('0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA'),
       name: 'USD Base Coin',
       symbol: 'USDbC',
+      decimals: 6,
+    },
+  ],
+  [CHAIN_IDS.ARBITRUM_MAINNET]: [
+    {
+      address: getAddress('0xaf88d065e77c8cC2239327C5EDb3A432268e5831'),
+      name: 'USD Coin',
+      symbol: 'USDC',
+      decimals: 6,
+    },
+    {
+      address: getAddress('0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8'),
+      name: 'USD Coin (Arb1)',
+      symbol: 'USDC.e',
       decimals: 6,
     },
   ],

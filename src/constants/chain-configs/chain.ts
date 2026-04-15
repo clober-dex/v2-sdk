@@ -5,6 +5,7 @@ import {
   monadTestnet,
   monad,
   base,
+  arbitrum,
 } from 'viem/chains'
 
 import { cloberTestChain } from '../networks/test-chain'
@@ -16,6 +17,7 @@ export enum CHAIN_IDS {
   CLOBER_TESTNET = cloberTestChain.id,
   ARBITRUM_SEPOLIA = arbitrumSepolia.id,
   BASE = base.id,
+  ARBITRUM_MAINNET = arbitrum.id,
   BERACHAIN_MAINNET = berachain.id,
   MONAD_TESTNET = monadTestnet.id,
   MONAD_MAINNET = monad.id,
@@ -30,6 +32,7 @@ export const CHAIN_MAP: {
   [CHAIN_IDS.CLOBER_TESTNET]: cloberTestChain,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: arbitrumSepolia,
   [CHAIN_IDS.BASE]: base,
+  [CHAIN_IDS.ARBITRUM_MAINNET]: arbitrum,
   [CHAIN_IDS.BERACHAIN_MAINNET]: berachain,
   [CHAIN_IDS.MONAD_TESTNET]: monadTestnet,
   [CHAIN_IDS.MONAD_MAINNET]: monad,

@@ -50,6 +50,18 @@ export const CONTRACT_ADDRESSES: {
       '0x9050b0A12D92b8ba7369ecc87BcD04643Fa0CfDB',
     ),
   },
+  [CHAIN_IDS.ARBITRUM_MAINNET]: {
+    Controller: getAddress('0x53691300635ce3ae575f91a186c2248a0e159830'),
+    BookManager: getAddress('0x74ffE45757DB60B24A7574b3B5948DAd368c2fdF'),
+    BookViewer: getAddress('0xc6ed4be4a69fd23eb6ab9c6f8b787748def2362e'),
+    Rebalancer: getAddress('0x21bb8709Fe339b227795809B0cb8Eb5a152Ad7E1'),
+    Strategy: getAddress('0x2610DC1F2e625E57F07B0ce17152b0f4C6520bcA'),
+    Minter: getAddress('0xFe87e2Cc08A8801a12105d862AEe71470883A76d'),
+    Operator: getAddress('0xcd166F67F13c7d5C4B899Fb1c980Dceff278F029'),
+    Wrapped6909Factory: getAddress(
+      '0x9050b0A12D92b8ba7369ecc87BcD04643Fa0CfDB',
+    ),
+  },
   [CHAIN_IDS.BERACHAIN_MAINNET]: {
     Controller: getAddress('0x06731177b4FA6dF2B14a714736828E373e3ae03b'),
     BookManager: getAddress('0xDED58e263087f5B45d878BD9CF599B7A1a75D1E4'),
