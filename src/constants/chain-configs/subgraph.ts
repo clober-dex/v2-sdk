@@ -11,6 +11,8 @@ export const SUBGRAPH_URL: {
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-arbitrum-sepolia/latest/gn',
   [CHAIN_IDS.BASE]:
     'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-base/latest/gn',
+  [CHAIN_IDS.ARBITRUM_MAINNET]:
+    'https://api.goldsky.com/api/public/project_clsljw95chutg01w45cio46j0/subgraphs/v2-subgraph-arbitrum-one/latest/gn',
   [CHAIN_IDS.BERACHAIN_MAINNET]:
     'https://subgraph.satsuma-prod.com/f6a8c4889b7b/clober/v2-subgraph-berachain-mainnet/api',
   [CHAIN_IDS.RISE_SEPOLIA]:
